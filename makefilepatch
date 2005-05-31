@@ -1,0 +1,61 @@
+***************
+*** 1,29 ****
+- #
+- # makefile for uEmacs/PK 4.0
+- #
+  
+- SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c file.c \
+- 	fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c pklock.c \
+- 	random.c region.c search.c spawn.c tcap.c termio.c vmsvt.c vt52.c \
+- 	window.c word.c
+- OBJ=ansi.o basic.o bind.o buffer.o crypt.o display.o eval.o exec.o file.o \
+- 	fileio.o ibmpc.o input.o isearch.o line.o lock.o main.o pklock.o \
+- 	random.o region.o search.o spawn.o tcap.o termio.o vmsvt.o vt52.o \
+- 	window.o word.o
+  HDR=ebind.h edef.h efunc.h epath.h estruct.h evar.h
+  
+  # DO NOT ADD OR MODIFY ANY LINES ABOVE THIS -- make source creates them
+  
+- CC=cc
+- CFLAGS=-O
+  #CC=c89 +O3			# HP
+  #CFLAGS= -D_HPUX_SOURCE -DSYSV
+- CFLAGS=-O4 -DSVR4		# Sun
+  #CFLAGS=-O -qchars=signed	# RS/6000
+- DEFINES=-DAUTOCONF
+- #LIBS=-ltermcap			# BSD
+  #LIBS=-lcurses			# SYSV
+- LIBS=-ltermlib
+  LFLAGS=-hbx
+  BINDIR=/usr/local/bin
+  LIBDIR=/usr/local/lib
+--- 1,29 ----
++ # makefile for emacs, updated Sun Apr 28 17:59:07 EET DST 1996
++ 
++ SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c \
++ 	file.c fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c \
++ 	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
++ 	termio.c vmsvt.c vt52.c window.c word.c
++ 
++ OBJ=ansi.o basic.o bind.o buffer.o crypt.o display.o eval.o exec.o \
++ 	file.o fileio.o ibmpc.o input.o isearch.o line.o lock.o main.o \
++ 	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
++ 	termio.o vmsvt.o vt52.o window.o word.o
+  
+  HDR=ebind.h edef.h efunc.h epath.h estruct.h evar.h
+  
+  # DO NOT ADD OR MODIFY ANY LINES ABOVE THIS -- make source creates them
+  
++ CC=gcc
++ CFLAGS=-O4
+  #CC=c89 +O3			# HP
+  #CFLAGS= -D_HPUX_SOURCE -DSYSV
++ #CFLAGS=-O4 -DSVR4		# Sun
+  #CFLAGS=-O -qchars=signed	# RS/6000
++ DEFINES=-DAUTOCONF -DPOSIX -DUSG
++ LIBS=-ltermcap			# BSD
+  #LIBS=-lcurses			# SYSV
++ #LIBS=-ltermlib
+  LFLAGS=-hbx
+  BINDIR=/usr/local/bin
+  LIBDIR=/usr/local/lib

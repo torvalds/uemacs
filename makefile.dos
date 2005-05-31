@@ -1,0 +1,22 @@
+CFLAGS=		-AL -ot -Gs
+
+OFILES=		ansi.obj basic.obj bind.obj buffer.obj crypt.obj \
+		display.obj eval.obj exec.obj file.obj fileio.obj \
+		ibmpc.obj input.obj isearch.obj line.obj \
+		lock.obj main.obj random.obj region.obj search.obj spawn.obj \
+		tcap.obj termio.obj vmsvt.obj vt52.obj \
+		window.obj word.obj pklock.obj
+
+CFILES=		ansi.c basic.c bind.c buffer.c crypt.c \
+		display.c eval.c exec.c file.c fileio.c \
+		ibmpc.c input.c isearch.c line.c \
+		lock.c main.c random.c region.c search.c spawn.c \
+		tcap.c termio.c vmsvt.c vt52.c \
+		window.c word.c pklock.c
+
+HFILES=		estruct.h edef.h efunc.h epath.h ebind.h evar.h
+
+emacs.exe:	$(OFILES)
+		link @emacso.lnk
+
+$(OFILES):	$(HFILES)

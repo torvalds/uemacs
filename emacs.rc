@@ -1,0 +1,285 @@
+;	EMACS.RC / .emascrc
+;
+;	Startup file for MicroEMACS 3.9 and uEmacs/PK 4.0
+;	This file is executed every time the editor is entered.
+;
+;	Modified by Petri Kutvonen, last edited September 1991.
+
+set $discmd "FALSE"
+
+;	First, try to resolve if we are on a PC ... yes, this is a kludge
+
+!if &seq $sres "NORMAL"
+	set %system "OTHER"
+!else
+	set %system "PC"
+!endif
+
+!if &seq %system "PC"
+
+;	PC specific initialization
+
+write-message "(Setting up)"
+
+;	Comment out or change this line if you want more than 25 lines,
+;	other possible $sres values include EGA and VGA
+
+set $sres "CGA"
+
+;	Uncomment next line if your old screen "snows"
+
+;set $flicker "TRUE"
+
+;	If your screen "snows" you'll not like scrolling
+
+!if &seq $flicker "TRUE"
+	set $scroll "FALSE"
+!endif
+
+;	Function keys (unshifted)
+;	f1  f2  f3  f4  f5  f6  f7  f8  f9  f10
+;	FN; FN< FN= FN> FN? FN@ FNA FNB FNC FND
+
+bind-to-key help			FN;	
+bind-to-key exit-emacs			FND
+
+;	Function keys (shifted)
+;	F1  F2  F3  F4  F5  F6  F7  F8  F9  F10
+;	FNT FNU FNV FNW FNX FNY FNZ FN[ FN\ FN]
+
+;	Other special keys (unshifted)
+;	Home End  Ins  Del  PgUp PgDn  
+;	FNG  FNO  FNR  FNS  FNI  FNQ
+
+;       Some common Alt-keys
+;	Alt-X Alt-Z Alt-C Alt-F Alt-O
+;	FN-   FN,   FN.   FN!   FN^X
+
+bind-to-key exit-emacs			FN-
+bind-to-key quick-exit			FN,
+bind-to-key i-shell			FN.
+bind-to-key find-file			FN!
+bind-to-key view-file			FN/
+bind-to-key next-window			FN^X
+
+;	Set screen colors
+
+;	You can define a DOS environment variable EMACS_BW (any value)
+;	if you don't like colors, e.g. if you have a LCD screen
+
+!if &seq &env "EMACS_BW" ""
+	add-global-mode "blue"
+	add-global-mode "HIGH"
+!endif
+
+!endif
+
+;	Help facility
+
+40 	store-macro
+	set $discmd "FALSE"
+	!if &not &seq $cbufname "emacs.hlp"
+		write-message "(Loading Help)"
+		!force help
+		!force 8 resize-window
+		!if &seq %system "PC"
+			!if &seq &env "EMACS_BW" ""
+				add-mode "red"
+			!endif
+			bind-to-key execute-macro-38 FNI
+			bind-to-key execute-macro-37 FNQ
+		!else
+			bind-to-key execute-macro-38 FN5
+			bind-to-key execute-macro-37 FN6
+		!endif
+		beginning-of-line
+		2 forward-character
+		1 redraw-display
+		save-window
+		!if &seq %system "PC"
+			set %hlpupdn "<PgUp> / <PgDn>"
+			set %hlphelp "<F1>"
+		!else
+			set %hlpupdn "<Prev Scrn> / <Next Scrn>"
+			set %hlphelp "<Help>"
+		!endif
+		execute-macro-39
+	!else
+		set %hlpcode &lef $line 2 
+		!if &seq %hlpcode ".."
+			set %hlptopic &mid $line 4 99
+			end-of-line
+			!force search-forward %hlptopic
+			beginning-of-line
+			2 forward-character
+			1 redraw-display
+			execute-macro-39
+		!else
+			!if &seq %system "PC"
+				bind-to-key previous-page FNI
+				bind-to-key next-page FNQ
+			!else
+				bind-to-key previous-page FN5
+				bind-to-key next-page FN6
+			!endif
+			!force restore-window
+			!force delete-window
+			clear-message-line
+		!endif
+	!endif
+	set $discmd "TRUE"
+!endm
+
+bind-to-key execute-macro-40 M-?
+!if &seq %system "PC"
+	bind-to-key execute-macro-40 FN;
+!else
+	bind-to-key execute-macro-40 FNh
+!endif
+
+;	Help on Help
+
+39	store-macro
+	!if &seq &rig $line 5 "INDEX"
+		write-message &cat "Select topic from list and press " %hlphelp
+	!else
+		write-message &cat "Use " &cat %hlpupdn &cat " to scan help file -- " &cat %hlphelp " to toggle help window"
+	!endif
+!endm
+
+;	Previous help page
+
+38 	store-macro
+	!if &seq $cbufname "emacs.hlp"
+		beginning-of-line
+		!force search-reverse "=>"
+		2 forward-character
+		1 redraw-display
+		execute-macro-39
+	!else
+		previous-page
+	!endif
+!endm
+
+;	Next help page
+
+37 	store-macro
+	!if &seq $cbufname "emacs.hlp"
+		beginning-of-line
+		2 forward-character
+		!force search-forward "=>"
+		1 redraw-display
+		execute-macro-39
+	!else
+		next-page
+	!endif
+!endm
+
+;	Set up auto CMODE
+
+36	store-macro
+	!if &seq &mid $cfname 1 7 "/tmp/Re"
+		add-mode "wrap"
+		!return
+	!endif
+	!if &gre &sin $cfname "/.ed" 0
+		add-mode "wrap"
+		!return
+	!endif
+	!if &gre &sin $cfname "/.let" 0
+		add-mode "wrap"
+		!return
+	!endif
+	!if &gre &sin $cfname "/.art" 0
+		add-mode "wrap"
+		!return
+	!endif
+	!if &gre &sin $cfname "/nn." 0
+		add-mode "wrap"
+		!return
+	!endif
+	set %rctmp &sin $cfname "."
+	!if &equ %rctmp 0
+		!return
+	!endif
+	set %rctmp &mid $cfname &add %rctmp 1 5
+	!if &or &seq %rctmp "c" &seq %rctmp "h"
+		add-mode "cmode"
+	!endif
+	!if &or &seq %rctmp "txt" &or &seq %rctmp "doc" &or &seq %rctmp "tmp" &seq %rctmp "tex"
+		add-mode "wrap"
+	!endif
+
+!endm
+	
+bind-to-key execute-macro-36	M-FNR
+
+;	Setup for ASCII {|}[\] to ISO Latin-1 translation
+
+21	store-macro
+	insert-string "ä"
+!endm
+22	store-macro
+	insert-string "ö"
+!endm
+23	store-macro
+	insert-string "å"
+!endm
+24	store-macro
+	insert-string "Ä"
+!endm
+25	store-macro
+	insert-string "Ö"
+!endm
+26	store-macro
+	insert-string "Å"
+!endm
+
+27	store-macro
+	bind-to-key execute-macro-21 {
+	bind-to-key execute-macro-22 |
+	bind-to-key execute-macro-23 }
+	bind-to-key execute-macro-24 [
+	bind-to-key execute-macro-25 \
+	bind-to-key execute-macro-26 ]
+	write-message "ISO Latin-1 äöåÄÖÅ"
+!endm
+
+28	store-macro
+	unbind-key {
+	unbind-key |
+	unbind-key }
+	unbind-key [
+	unbind-key \
+	unbind-key ]
+	write-message "ASCII {|}[\]"
+!endm
+
+bind-to-key execute-macro-27 ^X[
+bind-to-key execute-macro-28 ^X]
+
+;	Make cut-paste easier in window systems
+
+bind-to-key	newline	^J
+
+;	uEmacs/PK specific initialization
+
+!if &seq $progname "uEmacs/PK"
+
+;	Don't scroll on a Sun
+
+	!if &or &seq $TERM "sun" &seq $TERM "sun-cmd"
+		set $scroll "FALSE"
+	!endif
+
+;	Execute local initialization files
+
+	!if &seq %system "PC"
+		!force execute-file "EM.RC"
+	!else
+		!force execute-file &cat $HOME "/.emrc"
+		!force execute-file ".emrc"
+	!endif
+!endif
+
+set $discmd "TRUE"

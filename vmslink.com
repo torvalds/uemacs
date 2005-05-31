@@ -1,0 +1,29 @@
+$ define lnk$library sys$library:vaxcrtl
+$ link /exec=emacs.exe -
+ANSI.OBJ+ -
+BASIC.OBJ+ -
+BIND.OBJ+ -
+BUFFER.OBJ+ -
+CRYPT.OBJ+ -
+DISPLAY.OBJ+ -
+EVAL.OBJ+ -
+EXEC.OBJ+ -
+FILE.OBJ+ -
+FILEIO.OBJ+ -
+IBMPC.OBJ+ -
+INPUT.OBJ+ -
+ISEARCH.OBJ+ -
+LINE.OBJ+ -
+LOCK.OBJ+ -
+MAIN.OBJ+ -
+RANDOM.OBJ+ -
+REGION.OBJ+ -
+SEARCH.OBJ+ -
+SPAWN.OBJ+ -
+TCAP.OBJ+ -
+TERMIO.OBJ+ -
+VMSVT.OBJ+ -
+VT52.OBJ+ -
+WINDOW.OBJ+ -
+WORD.OBJ+ -
+PKLOCK.OBJ
