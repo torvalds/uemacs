@@ -82,6 +82,10 @@ extern unsigned _stklen = 32766;
 
 #if	UNIX
 #include <signal.h>
+static void emergencyexit();
+#ifdef SIGWINCH
+        extern void sizesignal();
+#endif
 #endif
 
 #if	CALLED
@@ -120,13 +124,6 @@ char *argv[];	/* argument strings */
 #if	PKCODE
 	int (*getbind())();
 	int (*execfunc)();		/* ptr to function to execute */
-#endif
-
-#if UNIX
-	static void emergencyexit();
-#ifdef SIGWINCH
-	extern void sizesignal();
-#endif
 #endif
 
 #if	PKCODE & VMS

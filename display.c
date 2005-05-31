@@ -8,6 +8,7 @@
  *	modified by Petri Kutvonen
  */
 
+#include	<errno.h>
 #include        <stdio.h>
 #include	"estruct.h"
 #include        "edef.h"
