@@ -260,7 +260,7 @@
 #define	SPEC	0x0800			/* special key (function keys)	*/
 
 #if	PKCODE
-#define	MAXNLINE	100000		/* max lines from one file */
+#define	MAXNLINE	10000000	/* max lines from one file */
 #endif
 
 #ifdef	FALSE
