@@ -484,3 +484,10 @@ extern void putline(int row, int col, char *buf);
 extern void getscreensize(int *widthp, int *heightp);
 extern void sizesignal(int signr);
 extern int newscreensize(int h, int w);
+
+/* region.c */
+extern int killregion(int f, int n);
+extern int copyregion(int f, int n);
+extern int lowerregion(int f, int n);
+extern int upperregion(int f, int n);
+extern int getregion(REGION *rp);
