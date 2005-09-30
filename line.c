@@ -26,10 +26,7 @@ int ykboff;			/* offset into that chunk */
  * a pointer to the new block, or NULL if there isn't any memory left. Print a
  * message in the message line if no space.
  */
-LINE *lalloc(used)
-
-register int used;
-
+LINE *lalloc(int used)
 {
 	register LINE *lp;
 	register int size;
@@ -52,8 +49,7 @@ register int used;
  * might be in. Release the memory. The buffers are updated too; the magic
  * conditions described in the above comments don't hold here.
  */
-lfree(lp)
-register LINE *lp;
+int lfree(LINE *lp)
 {
 	register BUFFER *bp;
 	register WINDOW *wp;
@@ -98,8 +94,7 @@ register LINE *lp;
  * displayed in more than 1 window we change EDIT t HARD. Set MODE if the
  * mode line needs to be updated (the "*" has to be set).
  */
-lchange(flag)
-register int flag;
+int lchange(int flag)
 {
 	register WINDOW *wp;
 
@@ -117,10 +112,12 @@ register int flag;
 	}
 }
 
-insspace(f, n)
-    /* insert spaces forward into text */
-int f, n;			/* default flag and numeric argument */
-
+/*
+ * insert spaces forward into text
+ *
+ * int f, n;		default flag and numeric argument
+ */
+int insspace(int f, int n)
 {
 	linsert(n, ' ');
 	backchar(f, n);
@@ -130,8 +127,7 @@ int f, n;			/* default flag and numeric argument */
  * linstr -- Insert a string at the current point
  */
 
-linstr(instr)
-char *instr;
+int linstr(char *instr)
 {
 	register int status = TRUE;
 	char tmpc;
@@ -161,7 +157,7 @@ char *instr;
  * well, and FALSE on errors.
  */
 
-linsert(n, c)
+int linsert(int n, int c)
 {
 	register char *cp1;
 	register char *cp2;
@@ -242,12 +238,9 @@ linsert(n, c)
 /*
  * Overwrite a character into the current line at the current position
  *
+ * int c;	character to overwrite on current position
  */
-
-lowrite(c)
-
-char c;				/* character to overwrite on current position */
-
+int lowrite(int c)
 {
 	if (curwp->w_doto < curwp->w_dotp->l_used &&
 	    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' ||
@@ -259,11 +252,7 @@ char c;				/* character to overwrite on current position */
 /*
  * lover -- Overwrite a string at the current point
  */
-
-lover(ostr)
-
-char *ostr;
-
+int lover(char *ostr)
 {
 	register int status = TRUE;
 	char tmpc;
@@ -292,7 +281,7 @@ char *ostr;
  * update of dot and mark is a bit easier then in the above case, because the
  * split forces more updating.
  */
-lnewline()
+int lnewline(void)
 {
 	register char *cp1;
 	register char *cp2;
@@ -350,12 +339,11 @@ lnewline()
  * with end of lines, etc. It returns TRUE if all of the characters were
  * deleted, and FALSE if they were not (because dot ran into the end of the
  * buffer. The "kflag" is TRUE if the text should be put in the kill buffer.
+ *
+ * long n;		# of chars to delete
+ * int kflag;		 put killed text in kill buffer flag
  */
-ldelete(n, kflag)
-
-long n;				/* # of chars to delete */
-int kflag;			/* put killed text in kill buffer flag */
-
+int ldelete(long n, int kflag)
 {
 	register char *cp1;
 	register char *cp2;
@@ -419,11 +407,11 @@ int kflag;			/* put killed text in kill buffer flag */
 	return (TRUE);
 }
 
-/* getctext:	grab and return a string with the text of
-		the current line
-*/
-
-char *getctext()
+/*
+ * getctext:	grab and return a string with the text of
+ *		the current line
+ */
+char *getctext(void)
 {
 	register LINE *lp;	/* line to copy */
 	register int size;	/* length of line to return */
@@ -446,12 +434,13 @@ char *getctext()
 	return (rline);
 }
 
-/* putctext:	replace the current line with the passed in text	*/
-
-putctext(iline)
-
-char *iline;			/* contents of new line */
-
+/*
+ * putctext:
+ *	replace the current line with the passed in text
+ *
+ * char *iline;			contents of new line
+ */
+int putctext(char *iline)
 {
 	register int status;
 
@@ -477,7 +466,7 @@ char *iline;			/* contents of new line */
  * about in memory. Return FALSE on error and TRUE if all looks ok. Called by
  * "ldelete" only.
  */
-ldelnewline()
+int ldelnewline(void)
 {
 	register char *cp1;
 	register char *cp2;
@@ -561,7 +550,7 @@ ldelnewline()
  * new kill context is being created. The kill buffer array is released, just
  * in case the buffer has grown to immense size. No errors.
  */
-kdelete()
+int kdelete(void)
 {
 	KILL *kp;		/* ptr to scan kill buffer chunk list */
 
@@ -584,12 +573,10 @@ kdelete()
 /*
  * Insert a character to the kill buffer, allocating new chunks as needed.
  * Return TRUE if all is well, and FALSE on errors.
+ *
+ * int c;			character to insert in the kill buffer
  */
-
-kinsert(c)
-
-int c;				/* character to insert in the kill buffer */
-
+int kinsert(int c)
 {
 	KILL *nchunk;		/* ptr to newly malloced chunk */
 
@@ -616,7 +603,7 @@ int c;				/* character to insert in the kill buffer */
  * is done by the standard insert routines. All you do is run the loop, and
  * check for errors. Bound to "C-Y".
  */
-yank(f, n)
+int yank(int f, int n)
 {
 	register int c;
 	register int i;

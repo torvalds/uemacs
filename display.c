@@ -10,6 +10,7 @@
 
 #include	<errno.h>
 #include        <stdio.h>
+#include	<stdarg.h>
 #include	"estruct.h"
 #include        "edef.h"
 
@@ -52,7 +53,7 @@ int chg_width, chg_height;
  * The original window has "WFCHG" set, so that it will get completely
  * redrawn on the first call to "update".
  */
-vtinit()
+void vtinit(void)
 {
 	register int i;
 	register VIDEO *vp;
@@ -99,7 +100,7 @@ vtinit()
 #if	CLEAN
 /* free up all the dynamically allocated video structures */
 
-vtfree()
+void vtfree(void)
 {
 	int i;
 	for (i = 0; i < term.t_mrow; ++i) {
@@ -121,7 +122,7 @@ vtfree()
  * system prompt will be written in the line). Shut down the channel to the
  * terminal.
  */
-vttidy()
+void vttidy(void)
 {
 	mlerase();
 	movecursor(term.t_nrow, 0);
@@ -138,23 +139,21 @@ vttidy()
  * screen. There is no checking for nonsense values; this might be a good
  * idea during the early stages.
  */
-vtmove(row, col)
+void vtmove(int row, int col)
 {
 	vtrow = row;
 	vtcol = col;
 }
 
-/* Write a character to the virtual screen. The virtual row and
-   column are updated. If we are not yet on left edge, don't print
-   it yet. If the line is too long put a "$" in the last column.
-   This routine only puts printing characters into the virtual
-   terminal buffers. Only column overflow is checked.
-*/
-
-vtputc(c)
-
-int c;
-
+/*
+ * Write a character to the virtual screen. The virtual row and
+ * column are updated. If we are not yet on left edge, don't print
+ * it yet. If the line is too long put a "$" in the last column.
+ *
+ * This routine only puts printing characters into the virtual
+ * terminal buffers. Only column overflow is checked.
+ */
+void vtputc(int c)
 {
 	register VIDEO *vp;	/* ptr to line being updated */
 
@@ -183,7 +182,7 @@ int c;
  * Erase from the end of the software cursor to the end of the line on which
  * the software cursor is located.
  */
-vteeol()
+void vteeol(void)
 {
 /*  register VIDEO      *vp;	*/
 	register char *vcp = vscreen[vtrow]->v_text;
@@ -194,10 +193,12 @@ vteeol()
 		vcp[vtcol++] = ' ';
 }
 
-/* upscreen:	user routine to force a screen update
-		always finishes complete update		*/
-
-upscreen(f, n)
+/*
+ * upscreen:
+ *	user routine to force a screen update
+ *	always finishes complete update
+ */
+int upscreen(int f, int n)
 {
 	update(TRUE);
 	return (TRUE);
@@ -213,11 +214,10 @@ int scrflags;
  * and refresh the screen. Second, make sure that "currow" and "curcol" are
  * correct for the current window. Third, make the virtual and physical
  * screens the same.
+ *
+ * int force;		force update past type ahead?
  */
-update(force)
-
-int force;			/* force update past type ahead? */
-
+int update(int force)
 {
 	register WINDOW *wp;
 
@@ -314,13 +314,12 @@ int force;			/* force update past type ahead? */
 	return (TRUE);
 }
 
-/*	reframe:	check to see if the cursor is on in the window
-			and re-frame it if needed or wanted		*/
-
-reframe(wp)
-
-WINDOW *wp;
-
+/*
+ * reframe:
+ *	check to see if the cursor is on in the window
+ *	and re-frame it if needed or wanted
+ */
+int reframe(WINDOW *wp)
 {
 	register LINE *lp, *lp0;
 	register int i;
@@ -404,12 +403,13 @@ WINDOW *wp;
 	return (TRUE);
 }
 
-/*	updone:	update the current line	to the virtual screen		*/
-
-updone(wp)
-
-WINDOW *wp;			/* window to update current line in */
-
+/*
+ * updone:
+ *	update the current line	to the virtual screen
+ *
+ * WINDOW *wp;		window to update current line in
+ */
+void updone(WINDOW *wp)
 {
 	register LINE *lp;	/* line to update */
 	register int sline;	/* physical screen line to update */
@@ -436,12 +436,13 @@ WINDOW *wp;			/* window to update current line in */
 	vteeol();
 }
 
-/*	updall:	update all the lines in a window on the virtual screen */
-
-updall(wp)
-
-WINDOW *wp;			/* window to update lines in */
-
+/*
+ * updall:
+ *	update all the lines in a window on the virtual screen
+ *
+ * WINDOW *wp;		window to update lines in
+ */
+void updall(WINDOW *wp)
 {
 	register LINE *lp;	/* line to update */
 	register int sline;	/* physical screen line to update */
@@ -474,10 +475,12 @@ WINDOW *wp;			/* window to update lines in */
 
 }
 
-/*	updpos:	update the position of the hardware cursor and handle extended
-		lines. This is the only update for simple moves.	*/
-
-updpos()
+/*
+ * updpos:
+ *	update the position of the hardware cursor and handle extended
+ *	lines. This is the only update for simple moves.
+ */
+void updpos(void)
 {
 	register LINE *lp;
 	register int c;
@@ -512,9 +515,11 @@ updpos()
 		lbound = 0;
 }
 
-/*	upddex:	de-extend any line that derserves it		*/
-
-upddex()
+/*
+ * upddex:
+ *	de-extend any line that derserves it
+ */
+void upddex(void)
 {
 	register WINDOW *wp;
 	register LINE *lp;
@@ -548,10 +553,12 @@ upddex()
 	}
 }
 
-/*	updgar:	if the screen is garbage, clear the physical screen and
-		the virtual screen and force a full update		*/
-
-updgar()
+/*
+ * updgar:
+ *	if the screen is garbage, clear the physical screen and
+ *	the virtual screen and force a full update
+ */
+void updgar(void)
 {
 	register char *txt;
 	register int i, j;
@@ -581,12 +588,13 @@ updgar()
 #endif
 }
 
-/*	updupd:	update the physical screen from the virtual screen	*/
-
-updupd(force)
-
-int force;			/* forced update flag */
-
+/*
+ * updupd:
+ *	update the physical screen from the virtual screen
+ *
+ * int force;		forced update flag
+ */
+int updupd(int force)
 {
 	register VIDEO *vp1;
 	register int i;
@@ -620,9 +628,11 @@ int force;			/* forced update flag */
 
 #if SCROLLCODE
 
-/* optimize out scrolls (line breaks, and newlines) */
-/* arg. chooses between looking for inserts or deletes */
-int scrolls(inserts)
+/*
+ * optimize out scrolls (line breaks, and newlines)
+ * arg. chooses between looking for inserts or deletes
+ */
+int scrolls(int inserts)
 {				/* returns true if it does something */
 	struct VIDEO *vpv;	/* virtual screen image */
 	struct VIDEO *vpp;	/* physical screen image */
@@ -758,14 +768,18 @@ int scrolls(inserts)
 }
 
 /* move the "count" lines starting at "from" to "to" */
-scrscroll(from, to, count)
+void scrscroll(int from, int to, int count)
 {
 	ttrow = ttcol = -1;
 	(*term.t_scroll) (from, to, count);
 }
 
-texttest(vrow, prow)		/* return TRUE on text match */
-int vrow, prow;			/* virtual, physical rows */
+/*
+ * return TRUE on text match
+ *
+ * int vrow, prow;		virtual, physical rows
+ */
+int texttest(int vrow, int prow)
 {
 	struct VIDEO *vpv = vscreen[vrow];	/* virtual screen image */
 	struct VIDEO *vpp = pscreen[prow];	/* physical screen image */
@@ -773,9 +787,10 @@ int vrow, prow;			/* virtual, physical rows */
 	return (!memcmp(vpv->v_text, vpp->v_text, term.t_ncol));
 }
 
-/* return the index of the first blank of trailing whitespace */
-int endofline(s, n)
-char *s;
+/*
+ * return the index of the first blank of trailing whitespace
+ */
+int endofline(char *s, int n)
 {
 	int i;
 	for (i = n - 1; i >= 0; i--)
@@ -786,13 +801,14 @@ char *s;
 
 #endif				/* SCROLLCODE */
 
-/*	updext: update the extended line which the cursor is currently
-		on at a column greater than the terminal width. The line
-		will be scrolled right or left to let the user see where
-		the cursor is
-								*/
-
-updext()
+/*
+ * updext:
+ *	update the extended line which the cursor is currently
+ *	on at a column greater than the terminal width. The line
+ *	will be scrolled right or left to let the user see where
+ *	the cursor is
+ */
+void updext(void)
 {
 	register int rcursor;	/* real cursor location */
 	register LINE *lp;	/* pointer to current line */
@@ -870,12 +886,14 @@ struct VIDEO *vp2;
 
 #else
 
-updateline(row, vp1, vp2)
-
-int row;			/* row of screen to update */
-struct VIDEO *vp1;		/* virtual screen image */
-struct VIDEO *vp2;		/* physical screen image */
-
+/*
+ * updateline()
+ *
+ * int row;		row of screen to update
+ * struct VIDEO *vp1;	virtual screen image
+ * struct VIDEO *vp2;	physical screen image
+ */
+int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
 {
 #if RAINBOW
 /*	UPDATELINE specific code for the DEC rainbow 100 micro	*/
@@ -1035,8 +1053,7 @@ struct VIDEO *vp2;		/* physical screen image */
  * change the modeline format by hacking at this routine. Called by "update"
  * any time there is a dirty window.
  */
-modeline(wp)
-WINDOW *wp;
+void modeline(WINDOW *wp)
 {
 	register char *cp;
 	register int c;
@@ -1225,7 +1242,7 @@ WINDOW *wp;
 	}
 }
 
-upmode()
+void upmode(void)
 {				/* update all the mode lines */
 	register WINDOW *wp;
 
@@ -1241,7 +1258,7 @@ upmode()
  * and column "col". The row and column arguments are origin 0. Optimize out
  * random calls. Update "ttrow" and "ttcol".
  */
-movecursor(row, col)
+void movecursor(int row, int col)
 {
 	if (row != ttrow || col != ttcol) {
 		ttrow = row;
@@ -1255,7 +1272,7 @@ movecursor(row, col)
  * is not considered to be part of the virtual screen. It always works
  * immediately; the terminal buffer is flushed via a call to the flusher.
  */
-mlerase()
+void mlerase(void)
 {
 	int i;
 
@@ -1284,16 +1301,14 @@ mlerase()
  * position. A small class of printf like format items is handled. Assumes the
  * stack grows down; this assumption is made by the "++" in the argument scan
  * loop. Set the "message line" flag TRUE.
+ *
+ * char *fmt;		format string for output
+ * char *arg;		pointer to first argument to print
  */
-
-mlwrite(fmt, arg)
-
-char *fmt;			/* format string for output */
-char *arg;			/* pointer to first argument to print */
-
+void mlwrite(const char *fmt, ...)
 {
 	register int c;		/* current char in format string */
-	register char *ap;	/* ptr to current data field */
+	va_list ap;
 
 	/* if we are not currently echoing on the command line, abort this */
 	if (discmd == FALSE) {
@@ -1313,7 +1328,7 @@ char *arg;			/* pointer to first argument to print */
 	}
 
 	movecursor(term.t_nrow, 0);
-	ap = (char *) &arg;
+	va_start(ap, fmt);
 	while ((c = *fmt++) != 0) {
 		if (c != '%') {
 			TTputc(c);
@@ -1321,39 +1336,28 @@ char *arg;			/* pointer to first argument to print */
 		} else {
 			c = *fmt++;
 			switch (c) {
-#if	PKCODE
-			case '*':
-				ap = *(char **) ap;
-				break;
-#endif
 			case 'd':
-				mlputi(*(int *) ap, 10);
-				ap += sizeof(int);
+				mlputi(va_arg(ap, int), 10);
 				break;
 
 			case 'o':
-				mlputi(*(int *) ap, 8);
-				ap += sizeof(int);
+				mlputi(va_arg(ap, int), 8);
 				break;
 
 			case 'x':
-				mlputi(*(int *) ap, 16);
-				ap += sizeof(int);
+				mlputi(va_arg(ap, int), 16);
 				break;
 
 			case 'D':
-				mlputli(*(long *) ap, 10);
-				ap += sizeof(long);
+				mlputli(va_arg(ap, long), 10);
 				break;
 
 			case 's':
-				mlputs(*(char **) ap);
-				ap += sizeof(char *);
+				mlputs(va_arg(ap, char *));
 				break;
 
 			case 'f':
-				mlputf(*(int *) ap);
-				ap += sizeof(int);
+				mlputf(va_arg(ap, int));
 				break;
 
 			default:
@@ -1362,6 +1366,7 @@ char *arg;			/* pointer to first argument to print */
 			}
 		}
 	}
+	va_end(ap);
 
 	/* if we can, erase to the end of screen */
 	if (eolexist == TRUE)
@@ -1370,15 +1375,14 @@ char *arg;			/* pointer to first argument to print */
 	mpresf = TRUE;
 }
 
-/*	Force a string out to the message line regardless of the
-	current $discmd setting. This is needed when $debug is TRUE
-	and for the write-message and clear-message-line commands
-*/
-
-mlforce(s)
-
-char *s;			/* string to force out */
-
+/*
+ * Force a string out to the message line regardless of the
+ * current $discmd setting. This is needed when $debug is TRUE
+ * and for the write-message and clear-message-line commands
+ *
+ * char *s;		string to force out
+ */
+void mlforce(char *s)
 {
 	register int oldcmd;	/* original command display flag */
 
@@ -1393,8 +1397,7 @@ char *s;			/* string to force out */
  * the characters in the string all have width "1"; if this is not the case
  * things will get screwed up a little.
  */
-mlputs(s)
-char *s;
+void mlputs(char *s)
 {
 	register int c;
 
@@ -1408,7 +1411,7 @@ char *s;
  * Write out an integer, in the specified radix. Update the physical cursor
  * position.
  */
-mlputi(i, r)
+void mlputi(int i, int r)
 {
 	register int q;
 	static char hexdigits[] = "0123456789ABCDEF";
@@ -1430,8 +1433,7 @@ mlputi(i, r)
 /*
  * do the same except as a long integer.
  */
-mlputli(l, r)
-long l;
+void mlputli(long l, int r)
 {
 	register long q;
 
@@ -1450,13 +1452,11 @@ long l;
 }
 
 /*
- *	write out a scaled integer with two decimal places
+ * write out a scaled integer with two decimal places
+ *
+ * int s;		scaled integer to output
  */
-
-mlputf(s)
-
-int s;				/* scaled integer to output */
-
+void mlputf(int s)
 {
 	int i;			/* integer portion of number */
 	int f;			/* fractional portion of number */
@@ -1475,9 +1475,7 @@ int s;				/* scaled integer to output */
 
 #if RAINBOW
 
-putline(row, col, buf)
-int row, col;
-char buf[];
+void putline(int row, int col, char *buf)
 {
 	int n;
 
@@ -1492,8 +1490,7 @@ char buf[];
    Store number of lines into *heightp and width into *widthp.
    If zero or a negative number is stored, the value is not valid.  */
 
-getscreensize(widthp, heightp)
-int *widthp, *heightp;
+void getscreensize(int *widthp, int *heightp)
 {
 #ifdef TIOCGWINSZ
 	struct winsize size;
@@ -1510,8 +1507,7 @@ int *widthp, *heightp;
 }
 
 #ifdef SIGWINCH
-void sizesignal(signr)
-int signr;
+void sizesignal(int signr)
 {
 	int w, h;
 	extern int errno;
@@ -1526,14 +1522,13 @@ int signr;
 	errno = old_errno;
 }
 
-newscreensize(h, w)
-int h, w;
+int newscreensize(int h, int w)
 {
 	/* do the change later */
 	if (displaying) {
 		chg_width = w;
 		chg_height = h;
-		return;
+		return FALSE;
 	}
 	chg_width = chg_height = 0;
 	if (h - 1 < term.t_mrow)

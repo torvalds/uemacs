@@ -17,12 +17,12 @@
  * a new line.	Otherwise, break the line at the word-break, eat it, and jump
  * back to the end of the word.
  * Returns TRUE on success, FALSE on errors.
+ *
+ * int f;		default flag
+ * int n;		numeric argument
+ * 
  */
-wrapword(f, n)
-
-int f;				/* default flag */
-int n;				/* numeric argument */
-
+int wrapword(int f, int n)
 {
 	register int cnt;	/* size of word wrapped to next line */
 	register int c;		/* charector temporary */
@@ -67,7 +67,7 @@ int n;				/* numeric argument */
  * performed by the "backchar" and "forwchar" routines. Error if you try to
  * move beyond the buffers.
  */
-backword(f, n)
+int backword(int f, int n)
 {
 	if (n < 0)
 		return (forwword(f, -n));
@@ -90,7 +90,7 @@ backword(f, n)
  * Move the cursor forward by the specified number of words. All of the motion
  * is done by "forwchar". Error if you try and move beyond the buffer's end.
  */
-forwword(f, n)
+int forwword(int f, int n)
 {
 	if (n < 0)
 		return (backword(f, -n));
@@ -113,7 +113,7 @@ forwword(f, n)
  * convert any characters to upper case. Error if you try and move beyond the
  * end of the buffer. Bound to "M-U".
  */
-upperword(f, n)
+int upperword(int f, int n)
 {
 	register int c;
 
@@ -149,7 +149,7 @@ upperword(f, n)
  * convert characters to lower case. Error if you try and move over the end of
  * the buffer. Bound to "M-L".
  */
-lowerword(f, n)
+int lowerword(int f, int n)
 {
 	register int c;
 
@@ -186,7 +186,7 @@ lowerword(f, n)
  * characters to lower case. Error if you try and move past the end of the
  * buffer. Bound to "M-C".
  */
-capword(f, n)
+int capword(int f, int n)
 {
 	register int c;
 
@@ -238,7 +238,7 @@ capword(f, n)
  * command for the right number of characters. With a zero argument, just
  * kill one word and no whitespace. Bound to "M-D".
  */
-delfword(f, n)
+int delfword(int f, int n)
 {
 	register LINE *dotp;	/* original cursor line */
 	register int doto;	/*      and row */
@@ -327,7 +327,7 @@ delfword(f, n)
  * counting the characters. When dot is finally moved to its resting place,
  * fire off the kill command. Bound to "M-Rubout" and to "M-Backspace".
  */
-delbword(f, n)
+int delbword(int f, int n)
 {
 	long size;
 
@@ -368,7 +368,7 @@ delbword(f, n)
  * Return TRUE if the character at dot is a character that is considered to be
  * part of a word. The word character list is hard coded. Should be setable.
  */
-inword()
+int inword(void)
 {
 	register int c;
 
@@ -389,11 +389,13 @@ inword()
 }
 
 #if	WORDPRO
-fillpara(f, n)
-    /* Fill the current paragraph according to the current
-       fill column                                              */
-int f, n;			/* deFault flag and Numeric argument */
-
+/*
+ * Fill the current paragraph according to the current
+ * fill column
+ *
+ * f and n - deFault flag and Numeric argument
+ */
+int fillpara(int f, int n)
 {
 	register int c;		/* current char durring scan    */
 	register int wordlen;	/* length of current word       */
@@ -485,11 +487,12 @@ int f, n;			/* deFault flag and Numeric argument */
 }
 
 #if	PKCODE
-justpara(f, n)
-    /* Fill the current paragraph according to the current
-       fill column and cursor position                  */
-int f, n;			/* deFault flag and Numeric argument */
-
+/* Fill the current paragraph according to the current
+ * fill column and cursor position
+ *
+ * int f, n;		deFault flag and Numeric argument
+ */
+int justpara(int f, int n)
 {
 	register int c;		/* current char durring scan    */
 	register int wordlen;	/* length of current word       */
@@ -593,11 +596,13 @@ int f, n;			/* deFault flag and Numeric argument */
 }
 #endif
 
-killpara(f, n)
-    /* delete n paragraphs starting with the current one */
-int f;				/* default flag */
-int n;				/* # of paras to delete */
-
+/*
+ * delete n paragraphs starting with the current one
+ *
+ * int f	default flag
+ * int n	# of paras to delete
+ */
+int killpara(int f, int n)
 {
 	register int status;	/* returned status of functions */
 
@@ -625,14 +630,14 @@ int n;				/* # of paras to delete */
 }
 
 
-/*	wordcount:	count the # of words in the marked region,
-			along with average word sizes, # of chars, etc,
-			and report on them.			*/
-
-wordcount(f, n)
-
-int f, n;			/* ignored numeric arguments */
-
+/*
+ *	wordcount:	count the # of words in the marked region,
+ *			along with average word sizes, # of chars, etc,
+ *			and report on them.
+ *
+ * int f, n;		ignored numeric arguments
+ */
+int wordcount(int f, int n)
 {
 	register LINE *lp;	/* current line to scan */
 	register int offset;	/* current char to scan */
@@ -702,17 +707,8 @@ int f, n;			/* ignored numeric arguments */
 	else
 		avgch = 0;
 
-#if	PKCODE
-	pk_mlrec.pk_1 = nwords;
-	pk_mlrec.pk_2 = nchars;
-	pk_mlrec.pk_3 = nlines + 1;
-	pk_mlrec.pk_4 = avgch;
-	mlwrite("%*Words %D Chars %D Lines %d Avg chars/word %f",
-		&pk_mlrec);
-#else
 	mlwrite("Words %D Chars %D Lines %d Avg chars/word %f",
 		nwords, nchars, nlines + 1, avgch);
-#endif
 	return (TRUE);
 }
 #endif

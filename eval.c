@@ -573,7 +573,7 @@ char *value;			/* value to set to */
 			ldelete(1L, FALSE);	/* delete 1 char */
 			c = atoi(value);
 			if (c == '\n')
-				lnewline(FALSE, 1);
+				lnewline();
 			else
 				linsert(1, c);
 			backchar(FALSE, 1);

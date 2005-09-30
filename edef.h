@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct VIDEO;
+
 char *flook();
 char *getctext();
 char *getfname();
@@ -320,3 +322,165 @@ extern char outline[];		/* global string to hold debug line text */
 #ifndef	termdef
 extern TERM term;		/* Terminal information.        */
 #endif
+
+/* word.c */
+extern int wrapword(int f, int n);
+extern int backword(int f, int n);
+extern int forwword(int f, int n);
+extern int upperword(int f, int n);
+extern int lowerword(int f, int n);
+extern int capword(int f, int n);
+extern int delfword(int f, int n);
+extern int delbword(int f, int n);
+extern int inword(void);
+extern int fillpara(int f, int n);
+extern int justpara(int f, int n);
+extern int killpara(int f, int n);
+extern int wordcount(int f, int n);
+
+/* line.c */
+extern int lfree(LINE *lp);
+extern int lchange(int flag);
+extern int insspace(int f, int n);
+extern int linstr(char *instr);
+extern int linsert(int n, int c);
+extern int lowrite(int c);
+extern int lover(char *ostr);
+extern int lnewline(void);
+extern int ldelete(long n, int kflag);
+extern char *getctext(void);
+extern int putctext(char *iline);
+extern int ldelnewline(void);
+extern int kdelete(void);
+extern int kinsert(int c);
+extern int yank(int f, int n);
+
+/* window.c */
+extern int reposition(int f, int n);
+extern int refresh(int f, int n);
+extern int nextwind(int f, int n);
+extern int prevwind(int f, int n);
+extern int mvdnwind(int f, int n);
+extern int mvupwind(int f, int n);
+extern int onlywind(int f, int n);
+extern int delwind(int f, int n);
+extern int splitwind(int f, int n);
+extern int enlargewind(int f, int n);
+extern int shrinkwind(int f, int n);
+extern int resize(int f, int n);
+extern int scrnextup(int f, int n);
+extern int scrnextdw(int f, int n);
+extern int savewnd(int f, int n);
+extern int restwnd(int f, int n);
+extern int newsize(int f, int n);
+extern int newwidth(int f, int n);
+extern int getwpos(void);
+extern int cknewwindow(void);
+
+/* basic.c */
+extern int gotobol(int f, int n);
+extern int backchar(int f, int n);
+extern int gotoeol(int f, int n);
+extern int forwchar(int f, int n);
+extern int gotoline(int f, int n);
+extern int gotobob(int f, int n);
+extern int gotoeob(int f, int n);
+extern int forwline(int f, int n);
+extern int backline(int f, int n);
+extern int gotobop(int f, int n);
+extern int gotoeop(int f, int n);
+extern int getgoal(LINE *dlp);
+extern int forwpage(int f, int n);
+extern int backpage(int f, int n);
+extern int setmark(int f, int n);
+extern int swapmark(int f, int n);
+
+/* random.c */
+extern int tabsize;			/* Tab size (0: use real tabs)  */;
+extern int setfillcol(int f, int n);
+extern int showcpos(int f, int n);
+extern int getcline(void);
+extern int getccol(int bflg);
+extern int setccol(int pos);
+extern int twiddle(int f, int n);
+extern int quote(int f, int n);
+extern int tab(int f, int n);
+extern int detab(int f, int n);
+extern int entab(int f, int n);
+extern int trim(int f, int n);
+extern int openline(int f, int n);
+extern int newline(int f, int n);
+extern int cinsert(void);
+extern int insbrace(int n, int c);
+extern int insbrace(int n, int c);
+extern int inspound(void);
+extern int deblank(int f, int n);
+extern int indent(int f, int n);
+extern int forwdel(int f, int n);
+extern int backdel(int f, int n);
+extern int killtext(int f, int n);
+extern int setmode(int f, int n);
+extern int delmode(int f, int n);
+extern int setgmode(int f, int n);
+extern int delgmode(int f, int n);
+extern int adjustmode(int kind, int global);
+extern int clrmes(int f, int n);
+extern int writemsg(int f, int n);
+extern int getfence(int f, int n);
+extern int fmatch(int ch);
+extern int istring(int f, int n);
+extern int ovstring(int f, int n);
+
+/* main.c */
+extern int edinit(char *bname);
+extern int execute(int c, int f, int n);
+extern int quickexit(int f, int n);
+extern int quit(int f, int n);
+extern int ctlxlp(int f, int n);
+extern int ctlxrp(int f, int n);
+extern int ctlxe(int f, int n);
+extern int ctrlg(int f, int n);
+extern int rdonly(void);
+extern int resterr(void);
+extern int nullproc(int f, int n);
+extern int meta(int f, int n);
+extern int cex(int f, int n);
+extern int unarg(int f, int n);
+extern int cexit(int status);
+
+/* display.c */
+extern void vtinit(void);
+extern void vtfree(void);
+extern void vttidy(void);
+extern void vtmove(int row, int col);
+extern void vtputc(int c);
+extern void vteeol(void);
+extern int upscreen(int f, int n);
+extern int update(int force);
+extern int reframe(WINDOW *wp);
+extern void updone(WINDOW *wp);
+extern void updall(WINDOW *wp);
+extern void updpos(void);
+extern void upddex(void);
+extern void updgar(void);
+extern int updupd(int force);
+extern int scrolls(int inserts);
+extern void scrscroll(int from, int to, int count);
+extern int texttest(int vrow, int prow);
+extern int endofline(char *s, int n);
+extern void updext(void);
+extern int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2);
+extern void modeline(WINDOW *wp);
+extern void upmode(void);
+extern void movecursor(int row, int col);
+extern void mlerase(void);
+extern void mlwrite(const char *fmt, ...);
+extern void mlforce(char *s);
+extern void mlputs(char *s);
+extern void mlputi(int i, int r);
+extern void mlputli(long l, int r);
+extern void mlputf(int s);
+extern void putline(int row, int col, char *buf);
+extern void getscreensize(int *widthp, int *heightp);
+extern void sizesignal(int signr);
+extern int newscreensize(int h, int w);

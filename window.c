@@ -15,7 +15,7 @@
  * bottom. If it is 0 the window is centered (this is what the standard
  * redisplay code does). With no argument it defaults to 0. Bound to M-!.
  */
-reposition(f, n)
+int reposition(int f, int n)
 {
 	if (f == FALSE)		/* default to 0 to center screen */
 		n = 0;
@@ -28,7 +28,7 @@ reposition(f, n)
  * Refresh the screen. With no argument, it just does the refresh. With an
  * argument it recenters "." in the current window. Bound to "C-L".
  */
-refresh(f, n)
+int refresh(int f, int n)
 {
 	if (f == FALSE)
 		sgarbf = TRUE;
@@ -47,11 +47,10 @@ refresh(f, n)
  *
  * with an argument this command finds the <n>th window from the top
  *
+ * int f, n;		default flag and numeric argument
+ *
  */
-nextwind(f, n)
-
-int f, n;			/* default flag and numeric argument */
-
+int nextwind(int f, int n)
 {
 	register WINDOW *wp;
 	register int nwindows;	/* total number of windows */
@@ -94,7 +93,7 @@ int f, n;			/* default flag and numeric argument */
  * current window. There arn't any errors, although the command does not do a
  * lot if there is 1 window.
  */
-prevwind(f, n)
+int prevwind(int f, int n)
 {
 	register WINDOW *wp1;
 	register WINDOW *wp2;
@@ -126,10 +125,7 @@ prevwind(f, n)
  * a new dot. We share the code by having "move down" just be an interface to
  * "move up". Magic. Bound to "C-X C-N".
  */
-mvdnwind(f, n)
-
-int n;
-
+int mvdnwind(int f, int n)
 {
 	return (mvupwind(f, -n));
 }
@@ -141,9 +137,7 @@ int n;
  * (this command does not really move "."; it moves the frame). Bound to
  * "C-X C-P".
  */
-mvupwind(f, n)
-int n;
-
+int mvupwind(int f, int n)
 {
 	register LINE *lp;
 	register int i;
@@ -187,7 +181,7 @@ int n;
  * the buffer structures right if the distruction of a window makes a buffer
  * become undisplayed.
  */
-onlywind(f, n)
+int onlywind(int f, int n)
 {
 	register WINDOW *wp;
 	register LINE *lp;
@@ -231,12 +225,10 @@ onlywind(f, n)
 /*
  * Delete the current window, placing its space in the window above,
  * or, if it is the top window, the window below. Bound to C-X 0.
+ *
+ * int f, n;	arguments are ignored for this command
  */
-
-delwind(f, n)
-
-int f, n;			/* arguments are ignored for this command */
-
+int delwind(int f, int n)
 {
 	register WINDOW *wp;	/* window to recieve deleted space */
 	register WINDOW *lwp;	/* ptr window before curwp */
@@ -306,18 +298,15 @@ int f, n;			/* arguments are ignored for this command */
 }
 
 /*
-
-Split the current window.  A window smaller than 3 lines cannot be
-split.  An argument of 1 forces the cursor into the upper window, an
-argument of two forces the cursor to the lower window.  The only other
-error that is possible is a "malloc" failure allocating the structure
-for the new window.  Bound to "C-X 2". 
-
+ * Split the current window.  A window smaller than 3 lines cannot be
+ * split.  An argument of 1 forces the cursor into the upper window, an
+ * argument of two forces the cursor to the lower window.  The only
+ * other error that is possible is a "malloc" failure allocating the
+ * structure for the new window.  Bound to "C-X 2". 
+ *
+ * int f, n;	default flag and numeric argument
  */
-splitwind(f, n)
-
-int f, n;			/* default flag and numeric argument */
-
+int splitwind(int f, int n)
 {
 	register WINDOW *wp;
 	register LINE *lp;
@@ -399,7 +388,7 @@ int f, n;			/* default flag and numeric argument */
  * all the hard work. You don't just set "force reframe" because dot would
  * move. Bound to "C-X Z".
  */
-enlargewind(f, n)
+int enlargewind(int f, int n)
 {
 	register WINDOW *adjwp;
 	register LINE *lp;
@@ -450,7 +439,7 @@ enlargewind(f, n)
  * window descriptions. Ask the redisplay to do all the hard work. Bound to
  * "C-X C-Z".
  */
-shrinkwind(f, n)
+int shrinkwind(int f, int n)
 {
 	register WINDOW *adjwp;
 	register LINE *lp;
@@ -497,12 +486,12 @@ shrinkwind(f, n)
 	return (TRUE);
 }
 
-/*	Resize the current window to the requested size	*/
-
-resize(f, n)
-
-int f, n;			/* default flag and numeric argument */
-
+/*
+ * Resize the current window to the requested size
+ *
+ * int f, n;		default flag and numeric argument
+ */
+int resize(int f, int n)
 {
 	int clines;		/* current # of lines in window */
 
@@ -525,7 +514,7 @@ int f, n;			/* default flag and numeric argument */
  * Pick the uppermost window that isn't the current window. An LRU algorithm
  * might be better. Return a pointer, or NULL on error.
  */
-WINDOW *wpopup()
+WINDOW *wpopup(void)
 {
 	register WINDOW *wp;
 
@@ -538,27 +527,27 @@ WINDOW *wpopup()
 	return (wp);
 }
 
-scrnextup(f, n)
+int scrnextup(int f, int n)
 {				/* scroll the next window up (back) a page */
 	nextwind(FALSE, 1);
 	backpage(f, n);
 	prevwind(FALSE, 1);
 }
 
-scrnextdw(f, n)
+int scrnextdw(int f, int n)
 {				/* scroll the next window down (forward) a page */
 	nextwind(FALSE, 1);
 	forwpage(f, n);
 	prevwind(FALSE, 1);
 }
 
-savewnd(f, n)
+int savewnd(int f, int n)
 {				/* save ptr to current window */
 	swindow = curwp;
 	return (TRUE);
 }
 
-restwnd(f, n)
+int restwnd(int f, int n)
 {				/* restore the saved screen */
 	register WINDOW *wp;
 
@@ -578,11 +567,13 @@ restwnd(f, n)
 	return (FALSE);
 }
 
-newsize(f, n)
-    /* resize the screen, re-writing the screen */
-int f;				/* default flag */
-int n;				/* numeric argument */
-
+/*
+ * resize the screen, re-writing the screen
+ *
+ * int f;	default flag
+ * int n;	numeric argument
+ */
+int newsize(int f, int n)
 {
 	WINDOW *wp;		/* current window being examined */
 	WINDOW *nextwp;		/* next window to scan */
@@ -664,11 +655,13 @@ int n;				/* numeric argument */
 	return (TRUE);
 }
 
-newwidth(f, n)
-    /* resize the screen, re-writing the screen */
-int f;				/* default flag */
-int n;				/* numeric argument */
-
+/*
+ * resize the screen, re-writing the screen
+ *
+ * int f;		default flag
+ * int n;		numeric argument
+ */
+int newwidth(int f, int n)
 {
 	register WINDOW *wp;
 
@@ -698,7 +691,7 @@ int n;				/* numeric argument */
 	return (TRUE);
 }
 
-int getwpos()
+int getwpos(void)
 {				/* get screen offset of current line in current window */
 	register int sline;	/* screen line from top of window */
 	register LINE *lp;	/* scannile line pointer */
@@ -715,7 +708,7 @@ int getwpos()
 	return (sline);
 }
 
-cknewwindow()
+int cknewwindow(void)
 {
 	execute(META | SPEC | 'X', FALSE, 1);
 }

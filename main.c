@@ -89,13 +89,10 @@ extern void sizesignal();
 #endif
 
 #if	CALLED
-emacs(argc, argv)
+int emacs(int argc, char **argv)
 #else
-main(argc, argv)
+int main(int argc, char **argv)
 #endif
-int argc;			/* # of arguments */
-char *argv[];			/* argument strings */
-
 {
 	register int c;		/* command character */
 	register int f;		/* default flag */
@@ -430,8 +427,7 @@ char *argv[];			/* argument strings */
  * as an argument, because the main routine may have been told to read in a
  * file by default, and we want the buffer name to be right.
  */
-edinit(bname)
-char bname[];
+int edinit(char *bname)
 {
 	register BUFFER *bp;
 	register WINDOW *wp;
@@ -469,7 +465,7 @@ char bname[];
  * and arranges to move it to the "lastflag", so that the next command can
  * look at it. Return the status of command.
  */
-execute(c, f, n)
+int execute(int c, int f, int n)
 {
 	register int status;
 	int (*execfunc) ();	/* ptr to function to execute */
@@ -560,7 +556,7 @@ execute(c, f, n)
  * Fancy quit command, as implemented by Norm. If the any buffer has
  * changed do a write on that buffer and exit emacs, otherwise simply exit.
  */
-quickexit(f, n)
+int quickexit(int f, int n)
 {
 	register BUFFER *bp;	/* scanning pointer to buffers */
 	register BUFFER *oldcb;	/* original current buffer */
@@ -590,8 +586,7 @@ quickexit(f, n)
 	return (TRUE);
 }
 
-static void emergencyexit(signr)
-int signr;
+static void emergencyexit(int signr)
 {
 	quickexit(FALSE, 0);
 	quit(TRUE, 0);
@@ -601,7 +596,7 @@ int signr;
  * Quit command. If an argument, always quit. Otherwise confirm if a buffer
  * has been changed and not written out. Normally bound to "C-X C-C".
  */
-quit(f, n)
+int quit(int f, int n)
 {
 	register int s;
 
@@ -634,7 +629,7 @@ quit(f, n)
  * Error if not at the top level in keyboard processing. Set up variables and
  * return.
  */
-ctlxlp(f, n)
+int ctlxlp(int f, int n)
 {
 	if (kbdmode != STOP) {
 		mlwrite("%%Macro already active");
@@ -651,7 +646,7 @@ ctlxlp(f, n)
  * End keyboard macro. Check for the same limit conditions as the above
  * routine. Set up the variables and return to the caller.
  */
-ctlxrp(f, n)
+int ctlxrp(int f, int n)
 {
 	if (kbdmode == STOP) {
 		mlwrite("%%Macro not active");
@@ -669,7 +664,7 @@ ctlxrp(f, n)
  * The command argument is the number of times to loop. Quit as soon as a
  * command gets an error. Return TRUE if all ok, else FALSE.
  */
-ctlxe(f, n)
+int ctlxe(int f, int n)
 {
 	if (kbdmode != STOP) {
 		mlwrite("%%Macro already active");
@@ -688,7 +683,7 @@ ctlxe(f, n)
  * Beep the beeper. Kill off any keyboard macro, etc., that is in progress.
  * Sometimes called as a routine, to do general aborting of stuff.
  */
-ctrlg(f, n)
+int ctrlg(int f, int n)
 {
 	TTbeep();
 	kbdmode = STOP;
@@ -696,36 +691,37 @@ ctrlg(f, n)
 	return (ABORT);
 }
 
-/* tell the user that this command is illegal while we are in
-   VIEW (read-only) mode				*/
-
-rdonly()
+/*
+ * tell the user that this command is illegal while we are in
+ * VIEW (read-only) mode
+ */
+int rdonly(void)
 {
 	TTbeep();
 	mlwrite("(Key illegal in VIEW mode)");
 	return (FALSE);
 }
 
-resterr()
+int resterr(void)
 {
 	TTbeep();
 	mlwrite("(That command is RESTRICTED)");
 	return (FALSE);
 }
 
-nullproc()
+int nullproc(int f, int n)
 {				/* user function that does NOTHING */
 }
 
-meta()
+int meta(int f, int n)
 {				/* dummy function for binding to meta prefix */
 }
 
-cex()
+int cex(int f, int n)
 {				/* dummy function for binding to control-x prefix */
 }
 
-unarg()
+int unarg(int f, int n)
 {				/* dummy function for binding to universal-argument */
 }
 
@@ -808,10 +804,13 @@ dspram()
 */
 
 #if	CLEAN
-cexit(status)
 
-int status;			/* return status of emacs */
-
+/*
+ * cexit()
+ *
+ * int status;		return status of emacs
+ */
+int cexit(int status)
 {
 	register BUFFER *bp;	/* buffer list pointer */
 	register WINDOW *wp;	/* window list pointer */
