@@ -20,46 +20,46 @@
  */
 wrapword(f, n)
 
-int f;		/* default flag */
-int n;		/* numeric argument */
- 
+int f;				/* default flag */
+int n;				/* numeric argument */
+
 {
 	register int cnt;	/* size of word wrapped to next line */
 	register int c;		/* charector temporary */
 
 	/* backup from the <NL> 1 char */
 	if (!backchar(0, 1))
-		return(FALSE);
+		return (FALSE);
 
 	/* back up until we aren't in a word,
 	   make sure there is a break in the line */
 	cnt = 0;
 	while (((c = lgetc(curwp->w_dotp, curwp->w_doto)) != ' ')
-				&& (c != '\t')) {
+	       && (c != '\t')) {
 		cnt++;
 		if (!backchar(0, 1))
-			return(FALSE);
+			return (FALSE);
 		/* if we make it to the beginning, start a new line */
 		if (curwp->w_doto == 0) {
 			gotoeol(FALSE, 0);
-			return(lnewline());
+			return (lnewline());
 		}
 	}
 
 	/* delete the forward white space */
 	if (!forwdel(0, 1))
-		return(FALSE);
+		return (FALSE);
 
 	/* put in a end of line */
 	if (!lnewline())
-		return(FALSE);
+		return (FALSE);
 
 	/* and past the first word */
 	while (cnt-- > 0) {
 		if (forwchar(FALSE, 1) == FALSE)
-			return(FALSE);
+			return (FALSE);
 	}
-	return(TRUE);
+	return (TRUE);
 }
 
 /*
@@ -105,7 +105,7 @@ forwword(f, n)
 				return (FALSE);
 		}
 	}
-	return(TRUE);
+	return (TRUE);
 }
 
 /*
@@ -115,10 +115,10 @@ forwword(f, n)
  */
 upperword(f, n)
 {
-	register int	c;
+	register int c;
 
-	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/
-		return(rdonly());	/* we are in read only mode	*/
+	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
+		return (rdonly());	/* we are in read only mode     */
 	if (n < 0)
 		return (FALSE);
 	while (n--) {
@@ -131,9 +131,9 @@ upperword(f, n)
 #if	PKCODE
 			if (islower(c)) {
 #else
-			if (c>='a' && c<='z') {
+			if (c >= 'a' && c <= 'z') {
 #endif
-				c -= 'a'-'A';
+				c -= 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
 			}
@@ -151,10 +151,10 @@ upperword(f, n)
  */
 lowerword(f, n)
 {
-	register int	c;
+	register int c;
 
-	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/
-		return(rdonly());	/* we are in read only mode	*/
+	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
+		return (rdonly());	/* we are in read only mode     */
 	if (n < 0)
 		return (FALSE);
 	while (n--) {
@@ -167,9 +167,9 @@ lowerword(f, n)
 #if	PKCODE
 			if (isupper(c)) {
 #else
-			if (c>='A' && c<='Z') {
+			if (c >= 'A' && c <= 'Z') {
 #endif
-				c += 'a'-'A';
+				c += 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
 			}
@@ -188,10 +188,10 @@ lowerword(f, n)
  */
 capword(f, n)
 {
-	register int	c;
+	register int c;
 
-	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/
-		return(rdonly());	/* we are in read only mode	*/
+	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
+		return (rdonly());	/* we are in read only mode     */
 	if (n < 0)
 		return (FALSE);
 	while (n--) {
@@ -204,9 +204,9 @@ capword(f, n)
 #if	PKCODE
 			if (islower(c)) {
 #else
-			if (c>='a' && c<='z') {
+			if (c >= 'a' && c <= 'z') {
 #endif
-				c -= 'a'-'A';
+				c -= 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
 			}
@@ -217,10 +217,11 @@ capword(f, n)
 #if	PKCODE
 				if (isupper(c)) {
 #else
-				if (c>='A' && c<='Z') {
+				if (c >= 'A' && c <= 'Z') {
 #endif
-					c += 'a'-'A';
-					lputc(curwp->w_dotp, curwp->w_doto, c);
+					c += 'a' - 'A';
+					lputc(curwp->w_dotp, curwp->w_doto,
+					      c);
 					lchange(WFHARD);
 				}
 				if (forwchar(FALSE, 1) == FALSE)
@@ -239,21 +240,21 @@ capword(f, n)
  */
 delfword(f, n)
 {
-	register LINE	*dotp;	/* original cursor line */
-	register int	doto;	/*	and row */
+	register LINE *dotp;	/* original cursor line */
+	register int doto;	/*      and row */
 	register int c;		/* temp char */
 	long size;		/* # of chars to delete */
 
 	/* don't allow this command if we are in read only mode */
-	if (curbp->b_mode&MDVIEW)
-		return(rdonly());
+	if (curbp->b_mode & MDVIEW)
+		return (rdonly());
 
 	/* ignore the command if there is a negative argument */
 	if (n < 0)
 		return (FALSE);
 
 	/* Clear the kill buffer if last command wasn't a kill */
-	if ((lastflag&CFKILL) == 0)
+	if ((lastflag & CFKILL) == 0)
 		kdelete();
 	thisflag |= CFKILL;	/* this command is a kill */
 
@@ -267,7 +268,7 @@ delfword(f, n)
 	/* get us into a word.... */
 	while (inword() == FALSE) {
 		if (forwchar(FALSE, 1) == FALSE)
-			return(FALSE);
+			return (FALSE);
 		++size;
 	}
 
@@ -275,43 +276,43 @@ delfword(f, n)
 		/* skip one word, no whitespace! */
 		while (inword() == TRUE) {
 			if (forwchar(FALSE, 1) == FALSE)
-				return(FALSE);
+				return (FALSE);
 			++size;
 		}
 	} else {
 		/* skip n words.... */
 		while (n--) {
-	
+
 			/* if we are at EOL; skip to the beginning of the next */
 			while (curwp->w_doto == llength(curwp->w_dotp)) {
 				if (forwchar(FALSE, 1) == FALSE)
-					return(FALSE);
+					return (FALSE);
 				++size;
 			}
-	
+
 			/* move forward till we are at the end of the word */
 			while (inword() == TRUE) {
 				if (forwchar(FALSE, 1) == FALSE)
-					return(FALSE);
+					return (FALSE);
 				++size;
 			}
-	
+
 			/* if there are more words, skip the interword stuff */
 			if (n != 0)
 				while (inword() == FALSE) {
 					if (forwchar(FALSE, 1) == FALSE)
-						return(FALSE);
+						return (FALSE);
 					++size;
 				}
 		}
-	
+
 		/* skip whitespace and newlines */
 		while ((curwp->w_doto == llength(curwp->w_dotp)) ||
-			((c = lgetc(curwp->w_dotp, curwp->w_doto)) == ' ') ||
-			(c == '\t')) {
-				if (forwchar(FALSE, 1) == FALSE)
-					break;
-				++size;
+		       ((c = lgetc(curwp->w_dotp, curwp->w_doto)) == ' ')
+		       || (c == '\t')) {
+			if (forwchar(FALSE, 1) == FALSE)
+				break;
+			++size;
 		}
 	}
 
@@ -331,15 +332,15 @@ delbword(f, n)
 	long size;
 
 	/* don't allow this command if we are in read only mode */
-	if (curbp->b_mode&MDVIEW)
-		return(rdonly());
+	if (curbp->b_mode & MDVIEW)
+		return (rdonly());
 
 	/* ignore the command if there is a nonpositive argument */
 	if (n <= 0)
 		return (FALSE);
 
 	/* Clear the kill buffer if last command wasn't a kill */
-	if ((lastflag&CFKILL) == 0)
+	if ((lastflag & CFKILL) == 0)
 		kdelete();
 	thisflag |= CFKILL;	/* this command is a kill */
 
@@ -360,7 +361,7 @@ delbword(f, n)
 	}
 	if (forwchar(FALSE, 1) == FALSE)
 		return (FALSE);
-bckdel:	return (ldelete(size, TRUE));
+      bckdel:return (ldelete(size, TRUE));
 }
 
 /*
@@ -369,7 +370,7 @@ bckdel:	return (ldelete(size, TRUE));
  */
 inword()
 {
-	register int	c;
+	register int c;
 
 	if (curwp->w_doto == llength(curwp->w_dotp))
 		return (FALSE);
@@ -377,39 +378,39 @@ inword()
 #if	PKCODE
 	if (isletter(c))
 #else
-	if (c>='a' && c<='z')
+	if (c >= 'a' && c <= 'z')
 		return (TRUE);
-	if (c>='A' && c<='Z')
+	if (c >= 'A' && c <= 'Z')
 #endif
 		return (TRUE);
-	if (c>='0' && c<='9')
+	if (c >= '0' && c <= '9')
 		return (TRUE);
 	return (FALSE);
 }
 
 #if	WORDPRO
-fillpara(f, n)	/* Fill the current paragraph according to the current
-		   fill column						*/
-
-int f, n;	/* deFault flag and Numeric argument */
+fillpara(f, n)
+    /* Fill the current paragraph according to the current
+       fill column                                              */
+int f, n;			/* deFault flag and Numeric argument */
 
 {
-	register int c;			/* current char durring scan	*/
-	register int wordlen;		/* length of current word	*/
-	register int clength;		/* position on line during fill	*/
-	register int i;			/* index during word copy	*/
-	register int newlength;		/* tentative new line length	*/
-	register int eopflag;		/* Are we at the End-Of-Paragraph? */
-	register int firstflag;		/* first word? (needs no space)	*/
-	register LINE *eopline;		/* pointer to line just past EOP */
-	register int dotflag;		/* was the last char a period?	*/
-	char wbuf[NSTRING];		/* buffer for current word	*/
+	register int c;		/* current char durring scan    */
+	register int wordlen;	/* length of current word       */
+	register int clength;	/* position on line during fill */
+	register int i;		/* index during word copy       */
+	register int newlength;	/* tentative new line length    */
+	register int eopflag;	/* Are we at the End-Of-Paragraph? */
+	register int firstflag;	/* first word? (needs no space) */
+	register LINE *eopline;	/* pointer to line just past EOP */
+	register int dotflag;	/* was the last char a period?  */
+	char wbuf[NSTRING];	/* buffer for current word      */
 
-	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/
-		return(rdonly());	/* we are in read only mode	*/
+	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
+		return (rdonly());	/* we are in read only mode     */
 	if (fillcol == 0) {	/* no fill column set */
 		mlwrite("No fill column set");
-		return(FALSE);
+		return (FALSE);
 	}
 #if	PKCODE
 	justflag = FALSE;
@@ -446,7 +447,7 @@ int f, n;	/* deFault flag and Numeric argument */
 
 		/* if not a separator, just add it in */
 		if (c != ' ' && c != '\t') {
-			dotflag = (c == '.');		/* was it a dot */
+			dotflag = (c == '.');	/* was it a dot */
 			if (wordlen < NSTRING - 1)
 				wbuf[wordlen++] = c;
 		} else if (wordlen) {
@@ -456,7 +457,7 @@ int f, n;	/* deFault flag and Numeric argument */
 			if (newlength <= fillcol) {
 				/* add word to current line */
 				if (!firstflag) {
-					linsert(1, ' '); /* the space */
+					linsert(1, ' ');	/* the space */
 					++clength;
 				}
 				firstflag = FALSE;
@@ -467,7 +468,7 @@ int f, n;	/* deFault flag and Numeric argument */
 			}
 
 			/* and add the word in in either case */
-			for (i=0; i<wordlen; i++) {
+			for (i = 0; i < wordlen; i++) {
 				linsert(1, wbuf[i]);
 				++clength;
 			}
@@ -480,40 +481,40 @@ int f, n;	/* deFault flag and Numeric argument */
 	}
 	/* and add a last newline for the end of our new paragraph */
 	lnewline();
-	return(TRUE);
+	return (TRUE);
 }
 
 #if	PKCODE
-justpara(f, n)	/* Fill the current paragraph according to the current
-		   fill column and cursor position 			*/
-
-int f, n;	/* deFault flag and Numeric argument */
+justpara(f, n)
+    /* Fill the current paragraph according to the current
+       fill column and cursor position                  */
+int f, n;			/* deFault flag and Numeric argument */
 
 {
-	register int c;			/* current char durring scan	*/
-	register int wordlen;		/* length of current word	*/
-	register int clength;		/* position on line during fill	*/
-	register int i;			/* index during word copy	*/
-	register int newlength;		/* tentative new line length	*/
-	register int eopflag;		/* Are we at the End-Of-Paragraph? */
-	register int firstflag;		/* first word? (needs no space)	*/
-	register LINE *eopline;		/* pointer to line just past EOP */
-	char wbuf[NSTRING];		/* buffer for current word	*/
-	int leftmarg;			/* left marginal */
+	register int c;		/* current char durring scan    */
+	register int wordlen;	/* length of current word       */
+	register int clength;	/* position on line during fill */
+	register int i;		/* index during word copy       */
+	register int newlength;	/* tentative new line length    */
+	register int eopflag;	/* Are we at the End-Of-Paragraph? */
+	register int firstflag;	/* first word? (needs no space) */
+	register LINE *eopline;	/* pointer to line just past EOP */
+	char wbuf[NSTRING];	/* buffer for current word      */
+	int leftmarg;		/* left marginal */
 
-	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/
-		return(rdonly());	/* we are in read only mode	*/
+	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
+		return (rdonly());	/* we are in read only mode     */
 	if (fillcol == 0) {	/* no fill column set */
 		mlwrite("No fill column set");
-		return(FALSE);
+		return (FALSE);
 	}
 	justflag = TRUE;
 	leftmarg = curwp->w_doto;
-	if (leftmarg+10 > fillcol) {
+	if (leftmarg + 10 > fillcol) {
 		leftmarg = 0;
 		mlwrite("Column too narrow");
-		return(FALSE);
-	}	
+		return (FALSE);
+	}
 
 	/* record the pointer to the line just past the EOP */
 	gotoeop(FALSE, 1);
@@ -558,20 +559,20 @@ int f, n;	/* deFault flag and Numeric argument */
 			if (newlength <= fillcol) {
 				/* add word to current line */
 				if (!firstflag) {
-					linsert(1, ' '); /* the space */
+					linsert(1, ' ');	/* the space */
 					++clength;
 				}
 				firstflag = FALSE;
 			} else {
 				/* start a new line */
 				lnewline();
-				for (i=0; i<leftmarg; i++)
+				for (i = 0; i < leftmarg; i++)
 					linsert(1, ' ');
 				clength = leftmarg;
 			}
 
 			/* and add the word in in either case */
-			for (i=0; i<wordlen; i++) {
+			for (i = 0; i < wordlen; i++) {
 				linsert(1, wbuf[i]);
 				++clength;
 			}
@@ -588,14 +589,14 @@ int f, n;	/* deFault flag and Numeric argument */
 		curwp->w_doto = llength(curwp->w_dotp);
 
 	justflag = FALSE;
-	return(TRUE);
+	return (TRUE);
 }
 #endif
 
-killpara(f, n)	/* delete n paragraphs starting with the current one */
-
-int f;	/* default flag */
-int n;	/* # of paras to delete */
+killpara(f, n)
+    /* delete n paragraphs starting with the current one */
+int f;				/* default flag */
+int n;				/* # of paras to delete */
 
 {
 	register int status;	/* returned status of functions */
@@ -612,15 +613,15 @@ int n;	/* # of paras to delete */
 		/* go to the beginning of the paragraph */
 		gotobop(FALSE, 1);
 		curwp->w_doto = 0;	/* force us to the beginning of line */
-	
+
 		/* and delete it */
 		if ((status = killregion(FALSE, 1)) != TRUE)
-			return(status);
+			return (status);
 
 		/* and clean up the 2 extra lines */
 		ldelete(2L, TRUE);
 	}
-	return(TRUE);
+	return (TRUE);
 }
 
 
@@ -630,7 +631,7 @@ int n;	/* # of paras to delete */
 
 wordcount(f, n)
 
-int f, n;	/* ignored numeric arguments */
+int f, n;			/* ignored numeric arguments */
 
 {
 	register LINE *lp;	/* current line to scan */
@@ -648,16 +649,16 @@ int f, n;	/* ignored numeric arguments */
 
 #if	PKCODE
 	struct {
-		long	pk_1;
-		long	pk_2;
-		int	pk_3;
-		int	pk_4;
+		long pk_1;
+		long pk_2;
+		int pk_3;
+		int pk_4;
 	} pk_mlrec;
 #endif
 
 	/* make sure we have a region to count */
 	if ((status = getregion(&region)) != TRUE)
-		return(status);
+		return (status);
 	lp = region.r_linep;
 	offset = region.r_offset;
 	size = region.r_size;
@@ -683,12 +684,12 @@ int f, n;	/* ignored numeric arguments */
 		/* and tabulate it */
 		wordflag = (
 #if	PKCODE
-			    (isletter(ch)) ||
+				   (isletter(ch)) ||
 #else
-			    (ch >= 'a' && ch <= 'z') ||
-			    (ch >= 'A' && ch <= 'Z') ||
+				   (ch >= 'a' && ch <= 'z') ||
+				   (ch >= 'A' && ch <= 'Z') ||
 #endif
-			    (ch >= '0' && ch <= '9'));
+				   (ch >= '0' && ch <= '9'));
 		if (wordflag == TRUE && lastword == FALSE)
 			++nwords;
 		lastword = wordflag;
@@ -697,7 +698,7 @@ int f, n;	/* ignored numeric arguments */
 
 	/* and report on the info */
 	if (nwords > 0L)
-		avgch = (int)((100L * nchars) / nwords);
+		avgch = (int) ((100L * nchars) / nwords);
 	else
 		avgch = 0;
 
@@ -706,12 +707,12 @@ int f, n;	/* ignored numeric arguments */
 	pk_mlrec.pk_2 = nchars;
 	pk_mlrec.pk_3 = nlines + 1;
 	pk_mlrec.pk_4 = avgch;
-	mlwrite("%*Words %D Chars %D Lines %d Avg chars/word %f", 
+	mlwrite("%*Words %D Chars %D Lines %d Avg chars/word %f",
 		&pk_mlrec);
 #else
 	mlwrite("Words %D Chars %D Lines %d Avg chars/word %f",
 		nwords, nchars, nlines + 1, avgch);
 #endif
-	return(TRUE);
+	return (TRUE);
 }
 #endif

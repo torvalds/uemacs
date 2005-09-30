@@ -45,14 +45,14 @@ char *prompt;
 		/* get the responce */
 		c = tgetc();
 
-		if (c == ectoc(abortc))		/* Bail out! */
-			return(ABORT);
+		if (c == ectoc(abortc))	/* Bail out! */
+			return (ABORT);
 
-		if (c=='y' || c=='Y')
-			return(TRUE);
+		if (c == 'y' || c == 'Y')
+			return (TRUE);
 
-		if (c=='n' || c=='N')
-			return(FALSE);
+		if (c == 'n' || c == 'N')
+			return (FALSE);
 	}
 }
 
@@ -65,10 +65,10 @@ char *prompt;
  */
 
 mlreply(prompt, buf, nbuf)
-    char *prompt;
-    char *buf;
+char *prompt;
+char *buf;
 {
-	return(nextarg(prompt, buf, nbuf, ctoec('\n')));
+	return (nextarg(prompt, buf, nbuf, ctoec('\n')));
 }
 
 mlreplyt(prompt, buf, nbuf, eolchar)
@@ -78,7 +78,7 @@ char *buf;
 int eolchar;
 
 {
-	return(nextarg(prompt, buf, nbuf, eolchar));
+	return (nextarg(prompt, buf, nbuf, eolchar));
 }
 
 /*	ectoc:	expanded character to character
@@ -92,8 +92,8 @@ int c;
 	if (c & CONTROL)
 		c = c & ~(CONTROL | 0x40);
 	if (c & SPEC)
-		c= c & 255;
-	return(c);
+		c = c & 255;
+	return (c);
 }
 
 /*	ctoec:	character to extended character
@@ -104,18 +104,17 @@ ctoec(c)
 int c;
 
 {
-        if (c>=0x00 && c<=0x1F)
-                c = CONTROL | (c+'@');
-        return (c);
+	if (c >= 0x00 && c <= 0x1F)
+		c = CONTROL | (c + '@');
+	return (c);
 }
- 
+
 /* get a command name from the command line. Command completion means
    that pressing a <SPACE> will attempt to complete an unfinished command
    name if it is unique.
 */
 
-int (*getname())()
-
+int (*getname()) ()
 {
 	register int cpos;	/* current column on screen output */
 	register int c;
@@ -124,7 +123,7 @@ int (*getname())()
 	register NBIND *cffp;	/* current ptr to entry in name binding table */
 	register NBIND *lffp;	/* last ptr to entry in name binding table */
 	char buf[NSTRING];	/* buffer to hold tentative command name */
-	int (*fncmatch())();
+	int (*fncmatch()) ();
 
 	/* starting at the beginning of the string buffer */
 	cpos = 0;
@@ -132,8 +131,8 @@ int (*getname())()
 	/* if we are executing a command line get the next arg and match it */
 	if (clexec) {
 		if (macarg(buf) != TRUE)
-			return(FALSE);
-		return(fncmatch(&buf[0]));
+			return (FALSE);
+		return (fncmatch(&buf[0]));
 	}
 
 	/* build a name string from the keyboard */
@@ -145,12 +144,12 @@ int (*getname())()
 			buf[cpos] = 0;
 
 			/* and match it off */
-			return(fncmatch(&buf[0]));
+			return (fncmatch(&buf[0]));
 
 		} else if (c == ectoc(abortc)) {	/* Bell, abort */
 			ctrlg(FALSE, 0);
 			TTflush();
-			return( (int (*)()) NULL);
+			return ((int (*)()) NULL);
 
 		} else if (c == 0x7F || c == 0x08) {	/* rubout/erase */
 			if (cpos != 0) {
@@ -175,61 +174,80 @@ int (*getname())()
 
 		} else if (c == ' ' || c == 0x1b || c == 0x09) {
 /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
-	/* attempt a completion */
-	buf[cpos] = 0;		/* terminate it for us */
-	ffp = &names[0];	/* scan for matches */
-	while (ffp->n_func != NULL) {
-		if (strncmp(buf, ffp->n_name, strlen(buf)) == 0) {
-			/* a possible match! More than one? */
-			if ((ffp + 1)->n_func == NULL ||
-			   (strncmp(buf, (ffp+1)->n_name, strlen(buf)) != 0)) {
-				/* no...we match, print it */
-				sp = ffp->n_name + cpos;
-				while (*sp)
-					TTputc(*sp++);
-				TTflush();
-				return(ffp->n_func);
-			} else {
+			/* attempt a completion */
+			buf[cpos] = 0;	/* terminate it for us */
+			ffp = &names[0];	/* scan for matches */
+			while (ffp->n_func != NULL) {
+				if (strncmp(buf, ffp->n_name, strlen(buf))
+				    == 0) {
+					/* a possible match! More than one? */
+					if ((ffp + 1)->n_func == NULL ||
+					    (strncmp
+					     (buf, (ffp + 1)->n_name,
+					      strlen(buf)) != 0)) {
+						/* no...we match, print it */
+						sp = ffp->n_name + cpos;
+						while (*sp)
+							TTputc(*sp++);
+						TTflush();
+						return (ffp->n_func);
+					} else {
 /* << << << << << << << << << << << << << << << << << */
-	/* try for a partial match against the list */
+						/* try for a partial match against the list */
 
-	/* first scan down until we no longer match the current input */
-	lffp = (ffp + 1);
-	while ((lffp+1)->n_func != NULL) {
-		if (strncmp(buf, (lffp+1)->n_name, strlen(buf)) != 0)
-			break;
-		++lffp;
-	}
+						/* first scan down until we no longer match the current input */
+						lffp = (ffp + 1);
+						while ((lffp +
+							1)->n_func !=
+						       NULL) {
+							if (strncmp
+							    (buf,
+							     (lffp +
+							      1)->n_name,
+							     strlen(buf))
+							    != 0)
+								break;
+							++lffp;
+						}
 
-	/* and now, attempt to partial complete the string, char at a time */
-	while (TRUE) {
-		/* add the next char in */
-		buf[cpos] = ffp->n_name[cpos];
+						/* and now, attempt to partial complete the string, char at a time */
+						while (TRUE) {
+							/* add the next char in */
+							buf[cpos] =
+							    ffp->
+							    n_name[cpos];
 
-		/* scan through the candidates */
-		cffp = ffp + 1;
-		while (cffp <= lffp) {
-			if (cffp->n_name[cpos] != buf[cpos])
-				goto onward;
-			++cffp;
-		}
+							/* scan through the candidates */
+							cffp = ffp + 1;
+							while (cffp <=
+							       lffp) {
+								if (cffp->
+								    n_name
+								    [cpos]
+								    !=
+								    buf
+								    [cpos])
+									goto onward;
+								++cffp;
+							}
 
-		/* add the character */
-		TTputc(buf[cpos++]);
-	}
+							/* add the character */
+							TTputc(buf
+							       [cpos++]);
+						}
 /* << << << << << << << << << << << << << << << << << */
+					}
+				}
+				++ffp;
 			}
-		}
-		++ffp;
-	}
 
-	/* no match.....beep and onward */
-	TTbeep();
-onward:;
-	TTflush();
+			/* no match.....beep and onward */
+			TTbeep();
+		      onward:;
+			TTflush();
 /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 		} else {
-			if (cpos < NSTRING-1 && c > ' ') {
+			if (cpos < NSTRING - 1 && c > ' ') {
 				buf[cpos++] = c;
 				TTputc(c);
 			}
@@ -244,16 +262,15 @@ onward:;
 		macro action					*/
 
 int tgetc()
-
 {
-	int c;	/* fetched character */
+	int c;			/* fetched character */
 
 	/* if we are playing a keyboard macro back, */
 	if (kbdmode == PLAY) {
 
 		/* if there is some left... */
 		if (kbdptr < kbdend)
-			return((int)*kbdptr++);
+			return ((int) *kbdptr++);
 
 		/* at the end of last repitition? */
 		if (--kbdrep < 1) {
@@ -266,7 +283,7 @@ int tgetc()
 
 			/* reset the macro to the begining for the next rep */
 			kbdptr = &kbdm[0];
-			return((int)*kbdptr++);
+			return ((int) *kbdptr++);
 		}
 	}
 
@@ -289,7 +306,7 @@ int tgetc()
 	}
 
 	/* and finally give the char back */
-	return(c);
+	return (c);
 }
 
 /*	GET1KEY:	Get one keystroke. The only prefixs legal here
@@ -297,43 +314,41 @@ int tgetc()
 								*/
 
 get1key()
-
 {
-	int    c;
+	int c;
 
 	/* get a keystroke */
-        c = tgetc();
+	c = tgetc();
 
-#if	MSDOS 
-	if (c == 0) {				/* Apply SPEC prefix	*/
-	        c = tgetc();
-	        if (c>=0x00 && c<=0x1F)		/* control key? */
-        	        c = CONTROL | (c+'@');
-		return(SPEC | c);
+#if	MSDOS
+	if (c == 0) {		/* Apply SPEC prefix    */
+		c = tgetc();
+		if (c >= 0x00 && c <= 0x1F)	/* control key? */
+			c = CONTROL | (c + '@');
+		return (SPEC | c);
 	}
 #endif
 
-        if (c>=0x00 && c<=0x1F)                 /* C0 control -> C-     */
-                c = CONTROL | (c+'@');
-        return (c);
+	if (c >= 0x00 && c <= 0x1F)	/* C0 control -> C-     */
+		c = CONTROL | (c + '@');
+	return (c);
 }
 
 /*	GETCMD:	Get a command from the keyboard. Process all applicable
 		prefix keys
 							*/
 getcmd()
-
 {
-	int c;		/* fetched keystroke */
+	int c;			/* fetched keystroke */
 #if VT220
-	int d;		/* second character P.K. */
+	int d;			/* second character P.K. */
 	int cmask = 0;
 #endif
 	/* get initial character */
 	c = get1key();
 
 #if VT220
-proc_metac:
+      proc_metac:
 #endif
 	/* process META prefix */
 	if (c == (CONTROL | '[')) {
@@ -342,32 +357,35 @@ proc_metac:
 		if (c == '[' || c == 'O') {	/* CSI P.K. */
 			c = get1key();
 			if (c >= 'A' && c <= 'D')
-				return(SPEC | c | cmask);
+				return (SPEC | c | cmask);
 			if (c >= 'E' && c <= 'z' && c != 'i' && c != 'c')
-				return(SPEC | c | cmask);
+				return (SPEC | c | cmask);
 			d = get1key();
-			if (d == '~')		/* ESC [ n ~   P.K. */
-				return(SPEC | c | cmask);
-			switch (c) {		/* ESC [ n n ~ P.K. */
-			case '1':	c = d + 32;
-					break;
-			case '2':	c = d + 48;
-					break;
-			case '3':	c = d + 64;
-					break;
-			default:	c = '?';
-					break;
+			if (d == '~')	/* ESC [ n ~   P.K. */
+				return (SPEC | c | cmask);
+			switch (c) {	/* ESC [ n n ~ P.K. */
+			case '1':
+				c = d + 32;
+				break;
+			case '2':
+				c = d + 48;
+				break;
+			case '3':
+				c = d + 64;
+				break;
+			default:
+				c = '?';
+				break;
 			}
-			if (d != '~')		/* eat tilde P.K. */
+			if (d != '~')	/* eat tilde P.K. */
 				get1key();
-			if (c == 'i') {		/* DO key    P.K. */
+			if (c == 'i') {	/* DO key    P.K. */
 				c = ctlxc;
 				goto proc_ctlxc;
-			}
-			else if (c == 'c')	/* ESC key   P.K. */
+			} else if (c == 'c')	/* ESC key   P.K. */
 				c = get1key();
 			else
-				return(SPEC | c | cmask);
+				return (SPEC | c | cmask);
 		}
 #endif
 #if VT220
@@ -376,15 +394,14 @@ proc_metac:
 			goto proc_metac;
 		}
 #endif
-	        if (islower(c))		/* Force to upper */
-        	        c ^= DIFCASE;
-	        if (c>=0x00 && c<=0x1F)		/* control key */
-	        	c = CONTROL | (c+'@');
-		return(META | c );
+		if (islower(c))	/* Force to upper */
+			c ^= DIFCASE;
+		if (c >= 0x00 && c <= 0x1F)	/* control key */
+			c = CONTROL | (c + '@');
+		return (META | c);
 	}
 #if	PKCODE
-	else
-	if (c == metac) {
+	else if (c == metac) {
 		c = get1key();
 #if VT220
 		if (c == (CONTROL | '[')) {
@@ -392,17 +409,17 @@ proc_metac:
 			goto proc_metac;
 		}
 #endif
-	        if (islower(c))		/* Force to upper */
-        	        c ^= DIFCASE;
-	        if (c>=0x00 && c<=0x1F)		/* control key */
-	        	c = CONTROL | (c+'@');
-		return(META | c );
+		if (islower(c))	/* Force to upper */
+			c ^= DIFCASE;
+		if (c >= 0x00 && c <= 0x1F)	/* control key */
+			c = CONTROL | (c + '@');
+		return (META | c);
 	}
 #endif
 
 
 #if	VT220
-proc_ctlxc:
+      proc_ctlxc:
 #endif
 	/* process CTLX prefix */
 	if (c == ctlxc) {
@@ -413,15 +430,15 @@ proc_ctlxc:
 			goto proc_metac;
 		}
 #endif
-	        if (c>='a' && c<='z')		/* Force to upper */
-        	        c -= 0x20;
-	        if (c>=0x00 && c<=0x1F)		/* control key */
-	        	c = CONTROL | (c+'@');
-		return(CTLX | c);
+		if (c >= 'a' && c <= 'z')	/* Force to upper */
+			c -= 0x20;
+		if (c >= 0x00 && c <= 0x1F)	/* control key */
+			c = CONTROL | (c + '@');
+		return (CTLX | c);
 	}
 
 	/* otherwise, just return it */
-	return(c);
+	return (c);
 }
 
 /*	A more generalized prompt/reply function allowing the caller
@@ -430,7 +447,9 @@ proc_ctlxc:
 							*/
 getstring(prompt, buf, nbuf, eolchar)
 
-char *prompt; char *buf; int eolchar;
+char *prompt;
+char *buf;
+int eolchar;
 
 {
 	register int cpos;	/* current character position in string */
@@ -447,11 +466,11 @@ char *prompt; char *buf; int eolchar;
 	FILE *tmpf = NULL;
 #endif
 	ffile = (strcmp(prompt, "Find file: ") == 0
-	      || strcmp(prompt, "View file: ") == 0
-	      || strcmp(prompt, "Insert file: ") == 0
-	      || strcmp(prompt, "Write file: ") == 0
-	      || strcmp(prompt, "Read file: ") == 0
-	      || strcmp(prompt, "File to execute: ") == 0);
+		 || strcmp(prompt, "View file: ") == 0
+		 || strcmp(prompt, "Insert file: ") == 0
+		 || strcmp(prompt, "Write file: ") == 0
+		 || strcmp(prompt, "Read file: ") == 0
+		 || strcmp(prompt, "File to execute: ") == 0);
 #endif
 
 	cpos = 0;
@@ -462,7 +481,7 @@ char *prompt; char *buf; int eolchar;
 
 	for (;;) {
 #if	COMPLC
-		if (! didtry)
+		if (!didtry)
 			nskip = -1;
 		didtry = 0;
 #endif
@@ -487,9 +506,9 @@ char *prompt; char *buf; int eolchar;
 
 			/* if we default the buffer, return FALSE */
 			if (buf[0] == 0)
-				return(FALSE);
+				return (FALSE);
 
-			return(TRUE);
+			return (TRUE);
 		}
 
 		/* change from command form back to character form */
@@ -499,8 +518,8 @@ char *prompt; char *buf; int eolchar;
 			/* Abort the input? */
 			ctrlg(FALSE, 0);
 			TTflush();
-			return(ABORT);
-		} else if ((c==0x7F || c==0x08) && quotef==FALSE) {
+			return (ABORT);
+		} else if ((c == 0x7F || c == 0x08) && quotef == FALSE) {
 			/* rubout/erase */
 			if (cpos != 0) {
 				outstring("\b \b");
@@ -536,7 +555,8 @@ char *prompt; char *buf; int eolchar;
 			TTflush();
 
 #if	COMPLC
-		} else if ((c == 0x09 || c == ' ') && quotef == FALSE && ffile) {
+		} else if ((c == 0x09 || c == ' ') && quotef == FALSE
+			   && ffile) {
 			/* TAB, complete file name */
 			char ffbuf[255];
 #if	MSDOS
@@ -563,14 +583,14 @@ char *prompt; char *buf; int eolchar;
 					iswild = 1;
 #if	MSDOS
 				if (lsav < 0 && (buf[cpos] == '\\' ||
-						 buf[cpos] == '/'  ||
-						 buf[cpos] == ':'  && cpos == 1))
+						 buf[cpos] == '/' ||
+						 buf[cpos] == ':'
+						 && cpos == 1))
 					lsav = cpos;
 #endif
 			}
 			TTflush();
-			if (nskip < 0)
-			{
+			if (nskip < 0) {
 				buf[ocpos] = 0;
 #if	UNIX
 				if (tmpf != NULL)
@@ -578,8 +598,8 @@ char *prompt; char *buf; int eolchar;
 				strcpy(tmp, "/tmp/meXXXXXX");
 				strcpy(ffbuf, "echo ");
 				strcat(ffbuf, buf);
-				if (! iswild)
-					strcat(ffbuf,"*");
+				if (!iswild)
+					strcat(ffbuf, "*");
 				strcat(ffbuf, " >");
 				mktemp(tmp);
 				strcat(ffbuf, tmp);
@@ -589,49 +609,47 @@ char *prompt; char *buf; int eolchar;
 #endif
 #if	MSDOS
 				strcpy(sffbuf, buf);
-				if (! iswild)
-					strcat(sffbuf,"*.*");
+				if (!iswild)
+					strcat(sffbuf, "*.*");
 #endif
 				nskip = 0;
 			}
 #if	UNIX
 			c = ' ';
 			for (n = nskip; n > 0; n--)
-				while ((c = getc(tmpf)) != EOF && c != ' ');
+				while ((c = getc(tmpf)) != EOF
+				       && c != ' ');
 #endif
 #if	MSDOS
-			if (nskip == 0)
-			{
+			if (nskip == 0) {
 				strcpy(ffbuf, sffbuf);
-				c = findfirst(ffbuf, &ffblk, FA_DIREC) ? '*' : ' ';
-			}
-			else if (nskip > 0)
+				c = findfirst(ffbuf, &ffblk,
+					      FA_DIREC) ? '*' : ' ';
+			} else if (nskip > 0)
 				c = findnext(&ffblk) ? 0 : ' ';
 #endif
 			nskip++;
 
-			if (c != ' ')
-			{
+			if (c != ' ') {
 				TTbeep();
 				nskip = 0;
 			}
-
 #if	UNIX
-			while ((c = getc(tmpf)) != EOF && c != '\n' && c != ' ' && c != '*')
+			while ((c = getc(tmpf)) != EOF && c != '\n'
+			       && c != ' ' && c != '*')
 #endif
 #if	MSDOS
-			if (c == '*')
-				fcp = sffbuf;
-			else
-			{
-				strncpy(buf, sffbuf, lsav+1);
-				cpos = lsav+1;
-				fcp = ffblk.ff_name;
-			}
+				if (c == '*')
+					fcp = sffbuf;
+				else {
+					strncpy(buf, sffbuf, lsav + 1);
+					cpos = lsav + 1;
+					fcp = ffblk.ff_name;
+				}
 			while (c != 0 && (c = *fcp++) != 0 && c != '*')
 #endif
 			{
-				if (cpos < nbuf-1)
+				if (cpos < nbuf - 1)
 					buf[cpos++] = c;
 			}
 #if	UNIX
@@ -639,8 +657,7 @@ char *prompt; char *buf; int eolchar;
 				TTbeep();
 #endif
 
-			for (n = 0; n < cpos; n++)
-			{
+			for (n = 0; n < cpos; n++) {
 				c = buf[n];
 				if ((c < ' ') && (c != '\n')) {
 					outstring("^");
@@ -668,7 +685,7 @@ char *prompt; char *buf; int eolchar;
 			quotef = TRUE;
 		} else {
 			quotef = FALSE;
-			if (cpos < nbuf-1) {
+			if (cpos < nbuf - 1) {
 				buf[cpos++] = c;
 
 				if ((c < ' ') && (c != '\n')) {
@@ -691,9 +708,9 @@ char *prompt; char *buf; int eolchar;
 	}
 }
 
-outstring(s)	/* output a string of characters */
-
-char *s;	/* string to output */
+outstring(s)
+    /* output a string of characters */
+char *s;			/* string to output */
 
 {
 	if (disinp)
@@ -701,13 +718,12 @@ char *s;	/* string to output */
 			TTputc(*s++);
 }
 
-ostring(s)	/* output a string of output characters */
-
-char *s;	/* string to output */
+ostring(s)
+    /* output a string of output characters */
+char *s;			/* string to output */
 
 {
 	if (discmd)
 		while (*s)
 			TTputc(*s++);
 }
-

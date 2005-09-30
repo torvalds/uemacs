@@ -21,16 +21,16 @@
 #include <fcntl.h>
 #include <errno.h>
 
-int kbdflgs;			/* saved keyboard fd flags	*/
-int kbdpoll;			/* in O_NDELAY mode			*/
-int kbdqp;			/* there is a char in kbdq	*/
-char kbdq;			/* char we've already read	*/
+int kbdflgs;			/* saved keyboard fd flags      */
+int kbdpoll;			/* in O_NDELAY mode                     */
+int kbdqp;			/* there is a char in kbdq      */
+char kbdq;			/* char we've already read      */
 
-struct	termios	otermios;	/* original terminal characteristics */
-struct	termios	ntermios;	/* charactoristics to use inside */
+struct termios otermios;	/* original terminal characteristics */
+struct termios ntermios;	/* charactoristics to use inside */
 
 #define TBUFSIZ 128
-char tobuf[TBUFSIZ];            /* terminal output buffer */
+char tobuf[TBUFSIZ];		/* terminal output buffer */
 
 
 /*
@@ -53,12 +53,13 @@ ttopen()
 			      | INPCK | INLCR | IGNCR | ICRNL);
 
 	/* raw CR/NR etc output handling */
-	ntermios.c_oflag &= ~(OPOST | ONLCR | OLCUC | OCRNL | ONOCR | ONLRET);
+	ntermios.c_oflag &=
+	    ~(OPOST | ONLCR | OLCUC | OCRNL | ONOCR | ONLRET);
 
 	/* No signal handling, no echo etc */
 	ntermios.c_lflag &= ~(ISIG | ICANON | XCASE | ECHO | ECHOE | ECHOK
-			     | ECHONL | NOFLSH | TOSTOP | ECHOCTL | ECHOPRT
-			     | ECHOKE | FLUSHO | PENDIN | IEXTEN);
+			      | ECHONL | NOFLSH | TOSTOP | ECHOCTL |
+			      ECHOPRT | ECHOKE | FLUSHO | PENDIN | IEXTEN);
 
 	/* one character, no timeout */
 	ntermios.c_cc[VMIN] = 1;
@@ -71,11 +72,11 @@ ttopen()
 	 */
 	setbuffer(stdout, &tobuf[0], TBUFSIZ);
 
-	kbdflgs = fcntl( 0, F_GETFL, 0 );
+	kbdflgs = fcntl(0, F_GETFL, 0);
 	kbdpoll = FALSE;
 
 	/* on all screens we are not sure of the initial position
-	   of the cursor					*/
+	   of the cursor                                        */
 	ttrow = 999;
 	ttcol = 999;
 }
@@ -136,7 +137,7 @@ ttflush()
  */
 ttgetc()
 {
-	return(255 & fgetc(stdin)); /* 8BIT P.K. */
+	return (255 & fgetc(stdin));	/* 8BIT P.K. */
 }
 
 /* typahead:	Check to see if any characters are already in the
@@ -145,10 +146,10 @@ ttgetc()
 
 typahead()
 {
-	int x;	/* holds # of pending chars */
+	int x;			/* holds # of pending chars */
 
 #ifdef FIONREAD
-	if (ioctl(0,FIONREAD,&x) < 0)
+	if (ioctl(0, FIONREAD, &x) < 0)
 		x = 0;
 #else
 	x = 0;
@@ -156,4 +157,4 @@ typahead()
 	return x;
 }
 
-#endif /* POSIX */
+#endif				/* POSIX */

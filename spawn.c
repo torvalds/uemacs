@@ -9,16 +9,16 @@
 #include        "edef.h"
 
 #if     VMS
-#define EFN     0                               /* Event flag.          */
+#define EFN     0		/* Event flag.          */
 
-#include        <ssdef.h>                       /* Random headers.      */
+#include        <ssdef.h>	/* Random headers.      */
 #include        <stsdef.h>
 #include        <descrip.h>
 #include        <iodef.h>
 
-extern  int     oldmode[3];                     /* In "termio.c"        */
-extern  int     newmode[3];                     /* In "termio.c"        */
-extern  short   iochan;                         /* In "termio.c"        */
+extern int oldmode[3];		/* In "termio.c"        */
+extern int newmode[3];		/* In "termio.c"        */
+extern short iochan;		/* In "termio.c"        */
 #endif
 
 #if     V7 | USG | BSD
@@ -43,50 +43,50 @@ extern void sizesignal();
 spawncli(f, n)
 {
 #if     V7 | USG | BSD
-        register char *cp;
-        char    *getenv();
+	register char *cp;
+	char *getenv();
 #endif
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return(resterr());
+		return (resterr());
 
 #if     VMS
-        movecursor(term.t_nrow, 0);             /* In last line.        */
-        mlputs("(Starting DCL)\r\n");
-        TTflush(); 	                     /* Ignore "ttcol".      */
-        sgarbf = TRUE;
+	movecursor(term.t_nrow, 0);	/* In last line.        */
+	mlputs("(Starting DCL)\r\n");
+	TTflush();		/* Ignore "ttcol".      */
+	sgarbf = TRUE;
 	sys(NULL);
 	sleep(1);
 	mlputs("\r\n(Returning from DCL)\r\n");
 	TTflush();
 	sleep(1);
-	return(TRUE);
+	return (TRUE);
 #endif
 #if     MSDOS & (MSC | TURBO)
-        movecursor(term.t_nrow, 0);             /* Seek to last line.   */
-        TTflush();
+	movecursor(term.t_nrow, 0);	/* Seek to last line.   */
+	TTflush();
 	TTkclose();
 	shellprog("");
 	TTkopen();
-        sgarbf = TRUE;
-        return(TRUE);
+	sgarbf = TRUE;
+	return (TRUE);
 #endif
 #if     V7 | USG | BSD
-        movecursor(term.t_nrow, 0);             /* Seek to last line.   */
-        TTflush();
-        TTclose();                              /* stty to old settings */
-        if ((cp = getenv("SHELL")) != NULL && *cp != '\0')
-                system(cp);
-        else
+	movecursor(term.t_nrow, 0);	/* Seek to last line.   */
+	TTflush();
+	TTclose();		/* stty to old settings */
+	if ((cp = getenv("SHELL")) != NULL && *cp != '\0')
+		system(cp);
+	else
 #if	BSD
-                system("exec /bin/csh");
+		system("exec /bin/csh");
 #else
-                system("exec /bin/sh");
+		system("exec /bin/sh");
 #endif
-        sgarbf = TRUE;
+	sgarbf = TRUE;
 	sleep(2);
-        TTopen();
+	TTopen();
 	TTkopen();
 #ifdef SIGWINCH
 /*
@@ -95,17 +95,17 @@ spawncli(f, n)
  *		-lbt
  */
 	chg_width = term.t_ncol;
-	chg_height = term.t_nrow+1;
+	chg_height = term.t_nrow + 1;
 	term.t_nrow = term.t_ncol = 0;
 #endif
-        return(TRUE);
+	return (TRUE);
 #endif
 }
 
 #if	BSD | __hpux | SVR4
 
-bktoshell()		/* suspend MicroEMACS and wait to wake up */
-{
+bktoshell()
+{				/* suspend MicroEMACS and wait to wake up */
 	int pid;
 
 	vttidy();
@@ -131,62 +131,61 @@ rtfrmshell()
  */
 spawn(f, n)
 {
-        register int    s;
-        char            line[NLINE];
+	register int s;
+	char line[NLINE];
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return(resterr());
+		return (resterr());
 
 #if     VMS
-        if ((s=mlreply("!", line, NLINE)) != TRUE)
-                return (s);
+	if ((s = mlreply("!", line, NLINE)) != TRUE)
+		return (s);
 	movecursor(term.t_nrow, 0);
-        TTflush();
-        s = sys(line);                          /* Run the command.     */
+	TTflush();
+	s = sys(line);		/* Run the command.     */
 	if (clexec == FALSE) {
-		mlputs("\r\n\n(End)");		/* Pause.               */
+		mlputs("\r\n\n(End)");	/* Pause.               */
 		TTflush();
 		tgetc();
 	}
-        sgarbf = TRUE;
-        return (s);
+	sgarbf = TRUE;
+	return (s);
 #endif
 #if     MSDOS
-        if ((s=mlreply("!", line, NLINE)) != TRUE)
-                return(s);
+	if ((s = mlreply("!", line, NLINE)) != TRUE)
+		return (s);
 	movecursor(term.t_nrow, 0);
 	TTkclose();
-        shellprog(line);
+	shellprog(line);
 	TTkopen();
 	/* if we are interactive, pause here */
 	if (clexec == FALSE) {
-	        mlputs("\r\n(End)");
-        	tgetc();
-        }
-        sgarbf = TRUE;
-        return (TRUE);
+		mlputs("\r\n(End)");
+		tgetc();
+	}
+	sgarbf = TRUE;
+	return (TRUE);
 #endif
 #if     V7 | USG | BSD
-        if ((s=mlreply("!", line, NLINE)) != TRUE)
-                return (s);
-        TTflush();
-        TTclose();                              /* stty to old modes    */
+	if ((s = mlreply("!", line, NLINE)) != TRUE)
+		return (s);
+	TTflush();
+	TTclose();		/* stty to old modes    */
 	TTkclose();
-        system(line);
-	fflush(stdout);				/* to be sure P.K. 	*/
-        TTopen();
+	system(line);
+	fflush(stdout);		/* to be sure P.K.      */
+	TTopen();
 
 	if (clexec == FALSE) {
-		mlputs("(End)");		/* Pause.               */
+		mlputs("(End)");	/* Pause.               */
 		TTflush();
-		while ((s = tgetc()) != '\r' && s != ' ')
-                ;
+		while ((s = tgetc()) != '\r' && s != ' ');
 		mlputs("\r\n");
 	}
 	TTkopen();
-        sgarbf = TRUE;
-        return (TRUE);
+	sgarbf = TRUE;
+	return (TRUE);
 #endif
 }
 
@@ -197,58 +196,56 @@ spawn(f, n)
  */
 
 execprg(f, n)
-
 {
-        register int    s;
-        char            line[NLINE];
+	register int s;
+	char line[NLINE];
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return(resterr());
+		return (resterr());
 
 #if     VMS
-        if ((s=mlreply("!", line, NLINE)) != TRUE)
-                return (s);
-        TTflush();
-        s = sys(line);                          /* Run the command.     */
-        mlputs("\r\n\n(End)");                  /* Pause.               */
-        TTflush();
-        tgetc();
-        sgarbf = TRUE;
-        return (s);
+	if ((s = mlreply("!", line, NLINE)) != TRUE)
+		return (s);
+	TTflush();
+	s = sys(line);		/* Run the command.     */
+	mlputs("\r\n\n(End)");	/* Pause.               */
+	TTflush();
+	tgetc();
+	sgarbf = TRUE;
+	return (s);
 #endif
 
 #if     MSDOS
-        if ((s=mlreply("$", line, NLINE)) != TRUE)
-                return(s);
+	if ((s = mlreply("$", line, NLINE)) != TRUE)
+		return (s);
 	movecursor(term.t_nrow, 0);
 	TTkclose();
-        execprog(line);
+	execprog(line);
 	TTkopen();
 	/* if we are interactive, pause here */
 	if (clexec == FALSE) {
-	        mlputs("\r\n(End)");
-        	tgetc();
-        }
-        sgarbf = TRUE;
-        return (TRUE);
+		mlputs("\r\n(End)");
+		tgetc();
+	}
+	sgarbf = TRUE;
+	return (TRUE);
 #endif
 
 #if     V7 | USG | BSD
-        if ((s=mlreply("!", line, NLINE)) != TRUE)
-                return (s);
-        TTputc('\n');                /* Already have '\r'    */
-        TTflush();
-        TTclose();                              /* stty to old modes    */
-        system(line);
-	fflush(stdout);				/* to be sure P.K. 	*/
-        TTopen();
-        mlputs("(End)");                        /* Pause.               */
-        TTflush();
-        while ((s = tgetc()) != '\r' && s != ' ')
-                ;
-        sgarbf = TRUE;
-        return (TRUE);
+	if ((s = mlreply("!", line, NLINE)) != TRUE)
+		return (s);
+	TTputc('\n');		/* Already have '\r'    */
+	TTflush();
+	TTclose();		/* stty to old modes    */
+	system(line);
+	fflush(stdout);		/* to be sure P.K.      */
+	TTopen();
+	mlputs("(End)");	/* Pause.               */
+	TTflush();
+	while ((s = tgetc()) != '\r' && s != ' ');
+	sgarbf = TRUE;
+	return (TRUE);
 #endif
 }
 
@@ -258,10 +255,10 @@ execprg(f, n)
  */
 pipecmd(f, n)
 {
-        register int    s;	/* return status from CLI */
+	register int s;		/* return status from CLI */
 	register WINDOW *wp;	/* pointer to new window */
 	register BUFFER *bp;	/* pointer to buffer to zot */
-        char	line[NLINE];	/* command line send to shell */
+	char line[NLINE];	/* command line send to shell */
 	static char bname[] = "command";
 
 	static char filnam[NSTRING] = "command";
@@ -271,36 +268,38 @@ pipecmd(f, n)
 	char *getenv();
 	FILE *fp;
 	FILE *fopen();
-	int  len;
+	int len;
 #endif
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return(resterr());
+		return (resterr());
 
 #if	MSDOS
-	if ((tmp = getenv("TMP")) == NULL && (tmp = getenv("TEMP")) == NULL)
+	if ((tmp = getenv("TMP")) == NULL
+	    && (tmp = getenv("TEMP")) == NULL)
 		strcpy(filnam, "command");
 	else {
 		strcpy(filnam, tmp);
 		len = strlen(tmp);
-		if (len <= 0 || filnam[len-1] != '\\' && filnam[len-1] != '/')
-			strcat(filnam,"\\");
-                strcat(filnam,"command");
-        }
+		if (len <= 0 || filnam[len - 1] != '\\'
+		    && filnam[len - 1] != '/')
+			strcat(filnam, "\\");
+		strcat(filnam, "command");
+	}
 #endif
 
 #if     VMS
 	mlwrite("Not available under VMS");
-	return(FALSE);
+	return (FALSE);
 #endif
 
 	/* get the command to pipe in */
-        if ((s=mlreply("@", line, NLINE)) != TRUE)
-                return(s);
+	if ((s = mlreply("@", line, NLINE)) != TRUE)
+		return (s);
 
 	/* get rid of the command output buffer if it exists */
-        if ((bp=bfind(bname, FALSE, 0)) != FALSE) {
+	if ((bp = bfind(bname, FALSE, 0)) != FALSE) {
 		/* try to make sure we are off screen */
 		wp = wheadp;
 		while (wp != NULL) {
@@ -320,17 +319,16 @@ pipecmd(f, n)
 		}
 		if (zotbuf(bp) != TRUE)
 
-			return(FALSE);
+			return (FALSE);
 	}
-
 #if     MSDOS
-	strcat(line," >>");
-	strcat(line,filnam);
+	strcat(line, " >>");
+	strcat(line, filnam);
 	movecursor(term.t_nrow, 0);
 	TTkclose();
-        shellprog(line);
+	shellprog(line);
 	TTkopen();
-        sgarbf = TRUE;
+	sgarbf = TRUE;
 	if ((fp = fopen(filnam, "r")) == NULL) {
 		s = FALSE;
 	} else {
@@ -340,27 +338,27 @@ pipecmd(f, n)
 #endif
 
 #if     V7 | USG | BSD
-        TTflush();
-        TTclose();                              /* stty to old modes    */
-	strcat(line,">");
-	strcat(line,filnam);
-        system(line);
-        TTopen();
-        TTflush();
-        sgarbf = TRUE;
-        s = TRUE;
+	TTflush();
+	TTclose();		/* stty to old modes    */
+	strcat(line, ">");
+	strcat(line, filnam);
+	system(line);
+	TTopen();
+	TTflush();
+	sgarbf = TRUE;
+	s = TRUE;
 #endif
 
 	if (s != TRUE)
-		return(s);
+		return (s);
 
 	/* split the current window to make room for the command output */
 	if (splitwind(FALSE, 1) == FALSE)
-			return(FALSE);
+		return (FALSE);
 
 	/* and read the stuff in */
 	if (getfile(filnam, FALSE) == FALSE)
-		return(FALSE);
+		return (FALSE);
 
 	/* make this window in VIEW mode, update all mode lines */
 	curwp->w_bufp->b_mode |= MDVIEW;
@@ -372,7 +370,7 @@ pipecmd(f, n)
 
 	/* and get rid of the temporary file */
 	unlink(filnam);
-	return(TRUE);
+	return (TRUE);
 }
 
 /*
@@ -380,11 +378,10 @@ pipecmd(f, n)
  * Bound to ^X #
  */
 filter(f, n)
-
 {
-        register int    s;	/* return status from CLI */
+	register int s;		/* return status from CLI */
 	register BUFFER *bp;	/* pointer to buffer to zot */
-        char line[NLINE];	/* command line send to shell */
+	char line[NLINE];	/* command line send to shell */
 	char tmpnam[NFILEN];	/* place to store real file name */
 	static char bname1[] = "fltinp";
 
@@ -393,19 +390,19 @@ filter(f, n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return(resterr());
+		return (resterr());
 
-	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/
-		return(rdonly());	/* we are in read only mode	*/
+	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
+		return (rdonly());	/* we are in read only mode     */
 
 #if     VMS
 	mlwrite("Not available under VMS");
-	return(FALSE);
+	return (FALSE);
 #endif
 
 	/* get the filter name and its args */
-        if ((s=mlreply("#", line, NLINE)) != TRUE)
-                return(s);
+	if ((s = mlreply("#", line, NLINE)) != TRUE)
+		return (s);
 
 	/* setup the proper file names */
 	bp = curbp;
@@ -416,48 +413,47 @@ filter(f, n)
 	if (writeout(filnam1) != TRUE) {
 		mlwrite("(Cannot write filter file)");
 		strcpy(bp->b_fname, tmpnam);
-		return(FALSE);
+		return (FALSE);
 	}
-
 #if     MSDOS
-	strcat(line," <fltinp >fltout");
+	strcat(line, " <fltinp >fltout");
 	movecursor(term.t_nrow - 1, 0);
 	TTkclose();
-        shellprog(line);
+	shellprog(line);
 	TTkopen();
-        sgarbf = TRUE;
+	sgarbf = TRUE;
 	s = TRUE;
 #endif
 
 #if     V7 | USG | BSD
-        TTputc('\n');                /* Already have '\r'    */
-        TTflush();
-        TTclose();                              /* stty to old modes    */
-	strcat(line," <fltinp >fltout");
-        system(line);
-        TTopen();
-        TTflush();
-        sgarbf = TRUE;
-        s = TRUE;
+	TTputc('\n');		/* Already have '\r'    */
+	TTflush();
+	TTclose();		/* stty to old modes    */
+	strcat(line, " <fltinp >fltout");
+	system(line);
+	TTopen();
+	TTflush();
+	sgarbf = TRUE;
+	s = TRUE;
 #endif
 
 	/* on failure, escape gracefully */
-	if (s != TRUE || (readin(filnam2,FALSE) == FALSE)) {
+	if (s != TRUE || (readin(filnam2, FALSE) == FALSE)) {
 		mlwrite("(Execution failed)");
 		strcpy(bp->b_fname, tmpnam);
 		unlink(filnam1);
 		unlink(filnam2);
-		return(s);
+		return (s);
 	}
 
 	/* reset file name */
 	strcpy(bp->b_fname, tmpnam);	/* restore name */
-	bp->b_flag |= BFCHG;		/* flag it as changed */
+	bp->b_flag |= BFCHG;	/* flag it as changed */
 
 	/* and get rid of the temporary file */
 	unlink(filnam1);
 	unlink(filnam2);
-	return(TRUE);
+	return (TRUE);
 }
 
 #if     VMS
@@ -468,36 +464,36 @@ filter(f, n)
  * and the way out, because DCL does not want the channel to be in raw mode.
  */
 sys(cmd)
-register char   *cmd;
+register char *cmd;
 {
-        struct  dsc$descriptor  cdsc;
-        struct  dsc$descriptor  *cdscp;
-        long    status;
-        long    substatus;
-        long    iosb[2];
+	struct dsc$descriptor cdsc;
+	struct dsc$descriptor *cdscp;
+	long status;
+	long substatus;
+	long iosb[2];
 
-        status = SYS$QIOW(EFN, iochan, IO$_SETMODE, iosb, 0, 0,
-                          oldmode, sizeof(oldmode), 0, 0, 0, 0);
-        if (status!=SS$_NORMAL || (iosb[0]&0xFFFF)!=SS$_NORMAL)
-                return (FALSE);
-        cdscp = NULL;                           /* Assume DCL.          */
-        if (cmd != NULL) {                      /* Build descriptor.    */
-                cdsc.dsc$a_pointer = cmd;
-                cdsc.dsc$w_length  = strlen(cmd);
-                cdsc.dsc$b_dtype   = DSC$K_DTYPE_T;
-                cdsc.dsc$b_class   = DSC$K_CLASS_S;
-                cdscp = &cdsc;
-        }
-        status = LIB$SPAWN(cdscp, 0, 0, 0, 0, 0, &substatus, 0, 0, 0);
-        if (status != SS$_NORMAL)
-                substatus = status;
-        status = SYS$QIOW(EFN, iochan, IO$_SETMODE, iosb, 0, 0,
-                          newmode, sizeof(newmode), 0, 0, 0, 0);
-        if (status!=SS$_NORMAL || (iosb[0]&0xFFFF)!=SS$_NORMAL)
-                return (FALSE);
-        if ((substatus&STS$M_SUCCESS) == 0)     /* Command failed.      */
-                return (FALSE);
-        return (TRUE);
+	status = SYS$QIOW(EFN, iochan, IO$_SETMODE, iosb, 0, 0,
+			  oldmode, sizeof(oldmode), 0, 0, 0, 0);
+	if (status != SS$_NORMAL || (iosb[0] & 0xFFFF) != SS$_NORMAL)
+		return (FALSE);
+	cdscp = NULL;		/* Assume DCL.          */
+	if (cmd != NULL) {	/* Build descriptor.    */
+		cdsc.dsc$a_pointer = cmd;
+		cdsc.dsc$w_length = strlen(cmd);
+		cdsc.dsc$b_dtype = DSC$K_DTYPE_T;
+		cdsc.dsc$b_class = DSC$K_CLASS_S;
+		cdscp = &cdsc;
+	}
+	status = LIB$SPAWN(cdscp, 0, 0, 0, 0, 0, &substatus, 0, 0, 0);
+	if (status != SS$_NORMAL)
+		substatus = status;
+	status = SYS$QIOW(EFN, iochan, IO$_SETMODE, iosb, 0, 0,
+			  newmode, sizeof(newmode), 0, 0, 0, 0);
+	if (status != SS$_NORMAL || (iosb[0] & 0xFFFF) != SS$_NORMAL)
+		return (FALSE);
+	if ((substatus & STS$M_SUCCESS) == 0)	/* Command failed.      */
+		return (FALSE);
+	return (TRUE);
 }
 #endif
 
@@ -507,7 +503,7 @@ register char   *cmd;
 
 shellprog(cmd)
 
-char *cmd;	/*  Incoming command line to execute  */
+char *cmd;			/*  Incoming command line to execute  */
 
 {
 	char *shell;		/* Name of system command processor */
@@ -521,11 +517,11 @@ char *cmd;	/*  Incoming command line to execute  */
 	regs.h.ah = 0x37;	/*  get setting data  */
 	regs.h.al = 0x00;	/*  get switch character  */
 	intdos(&regs, &regs);
-	swchar = (char)regs.h.dl;
+	swchar = (char) regs.h.dl;
 
 	/*  get name of system shell  */
 	if ((shell = getenv("COMSPEC")) == NULL) {
-		return(FALSE);		/*  No shell located  */
+		return (FALSE);	/*  No shell located  */
 	}
 
 	/* trim leading whitespace off the command */
@@ -543,9 +539,9 @@ char *cmd;	/*  Incoming command line to execute  */
 		comline[strlen(comline)] = swchar;
 		strcat(comline, "c ");
 		strcat(comline, cmd);
-		return(execprog(comline));
+		return (execprog(comline));
 	} else
-		return(execprog(shell));
+		return (execprog(shell));
 }
 
 /*	EXECPROG:	A function to execute a named program
@@ -554,7 +550,7 @@ char *cmd;	/*  Incoming command line to execute  */
 
 execprog(cmd)
 
-char *cmd;	/*  Incoming command line to execute  */
+char *cmd;			/*  Incoming command line to execute  */
 
 {
 	char *sp;		/* temporary string pointer */
@@ -581,16 +577,16 @@ char *cmd;	/*  Incoming command line to execute  */
 	/* and parse out the command tail */
 	while (*cmd && ((*cmd == ' ') || (*cmd == '\t')))
 		++cmd;
-	*tail = (char)(strlen(cmd)); /* record the byte length */
+	*tail = (char) (strlen(cmd));	/* record the byte length */
 	strcpy(&tail[1], cmd);
 	strcat(&tail[1], "\r");
 
 	/* look up the program on the path trying various extentions */
 	if ((sp = flook(prog, TRUE)) == NULL)
 		if ((sp = flook(strcat(prog, ".exe"), TRUE)) == NULL) {
-			strcpy(&prog[strlen(prog)-4], ".com");
+			strcpy(&prog[strlen(prog) - 4], ".com");
 			if ((sp = flook(prog, TRUE)) == NULL)
-				return(FALSE);
+				return (FALSE);
 		}
 	strcpy(prog, sp);
 
@@ -599,17 +595,17 @@ char *cmd;	/*  Incoming command line to execute  */
 
 	/* set up the EXEC parameter block */
 	pblock.envptr = 0;	/* make the child inherit the parents env */
-	pblock.fcb1 = f1;		/* point to a blank FCB */
-	pblock.fcb2 = f2;		/* point to a blank FCB */
-        pblock.cline = tail;		/* parameter line pointer */
+	pblock.fcb1 = f1;	/* point to a blank FCB */
+	pblock.fcb2 = f2;	/* point to a blank FCB */
+	pblock.cline = tail;	/* parameter line pointer */
 
 	/* and make the call */
 	regs.h.ah = 0x4b;	/* EXEC Load or Execute a Program */
 	regs.h.al = 0x00;	/* load end execute function subcode */
-	segreg.ds = ((unsigned long)(prog) >> 16);	/* program name ptr */
-	regs.x.dx = (unsigned int)(prog);
-	segreg.es = ((unsigned long)(&pblock) >> 16);	/* set up param block ptr */
-	regs.x.bx = (unsigned int)(&pblock);
+	segreg.ds = ((unsigned long) (prog) >> 16);	/* program name ptr */
+	regs.x.dx = (unsigned int) (prog);
+	segreg.es = ((unsigned long) (&pblock) >> 16);	/* set up param block ptr */
+	regs.x.bx = (unsigned int) (&pblock);
 #if	TURBO | MSC
 	intdosx(&regs, &regs, &segreg);
 	if (regs.x.cflag == 0) {
@@ -623,6 +619,6 @@ char *cmd;	/*  Incoming command line to execute  */
 		rval = -_doserrno;	/* failed child call */
 #endif
 #endif
-	return((rval < 0) ? FALSE : TRUE);
+	return ((rval < 0) ? FALSE : TRUE);
 }
 #endif

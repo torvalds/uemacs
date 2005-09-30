@@ -9,15 +9,15 @@
 /*	structure to hold user variables and their definitions	*/
 
 typedef struct UVAR {
-	char u_name[NVSIZE + 1];		/* name of user variable */
-	char *u_value;				/* value (string) */
+	char u_name[NVSIZE + 1];	/* name of user variable */
+	char *u_value;		/* value (string) */
 } UVAR;
 
 /*	current user variables (This structure will probably change)	*/
 
 #define	MAXVARS		255
 
-UVAR uv[MAXVARS + 1];	/* user variables */
+UVAR uv[MAXVARS + 1];		/* user variables */
 
 /*	list of recognized environment variables	*/
 
@@ -116,8 +116,8 @@ char *envars[] = {
 /*	list of recognized user functions	*/
 
 typedef struct UFUNC {
-	char *f_name;	/* name of function */
-	int f_type;	/* 1 = monamic, 2 = dynamic */
+	char *f_name;		/* name of function */
+	int f_type;		/* 1 = monamic, 2 = dynamic */
 } UFUNC;
 
 #define	NILNAMIC	0
@@ -145,7 +145,7 @@ UFUNC funcs[] = {
 	"sgr", DYNAMIC,		/* string logical greater than */
 	"ind", MONAMIC,		/* evaluate indirect value */
 	"and", DYNAMIC,		/* logical and */
-	"or",  DYNAMIC,		/* logical or */
+	"or", DYNAMIC,		/* logical or */
 	"len", MONAMIC,		/* string length */
 	"upp", MONAMIC,		/* uppercase string */
 	"low", MONAMIC,		/* lower case string */
@@ -160,9 +160,9 @@ UFUNC funcs[] = {
 	"bin", MONAMIC,		/* loopup what function name is bound to a key */
 	"exi", MONAMIC,		/* check if a file exists */
 	"fin", MONAMIC,		/* look for a file on the path... */
- 	"ban", DYNAMIC,		/* bitwise and   9-10-87  jwm */
- 	"bor", DYNAMIC,		/* bitwise or    9-10-87  jwm */
- 	"bxo", DYNAMIC,		/* bitwise xor	 9-10-87  jwm */
+	"ban", DYNAMIC,		/* bitwise and   9-10-87  jwm */
+	"bor", DYNAMIC,		/* bitwise or    9-10-87  jwm */
+	"bxo", DYNAMIC,		/* bitwise xor   9-10-87  jwm */
 	"bno", MONAMIC,		/* bitwise not */
 	"xla", TRINAMIC,	/* XLATE character string translation */
 };

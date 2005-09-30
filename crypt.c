@@ -13,10 +13,10 @@
 
 static int mod95();
 
-setkey(f, n)	/* reset encryption key of current buffer */
-
-int f;		/* default flag */
-int n;		/* numeric argument */
+setkey(f, n)
+    /* reset encryption key of current buffer */
+int f;				/* default flag */
+int n;				/* numeric argument */
 
 {
 	register int status;	/* return status */
@@ -30,17 +30,17 @@ int n;		/* numeric argument */
 	/* get the string to use as an encrytion string */
 	status = mlreply("Encryption String: ", key, NPAT - 1);
 	disinp = odisinp;
-        if (status != TRUE)
-                return(status);
+	if (status != TRUE)
+		return (status);
 
 	/* and encrypt it */
-	crypt((char *)NULL, 0);
+	crypt((char *) NULL, 0);
 	crypt(key, strlen(key));
 
 	/* and save it off */
 	strcpy(curbp->b_key, key);
 	mlwrite(" ");		/* clear it off the bottom line */
-	return(TRUE);
+	return (TRUE);
 }
 
 /**********
@@ -137,8 +137,8 @@ int n;		/* numeric argument */
  **********/
 
 crypt(bptr, len)
-register char *bptr;	/* buffer of characters to be encrypted */
-register unsigned len;	/* number of characters in the buffer */
+register char *bptr;		/* buffer of characters to be encrypted */
+register unsigned len;		/* number of characters in the buffer */
 {
 	register int cc;	/* current character being considered */
 
@@ -170,7 +170,7 @@ register unsigned len;	/* number of characters in the buffer */
 	so that the left shift here will be more portable and the 
 	mod95() faster   **/
 
-			cc = mod95((int)(key % 95) - (cc - ' ')) + ' ';
+			cc = mod95((int) (key % 95) - (cc - ' ')) + ' ';
 
 /**  the salt will spice up the key a little bit, helping to obscure 
 	any patterns in the clear text, particularly when all the 
@@ -202,7 +202,7 @@ register int val;
 	/*  The mathematical MOD does not match the computer MOD  */
 
 	/*  Yes, what I do here may look strange, but it gets the
-		job done, and portably at that.  */
+	   job done, and portably at that.  */
 
 	while (val >= 9500)
 		val -= 9500;

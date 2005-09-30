@@ -61,17 +61,17 @@
 #include	"estruct.h"
 #include        "edef.h"
 
-static int    readpattern();
-static int    replaces();
-static int    nextch();
+static int readpattern();
+static int replaces();
+static int nextch();
 #if	MAGIC
-static int    cclmake();
-static int    mcstr();
-static int    rmcstr();
-static int    mceq();
-static void   setbit();
-static int    amatch();
-static int    biteq();
+static int cclmake();
+static int mcstr();
+static int rmcstr();
+static int mceq();
+static void setbit();
+static int amatch();
+static int biteq();
 static BITMAP clearbits();
 #endif
 
@@ -81,7 +81,7 @@ static BITMAP clearbits();
  *	the match string, and (perhaps) repaint the display.
  */
 forwsearch(f, n)
-int f, n;	/* default flag / numeric argument */
+int f, n;			/* default flag / numeric argument */
 {
 	register int status = TRUE;
 
@@ -89,7 +89,7 @@ int f, n;	/* default flag / numeric argument */
 	 * Otherwise proceed by asking for the search string.
 	 */
 	if (n < 0)
-		return(backsearch(f, -n));
+		return (backsearch(f, -n));
 
 	/* Ask the user for the text of a pattern.  If the
 	 * response is TRUE (responses other than FALSE are
@@ -100,8 +100,10 @@ int f, n;	/* default flag / numeric argument */
 	if ((status = readpattern("Search", &pat[0], TRUE)) == TRUE) {
 		do {
 #if	MAGIC
-			if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
-				status = mcscanner(&mcpat[0], FORWARD, PTEND);
+			if ((magical
+			     && curwp->w_bufp->b_mode & MDMAGIC) != 0)
+				status =
+				    mcscanner(&mcpat[0], FORWARD, PTEND);
 			else
 #endif
 				status = scanner(&pat[0], FORWARD, PTEND);
@@ -115,7 +117,7 @@ int f, n;	/* default flag / numeric argument */
 		else
 			mlwrite("Not found");
 	}
-	return(status);
+	return (status);
 }
 
 /*
@@ -125,25 +127,23 @@ int f, n;	/* default flag / numeric argument */
  */
 
 forwhunt(f, n)
-int f, n;	/* default flag / numeric argument */
+int f, n;			/* default flag / numeric argument */
 {
 	register int status = TRUE;
 
 	if (n < 0)		/* search backwards */
-		return(backhunt(f, -n));
+		return (backhunt(f, -n));
 
 	/* Make sure a pattern exists, or that we didn't switch
 	 * into MAGIC mode until after we entered the pattern.
 	 */
-	if (pat[0] == '\0')
-	{
+	if (pat[0] == '\0') {
 		mlwrite("No pattern set");
 		return FALSE;
 	}
 #if	MAGIC
 	if ((curwp->w_bufp->b_mode & MDMAGIC) != 0 &&
-		 mcpat[0].mc_type == MCNIL)
-	{
+	    mcpat[0].mc_type == MCNIL) {
 		if (!mcstr())
 			return FALSE;
 	}
@@ -153,8 +153,7 @@ int f, n;	/* default flag / numeric argument */
 	 * n is positive (n == 0 will go through once, which
 	 * is just fine).
 	 */
-	do
-	{
+	do {
 #if	MAGIC
 		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
 			status = mcscanner(&mcpat[0], FORWARD, PTEND);
@@ -171,7 +170,7 @@ int f, n;	/* default flag / numeric argument */
 	else
 		mlwrite("Not found");
 
-	return(status);
+	return (status);
 }
 
 /*
@@ -181,7 +180,7 @@ int f, n;	/* default flag / numeric argument */
  *	(the last character that was matched).
  */
 backsearch(f, n)
-int f, n;	/* default flag / numeric argument */
+int f, n;			/* default flag / numeric argument */
 {
 	register int status = TRUE;
 
@@ -189,7 +188,7 @@ int f, n;	/* default flag / numeric argument */
 	 * Otherwise proceed by asking for the search string.
 	 */
 	if (n < 0)
-		return(forwsearch(f, -n));
+		return (forwsearch(f, -n));
 
 	/* Ask the user for the text of a pattern.  If the
 	 * response is TRUE (responses other than FALSE are
@@ -197,11 +196,14 @@ int f, n;	/* default flag / numeric argument */
 	 * n is positive (n == 0 will go through once, which
 	 * is just fine).
 	 */
-	if ((status = readpattern("Reverse search", &pat[0], TRUE)) == TRUE) {
+	if ((status =
+	     readpattern("Reverse search", &pat[0], TRUE)) == TRUE) {
 		do {
 #if	MAGIC
-			if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
-				status = mcscanner(&tapcm[0], REVERSE, PTBEG);
+			if ((magical
+			     && curwp->w_bufp->b_mode & MDMAGIC) != 0)
+				status =
+				    mcscanner(&tapcm[0], REVERSE, PTBEG);
 			else
 #endif
 				status = scanner(&tap[0], REVERSE, PTBEG);
@@ -215,7 +217,7 @@ int f, n;	/* default flag / numeric argument */
 		else
 			mlwrite("Not found");
 	}
-	return(status);
+	return (status);
 }
 
 /*
@@ -225,25 +227,23 @@ int f, n;	/* default flag / numeric argument */
  *	(the last character that was matched).
  */
 backhunt(f, n)
-int f, n;	/* default flag / numeric argument */
+int f, n;			/* default flag / numeric argument */
 {
-	register int	status = TRUE;
+	register int status = TRUE;
 
 	if (n < 0)
-		return(forwhunt(f, -n));
+		return (forwhunt(f, -n));
 
 	/* Make sure a pattern exists, or that we didn't switch
 	 * into MAGIC mode until after we entered the pattern.
 	 */
-	if (tap[0] == '\0')
-	{
+	if (tap[0] == '\0') {
 		mlwrite("No pattern set");
 		return FALSE;
 	}
 #if	MAGIC
 	if ((curwp->w_bufp->b_mode & MDMAGIC) != 0 &&
-		 tapcm[0].mc_type == MCNIL)
-	{
+	    tapcm[0].mc_type == MCNIL) {
 		if (!mcstr())
 			return FALSE;
 	}
@@ -253,8 +253,7 @@ int f, n;	/* default flag / numeric argument */
 	 * n is positive (n == 0 will go through once, which
 	 * is just fine).
 	 */
-	do
-	{
+	do {
 #if	MAGIC
 		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
 			status = mcscanner(&tapcm[0], REVERSE, PTBEG);
@@ -271,7 +270,7 @@ int f, n;	/* default flag / numeric argument */
 	else
 		mlwrite("Not found");
 
-	return(status);
+	return (status);
 }
 
 #if	MAGIC
@@ -280,13 +279,13 @@ int f, n;	/* default flag / numeric argument */
  *	reset the "." to be at the start or just after the match string,
  *	and (perhaps) repaint the display.
  */
-int	mcscanner(mcpatrn, direct, beg_or_end)
-MC	*mcpatrn;	/* pointer into pattern */
-int	direct;		/* which way to go.*/
-int	beg_or_end;	/* put point at beginning or end of pattern.*/
+int mcscanner(mcpatrn, direct, beg_or_end)
+MC *mcpatrn;			/* pointer into pattern */
+int direct;			/* which way to go. */
+int beg_or_end;			/* put point at beginning or end of pattern. */
 {
-	LINE *curline;			/* current line during scan */
-	int curoff;			/* position within current line */
+	LINE *curline;		/* current line during scan */
+	int curoff;		/* position within current line */
 
 	/* If we are going in reverse, then the 'end' is actually
 	 * the beginning of the pattern.  Toggle it.
@@ -304,12 +303,11 @@ int	beg_or_end;	/* put point at beginning or end of pattern.*/
 	/* Setup local scan pointers to global ".".
 	 */
 	curline = curwp->w_dotp;
-	curoff  = curwp->w_doto;
+	curoff = curwp->w_doto;
 
 	/* Scan each character until we hit the head link record.
 	 */
-	while (!boundry(curline, curoff, direct))
-	{
+	while (!boundry(curline, curoff, direct)) {
 		/* Save the current position in case we need to
 		 * restore it on a match, and initialize matchlen to
 		 * zero in case we are doing a search for replacement.
@@ -318,23 +316,20 @@ int	beg_or_end;	/* put point at beginning or end of pattern.*/
 		matchoff = curoff;
 		matchlen = 0;
 
-		if (amatch(mcpatrn, direct, &curline, &curoff))
-		{
+		if (amatch(mcpatrn, direct, &curline, &curoff)) {
 			/* A SUCCESSFULL MATCH!!!
 			 * reset the global "." pointers.
 			 */
-			if (beg_or_end == PTEND)	/* at end of string */
-			{
+			if (beg_or_end == PTEND) {	/* at end of string */
 				curwp->w_dotp = curline;
 				curwp->w_doto = curoff;
-			}
-			else		/* at beginning of string */
-			{
+			} else {	/* at beginning of string */
+
 				curwp->w_dotp = matchline;
 				curwp->w_doto = matchoff;
 			}
 
-			curwp->w_flag |= WFMOVE; /* flag that we have moved */
+			curwp->w_flag |= WFMOVE;	/* flag that we have moved */
 			return TRUE;
 		}
 
@@ -343,7 +338,7 @@ int	beg_or_end;	/* put point at beginning or end of pattern.*/
 		nextch(&curline, &curoff, direct);
 	}
 
-	return FALSE;	/* We could not find a match.*/
+	return FALSE;		/* We could not find a match. */
 }
 
 /*
@@ -351,15 +346,15 @@ int	beg_or_end;	/* put point at beginning or end of pattern.*/
  *	recursive routine amatch() (for "anchored match") in
  *	Kernighan & Plauger's "Software Tools".
  */
-static int	amatch(mcptr, direct, pcwline, pcwoff)
-register MC	*mcptr;	/* string to scan for */
-int		direct;		/* which way to go.*/
-LINE		**pcwline;	/* current line during scan */
-int		*pcwoff;	/* position within current line */
+static int amatch(mcptr, direct, pcwline, pcwoff)
+register MC *mcptr;		/* string to scan for */
+int direct;			/* which way to go. */
+LINE **pcwline;			/* current line during scan */
+int *pcwoff;			/* position within current line */
 {
-	register int c;			/* character at current position */
-	LINE *curline;			/* current line during scan */
-	int curoff;			/* position within current line */
+	register int c;		/* character at current position */
+	LINE *curline;		/* current line during scan */
+	int curoff;		/* position within current line */
 	int nchars;
 
 	/* Set up local scan pointers to ".", and get
@@ -377,33 +372,28 @@ int		*pcwoff;	/* position within current line */
 	 * for reverse searches.  The reverse is true for EOL.
 	 * So, for a start, we check for them on entry.
 	 */
-	if (mcptr->mc_type == BOL)
-	{
+	if (mcptr->mc_type == BOL) {
 		if (curoff != 0)
 			return FALSE;
 		mcptr++;
 	}
 
-	if (mcptr->mc_type == EOL)
-	{
+	if (mcptr->mc_type == EOL) {
 		if (curoff != llength(curline))
 			return FALSE;
 		mcptr++;
 	}
 
-	while (mcptr->mc_type != MCNIL)
-	{
+	while (mcptr->mc_type != MCNIL) {
 		c = nextch(&curline, &curoff, direct);
 
-		if (mcptr->mc_type & CLOSURE)
-		{
+		if (mcptr->mc_type & CLOSURE) {
 			/* Try to match as many characters as possible
 			 * against the current meta-character.  A
 			 * newline never matches a closure.
 			 */
 			nchars = 0;
-			while (c != '\n' && mceq(c, mcptr))
-			{
+			while (c != '\n' && mceq(c, mcptr)) {
 				c = nextch(&curline, &curoff, direct);
 				nchars++;
 			}
@@ -417,12 +407,12 @@ int		*pcwoff;	/* position within current line */
 			 */
 			mcptr++;
 
-			for (;;)
-			{
-				c = nextch(&curline, &curoff, direct ^ REVERSE);
+			for (;;) {
+				c = nextch(&curline, &curoff,
+					   direct ^ REVERSE);
 
-				if (amatch(mcptr, direct, &curline, &curoff))
-				{
+				if (amatch
+				    (mcptr, direct, &curline, &curoff)) {
 					matchlen += nchars;
 					goto success;
 				}
@@ -430,9 +420,8 @@ int		*pcwoff;	/* position within current line */
 				if (nchars-- == 0)
 					return FALSE;
 			}
-		}
-		else			/* Not closure.*/
-		{
+		} else {	/* Not closure. */
+
 			/* The only way we'd get a BOL metacharacter
 			 * at this point is at the end of the reversed pattern.
 			 * The only way we'd get an EOL metacharacter
@@ -450,23 +439,19 @@ int		*pcwoff;	/* position within current line */
 			 * '^') match positions, not characters.
 			 */
 			if (mcptr->mc_type == BOL)
-				if (curoff == llength(curline))
-				{
+				if (curoff == llength(curline)) {
 					c = nextch(&curline, &curoff,
 						   direct ^ REVERSE);
 					goto success;
-				}
-				else
+				} else
 					return FALSE;
 
 			if (mcptr->mc_type == EOL)
-				if (curoff == 0)
-				{
+				if (curoff == 0) {
 					c = nextch(&curline, &curoff,
 						   direct ^ REVERSE);
 					goto success;
-				}
-				else
+				} else
 					return FALSE;
 
 			/* Neither BOL nor EOL, so go through
@@ -481,14 +466,14 @@ int		*pcwoff;	/* position within current line */
 		 */
 		matchlen++;
 		mcptr++;
-	}			/* End of mcptr loop.*/
+	}			/* End of mcptr loop. */
 
 	/* A SUCCESSFULL MATCH!!!
 	 * Reset the "." pointers.
 	 */
-success:
+      success:
 	*pcwline = curline;
-	*pcwoff  = curoff;
+	*pcwoff = curoff;
 
 	return TRUE;
 }
@@ -499,17 +484,17 @@ success:
  *	reset the "." to be at the start or just after the match string,
  *	and (perhaps) repaint the display.
  */
-int	scanner(patrn, direct, beg_or_end)
-unsigned char *patrn;	/* string to scan for */
-int	direct;		/* which way to go.*/
-int	beg_or_end;	/* put point at beginning or end of pattern.*/
+int scanner(patrn, direct, beg_or_end)
+unsigned char *patrn;		/* string to scan for */
+int direct;			/* which way to go. */
+int beg_or_end;			/* put point at beginning or end of pattern. */
 {
-	register int	c;		/* character at current position */
+	register int c;		/* character at current position */
 	register unsigned char *patptr;	/* pointer into pattern */
-	LINE	*curline;		/* current line during scan */
-	int	curoff;			/* position within current line */
-	LINE	*scanline;		/* current line during scanning */
-	int	scanoff;		/* position in scanned line */
+	LINE *curline;		/* current line during scan */
+	int curoff;		/* position within current line */
+	LINE *scanline;		/* current line during scanning */
+	int scanoff;		/* position in scanned line */
 
 	/* If we are going in reverse, then the 'end' is actually
 	 * the beginning of the pattern.  Toggle it.
@@ -523,8 +508,7 @@ int	beg_or_end;	/* put point at beginning or end of pattern.*/
 
 	/* Scan each character until we hit the head link record.
 	 */
-	while (!boundry(curline, curoff, direct))
-	{
+	while (!boundry(curline, curoff, direct)) {
 		/* Save the current position in case we match
 		 * the search string at this point.
 		 */
@@ -536,8 +520,7 @@ int	beg_or_end;	/* put point at beginning or end of pattern.*/
 		 */
 		c = nextch(&curline, &curoff, direct);
 
-		if (eq(c, patrn[0]))	/* if we find it..*/
-		{
+		if (eq(c, patrn[0])) {	/* if we find it.. */
 			/* Setup scanning pointers.
 			 */
 			scanline = curline;
@@ -546,8 +529,7 @@ int	beg_or_end;	/* put point at beginning or end of pattern.*/
 
 			/* Scan through the pattern for a match.
 			 */
-			while (*++patptr != '\0')
-			{
+			while (*++patptr != '\0') {
 				c = nextch(&scanline, &scanoff, direct);
 
 				if (!eq(c, *patptr))
@@ -557,42 +539,39 @@ int	beg_or_end;	/* put point at beginning or end of pattern.*/
 			/* A SUCCESSFULL MATCH!!!
 			 * reset the global "." pointers
 			 */
-			if (beg_or_end == PTEND)	/* at end of string */
-			{
+			if (beg_or_end == PTEND) {	/* at end of string */
 				curwp->w_dotp = scanline;
 				curwp->w_doto = scanoff;
-			}
-			else		/* at beginning of string */
-			{
+			} else {	/* at beginning of string */
+
 				curwp->w_dotp = matchline;
 				curwp->w_doto = matchoff;
 			}
 
-			curwp->w_flag |= WFMOVE; /* Flag that we have moved.*/
+			curwp->w_flag |= WFMOVE;	/* Flag that we have moved. */
 			return TRUE;
 
 		}
-fail:;			/* continue to search */
+	      fail:;		/* continue to search */
 	}
 
-	return FALSE;	/* We could not find a match */
+	return FALSE;		/* We could not find a match */
 }
 
 /*
  * eq -- Compare two characters.  The "bc" comes from the buffer, "pc"
  *	from the pattern.  If we are not in EXACT mode, fold out the case.
  */
-int	eq(bc, pc)
+int eq(bc, pc)
 #if	PKCODE
-register char	bc;
-register char	pc;
+register char bc;
+register char pc;
 #else
-register int	bc;
-register int	pc;
+register int bc;
+register int pc;
 #endif
 {
-	if ((curwp->w_bufp->b_mode & MDEXACT) == 0)
-	{
+	if ((curwp->w_bufp->b_mode & MDEXACT) == 0) {
 		if (islower(bc))
 			bc ^= DIFCASE;
 
@@ -614,17 +593,17 @@ register int	pc;
  *	<META> to delimit the end-of-pattern to allow <NL>s in the search
  *	string. 
  */
-static int	readpattern(prompt, apat, srch)
-char	*prompt;
-char	apat[];
-int	srch;
+static int readpattern(prompt, apat, srch)
+char *prompt;
+char apat[];
+int srch;
 {
 	int status;
-	char tpat[NPAT+20];
+	char tpat[NPAT + 20];
 
 	strcpy(tpat, prompt);	/* copy prompt to output string */
 	strcat(tpat, " (");	/* build new prompt string */
-	expandp(&apat[0], &tpat[strlen(tpat)], NPAT/2);	/* add old pattern */
+	expandp(&apat[0], &tpat[strlen(tpat)], NPAT / 2);	/* add old pattern */
 	strcat(tpat, ")<Meta>: ");
 
 	/* Read a pattern.  Either we get one,
@@ -632,11 +611,9 @@ int	srch;
 	 * Then, if it's the search string, make a reversed pattern.
 	 * *Then*, make the meta-pattern, if we are defined that way.
 	 */
-	if ((status = mlreplyt(tpat, tpat, NPAT, metac)) == TRUE)
-	{
+	if ((status = mlreplyt(tpat, tpat, NPAT, metac)) == TRUE) {
 		strcpy(apat, tpat);
-		if (srch)	/* If we are doing the search string.*/
-		{
+		if (srch) {	/* If we are doing the search string. */
 			/* Reverse string copy, and remember
 			 * the length for substitution purposes.
 			 */
@@ -648,19 +625,16 @@ int	srch;
 		 * since the pattern in question might have an
 		 * invalid meta combination.
 		 */
-		if ((curwp->w_bufp->b_mode & MDMAGIC) == 0)
-		{
+		if ((curwp->w_bufp->b_mode & MDMAGIC) == 0) {
 			mcclear();
 			rmcclear();
-		}
-		else
-			status = srch? mcstr(): rmcstr();
+		} else
+			status = srch ? mcstr() : rmcstr();
 #endif
-	}
-	else if (status == FALSE && apat[0] != 0)	/* Old one */
+	} else if (status == FALSE && apat[0] != 0)	/* Old one */
 		status = TRUE;
 
-	return(status);
+	return (status);
 }
 
 /*
@@ -668,10 +642,10 @@ int	srch;
  */
 savematch()
 {
-	register char	*ptr;		/* pointer to last match string */
-	register int	j;
-	LINE		*curline;	/* line of last match */
-	int		curoff;		/* offset "      "    */
+	register char *ptr;	/* pointer to last match string */
+	register int j;
+	LINE *curline;		/* line of last match */
+	int curoff;		/* offset "      "    */
 
 	/* Free any existing match string, then
 	 * attempt to allocate a new one.
@@ -681,8 +655,7 @@ savematch()
 
 	ptr = patmatch = malloc(matchlen + 1);
 
-	if (ptr != NULL)
-	{
+	if (ptr != NULL) {
 		curoff = matchoff;
 		curline = matchline;
 
@@ -697,7 +670,7 @@ savematch()
  * rvstrcpy -- Reverse string copy.
  */
 rvstrcpy(rvstr, str)
-register char	*rvstr, *str;
+register char *rvstr, *str;
 {
 	register int i;
 
@@ -713,30 +686,30 @@ register char	*rvstr, *str;
  * sreplace -- Search and replace.
  */
 sreplace(f, n)
-int f;		/* default flag */
-int n;		/* # of repetitions wanted */
+int f;				/* default flag */
+int n;				/* # of repetitions wanted */
 {
-	return(replaces(FALSE, f, n));
+	return (replaces(FALSE, f, n));
 }
 
 /*
  * qreplace -- search and replace with query.
  */
 qreplace(f, n)
-int f;		/* default flag */
-int n;		/* # of repetitions wanted */
+int f;				/* default flag */
+int n;				/* # of repetitions wanted */
 {
-	return(replaces(TRUE, f, n));
+	return (replaces(TRUE, f, n));
 }
 
 /*
  * replaces -- Search for a string and replace it with another
  *	string.  Query might be enabled (according to kind).
  */
-static int	replaces(kind, f, n)
-int	kind;	/* Query enabled flag */
-int	f;	/* default flag */
-int	n;	/* # of repetitions wanted */
+static int replaces(kind, f, n)
+int kind;			/* Query enabled flag */
+int f;				/* default flag */
+int n;				/* # of repetitions wanted */
 {
 	register int status;	/* success flag on pattern inputs */
 	register int rlength;	/* length of replacement string */
@@ -751,25 +724,26 @@ int	n;	/* # of repetitions wanted */
 	LINE *lastline;		/* position of last replace and */
 	int lastoff;		/* offset (for 'u' query option) */
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if	*/
-		return(rdonly());	/* we are in read only mode	*/
+	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
+		return (rdonly());	/* we are in read only mode     */
 
 	/* Check for negative repetitions.
 	 */
 	if (f && n < 0)
-		return(FALSE);
+		return (FALSE);
 
 	/* Ask the user for the text of a pattern.
 	 */
-	if ((status = readpattern(
-	    (kind == FALSE ? "Replace" : "Query replace"), &pat[0], TRUE))
-								!= TRUE)
-		return(status);
+	if ((status = readpattern((kind ==
+				   FALSE ? "Replace" : "Query replace"),
+				  &pat[0], TRUE))
+	    != TRUE)
+		return (status);
 
 	/* Ask for the replacement string.
 	 */
 	if ((status = readpattern("with", &rpat[0], FALSE)) == ABORT)
-		return(status);
+		return (status);
 
 	/* Find the length of the replacement string.
 	 */
@@ -781,14 +755,13 @@ int	n;	/* # of repetitions wanted */
 	nlflag = (pat[matchlen - 1] == '\n');
 	nlrepl = FALSE;
 
-	if (kind)
-	{
+	if (kind) {
 		/* Build query replace question string.
 		 */
 		strcpy(tpat, "Replace '");
-		expandp(&pat[0], &tpat[strlen(tpat)], NPAT/3);
+		expandp(&pat[0], &tpat[strlen(tpat)], NPAT / 3);
 		strcat(tpat, "' with '");
-		expandp(&rpat[0], &tpat[strlen(tpat)], NPAT/3);
+		expandp(&rpat[0], &tpat[strlen(tpat)], NPAT / 3);
 		strcat(tpat, "'? ");
 
 		/* Initialize last replaced pointers.
@@ -805,24 +778,21 @@ int	n;	/* # of repetitions wanted */
 	numsub = 0;
 	nummatch = 0;
 
-	while ( (f == FALSE || n > nummatch) &&
-		(nlflag == FALSE || nlrepl == FALSE) )
-	{
+	while ((f == FALSE || n > nummatch) &&
+	       (nlflag == FALSE || nlrepl == FALSE)) {
 		/* Search for the pattern.
 		 * If we search with a regular expression,
 		 * matchlen is reset to the true length of
 		 * the matched string.
 		 */
 #if	MAGIC
-		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
-		{
+		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0) {
 			if (!mcscanner(&mcpat[0], FORWARD, PTBEG))
 				break;
-		}
-		else
+		} else
 #endif
-			if (!scanner(&pat[0], FORWARD, PTBEG))
-				break;		/* all done */
+		if (!scanner(&pat[0], FORWARD, PTBEG))
+			break;	/* all done */
 
 		++nummatch;	/* Increment # of matches */
 
@@ -832,100 +802,99 @@ int	n;	/* # of repetitions wanted */
 
 		/* Check for query.
 		 */
-		if (kind)
-		{
+		if (kind) {
 			/* Get the query.
 			 */
-pprompt:		mlwrite(&tpat[0], &pat[0], &rpat[0]);
-qprompt:
-			update(TRUE);  /* show the proposed place to change */
-			c = tgetc();			/* and input */
-			mlwrite("");			/* and clear it */
+		      pprompt:mlwrite(&tpat[0], &pat[0],
+				&rpat[0]);
+		      qprompt:
+			update(TRUE);	/* show the proposed place to change */
+			c = tgetc();	/* and input */
+			mlwrite("");	/* and clear it */
 
 			/* And respond appropriately.
 			 */
-			switch (c)
-			{
+			switch (c) {
 #if	PKCODE
-				case 'Y':
+			case 'Y':
 #endif
-				case 'y':	/* yes, substitute */
-				case ' ':
-					savematch();
-					break;
-
-#if	PKCODE
-				case 'N':
-#endif
-				case 'n':	/* no, onword */
-					forwchar(FALSE, 1);
-					continue;
-
-				case '!':	/* yes/stop asking */
-					kind = FALSE;
-					break;
+			case 'y':	/* yes, substitute */
+			case ' ':
+				savematch();
+				break;
 
 #if	PKCODE
-				case 'U':
+			case 'N':
 #endif
-				case 'u':	/* undo last and re-prompt */
+			case 'n':	/* no, onword */
+				forwchar(FALSE, 1);
+				continue;
 
-					/* Restore old position.
+			case '!':	/* yes/stop asking */
+				kind = FALSE;
+				break;
+
+#if	PKCODE
+			case 'U':
+#endif
+			case 'u':	/* undo last and re-prompt */
+
+				/* Restore old position.
+				 */
+				if (lastline == NULL) {
+					/* There is nothing to undo.
 					 */
-					if (lastline == NULL)
-					{
-						/* There is nothing to undo.
-						 */
-						TTbeep();
-						goto pprompt;
-					}
-					curwp->w_dotp = lastline;
-					curwp->w_doto = lastoff;
-					lastline = NULL;
-					lastoff = 0;
-
-					/* Delete the new string.
-					 */
-					backchar(FALSE, rlength);
-#if	PKCODE
-					matchline = curwp->w_dotp;
-					matchoff = curwp->w_doto;
-#endif
-					status = delins(rlength, patmatch, FALSE);
-					if (status != TRUE)
-						return (status);
-
-					/* Record one less substitution,
-					 * backup, save our place, and
-					 * reprompt.
-					 */
-					--numsub;
-					backchar(FALSE, mlenold);
-					matchline = curwp->w_dotp;
-					matchoff  = curwp->w_doto;
-					goto pprompt;
-
-				case '.':	/* abort! and return */
-					/* restore old position */
-					curwp->w_dotp = origline;
-					curwp->w_doto = origoff;
-					curwp->w_flag |= WFMOVE;
-
-				case BELL:	/* abort! and stay */
-					mlwrite("Aborted!");
-					return(FALSE);
-
-				default:	/* bitch and beep */
 					TTbeep();
+					goto pprompt;
+				}
+				curwp->w_dotp = lastline;
+				curwp->w_doto = lastoff;
+				lastline = NULL;
+				lastoff = 0;
 
-				case '?':	/* help me */
-					mlwrite(
-"(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: ");
-					goto qprompt;
+				/* Delete the new string.
+				 */
+				backchar(FALSE, rlength);
+#if	PKCODE
+				matchline = curwp->w_dotp;
+				matchoff = curwp->w_doto;
+#endif
+				status = delins(rlength, patmatch, FALSE);
+				if (status != TRUE)
+					return (status);
+
+				/* Record one less substitution,
+				 * backup, save our place, and
+				 * reprompt.
+				 */
+				--numsub;
+				backchar(FALSE, mlenold);
+				matchline = curwp->w_dotp;
+				matchoff = curwp->w_doto;
+				goto pprompt;
+
+			case '.':	/* abort! and return */
+				/* restore old position */
+				curwp->w_dotp = origline;
+				curwp->w_doto = origoff;
+				curwp->w_flag |= WFMOVE;
+
+			case BELL:	/* abort! and stay */
+				mlwrite("Aborted!");
+				return (FALSE);
+
+			default:	/* bitch and beep */
+				TTbeep();
+
+			case '?':	/* help me */
+				mlwrite
+				    ("(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: ");
+				goto qprompt;
 
 			}	/* end of switch */
-		}	/* end of "if kind" */
+		}
 
+		/* end of "if kind" */
 		/*
 		 * Delete the sucker, and insert its
 		 * replacement.
@@ -937,8 +906,7 @@ qprompt:
 		/* Save our position, since we may
 		 * undo this.
 		 */
-		if (kind)
-		{
+		if (kind) {
 			lastline = curwp->w_dotp;
 			lastoff = curwp->w_doto;
 		}
@@ -949,7 +917,7 @@ qprompt:
 	/* And report the results.
 	 */
 	mlwrite("%d substitutions", numsub);
-	return(TRUE);
+	return (TRUE);
 }
 
 /*
@@ -958,13 +926,13 @@ qprompt:
  *	replacement meta-array.
  */
 delins(dlength, instr, use_meta)
-int	dlength;
-char	*instr;
-int	use_meta;
+int dlength;
+char *instr;
+int use_meta;
 {
-	int	status;
+	int status;
 #if	MAGIC
-	RMC	*rmcptr;
+	RMC *rmcptr;
 #endif
 
 	/* Zap what we gotta,
@@ -974,39 +942,37 @@ int	use_meta;
 		mlwrite("%%ERROR while deleting");
 	else
 #if	MAGIC
-		if ((rmagical && use_meta) &&
-		     (curwp->w_bufp->b_mode & MDMAGIC) != 0) {
-			rmcptr = &rmcpat[0];
-			while (rmcptr->mc_type != MCNIL && status == TRUE) {
-				if (rmcptr->mc_type == LITCHAR)
-					status = linstr(rmcptr->rstr);
-				else
-					status = linstr(patmatch);
-				rmcptr++;
-			}
-		} else
+	if ((rmagical && use_meta) &&
+		    (curwp->w_bufp->b_mode & MDMAGIC) != 0) {
+		rmcptr = &rmcpat[0];
+		while (rmcptr->mc_type != MCNIL && status == TRUE) {
+			if (rmcptr->mc_type == LITCHAR)
+				status = linstr(rmcptr->rstr);
+			else
+				status = linstr(patmatch);
+			rmcptr++;
+		}
+	} else
 #endif
-			status = linstr(instr);
+		status = linstr(instr);
 
-	return(status);
+	return (status);
 }
 
 /*
  * expandp -- Expand control key sequences for output.
  */
 expandp(srcstr, deststr, maxlength)
-char	*srcstr;	/* string to expand */
-char	*deststr;	/* destination of expanded string */
-int	maxlength;	/* maximum chars in destination */
+char *srcstr;			/* string to expand */
+char *deststr;			/* destination of expanded string */
+int maxlength;			/* maximum chars in destination */
 {
 	unsigned char c;	/* current char to translate */
 
 	/* Scan through the string.
 	 */
-	while ((c = *srcstr++) != 0)
-	{
-		if (c == '\n')		/* it's a newline */
-		{
+	while ((c = *srcstr++) != 0) {
+		if (c == '\n') {	/* it's a newline */
 			*deststr++ = '<';
 			*deststr++ = 'N';
 			*deststr++ = 'L';
@@ -1014,8 +980,7 @@ int	maxlength;	/* maximum chars in destination */
 			maxlength -= 4;
 		}
 #if	PKCODE
-		else if ((c > 0 && c < 0x20) ||
-			c == 0x7f)		/* control character */
+		else if ((c > 0 && c < 0x20) || c == 0x7f)	/* control character */
 #else
 		else if (c < 0x20 || c == 0x7f)	/* control character */
 #endif
@@ -1023,29 +988,25 @@ int	maxlength;	/* maximum chars in destination */
 			*deststr++ = '^';
 			*deststr++ = c ^ 0x40;
 			maxlength -= 2;
-		}
-		else if (c == '%')
-		{
+		} else if (c == '%') {
 			*deststr++ = '%';
 			*deststr++ = '%';
 			maxlength -= 2;
-		}
-		else			/* any other character */
-		{
+		} else {	/* any other character */
+
 			*deststr++ = c;
 			maxlength--;
 		}
 
 		/* check for maxlength */
-		if (maxlength < 4)
-		{
+		if (maxlength < 4) {
 			*deststr++ = '$';
 			*deststr = '\0';
-			return(FALSE);
+			return (FALSE);
 		}
 	}
 	*deststr = '\0';
-	return(TRUE);
+	return (TRUE);
 }
 
 /*
@@ -1055,21 +1016,18 @@ int	maxlength;	/* maximum chars in destination */
  *	in future, a' la VMS EDT.  At the moment, just return TRUE or
  *	FALSE depending on if a boundry is hit (ouch).
  */
-int	boundry(curline, curoff, dir)
-LINE	*curline;
-int	curoff, dir;
+int boundry(curline, curoff, dir)
+LINE *curline;
+int curoff, dir;
 {
-	register int	border;
+	register int border;
 
-	if (dir == FORWARD)
-	{
+	if (dir == FORWARD) {
 		border = (curoff == llength(curline)) &&
-			 (lforw(curline) == curbp->b_linep);
-	}
-	else
-	{
+		    (lforw(curline) == curbp->b_linep);
+	} else {
 		border = (curoff == 0) &&
-			 (lback(curline) == curbp->b_linep);
+		    (lback(curline) == curbp->b_linep);
 	}
 	return (border);
 }
@@ -1083,37 +1041,31 @@ int	curoff, dir;
  *	look at the character.
  */
 static int nextch(pcurline, pcuroff, dir)
-LINE	**pcurline;
-int	*pcuroff;
-int	dir;
+LINE **pcurline;
+int *pcuroff;
+int dir;
 {
-	register LINE	*curline;
-	register int	curoff;
-	register int	c;
+	register LINE *curline;
+	register int curoff;
+	register int c;
 
 	curline = *pcurline;
 	curoff = *pcuroff;
 
-	if (dir == FORWARD)
-	{
-		if (curoff == llength(curline))		/* if at EOL */
-		{
+	if (dir == FORWARD) {
+		if (curoff == llength(curline)) {	/* if at EOL */
 			curline = lforw(curline);	/* skip to next line */
 			curoff = 0;
-			c = '\n';			/* and return a <NL> */
-		}
-		else
+			c = '\n';	/* and return a <NL> */
+		} else
 			c = lgetc(curline, curoff++);	/* get the char */
-	}
-	else			/* Reverse.*/
-	{
-		if (curoff == 0)
-		{
+	} else {		/* Reverse. */
+
+		if (curoff == 0) {
 			curline = lback(curline);
 			curoff = llength(curline);
 			c = '\n';
-		}
-		else
+		} else
 			c = lgetc(curline, --curoff);
 
 	}
@@ -1139,12 +1091,12 @@ int	dir;
  */
 static int mcstr()
 {
-	MC	*mcptr, *rtpcm;
-	char	*patptr;
- 	int	mj;
- 	int	pchr;
- 	int	status = TRUE;
- 	int	does_closure = FALSE;
+	MC *mcptr, *rtpcm;
+	char *patptr;
+	int mj;
+	int pchr;
+	int status = TRUE;
+	int does_closure = FALSE;
 
 	/* If we had metacharacters in the MC array previously,
 	 * free up any bitmaps that may have been allocated.
@@ -1157,68 +1109,66 @@ static int mcstr()
 	mcptr = &mcpat[0];
 	patptr = &pat[0];
 
-	while ((pchr = *patptr) && status)
-	{
-		switch (pchr)
-		{
-			case MC_CCL:
-				status = cclmake(&patptr, mcptr);
-				magical = TRUE;
-				does_closure = TRUE;
-				break;
-			case MC_BOL:
-				if (mj != 0)
-					goto litcase;
+	while ((pchr = *patptr) && status) {
+		switch (pchr) {
+		case MC_CCL:
+			status = cclmake(&patptr, mcptr);
+			magical = TRUE;
+			does_closure = TRUE;
+			break;
+		case MC_BOL:
+			if (mj != 0)
+				goto litcase;
 
-				mcptr->mc_type = BOL;
-				magical = TRUE;
-				does_closure = FALSE;
-				break;
-			case MC_EOL:
-				if (*(patptr + 1) != '\0')
-					goto litcase;
+			mcptr->mc_type = BOL;
+			magical = TRUE;
+			does_closure = FALSE;
+			break;
+		case MC_EOL:
+			if (*(patptr + 1) != '\0')
+				goto litcase;
 
-				mcptr->mc_type = EOL;
-				magical = TRUE;
-				does_closure = FALSE;
-				break;
-			case MC_ANY:
-				mcptr->mc_type = ANY;
-				magical = TRUE;
-				does_closure = TRUE;
-				break;
-			case MC_CLOSURE:
-				/* Does the closure symbol mean closure here?
-				 * If so, back up to the previous element
-				 * and indicate it is enclosed.
-				 */
-				if (!does_closure)
-					goto litcase;
-				mj--;
-				mcptr--;
-				mcptr->mc_type |= CLOSURE;
-				magical = TRUE;
-				does_closure = FALSE;
-				break;
+			mcptr->mc_type = EOL;
+			magical = TRUE;
+			does_closure = FALSE;
+			break;
+		case MC_ANY:
+			mcptr->mc_type = ANY;
+			magical = TRUE;
+			does_closure = TRUE;
+			break;
+		case MC_CLOSURE:
+			/* Does the closure symbol mean closure here?
+			 * If so, back up to the previous element
+			 * and indicate it is enclosed.
+			 */
+			if (!does_closure)
+				goto litcase;
+			mj--;
+			mcptr--;
+			mcptr->mc_type |= CLOSURE;
+			magical = TRUE;
+			does_closure = FALSE;
+			break;
 
 			/* Note: no break between MC_ESC case and the default.
 			 */
-			case MC_ESC:
-				if (*(patptr + 1) != '\0')
-				{
-					pchr = *++patptr;
-					magical = TRUE;
-				}
-			default:
-litcase:			mcptr->mc_type = LITCHAR;
-				mcptr->u.lchar = pchr;
-				does_closure = (pchr != '\n');
-				break;
-		}		/* End of switch.*/
+		case MC_ESC:
+			if (*(patptr + 1) != '\0') {
+				pchr = *++patptr;
+				magical = TRUE;
+			}
+		default:
+		      litcase:mcptr->mc_type =
+			    LITCHAR;
+			mcptr->u.lchar = pchr;
+			does_closure = (pchr != '\n');
+			break;
+		}		/* End of switch. */
 		mcptr++;
 		patptr++;
 		mj++;
-	}		/* End of while.*/
+	}			/* End of while. */
 
 	/* Close off the meta-string.
 	 */
@@ -1232,24 +1182,20 @@ litcase:			mcptr->mc_type = LITCHAR;
 	 * freed.  So we stomp a MCNIL value there, and call mcclear()
 	 * to free any other bitmaps.
 	 */
-	if (status)
-	{
+	if (status) {
 		rtpcm = &tapcm[0];
-		while (--mj >= 0)
-		{
+		while (--mj >= 0) {
 #if	MSC | TURBO | VMS | USG | BSD | V7
 			*rtpcm++ = *--mcptr;
 #endif
 		}
 		rtpcm->mc_type = MCNIL;
-	}
-	else
-	{
+	} else {
 		(--mcptr)->mc_type = MCNIL;
 		mcclear();
 	}
 
-	return(status);
+	return (status);
 }
 
 /*
@@ -1260,86 +1206,80 @@ litcase:			mcptr->mc_type = LITCHAR;
  */
 static int rmcstr()
 {
-	RMC	*rmcptr;
-	char	*patptr;
-	int	status = TRUE;
-	int	mj;
+	RMC *rmcptr;
+	char *patptr;
+	int status = TRUE;
+	int mj;
 
 	patptr = &rpat[0];
 	rmcptr = &rmcpat[0];
 	mj = 0;
 	rmagical = FALSE;
 
-	while (*patptr && status == TRUE)
-	{
-		switch (*patptr)
-		{
-			case MC_DITTO:
+	while (*patptr && status == TRUE) {
+		switch (*patptr) {
+		case MC_DITTO:
 
-				/* If there were non-magical characters
-				 * in the string before reaching this
-				 * character, plunk it in the replacement
-				 * array before processing the current
-				 * meta-character.
-				 */
-				if (mj != 0)
-				{
-					rmcptr->mc_type = LITCHAR;
-					if ((rmcptr->rstr = malloc(mj + 1)) == NULL)
-					{
-						mlwrite("%%Out of memory");
-						status = FALSE;
-						break;
-					}
-					strncpy(rmcptr->rstr, patptr - mj, mj);
-					rmcptr++;
-					mj = 0;
-				}
-				rmcptr->mc_type = DITTO;
-				rmcptr++;
-				rmagical = TRUE;
-				break;
-
-			case MC_ESC:
+			/* If there were non-magical characters
+			 * in the string before reaching this
+			 * character, plunk it in the replacement
+			 * array before processing the current
+			 * meta-character.
+			 */
+			if (mj != 0) {
 				rmcptr->mc_type = LITCHAR;
-
-				/* We malloc mj plus two here, instead
-				 * of one, because we have to count the
-				 * current character.
-				 */
-				if ((rmcptr->rstr = malloc(mj + 2)) == NULL)
-				{
+				if ((rmcptr->rstr =
+				     malloc(mj + 1)) == NULL) {
 					mlwrite("%%Out of memory");
 					status = FALSE;
 					break;
 				}
-
-				strncpy(rmcptr->rstr, patptr - mj, mj + 1);
-
-				/* If MC_ESC is not the last character
-				 * in the string, find out what it is
-				 * escaping, and overwrite the last
-				 * character with it.
-				 */
-				if (*(patptr + 1) != '\0')
-					*((rmcptr->rstr) + mj) = *++patptr;
-
+				strncpy(rmcptr->rstr, patptr - mj, mj);
 				rmcptr++;
 				mj = 0;
-				rmagical = TRUE;
-				break;
+			}
+			rmcptr->mc_type = DITTO;
+			rmcptr++;
+			rmagical = TRUE;
+			break;
 
-			default:
-				mj++;
+		case MC_ESC:
+			rmcptr->mc_type = LITCHAR;
+
+			/* We malloc mj plus two here, instead
+			 * of one, because we have to count the
+			 * current character.
+			 */
+			if ((rmcptr->rstr = malloc(mj + 2)) == NULL) {
+				mlwrite("%%Out of memory");
+				status = FALSE;
+				break;
+			}
+
+			strncpy(rmcptr->rstr, patptr - mj, mj + 1);
+
+			/* If MC_ESC is not the last character
+			 * in the string, find out what it is
+			 * escaping, and overwrite the last
+			 * character with it.
+			 */
+			if (*(patptr + 1) != '\0')
+				*((rmcptr->rstr) + mj) = *++patptr;
+
+			rmcptr++;
+			mj = 0;
+			rmagical = TRUE;
+			break;
+
+		default:
+			mj++;
 		}
 		patptr++;
 	}
 
-	if (rmagical && mj > 0)
-	{
+	if (rmagical && mj > 0) {
 		rmcptr->mc_type = LITCHAR;
-		if ((rmcptr->rstr = malloc(mj + 1)) == NULL)
-		{
+		if ((rmcptr->rstr = malloc(mj + 1)) == NULL) {
 			mlwrite("%%Out of memory.");
 			status = FALSE;
 		}
@@ -1355,12 +1295,11 @@ static int rmcstr()
  */
 mcclear()
 {
-	register MC	*mcptr;
+	register MC *mcptr;
 
 	mcptr = &mcpat[0];
 
-	while (mcptr->mc_type != MCNIL)
-	{
+	while (mcptr->mc_type != MCNIL) {
 		if ((mcptr->mc_type & MASKCL) == CCL ||
 		    (mcptr->mc_type & MASKCL) == NCCL)
 			free(mcptr->u.cclmap);
@@ -1374,12 +1313,11 @@ mcclear()
  */
 rmcclear()
 {
-	register RMC	*rmcptr;
+	register RMC *rmcptr;
 
 	rmcptr = &rmcpat[0];
 
-	while (rmcptr->mc_type != MCNIL)
-	{
+	while (rmcptr->mc_type != MCNIL) {
 		if (rmcptr->mc_type == LITCHAR)
 			free(rmcptr->rstr);
 		rmcptr++;
@@ -1393,52 +1331,48 @@ rmcclear()
  *	Software Tools, this is the function omatch(), but i felt there
  *	were too many functions with the 'match' name already.
  */
-static int	mceq(bc, mt)
-int	bc;
-MC	*mt;
+static int mceq(bc, mt)
+int bc;
+MC *mt;
 {
 	register int result;
 
 #if	PKCODE
 	bc = bc & 0xFF;
 #endif
-	switch (mt->mc_type & MASKCL)
-	{
-		case LITCHAR:
-			result = eq(bc, mt->u.lchar);
-			break;
+	switch (mt->mc_type & MASKCL) {
+	case LITCHAR:
+		result = eq(bc, mt->u.lchar);
+		break;
 
-		case ANY:
-			result = (bc != '\n');
-			break;
+	case ANY:
+		result = (bc != '\n');
+		break;
 
-		case CCL:
-			if (!(result = biteq(bc, mt->u.cclmap)))
-			{
-				if ((curwp->w_bufp->b_mode & MDEXACT) == 0 &&
-				    (isletter(bc)))
-				{
-					result = biteq(CHCASE(bc), mt->u.cclmap);
-				}
-			}
-			break;
-
-		case NCCL:
-			result = !biteq(bc, mt->u.cclmap);
-
+	case CCL:
+		if (!(result = biteq(bc, mt->u.cclmap))) {
 			if ((curwp->w_bufp->b_mode & MDEXACT) == 0 &&
-			    (isletter(bc)))
-			{
-				result &= !biteq(CHCASE(bc), mt->u.cclmap);
+			    (isletter(bc))) {
+				result = biteq(CHCASE(bc), mt->u.cclmap);
 			}
-			break;
+		}
+		break;
 
-		default:
-			mlwrite("mceq: what is %d?", mt->mc_type);
-			result = FALSE;
-			break;
+	case NCCL:
+		result = !biteq(bc, mt->u.cclmap);
 
-	}	/* End of switch.*/
+		if ((curwp->w_bufp->b_mode & MDEXACT) == 0 &&
+		    (isletter(bc))) {
+			result &= !biteq(CHCASE(bc), mt->u.cclmap);
+		}
+		break;
+
+	default:
+		mlwrite("mceq: what is %d?", mt->mc_type);
+		result = FALSE;
+		break;
+
+	}			/* End of switch. */
 
 	return (result);
 }
@@ -1448,17 +1382,16 @@ MC	*mt;
  *	ppatptr is left pointing to the end-of-character-class character,
  *	so that a loop may automatically increment with safety.
  */
-static int	cclmake(ppatptr, mcptr)
-char	**ppatptr;
-MC	*mcptr;
+static int cclmake(ppatptr, mcptr)
+char **ppatptr;
+MC *mcptr;
 {
-	BITMAP		clearbits();
-	BITMAP		bmap;
-	register char	*patptr;
-	register int	pchr, ochr;
+	BITMAP clearbits();
+	BITMAP bmap;
+	register char *patptr;
+	register int pchr, ochr;
 
-	if ((bmap = clearbits()) == NULL)
-	{
+	if ((bmap = clearbits()) == NULL) {
 		mlwrite("%%Out of memory");
 		return FALSE;
 	}
@@ -1472,21 +1405,16 @@ MC	*mcptr;
 	 * character as a first character.  Anything
 	 * else gets set in the bitmap.
 	 */
-	if (*++patptr == MC_NCCL)
-	{
+	if (*++patptr == MC_NCCL) {
 		patptr++;
 		mcptr->mc_type = NCCL;
-	}
-	else
+	} else
 		mcptr->mc_type = CCL;
 
-	if ((ochr = *patptr) == MC_ECCL)
-	{
+	if ((ochr = *patptr) == MC_ECCL) {
 		mlwrite("%%No characters in character class");
 		return (FALSE);
-	}
-	else
-	{
+	} else {
 		if (ochr == MC_ESC)
 			ochr = *++patptr;
 
@@ -1494,32 +1422,29 @@ MC	*mcptr;
 		patptr++;
 	}
 
-	while (ochr != '\0' && (pchr = *patptr) != MC_ECCL)
-	{
-		switch (pchr)
-		{
+	while (ochr != '\0' && (pchr = *patptr) != MC_ECCL) {
+		switch (pchr) {
 			/* Range character loses its meaning
 			 * if it is the last character in
 			 * the class.
 			 */
-			case MC_RCCL:
-				if (*(patptr + 1) == MC_ECCL)
-					setbit(pchr, bmap);
-				else
-				{
-					pchr = *++patptr;
-					while (++ochr <= pchr)
-						setbit(ochr, bmap);
-				}
-				break;
+		case MC_RCCL:
+			if (*(patptr + 1) == MC_ECCL)
+				setbit(pchr, bmap);
+			else {
+				pchr = *++patptr;
+				while (++ochr <= pchr)
+					setbit(ochr, bmap);
+			}
+			break;
 
 			/* Note: no break between case MC_ESC and the default.
 			 */
-			case MC_ESC:
-				pchr = *++patptr;
-			default:
-				setbit(pchr, bmap);
-				break;
+		case MC_ESC:
+			pchr = *++patptr;
+		default:
+			setbit(pchr, bmap);
+			break;
 		}
 		patptr++;
 		ochr = pchr;
@@ -1527,8 +1452,7 @@ MC	*mcptr;
 
 	*ppatptr = patptr;
 
-	if (ochr == '\0')
-	{
+	if (ochr == '\0') {
 		mlwrite("%%Character class not ended");
 		free(bmap);
 		return FALSE;
@@ -1539,9 +1463,9 @@ MC	*mcptr;
 /*
  * biteq -- is the character in the bitmap?
  */
-static int	biteq(bc, cclmap)
-int	bc;
-BITMAP	cclmap;
+static int biteq(bc, cclmap)
+int bc;
+BITMAP cclmap;
 {
 #if	PKCODE
 	bc = bc & 0xFF;
@@ -1549,18 +1473,18 @@ BITMAP	cclmap;
 	if (bc >= HICHAR)
 		return FALSE;
 
-	return( (*(cclmap + (bc >> 3)) & BIT(bc & 7))? TRUE: FALSE );
+	return ((*(cclmap + (bc >> 3)) & BIT(bc & 7)) ? TRUE : FALSE);
 }
 
 /*
  * clearbits -- Allocate and zero out a CCL bitmap.
  */
-static	BITMAP clearbits()
+static BITMAP clearbits()
 {
-	char		*malloc();
+	char *malloc();
 
-	BITMAP		cclstart, cclmap;
-	register int	j;
+	BITMAP cclstart, cclmap;
+	register int j;
 
 	if ((cclmap = cclstart = (BITMAP) malloc(HIBYTE)) != NULL)
 		for (j = 0; j < HIBYTE; j++)
@@ -1573,8 +1497,8 @@ static	BITMAP clearbits()
  * setbit -- Set a bit (ON only) in the bitmap.
  */
 static void setbit(bc, cclmap)
-int	bc;
-BITMAP	cclmap;
+int bc;
+BITMAP cclmap;
 {
 #if	PKCODE
 	bc = bc & 0xFF;

@@ -2,7 +2,7 @@
  *
  *	locking routines as modified by Petri Kutvonen
  */
- 
+
 #include "estruct.h"
 
 #if (FILOCK && BSD) || SVR4
@@ -26,7 +26,7 @@
 
 int gethostname(char *name, int namelen)
 {
-  return(sysinfo(SI_HOSTNAME, name, namelen));
+	return (sysinfo(SI_HOSTNAME, name, namelen));
 }
 #endif
 
@@ -40,18 +40,18 @@ int gethostname(char *name, int namelen)
  *
  *********************/
 char *dolock(fname)
-	char *fname;
+char *fname;
 {
 	int fd, lk, n;
-	static char lname[MAXLOCK], locker[MAXNAME+1];
+	static char lname[MAXLOCK], locker[MAXNAME + 1];
 	int mask;
 	struct stat sbuf;
-	
+
 	strcat(strcpy(lname, fname), ".lock~");
 
-	/* check that we are not being cheated, qname must point to	*/
-	/* a regular file - even this code leaves a small window of	*/
-	/* vulnerability but it is rather hard to exploit it		*/
+	/* check that we are not being cheated, qname must point to     */
+	/* a regular file - even this code leaves a small window of     */
+	/* vulnerability but it is rather hard to exploit it            */
 
 #if defined(S_IFLNK)
 	if (lstat(lname, &sbuf) == 0)
@@ -59,17 +59,16 @@ char *dolock(fname)
 	if (stat(lname, &sbuf) == 0)
 #endif
 #if defined(S_ISREG)
-		if (! S_ISREG(sbuf.st_mode))
+		if (!S_ISREG(sbuf.st_mode))
 #else
-		if (! (((sbuf.st_mode) & 070000) == 0))	/* SysV R2 */
+		if (!(((sbuf.st_mode) & 070000) == 0))	/* SysV R2 */
 #endif
 			return "LOCK ERROR: not a regular file";
 
 	mask = umask(0);
 	fd = open(lname, O_RDWR | O_CREAT, 0666);
 	umask(mask);
-	if (fd < 0)
-	{
+	if (fd < 0) {
 		if (errno == EACCES)
 			return NULL;
 #ifdef EROFS
@@ -78,20 +77,19 @@ char *dolock(fname)
 #endif
 		return "LOCK ERROR: cannot access lock file";
 	}
-	if ((n = read(fd, locker, MAXNAME)) < 1)
-	{
+	if ((n = read(fd, locker, MAXNAME)) < 1) {
 		lseek(fd, 0, SEEK_SET);
 /*		strcpy(locker, getlogin()); */
 		cuserid(locker);
-		strcat(locker+strlen(locker), "@");
-		gethostname(locker+strlen(locker), 64);
+		strcat(locker + strlen(locker), "@");
+		gethostname(locker + strlen(locker), 64);
 		write(fd, locker, strlen(locker));
 		close(fd);
 		return NULL;
 	}
 	locker[n > MAXNAME ? MAXNAME : n] = 0;
 	return locker;
-}        	
+}
 
 
 /*********************
@@ -102,16 +100,15 @@ char *dolock(fname)
  * if other error, returns "LOCK ERROR: explanation"
  *
  *********************/
-                                  
+
 char *undolock(fname)
-	char *fname;
+char *fname;
 {
 	int fd, lk;
 	static char lname[MAXLOCK];
 
 	strcat(strcpy(lname, fname), ".lock~");
-	if (unlink(lname) != 0)
-	{
+	if (unlink(lname) != 0) {
 		if (errno == EACCES || errno == ENOENT)
 			return NULL;
 #ifdef EROFS
@@ -121,5 +118,5 @@ char *undolock(fname)
 		return "LOCK ERROR: cannot remove lock file";
 	}
 	return NULL;
-}                                        	
+}
 #endif

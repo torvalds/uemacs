@@ -57,7 +57,7 @@
 #define	maindef
 
 #include        "estruct.h"	/* global structures and defines */
-#include	"efunc.h"	/* function declarations and name table	*/
+#include	"efunc.h"	/* function declarations and name table */
 #include	"edef.h"	/* global definitions */
 #include	"ebind.h"	/* default key bindings */
 
@@ -84,7 +84,7 @@ extern unsigned _stklen = 32766;
 #include <signal.h>
 static void emergencyexit();
 #ifdef SIGWINCH
-        extern void sizesignal();
+extern void sizesignal();
 #endif
 #endif
 
@@ -93,37 +93,37 @@ emacs(argc, argv)
 #else
 main(argc, argv)
 #endif
-int argc;	/* # of arguments */
-char *argv[];	/* argument strings */
+int argc;			/* # of arguments */
+char *argv[];			/* argument strings */
 
 {
-        register int    c;		/* command character */
-        register int    f;		/* default flag */
-        register int    n;		/* numeric repeat count */
-        register int    mflag;		/* negative flag on repeat */
-	register BUFFER *bp;		/* temp buffer pointer */
-	register int	firstfile;	/* first file flag */
-	register int	carg;		/* current arg to scan */
-	register int	startflag;	/* startup executed flag */
-	BUFFER *firstbp = NULL;		/* ptr to first buffer in cmd line */
-	int basec;			/* c stripped of meta character */
-	int viewflag;			/* are we starting in view mode? */
-        int gotoflag;                   /* do we need to goto a line at start? */
-        int gline;                      /* if so, what line? */
-        int searchflag;                 /* Do we need to search at start? */
-	int saveflag;			/* temp store for lastflag */
-	int errflag;			/* C error processing? */
-        char bname[NBUFN];		/* buffer name of file to read */
+	register int c;		/* command character */
+	register int f;		/* default flag */
+	register int n;		/* numeric repeat count */
+	register int mflag;	/* negative flag on repeat */
+	register BUFFER *bp;	/* temp buffer pointer */
+	register int firstfile;	/* first file flag */
+	register int carg;	/* current arg to scan */
+	register int startflag;	/* startup executed flag */
+	BUFFER *firstbp = NULL;	/* ptr to first buffer in cmd line */
+	int basec;		/* c stripped of meta character */
+	int viewflag;		/* are we starting in view mode? */
+	int gotoflag;		/* do we need to goto a line at start? */
+	int gline;		/* if so, what line? */
+	int searchflag;		/* Do we need to search at start? */
+	int saveflag;		/* temp store for lastflag */
+	int errflag;		/* C error processing? */
+	char bname[NBUFN];	/* buffer name of file to read */
 #if	CRYPT
-	int cryptflag;			/* encrypting on the way in? */
-	char ekey[NPAT];		/* startup encryption key */
+	int cryptflag;		/* encrypting on the way in? */
+	char ekey[NPAT];	/* startup encryption key */
 #endif
 	char *strncpy();
-	extern *pathname[];		/* startup file path/name array */
+	extern *pathname[];	/* startup file path/name array */
 	int newc;
 #if	PKCODE
-	int (*getbind())();
-	int (*execfunc)();		/* ptr to function to execute */
+	int (*getbind()) ();
+	int (*execfunc) ();	/* ptr to function to execute */
 #endif
 
 #if	PKCODE & VMS
@@ -141,8 +141,8 @@ char *argv[];	/* argument strings */
 #endif
 
 	/* initialize the editor */
-        vtinit();		/* Display */
-        edinit("main");		/* Buffers, windows */
+	vtinit();		/* Display */
+	edinit("main");		/* Buffers, windows */
 	varinit();		/* user variables */
 
 	viewflag = FALSE;	/* view mode defaults off in command line */
@@ -171,51 +171,51 @@ char *argv[];	/* argument strings */
 		if (argv[carg][0] == '-') {
 			switch (argv[carg][1]) {
 				/* Process Startup macroes */
-				case 'a':	/* process error file */
-				case 'A':
-					errflag = TRUE;
-					break;
-				case 'e':	/* -e for Edit file */
-				case 'E':
-					viewflag = FALSE;
-					break;
-				case 'g':	/* -g for initial goto */
-				case 'G':
-					gotoflag = TRUE;
-					gline = atoi(&argv[carg][2]);
-					break;
+			case 'a':	/* process error file */
+			case 'A':
+				errflag = TRUE;
+				break;
+			case 'e':	/* -e for Edit file */
+			case 'E':
+				viewflag = FALSE;
+				break;
+			case 'g':	/* -g for initial goto */
+			case 'G':
+				gotoflag = TRUE;
+				gline = atoi(&argv[carg][2]);
+				break;
 #if	CRYPT
-				case 'k':	/* -k<key> for code key */
-				case 'K':
-					cryptflag = TRUE;
-					strcpy(ekey, &argv[carg][2]);
-					break;
+			case 'k':	/* -k<key> for code key */
+			case 'K':
+				cryptflag = TRUE;
+				strcpy(ekey, &argv[carg][2]);
+				break;
 #endif
 #if	PKCODE
-				case 'n':	/* -n accept null chars */
-				case 'N':
-					nullflag = TRUE;
-					break;
+			case 'n':	/* -n accept null chars */
+			case 'N':
+				nullflag = TRUE;
+				break;
 #endif
-				case 'r':	/* -r restrictive use */
-				case 'R':
-					restflag = TRUE;
-					break;
-				case 's':	/* -s for initial search string */
-				case 'S':
-					searchflag = TRUE;
-					strncpy(pat,&argv[carg][2],NPAT);
-					break;
-				case 'v':	/* -v for View File */
-				case 'V':
-					viewflag = TRUE;
-					break;
-				default:	/* unknown switch */
-					/* ignore this for now */
-					break;
+			case 'r':	/* -r restrictive use */
+			case 'R':
+				restflag = TRUE;
+				break;
+			case 's':	/* -s for initial search string */
+			case 'S':
+				searchflag = TRUE;
+				strncpy(pat, &argv[carg][2], NPAT);
+				break;
+			case 'v':	/* -v for View File */
+			case 'V':
+				viewflag = TRUE;
+				break;
+			default:	/* unknown switch */
+				/* ignore this for now */
+				break;
 			}
 
-		} else if (argv[carg][0]== '@') {
+		} else if (argv[carg][0] == '@') {
 
 			/* Process Startup macroes */
 			if (startup(&argv[carg][1]) == TRUE)
@@ -227,7 +227,7 @@ char *argv[];	/* argument strings */
 			/* Process an input file */
 
 			/* set up a buffer for this file */
-	                makename(bname, argv[carg]);
+			makename(bname, argv[carg]);
 			unqname(bname);
 
 			/* set this to inactive */
@@ -245,7 +245,7 @@ char *argv[];	/* argument strings */
 #if	CRYPT
 			if (cryptflag) {
 				bp->b_mode |= MDCRYPT;
-				crypt((char *)NULL, 0);
+				crypt((char *) NULL, 0);
 				crypt(ekey, strlen(ekey));
 				strncpy(bp->b_key, ekey, NPAT);
 			}
@@ -254,7 +254,7 @@ char *argv[];	/* argument strings */
 	}
 
 #if	UNIX
-	signal(SIGHUP,  emergencyexit);
+	signal(SIGHUP, emergencyexit);
 	signal(SIGTERM, emergencyexit);
 #endif
 
@@ -270,7 +270,7 @@ char *argv[];	/* argument strings */
 		startup("");
 		startflag = TRUE;
 	}
-	discmd = TRUE;	/* P.K. */
+	discmd = TRUE;		/* P.K. */
 
 	/* if there are any files to read, read the first one! */
 	bp = bfind("main", FALSE, 0);
@@ -280,85 +280,79 @@ char *argv[];	/* argument strings */
 	} else
 		bp->b_mode |= gmode;
 
-        /* Deal with startup gotos and searches */
-        if (gotoflag && searchflag) {
-        	update(FALSE);
+	/* Deal with startup gotos and searches */
+	if (gotoflag && searchflag) {
+		update(FALSE);
 		mlwrite("(Can not search and goto at the same time!)");
-	}
-        else if (gotoflag) {
-                if (gotoline(TRUE,gline) == FALSE) {
-                	update(FALSE);
+	} else if (gotoflag) {
+		if (gotoline(TRUE, gline) == FALSE) {
+			update(FALSE);
 			mlwrite("(Bogus goto argument)");
 		}
-        } else if (searchflag) {
-                if (forwhunt(FALSE, 0) == FALSE)
-                	update(FALSE);
-        }
+	} else if (searchflag) {
+		if (forwhunt(FALSE, 0) == FALSE)
+			update(FALSE);
+	}
 
 	/* setup to process commands */
-        lastflag = 0;                           /* Fake last flags.     */
+	lastflag = 0;		/* Fake last flags.     */
 
-loop:
+      loop:
 
 #if	CALLED
 	/* if we were called as a subroutine and want to leave, do so */
 	if (eexitflag)
-		return(eexitval);
+		return (eexitval);
 #endif
 
 	/* execute the "command" macro...normally null */
 	saveflag = lastflag;	/* preserve lastflag through this */
-	execute(META|SPEC|'C', FALSE, 1);
+	execute(META | SPEC | 'C', FALSE, 1);
 	lastflag = saveflag;
 
 #if 	TYPEAH && PKCODE
-	if (typahead())
-	{
+	if (typahead()) {
 		newc = getcmd();
 		update(FALSE);
-		do
-		{
+		do {
 			if (c == newc && (execfunc = getbind(c)) != NULL
-				      &&  execfunc != newline 
-				      &&  execfunc != tab)
+			    && execfunc != newline && execfunc != tab)
 				newc = getcmd();
 			else
 				break;
 		} while (typahead());
 		c = newc;
-	}
-	else
-	{
+	} else {
 		update(FALSE);
 		c = getcmd();
 	}
 #else
 	/* Fix up the screen    */
-        update(FALSE);
+	update(FALSE);
 
 	/* get the next command from the keyboard */
 	c = getcmd();
 #endif
 	/* if there is something on the command line, clear it */
-        if (mpresf != FALSE) {
-                mlerase();
-                update(FALSE);
+	if (mpresf != FALSE) {
+		mlerase();
+		update(FALSE);
 #if	CLRMSG
-                if (c == ' ')                   /* ITS EMACS does this  */
-                        goto loop;
+		if (c == ' ')	/* ITS EMACS does this  */
+			goto loop;
 #endif
-        }
-        f = FALSE;
-        n = 1;
+	}
+	f = FALSE;
+	n = 1;
 
 	/* do META-# processing if needed */
 
-	basec = c & ~META;		/* strip meta char off if there */
+	basec = c & ~META;	/* strip meta char off if there */
 	if ((c & META) && ((basec >= '0' && basec <= '9') || basec == '-')) {
-		f = TRUE;		/* there is a # arg */
-		n = 0;			/* start with a zero default */
-		mflag = 1;		/* current minus flag */
-		c = basec;		/* strip the META */
+		f = TRUE;	/* there is a # arg */
+		n = 0;		/* start with a zero default */
+		mflag = 1;	/* current minus flag */
+		c = basec;	/* strip the META */
 		while ((c >= '0' && c <= '9') || (c == '-')) {
 			if (c == '-') {
 				/* already hit a minus or digit? */
@@ -371,7 +365,7 @@ loop:
 			if ((n == 0) && (mflag == -1))	/* lonely - */
 				mlwrite("Arg:");
 			else
-				mlwrite("Arg: %d",n * mflag);
+				mlwrite("Arg: %d", n * mflag);
 
 			c = getcmd();	/* get the next key */
 		}
@@ -380,54 +374,56 @@ loop:
 
 	/* do ^U repeat argument processing */
 
-        if (c == reptc) {                  /* ^U, start argument   */
-                f = TRUE;
-                n = 4;                          /* with argument of 4 */
-                mflag = 0;                      /* that can be discarded. */
-                mlwrite("Arg: 4");
-                while ((c=getcmd()) >='0' && c<='9' || c==reptc || c=='-'){
-                        if (c == reptc)
-				if ((n > 0) == ((n*4) > 0))
-	                                n = n*4;
-	                        else
-	                        	n = 1;
-                        /*
-                         * If dash, and start of argument string, set arg.
-                         * to -1.  Otherwise, insert it.
-                         */
-                        else if (c == '-') {
-                                if (mflag)
-                                        break;
-                                n = 0;
-                                mflag = -1;
-                        }
-                        /*
-                         * If first digit entered, replace previous argument
-                         * with digit and set sign.  Otherwise, append to arg.
-                         */
-                        else {
-                                if (!mflag) {
-                                        n = 0;
-                                        mflag = 1;
-                                }
-                                n = 10*n + c - '0';
-                        }
-                        mlwrite("Arg: %d", (mflag >=0) ? n : (n ? -n : -1));
-                }
-                /*
-                 * Make arguments preceded by a minus sign negative and change
-                 * the special argument "^U -" to an effective "^U -1".
-                 */
-                if (mflag == -1) {
-                        if (n == 0)
-                                n++;
-                        n = -n;
-                }
-        }
+	if (c == reptc) {	/* ^U, start argument   */
+		f = TRUE;
+		n = 4;		/* with argument of 4 */
+		mflag = 0;	/* that can be discarded. */
+		mlwrite("Arg: 4");
+		while ((c = getcmd()) >= '0' && c <= '9' || c == reptc
+		       || c == '-') {
+			if (c == reptc)
+				if ((n > 0) == ((n * 4) > 0))
+					n = n * 4;
+				else
+					n = 1;
+			/*
+			 * If dash, and start of argument string, set arg.
+			 * to -1.  Otherwise, insert it.
+			 */
+			else if (c == '-') {
+				if (mflag)
+					break;
+				n = 0;
+				mflag = -1;
+			}
+			/*
+			 * If first digit entered, replace previous argument
+			 * with digit and set sign.  Otherwise, append to arg.
+			 */
+			else {
+				if (!mflag) {
+					n = 0;
+					mflag = 1;
+				}
+				n = 10 * n + c - '0';
+			}
+			mlwrite("Arg: %d",
+				(mflag >= 0) ? n : (n ? -n : -1));
+		}
+		/*
+		 * Make arguments preceded by a minus sign negative and change
+		 * the special argument "^U -" to an effective "^U -1".
+		 */
+		if (mflag == -1) {
+			if (n == 0)
+				n++;
+			n = -n;
+		}
+	}
 
 	/* and execute the command */
-        execute(c, f, n);
-        goto loop;
+	execute(c, f, n);
+	goto loop;
 }
 
 /*
@@ -436,37 +432,37 @@ loop:
  * file by default, and we want the buffer name to be right.
  */
 edinit(bname)
-char    bname[];
+char bname[];
 {
-        register BUFFER *bp;
-        register WINDOW *wp;
+	register BUFFER *bp;
+	register WINDOW *wp;
 	char *malloc();
 
-        bp = bfind(bname, TRUE, 0);             /* First buffer         */
-        blistp = bfind("*List*", TRUE, BFINVS); /* Buffer list buffer   */
-        wp = (WINDOW *) malloc(sizeof(WINDOW)); /* First window         */
-        if (bp==NULL || wp==NULL || blistp==NULL)
-                exit(1);
-        curbp  = bp;                            /* Make this current    */
-        wheadp = wp;
-        curwp  = wp;
-        wp->w_wndp  = NULL;                     /* Initialize window    */
-        wp->w_bufp  = bp;
-        bp->b_nwnd  = 1;                        /* Displayed.           */
-        wp->w_linep = bp->b_linep;
-        wp->w_dotp  = bp->b_linep;
-        wp->w_doto  = 0;
-        wp->w_markp = NULL;
-        wp->w_marko = 0;
-        wp->w_toprow = 0;
+	bp = bfind(bname, TRUE, 0);	/* First buffer         */
+	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
+	wp = (WINDOW *) malloc(sizeof(WINDOW));	/* First window         */
+	if (bp == NULL || wp == NULL || blistp == NULL)
+		exit(1);
+	curbp = bp;		/* Make this current    */
+	wheadp = wp;
+	curwp = wp;
+	wp->w_wndp = NULL;	/* Initialize window    */
+	wp->w_bufp = bp;
+	bp->b_nwnd = 1;		/* Displayed.           */
+	wp->w_linep = bp->b_linep;
+	wp->w_dotp = bp->b_linep;
+	wp->w_doto = 0;
+	wp->w_markp = NULL;
+	wp->w_marko = 0;
+	wp->w_toprow = 0;
 #if	COLOR
 	/* initalize colors to global defaults */
 	wp->w_fcolor = gfcolor;
 	wp->w_bcolor = gbcolor;
 #endif
-        wp->w_ntrows = term.t_nrow-1;           /* "-1" for mode line.  */
-        wp->w_force = 0;
-        wp->w_flag  = WFMODE|WFHARD;            /* Full.                */
+	wp->w_ntrows = term.t_nrow - 1;	/* "-1" for mode line.  */
+	wp->w_force = 0;
+	wp->w_flag = WFMODE | WFHARD;	/* Full.                */
 }
 
 /*
@@ -477,70 +473,70 @@ char    bname[];
  */
 execute(c, f, n)
 {
-        register int status;
-	int (*execfunc)();		/* ptr to function to execute */
-	int (*getbind())();
+	register int status;
+	int (*execfunc) ();	/* ptr to function to execute */
+	int (*getbind()) ();
 
 	/* if the keystroke is a bound function...do it */
 	execfunc = getbind(c);
-        if (execfunc != NULL) {
+	if (execfunc != NULL) {
 		thisflag = 0;
-		status	 = (*execfunc)(f, n);
+		status = (*execfunc) (f, n);
 		lastflag = thisflag;
 		return (status);
-        }
+	}
 
-        /*
-         * If a space was typed, fill column is defined, the argument is non-
-         * negative, wrap mode is enabled, and we are now past fill column,
+	/*
+	 * If a space was typed, fill column is defined, the argument is non-
+	 * negative, wrap mode is enabled, and we are now past fill column,
 	 * and we are not read-only, perform word wrap.
-         */
-        if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fillcol > 0 &&
+	 */
+	if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fillcol > 0 &&
 	    n >= 0 && getccol(FALSE) > fillcol &&
 	    (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
-		execute(META|SPEC|'W', FALSE, 1);
+		execute(META | SPEC | 'W', FALSE, 1);
 
 #if	PKCODE
-        if ((c>=0x20 && c<=0x7E)                /* Self inserting.      */
+	if ((c >= 0x20 && c <= 0x7E)	/* Self inserting.      */
 #if	IBMPC
-        ||  (c>=0x80 && c<=0xFE)) {
+	    || (c >= 0x80 && c <= 0xFE)) {
 #else
-#if	VMS || BSD || USG				/* 8BIT P.K. */
-        ||  (c>=0xA0 && c<=0xFE)) {
+#if	VMS || BSD || USG	/* 8BIT P.K. */
+	    || (c >= 0xA0 && c <= 0xFE)) {
 #else
-	) {
+	    ) {
 #endif
 #endif
 #else
-        if ((c>=0x20 && c<=0xFF)) {	/* Self inserting.      */
+	if ((c >= 0x20 && c <= 0xFF)) {	/* Self inserting.      */
 #endif
-                if (n <= 0) {                   /* Fenceposts.          */
-                        lastflag = 0;
-                        return (n<0 ? FALSE : TRUE);
-                }
-                thisflag = 0;                   /* For the future.      */
+		if (n <= 0) {	/* Fenceposts.          */
+			lastflag = 0;
+			return (n < 0 ? FALSE : TRUE);
+		}
+		thisflag = 0;	/* For the future.      */
 
 		/* if we are in overwrite mode, not at eol,
 		   and next char is not a tab or we are at a tab stop,
-		   delete a char forword			*/
+		   delete a char forword                        */
 		if (curwp->w_bufp->b_mode & MDOVER &&
 		    curwp->w_doto < curwp->w_dotp->l_used &&
-			(lgetc(curwp->w_dotp, curwp->w_doto) != '\t' ||
-			 (curwp->w_doto) % 8 == 7))
-				ldelete(1L, FALSE);
+		    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' ||
+		     (curwp->w_doto) % 8 == 7))
+			ldelete(1L, FALSE);
 
 		/* do the appropriate insertion */
 		if (c == '}' && (curbp->b_mode & MDCMOD) != 0)
-	        	status = insbrace(n, c);
-	        else if (c == '#' && (curbp->b_mode & MDCMOD) != 0)
-	        	status = inspound();
-	        else
-	                status = linsert(n, c);
+			status = insbrace(n, c);
+		else if (c == '#' && (curbp->b_mode & MDCMOD) != 0)
+			status = inspound();
+		else
+			status = linsert(n, c);
 
 #if	CFENCE
 		/* check for CMODE fence matching */
 		if ((c == '}' || c == ')' || c == ']') &&
-				(curbp->b_mode & MDCMOD) != 0)
+		    (curbp->b_mode & MDCMOD) != 0)
 			fmatch(c);
 #endif
 
@@ -553,13 +549,13 @@ execute(c, f, n)
 				gacount = gasave;
 			}
 
-                lastflag = thisflag;
-                return (status);
-        }
+		lastflag = thisflag;
+		return (status);
+	}
 	TTbeep();
-	mlwrite("(Key not bound)");		/* complain		*/
-        lastflag = 0;                           /* Fake last flags.     */
-        return (FALSE);
+	mlwrite("(Key not bound)");	/* complain             */
+	lastflag = 0;		/* Fake last flags.     */
+	return (FALSE);
 }
 
 /*
@@ -569,38 +565,38 @@ execute(c, f, n)
 quickexit(f, n)
 {
 	register BUFFER *bp;	/* scanning pointer to buffers */
-        register BUFFER *oldcb; /* original current buffer */
+	register BUFFER *oldcb;	/* original current buffer */
 	register int status;
 
-        oldcb = curbp;                          /* save in case we fail */
+	oldcb = curbp;		/* save in case we fail */
 
 	bp = bheadp;
 	while (bp != NULL) {
-		if ((bp->b_flag&BFCHG) != 0	/* Changed.             */
-		&& (bp->b_flag&BFTRUNC) == 0	/* Not truncated P.K.	*/
-        	&& (bp->b_flag&BFINVS) == 0) {	/* Real.                */
-			curbp = bp;		/* make that buffer cur	*/
-			mlwrite("(Saving %s)",bp->b_fname);
+		if ((bp->b_flag & BFCHG) != 0	/* Changed.             */
+		    && (bp->b_flag & BFTRUNC) == 0	/* Not truncated P.K.   */
+		    && (bp->b_flag & BFINVS) == 0) {	/* Real.                */
+			curbp = bp;	/* make that buffer cur */
+			mlwrite("(Saving %s)", bp->b_fname);
 #if	PKCODE
 #else
 			mlwrite("\n");
 #endif
-                	if ((status = filesave(f, n)) != TRUE) {
-                		curbp = oldcb;	/* restore curbp */
-                		return(status);
-                	}
+			if ((status = filesave(f, n)) != TRUE) {
+				curbp = oldcb;	/* restore curbp */
+				return (status);
+			}
 		}
-	bp = bp->b_bufp;			/* on to the next buffer */
+		bp = bp->b_bufp;	/* on to the next buffer */
 	}
-        quit(f, n);                             /* conditionally quit   */
-	return(TRUE);
+	quit(f, n);		/* conditionally quit   */
+	return (TRUE);
 }
 
 static void emergencyexit(signr)
 int signr;
 {
 	quickexit(FALSE, 0);
-	quit(TRUE, 0);		
+	quit(TRUE, 0);
 }
 
 /*
@@ -609,12 +605,13 @@ int signr;
  */
 quit(f, n)
 {
-        register int    s;
+	register int s;
 
-        if (f != FALSE                          /* Argument forces it.  */
-        || anycb() == FALSE                     /* All buffers clean.   */
-						/* User says it's OK.   */
-        || (s=mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
+	if (f != FALSE		/* Argument forces it.  */
+	    || anycb() == FALSE	/* All buffers clean.   */
+	    /* User says it's OK.   */
+	    || (s =
+		mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
 #if	(FILOCK && BSD) || SVR4
 		if (lockrel() != TRUE) {
 			TTputc('\n');
@@ -624,14 +621,14 @@ quit(f, n)
 			exit(1);
 		}
 #endif
-                vttidy();
+		vttidy();
 		if (f)
 			exit(n);
 		else
-	                exit(GOOD);
-        }
+			exit(GOOD);
+	}
 	mlwrite("");
-        return(s);
+	return (s);
 }
 
 /*
@@ -641,15 +638,15 @@ quit(f, n)
  */
 ctlxlp(f, n)
 {
-        if (kbdmode != STOP) {
-                mlwrite("%%Macro already active");
-                return(FALSE);
-        }
-        mlwrite("(Start macro)");
+	if (kbdmode != STOP) {
+		mlwrite("%%Macro already active");
+		return (FALSE);
+	}
+	mlwrite("(Start macro)");
 	kbdptr = &kbdm[0];
 	kbdend = kbdptr;
-        kbdmode = RECORD;
-        return (TRUE);
+	kbdmode = RECORD;
+	return (TRUE);
 }
 
 /*
@@ -658,15 +655,15 @@ ctlxlp(f, n)
  */
 ctlxrp(f, n)
 {
-        if (kbdmode == STOP) {
-                mlwrite("%%Macro not active");
-                return(FALSE);
-        }
-	if (kbdmode == RECORD) {
-	        mlwrite("(End macro)");
-	        kbdmode = STOP;
+	if (kbdmode == STOP) {
+		mlwrite("%%Macro not active");
+		return (FALSE);
 	}
-        return(TRUE);
+	if (kbdmode == RECORD) {
+		mlwrite("(End macro)");
+		kbdmode = STOP;
+	}
+	return (TRUE);
 }
 
 /*
@@ -676,16 +673,16 @@ ctlxrp(f, n)
  */
 ctlxe(f, n)
 {
-        if (kbdmode != STOP) {
-                mlwrite("%%Macro already active");
-                return(FALSE);
-        }
-        if (n <= 0)
-                return (TRUE);
+	if (kbdmode != STOP) {
+		mlwrite("%%Macro already active");
+		return (FALSE);
+	}
+	if (n <= 0)
+		return (TRUE);
 	kbdrep = n;		/* remember how many times to execute */
 	kbdmode = PLAY;		/* start us in play mode */
 	kbdptr = &kbdm[0];	/*    at the beginning */
-	return(TRUE);
+	return (TRUE);
 }
 
 /*
@@ -695,46 +692,43 @@ ctlxe(f, n)
  */
 ctrlg(f, n)
 {
-        TTbeep();
+	TTbeep();
 	kbdmode = STOP;
 	mlwrite("(Aborted)");
-        return(ABORT);
+	return (ABORT);
 }
 
 /* tell the user that this command is illegal while we are in
    VIEW (read-only) mode				*/
 
 rdonly()
-
 {
 	TTbeep();
 	mlwrite("(Key illegal in VIEW mode)");
-	return(FALSE);
+	return (FALSE);
 }
 
 resterr()
-
 {
 	TTbeep();
 	mlwrite("(That command is RESTRICTED)");
-	return(FALSE);
+	return (FALSE);
 }
 
-nullproc()	/* user function that does NOTHING */
-
-{
+nullproc()
+{				/* user function that does NOTHING */
 }
 
-meta()	/* dummy function for binding to meta prefix */
-{
+meta()
+{				/* dummy function for binding to meta prefix */
 }
 
-cex()	/* dummy function for binding to control-x prefix */
-{
+cex()
+{				/* dummy function for binding to control-x prefix */
 }
 
-unarg()	/* dummy function for binding to universal-argument */
-{
+unarg()
+{				/* dummy function for binding to universal-argument */
 }
 
 /*****		Compiler specific Library functions	****/
@@ -746,12 +740,12 @@ unarg()	/* dummy function for binding to universal-argument */
 
 char *strncpy(dst, src, maxlen)
 
-char *dst;	/* destination of copied string */
-char *src;	/* source */
-int maxlen;	/* maximum length */
+char *dst;			/* destination of copied string */
+char *src;			/* source */
+int maxlen;			/* maximum length */
 
 {
-	char *dptr;	/* ptr into dst */
+	char *dptr;		/* ptr into dst */
 
 	dptr = dst;
 /*	while (*src && (maxlen-- > 0))
@@ -760,11 +754,11 @@ int maxlen;	/* maximum length */
 		*dptr++ = *src++;
 		maxlen--;
 	}
-	
-	*dptr = 0;		/* orig	*/
+
+	*dptr = 0;		/* orig */
 /*	if (maxlen > 0)
 		*dptr = 0;		*/
-	return(dst);
+	return (dst);
 }
 #endif
 
@@ -781,12 +775,12 @@ int maxlen;	/* maximum length */
 #undef	malloc
 #undef	free
 
-char *allocate(nbytes)	/* allocate nbytes and track */
-
-unsigned nbytes;	/* # of bytes to allocate */
+char *allocate(nbytes)
+			    /* allocate nbytes and track */
+unsigned nbytes;		/* # of bytes to allocate */
 
 {
-	char *mp;	/* ptr returned from malloc */
+	char *mp;		/* ptr returned from malloc */
 	char *malloc();
 
 	mp = malloc(nbytes);
@@ -797,20 +791,20 @@ unsigned nbytes;	/* # of bytes to allocate */
 #endif
 	}
 
-	return(mp);
+	return (mp);
 }
 
-release(mp)	/* release malloced memory and track */
-
-char *mp;	/* chunk of RAM to release */
+release(mp)
+    /* release malloced memory and track */
+char *mp;			/* chunk of RAM to release */
 
 {
-	unsigned *lp;	/* ptr to the long containing the block size */
+	unsigned *lp;		/* ptr to the long containing the block size */
 
 	if (mp) {
 		/* update amount of ram currently malloced */
-		lp = ((unsigned *)mp) - 1;
-		envram -= (long)*lp - 2;
+		lp = ((unsigned *) mp) - 1;
+		envram -= (long) *lp - 2;
 		free(mp);
 #if	RAMSHOW
 		dspram();
@@ -819,9 +813,8 @@ char *mp;	/* chunk of RAM to release */
 }
 
 #if	RAMSHOW
-dspram()	/* display the amount of RAM currently malloced */
-
-{
+dspram()
+{				/* display the amount of RAM currently malloced */
 	char mbuf[20];
 	char *sp;
 
@@ -848,7 +841,7 @@ dspram()	/* display the amount of RAM currently malloced */
 #if	CLEAN
 cexit(status)
 
-int status;	/* return status of emacs */
+int status;			/* return status of emacs */
 
 {
 	register BUFFER *bp;	/* buffer list pointer */
@@ -883,7 +876,7 @@ int status;	/* return status of emacs */
 #if	CALLED
 	eexitflag = TRUE;	/* flag a program exit */
 	eexitval = status;
-	return(status);
+	return (status);
 #else
 #undef	exit
 	exit(status);
