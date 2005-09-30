@@ -33,6 +33,12 @@ LIBDIR=/usr/lib
 em:	${OBJ}
 	${CC} ${DEFINES} -o em ${OBJ} ${LIBS}
 
+SPARSE=sparse
+SPARSE_FLAGS=-D__BIG_ENDIAN__ -D__ppc__ -D__linux__ -D__unix__
+
+sparse:
+	for i in $(SRC); do $(SPARSE) $(SPARSE_FLAGS) $(DEFINES) $$i; done
+
 clean:
 	rm -f core lintout makeout tags makefile.bak *.o
 
