@@ -1481,8 +1481,6 @@ BITMAP cclmap;
  */
 static BITMAP clearbits()
 {
-	char *malloc();
-
 	BITMAP cclstart, cclmap;
 	register int j;
 

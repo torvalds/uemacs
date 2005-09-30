@@ -10,6 +10,9 @@
 
 /* some global fuction declarations */
 
+#include <stdlib.h>
+#include <string.h>
+
 char *flook();
 char *getctext();
 char *getfname();
@@ -19,12 +22,8 @@ char *gtfun();
 char *gtusr();
 char *itoa();
 char *ltos();
-char *malloc();
 char *mklower();
 char *mkupper();
-char *strcat();
-char *strcpy();
-char *strncpy();
 char *token();
 char *transbind();
 unsigned int getckey();

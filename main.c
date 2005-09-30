@@ -118,7 +118,6 @@ char *argv[];			/* argument strings */
 	int cryptflag;		/* encrypting on the way in? */
 	char ekey[NPAT];	/* startup encryption key */
 #endif
-	char *strncpy();
 	extern *pathname[];	/* startup file path/name array */
 	int newc;
 #if	PKCODE
@@ -436,7 +435,6 @@ char bname[];
 {
 	register BUFFER *bp;
 	register WINDOW *wp;
-	char *malloc();
 
 	bp = bfind(bname, TRUE, 0);	/* First buffer         */
 	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
@@ -732,35 +730,6 @@ unarg()
 }
 
 /*****		Compiler specific Library functions	****/
-
-#if	MSDOS || PKCODE
-/*	strncpy:	copy a string...with length restrictions
-			ALWAYS null terminate
-*/
-
-char *strncpy(dst, src, maxlen)
-
-char *dst;			/* destination of copied string */
-char *src;			/* source */
-int maxlen;			/* maximum length */
-
-{
-	char *dptr;		/* ptr into dst */
-
-	dptr = dst;
-/*	while (*src && (maxlen-- > 0))
-		*dptr++ = *src++;	*/
-	while ((maxlen > 0) && *src) {
-		*dptr++ = *src++;
-		maxlen--;
-	}
-
-	*dptr = 0;		/* orig */
-/*	if (maxlen > 0)
-		*dptr = 0;		*/
-	return (dst);
-}
-#endif
 
 #if	RAMSIZE
 /*	These routines will allow me to track memory usage by placing

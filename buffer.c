@@ -450,7 +450,6 @@ register char *bname;
 	register BUFFER *bp;
 	register BUFFER *sb;	/* buffer to insert after */
 	register LINE *lp;
-	char *malloc();
 
 	bp = bheadp;
 	while (bp != NULL) {

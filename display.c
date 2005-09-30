@@ -56,7 +56,6 @@ vtinit()
 {
 	register int i;
 	register VIDEO *vp;
-	char *malloc();
 
 	TTopen();		/* open the screen */
 	TTkopen();		/* open the keyboard */

@@ -660,43 +660,6 @@ char *value;			/* value to set to */
 	return (status);
 }
 
-/*	atoi:	ascii string to integer......This is too
-		inconsistant to use the system's	*/
-
-atoi(st)
-
-char *st;
-
-{
-	int result;		/* resulting number */
-	int sign;		/* sign of resulting number */
-	char c;			/* current char being examined */
-
-	result = 0;
-	sign = 1;
-
-	/* skip preceding whitespace */
-	while (*st == ' ' || *st == '\t')
-		++st;
-
-	/* check for sign */
-	if (*st == '-') {
-		sign = -1;
-		++st;
-	}
-	if (*st == '+')
-		++st;
-
-	/* scan digits, build value */
-	while ((c = *st++))
-		if (c >= '0' && c <= '9')
-			result = result * 10 + c - '0';
-		else
-			return (0);
-
-	return (result * sign);
-}
-
 /*	itoa:	integer to ascii string.......... This is too
 		inconsistant to use the system's	*/
 

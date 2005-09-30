@@ -33,7 +33,6 @@ register int used;
 {
 	register LINE *lp;
 	register int size;
-	char *malloc();
 
 	size = (used + NBLOCK - 1) & ~(NBLOCK - 1);
 	if (size == 0)		/* Assume that an empty */
