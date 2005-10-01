@@ -491,3 +491,11 @@ extern int copyregion(int f, int n);
 extern int lowerregion(int f, int n);
 extern int upperregion(int f, int n);
 extern int getregion(REGION *rp);
+
+/* posix.c */
+extern void ttopen(void);
+extern void ttclose(void);
+extern int ttputc(int c);
+extern void ttflush(void);
+extern int ttgetc(void);
+extern int typahead(void);

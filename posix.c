@@ -38,7 +38,7 @@ char tobuf[TBUFSIZ];		/* terminal output buffer */
  * On VMS, it translates TT until it finds the terminal, then assigns
  * a channel to it and sets it raw. On CPM it is a no-op.
  */
-ttopen()
+void ttopen(void)
 {
 	tcgetattr(0, &otermios);	/* save old settings */
 
@@ -86,7 +86,7 @@ ttopen()
  * interpreter. On VMS it puts the terminal back in a reasonable state.
  * Another no-operation on CPM.
  */
-ttclose()
+void ttclose(void)
 {
 	tcsetattr(0, TCSADRAIN, &otermios);	/* restore terminal settings */
 }
@@ -97,7 +97,7 @@ ttclose()
  * On CPM terminal I/O unbuffered, so we just write the byte out. Ditto on
  * MS-DOS (use the very very raw console output routine).
  */
-ttputc(c)
+int ttputc(int c)
 {
 	fputc(c, stdout);
 }
@@ -106,7 +106,7 @@ ttputc(c)
  * Flush terminal buffer. Does real work where the terminal output is buffered
  * up. A no-operation on systems where byte at a time terminal I/O is done.
  */
-ttflush()
+void ttflush(void)
 {
 /*
  * Add some terminal output success checking, sometimes an orphaned
@@ -135,7 +135,7 @@ ttflush()
  * at all. More complex in VMS that almost anyplace else, which figures. Very
  * simple on CPM, because the system can do exactly what you want.
  */
-ttgetc()
+int ttgetc(void)
 {
 	return (255 & fgetc(stdin));	/* 8BIT P.K. */
 }
@@ -144,7 +144,7 @@ ttgetc()
 		keyboard buffer
 */
 
-typahead()
+int typahead(void)
 {
 	int x;			/* holds # of pending chars */
 

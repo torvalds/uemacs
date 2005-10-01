@@ -14,8 +14,10 @@
 #define	termdef	1		/* don't define "term" external */
 
 #include <stdio.h>
+
 #include	"estruct.h"
 #include        "edef.h"
+
 
 #if TERMCAP
 
@@ -29,23 +31,26 @@
 #define BEL     0x07
 #define ESC     0x1B
 
-extern int ttopen();
-extern int ttgetc();
-extern int ttputc();
-extern int tgetnum();
-extern int ttflush();
-extern int ttclose();
-extern int tcapkopen();
-extern int tcapkclose();
-extern int tcapmove();
-extern int tcapeeol();
-extern int tcapeeop();
-extern int tcapbeep();
-extern int tcaprev();
-extern int tcapcres();
-extern int tcapopen();
+/* FIXME! termcap */
+extern int tgetnum(char *);
+extern char *tgetstr(char *id, char **area);
+extern int tputs(const char *str, int affcnt, int (*putc)(int));
+extern char *tgoto(const char *cap, int col, int row);
+
+static void tcapkopen(void);
+static void tcapkclose(void);
+static void tcapmove(int, int);
+static void tcapeeol(void);
+static void tcapeeop(void);
+static void tcapbeep(void);
+static void tcaprev(int);
+static int tcapcres(char *);
+static void tcapscrollregion(int top, int bot);
+static void putpad(char *str);
+
+static void tcapopen(void);
 #if	PKCODE
-extern int tcapclose();
+static void tcapclose(void);
 #endif
 extern int tput();
 extern char *tgoto();
@@ -54,8 +59,8 @@ extern int tcapfcol();
 extern int tcapbcol();
 #endif
 #if     SCROLLCODE
-extern int tcapscroll_reg();
-extern int tcapscroll_delins();
+static void tcapscroll_reg(int from, int to, int lines);
+static void tcapscroll_delins(int from, int to, int lines);
 #endif
 
 
@@ -106,10 +111,10 @@ TERM term = {
 #endif
 };
 
-tcapopen()
+static void tcapopen(void)
 {
 	char *getenv();
-	char *t, *p, *tgetstr();
+	char *t, *p;
 	char tcbuf[1024];
 	char *tv_stype;
 	char err_str[72];
@@ -216,7 +221,7 @@ tcapopen()
 
 #if	PKCODE
 
-tcapclose()
+static void tcapclose(void)
 {
 	putpad(tgoto(CM, 0, term.t_nrow));
 	putpad(TE);
@@ -225,7 +230,7 @@ tcapclose()
 }
 #endif
 
-tcapkopen()
+static void tcapkopen(void)
 {
 #if	PKCODE
 	putpad(TI);
@@ -234,30 +239,31 @@ tcapkopen()
 	strcpy(sres, "NORMAL");
 }
 
-tcapkclose()
+static void tcapkclose(void)
 {
 }
 
-tcapmove(row, col)
-register int row, col;
+static void tcapmove(int row, int col)
 {
 	putpad(tgoto(CM, col, row));
 }
 
-tcapeeol()
+static void tcapeeol(void)
 {
 	putpad(CE);
 }
 
-tcapeeop()
+static void tcapeeop(void)
 {
 	putpad(CL);
 }
 
-tcaprev(state)
-    /* change reverse video status */
-int state;			/* FALSE = normal video, TRUE = reverse video */
-
+/*
+ * change reverse video status
+ *
+ * int state;		FALSE = normal video, TRUE = reverse video
+ */
+static void tcaprev(int state)
 {
 	static int revstate = FALSE;
 	if (state) {
@@ -267,7 +273,7 @@ int state;			/* FALSE = normal video, TRUE = reverse video */
 		putpad(SE);
 }
 
-tcapcres()
+static int tcapcres(char *res)
 {				/* change screen resolution */
 	return (TRUE);
 }
@@ -275,7 +281,7 @@ tcapcres()
 #if SCROLLCODE
 
 /* move howmanylines lines starting at from to to */
-tcapscroll_reg(from, to, howmanylines)
+static void tcapscroll_reg(int from, int to, int howmanylines)
 {
 	int i;
 	if (to == from)
@@ -295,7 +301,7 @@ tcapscroll_reg(from, to, howmanylines)
 }
 
 /* move howmanylines lines starting at from to to */
-tcapscroll_delins(from, to, howmanylines)
+static void tcapscroll_delins(int from, int to, int howmanylines)
 {
 	int i;
 	if (to == from)
@@ -318,7 +324,7 @@ tcapscroll_delins(from, to, howmanylines)
 }
 
 /* cs is set up just like cm, so we use tgoto... */
-tcapscrollregion(top, bot)
+static void tcapscrollregion(int top, int bot)
 {
 	ttputc(PC);
 	putpad(tgoto(CS, bot, top));
@@ -326,44 +332,44 @@ tcapscrollregion(top, bot)
 
 #endif
 
-spal(dummy)
+void spal(int dummy)
 {				/* change palette string */
 	/*      Does nothing here       */
 }
 
 #if	COLOR
-tcapfcol()
+static void tcapfcol(void)
 {				/* no colors here, ignore this */
 }
 
-tcapbcol()
+static void tcapbcol(void)
 {				/* no colors here, ignore this */
 }
 #endif
 
-tcapbeep()
+static void tcapbeep(void)
 {
 	ttputc(BEL);
 }
 
-putpad(str)
-char *str;
+static void putpad(char *str)
 {
 	tputs(str, 1, ttputc);
 }
 
-putnpad(str, n)
-char *str;
+static void putnpad(char *str, int n)
 {
 	tputs(str, n, ttputc);
 }
 
 
 #if	FNLABEL
-fnclabel(f, n)
-    /* label a function key */
-int f, n;			/* default flag, numeric argument [unused] */
-
+/*
+ * label a function key
+ *
+ * int f, n;		default flag, numeric argument [unused]
+ */
+static int fnclabel(int f, int n)
 {
 	/* on machines with no function keys...don't bother */
 	return (TRUE);
@@ -371,7 +377,7 @@ int f, n;			/* default flag, numeric argument [unused] */
 #endif
 #else
 
-hello()
+static void hello(void)
 {
 }
 

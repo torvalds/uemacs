@@ -554,25 +554,25 @@ typedef struct {
 	short t_margin;		/* min margin for extended lines */
 	short t_scrsiz;		/* size of scroll region "      */
 	int t_pause;		/* # times thru update to pause */
-	int (*t_open) ();	/* Open terminal at the start.  */
-	int (*t_close) ();	/* Close terminal at end.       */
-	int (*t_kopen) ();	/* Open keyboard                */
-	int (*t_kclose) ();	/* close keyboard               */
-	int (*t_getchar) ();	/* Get character from keyboard. */
-	int (*t_putchar) ();	/* Put character to display.    */
-	int (*t_flush) ();	/* Flush output buffers.        */
-	int (*t_move) ();	/* Move the cursor, origin 0.   */
-	int (*t_eeol) ();	/* Erase to end of line.        */
-	int (*t_eeop) ();	/* Erase to end of page.        */
-	int (*t_beep) ();	/* Beep.                        */
-	int (*t_rev) ();	/* set reverse video state      */
-	int (*t_rez) ();	/* change screen resolution     */
+	void (*t_open)(void);	/* Open terminal at the start.  */
+	void (*t_close)(void);	/* Close terminal at end.       */
+	void (*t_kopen)(void);	/* Open keyboard                */
+	void (*t_kclose)(void);	/* close keyboard               */
+	int (*t_getchar)(void);	/* Get character from keyboard. */
+	int (*t_putchar)(int);	/* Put character to display.    */
+	void (*t_flush) (void);	/* Flush output buffers.        */
+	void (*t_move)(int, int);/* Move the cursor, origin 0.   */
+	void (*t_eeol)(void);	/* Erase to end of line.        */
+	void (*t_eeop)(void);	/* Erase to end of page.        */
+	void (*t_beep)(void);	/* Beep.                        */
+	void (*t_rev)(int);	/* set reverse video state      */
+	int (*t_rez)(char *);	/* change screen resolution     */
 #if	COLOR
 	int (*t_setfor) ();	/* set forground color          */
 	int (*t_setback) ();	/* set background color         */
 #endif
 #if     SCROLLCODE
-	int (*t_scroll) ();	/* scroll a region of the screen */
+	void (*t_scroll)(int, int,int);	/* scroll a region of the screen */
 #endif
 } TERM;
 
