@@ -431,7 +431,7 @@ int dobuf(BUFFER *bp)
 	int i;			/* index */
 	int c;			/* temp character */
 	int force;		/* force TRUE result? */
-	WINDOW *wp;		/* ptr to windows to scan */
+	window_t *wp;		/* ptr to windows to scan */
 	WHBLOCK *whlist;	/* ptr to !WHILE list */
 	WHBLOCK *scanner;	/* ptr during scan */
 	WHBLOCK *whtemp;	/* temporary ptr to a WHBLOCK */

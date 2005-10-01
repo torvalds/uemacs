@@ -220,7 +220,7 @@ int scrflags;
  */
 int update(int force)
 {
-	register WINDOW *wp;
+	register window_t *wp;
 
 #if	TYPEAH && ! PKCODE
 	if (force == FALSE && typahead())
@@ -242,7 +242,7 @@ int update(int force)
 		if (wp->w_flag & WFMODE) {
 			if (wp->w_bufp->b_nwnd > 1) {
 				/* make sure all previous windows have this */
-				register WINDOW *owp;
+				register window_t *owp;
 				owp = wheadp;
 				while (owp != NULL) {
 					if (owp->w_bufp == wp->w_bufp)
@@ -320,7 +320,7 @@ int update(int force)
  *	check to see if the cursor is on in the window
  *	and re-frame it if needed or wanted
  */
-int reframe(WINDOW *wp)
+int reframe(window_t *wp)
 {
 	register LINE *lp, *lp0;
 	register int i;
@@ -408,9 +408,9 @@ int reframe(WINDOW *wp)
  * updone:
  *	update the current line	to the virtual screen
  *
- * WINDOW *wp;		window to update current line in
+ * window_t *wp;		window to update current line in
  */
-void updone(WINDOW *wp)
+void updone(window_t *wp)
 {
 	register LINE *lp;	/* line to update */
 	register int sline;	/* physical screen line to update */
@@ -441,9 +441,9 @@ void updone(WINDOW *wp)
  * updall:
  *	update all the lines in a window on the virtual screen
  *
- * WINDOW *wp;		window to update lines in
+ * window_t *wp;		window to update lines in
  */
-void updall(WINDOW *wp)
+void updall(window_t *wp)
 {
 	register LINE *lp;	/* line to update */
 	register int sline;	/* physical screen line to update */
@@ -522,7 +522,7 @@ void updpos(void)
  */
 void upddex(void)
 {
-	register WINDOW *wp;
+	register window_t *wp;
 	register LINE *lp;
 	register int i, j;
 
@@ -1054,7 +1054,7 @@ int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
  * change the modeline format by hacking at this routine. Called by "update"
  * any time there is a dirty window.
  */
-void modeline(WINDOW *wp)
+void modeline(window_t *wp)
 {
 	register char *cp;
 	register int c;
@@ -1245,7 +1245,7 @@ void modeline(WINDOW *wp)
 
 void upmode(void)
 {				/* update all the mode lines */
-	register WINDOW *wp;
+	register window_t *wp;
 
 	wp = wheadp;
 	while (wp != NULL) {

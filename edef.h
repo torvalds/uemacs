@@ -91,7 +91,7 @@ char *cname[] = {		/* names of colors              */
 KILL *kbufp = NULL;		/* current kill buffer chunk pointer    */
 KILL *kbufh = NULL;		/* kill buffer header pointer           */
 int kused = KBLOCK;		/* # of bytes used in kill buffer       */
-WINDOW *swindow = NULL;		/* saved window pointer                 */
+window_t *swindow = NULL;	/* saved window pointer                 */
 int cryptflag = FALSE;		/* currently encrypting?                */
 short *kbdptr;			/* current position in keyboard buf */
 short *kbdend = &kbdm[0];	/* ptr to end of the keyboard */
@@ -129,14 +129,14 @@ int curcol;			/* Cursor column                */
 int thisflag;			/* Flags, this command          */
 int lastflag;			/* Flags, last command          */
 int curgoal;			/* Goal for C-P, C-N            */
-WINDOW *curwp;			/* Current window               */
+window_t *curwp;		/* Current window               */
 BUFFER *curbp;			/* Current buffer               */
-WINDOW *wheadp;			/* Head of list of windows      */
+window_t *wheadp;		/* Head of list of windows      */
 BUFFER *bheadp;			/* Head of list of buffers      */
 BUFFER *blistp;			/* Buffer for C-X C-B           */
 
 BUFFER *bfind(char *bname, int cflag, int bflag);	/* Lookup a buffer by name      */
-WINDOW *wpopup();		/* Pop up window creation       */
+window_t *wpopup();		/* Pop up window creation       */
 LINE *lalloc();			/* Allocate a line              */
 char sres[NBUFN];		/* current screen resolution    */
 
@@ -239,7 +239,7 @@ extern char *cname[];		/* names of colors              */
 extern KILL *kbufp;		/* current kill buffer chunk pointer */
 extern KILL *kbufh;		/* kill buffer header pointer   */
 extern int kused;		/* # of bytes used in KB        */
-extern WINDOW *swindow;		/* saved window pointer         */
+extern window_t *swindow;	/* saved window pointer         */
 extern int cryptflag;		/* currently encrypting?        */
 extern short *kbdptr;		/* current position in keyboard buf */
 extern short *kbdend;		/* ptr to end of the keyboard */
@@ -276,14 +276,14 @@ extern int curcol;		/* Cursor column                */
 extern int thisflag;		/* Flags, this command          */
 extern int lastflag;		/* Flags, last command          */
 extern int curgoal;		/* Goal for C-P, C-N            */
-extern WINDOW *curwp;		/* Current window               */
+extern window_t *curwp;		/* Current window               */
 extern BUFFER *curbp;		/* Current buffer               */
-extern WINDOW *wheadp;		/* Head of list of windows      */
+extern window_t *wheadp;	/* Head of list of windows      */
 extern BUFFER *bheadp;		/* Head of list of buffers      */
 extern BUFFER *blistp;		/* Buffer for C-X C-B           */
 
 extern BUFFER *bfind();		/* Lookup a buffer by name      */
-extern WINDOW *wpopup();	/* Pop up window creation       */
+extern window_t *wpopup();	/* Pop up window creation       */
 extern LINE *lalloc();		/* Allocate a line              */
 extern char sres[NBUFN];	/* current screen resolution    */
 extern char pat[];		/* Search pattern               */

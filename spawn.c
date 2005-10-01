@@ -258,7 +258,7 @@ int execprg(int f, int n)
 int pipecmd(int f, int n)
 {
 	register int s;		/* return status from CLI */
-	register WINDOW *wp;	/* pointer to new window */
+	register window_t *wp;	/* pointer to new window */
 	register BUFFER *bp;	/* pointer to buffer to zot */
 	char line[NLINE];	/* command line send to shell */
 	static char bname[] = "command";

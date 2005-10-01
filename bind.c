@@ -17,7 +17,7 @@ int help(int f, int n)
 {				/* give me some help!!!!
 				   bring up a fake buffer and read the help file
 				   into it with view mode                 */
-	register WINDOW *wp;	/* scaning pointer to windows */
+	register window_t *wp;	/* scaning pointer to windows */
 	register BUFFER *bp;	/* buffer pointer to help */
 	char *fname;		/* ptr to file returned by flook() */
 
@@ -272,7 +272,7 @@ int apro(int f, int n)
 int buildlist(int type, char *mstring)
 #endif
 {
-	register WINDOW *wp;	/* scanning pointer to windows */
+	register window_t *wp;	/* scanning pointer to windows */
 	register KEYTAB *ktp;	/* pointer into the command table */
 	register NBIND *nptr;	/* pointer into the name binding table */
 	register BUFFER *bp;	/* buffer to put binding list into */

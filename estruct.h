@@ -428,8 +428,8 @@
  * the full blown redisplay is just too expensive to run for every input
  * character.
  */
-typedef struct WINDOW {
-	struct WINDOW *w_wndp;	/* Next window                  */
+typedef struct window {
+	struct window *w_wndp;	/* Next window                  */
 	struct BUFFER *w_bufp;	/* Buffer displayed in window   */
 	struct LINE *w_linep;	/* Top line in the window       */
 	struct LINE *w_dotp;	/* Line containing "."          */
@@ -444,7 +444,7 @@ typedef struct WINDOW {
 	char w_fcolor;		/* current forground color      */
 	char w_bcolor;		/* current background color     */
 #endif
-} WINDOW;
+} window_t;
 
 #define WFFORCE 0x01		/* Window needs forced reframe  */
 #define WFMOVE  0x02		/* Movement from line to line   */

@@ -427,11 +427,11 @@ int main(int argc, char **argv)
 void edinit(char *bname)
 {
 	register BUFFER *bp;
-	register WINDOW *wp;
+	register window_t *wp;
 
 	bp = bfind(bname, TRUE, 0);	/* First buffer         */
 	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
-	wp = (WINDOW *) malloc(sizeof(WINDOW));	/* First window         */
+	wp = (window_t *) malloc(sizeof(window_t));	/* First window         */
 	if (bp == NULL || wp == NULL || blistp == NULL)
 		exit(1);
 	curbp = bp;		/* Make this current    */
@@ -817,8 +817,8 @@ dspram()
 int cexit(int status)
 {
 	register BUFFER *bp;	/* buffer list pointer */
-	register WINDOW *wp;	/* window list pointer */
-	register WINDOW *tp;	/* temporary window pointer */
+	register window_t *wp;	/* window list pointer */
+	register window_t *tp;	/* temporary window pointer */
 
 	/* first clean up the windows */
 	wp = wheadp;

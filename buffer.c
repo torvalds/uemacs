@@ -78,7 +78,7 @@ int nextbuffer(int f, int n)
  */
 int swbuffer(BUFFER *bp)
 {
-	register WINDOW *wp;
+	register window_t *wp;
 
 	if (--curbp->b_nwnd == 0) {	/* Last use.            */
 		curbp->b_dotp = curwp->w_dotp;
@@ -219,7 +219,7 @@ int namebuffer(int f, int n)
  */
 int listbuffers(int f, int n)
 {
-	register WINDOW *wp;
+	register window_t *wp;
 	register BUFFER *bp;
 	register int s;
 

@@ -53,7 +53,7 @@ LINE *lalloc(int used)
 int lfree(LINE *lp)
 {
 	register BUFFER *bp;
-	register WINDOW *wp;
+	register window_t *wp;
 
 	wp = wheadp;
 	while (wp != NULL) {
@@ -97,7 +97,7 @@ int lfree(LINE *lp)
  */
 int lchange(int flag)
 {
-	register WINDOW *wp;
+	register window_t *wp;
 
 	if (curbp->b_nwnd != 1)	/* Ensure hard.     */
 		flag = WFHARD;
@@ -167,7 +167,7 @@ int linsert(int n, int c)
 	register LINE *lp3;
 	register int doto;
 	register int i;
-	register WINDOW *wp;
+	register window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -289,7 +289,7 @@ int lnewline(void)
 	register LINE *lp1;
 	register LINE *lp2;
 	register int doto;
-	register WINDOW *wp;
+	register window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -351,7 +351,7 @@ int ldelete(long n, int kflag)
 	register LINE *dotp;
 	register int doto;
 	register int chunk;
-	register WINDOW *wp;
+	register window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -474,7 +474,7 @@ int ldelnewline(void)
 	register LINE *lp1;
 	register LINE *lp2;
 	register LINE *lp3;
-	register WINDOW *wp;
+	register window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
