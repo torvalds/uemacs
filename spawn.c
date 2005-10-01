@@ -5,6 +5,7 @@
  */
 
 #include        <stdio.h>
+#include        <unistd.h>
 #include	"estruct.h"
 #include        "edef.h"
 #include        "efunc.h"
@@ -104,16 +105,17 @@ int spawncli(int f, int n)
 
 #if	BSD | __hpux | SVR4
 
-void bktoshell(void)
+int bktoshell(int f, int n)
 {				/* suspend MicroEMACS and wait to wake up */
-	int pid;
-
 	vttidy();
 /******************************
+	int pid;
+
 	pid = getpid();
 	kill(pid,SIGTSTP);
 ******************************/
 	kill(0, SIGTSTP);
+	return (TRUE);
 }
 
 void rtfrmshell(void)

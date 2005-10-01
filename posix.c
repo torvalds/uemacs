@@ -13,6 +13,7 @@
 #ifdef POSIX
 
 #include <stdio.h>
+#include <unistd.h>
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
@@ -23,9 +24,7 @@
 #include <errno.h>
 
 static int kbdflgs;			/* saved keyboard fd flags      */
-static int kbdpoll;			/* in O_NDELAY mode                     */
-static int kbdqp;			/* there is a char in kbdq      */
-static char kbdq;			/* char we've already read      */
+static int kbdpoll;			/* in O_NDELAY mode             */
 
 static struct termios otermios;		/* original terminal characteristics */
 static struct termios ntermios;		/* charactoristics to use inside */
@@ -101,6 +100,7 @@ void ttclose(void)
 int ttputc(int c)
 {
 	fputc(c, stdout);
+	return (TRUE);
 }
 
 /*

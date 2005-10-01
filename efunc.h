@@ -120,7 +120,7 @@ extern int istring(int f, int n);
 extern int ovstring(int f, int n);
 
 /* main.c */
-extern int edinit(char *bname);
+extern void edinit(char *bname);
 extern int execute(int c, int f, int n);
 extern int quickexit(int f, int n);
 extern int quit(int f, int n);
@@ -320,7 +320,7 @@ extern int cbuf40(int f, int n);
 
 /* spawn.c */
 extern int spawncli(int f, int n);
-extern void bktoshell(void);
+extern int bktoshell(int f, int n);
 extern void rtfrmshell(void);
 extern int spawn(int f, int n);
 extern int execprg(int f, int n);

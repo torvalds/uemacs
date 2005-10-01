@@ -409,10 +409,10 @@ KEYTAB keytab[NBINDS] = {
 	,
 
 	/* special internal bindings */
-	SPEC | META | 'W', wrapword,	/* called on word wrap */
-	SPEC | META | 'C', nullproc,	/*  every command input */
-	SPEC | META | 'R', nullproc,	/*  on file read */
-	SPEC | META | 'X', nullproc,	/*  on window change P.K. */
+	{ SPEC | META | 'W', wrapword },	/* called on word wrap */
+	{ SPEC | META | 'C', nullproc },	/*  every command input */
+	{ SPEC | META | 'R', nullproc },	/*  on file read */
+	{ SPEC | META | 'X', nullproc },	/*  on window change P.K. */
 
 	{0, NULL}
 };

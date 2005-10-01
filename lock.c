@@ -14,9 +14,6 @@
 #if	BSD | SVR4
 #include <sys/errno.h>
 
-extern int sys_nerr;		/* number of system error messages defined */
-extern int errno;		/* current error */
-
 char *lname[NLOCKS];		/* names of all locked files */
 int numlocks;			/* # of current locks active */
 
@@ -157,10 +154,7 @@ void lckerror(char *errstr)
 
 	strcpy(obuf, errstr);
 	strcat(obuf, " - ");
-	if (errno < sys_nerr)
-		strcat(obuf, sys_errlist[errno]);
-	else
-		strcat(obuf, "(can not get system error message)");
+	strcat(obuf, strerror(errno));
 	mlwrite(obuf);
 }
 #endif

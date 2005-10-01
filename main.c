@@ -94,7 +94,7 @@ int emacs(int argc, char **argv)
 int main(int argc, char **argv)
 #endif
 {
-	register int c;		/* command character */
+	register int c = -1;	/* command character */
 	register int f;		/* default flag */
 	register int n;		/* numeric repeat count */
 	register int mflag;	/* negative flag on repeat */
@@ -115,7 +115,6 @@ int main(int argc, char **argv)
 	int cryptflag;		/* encrypting on the way in? */
 	char ekey[NPAT];	/* startup encryption key */
 #endif
-	extern *pathname[];	/* startup file path/name array */
 	int newc;
 
 #if	PKCODE & VMS
@@ -373,7 +372,7 @@ int main(int argc, char **argv)
 		n = 4;		/* with argument of 4 */
 		mflag = 0;	/* that can be discarded. */
 		mlwrite("Arg: 4");
-		while ((c = getcmd()) >= '0' && c <= '9' || c == reptc
+		while (((c = getcmd()) >= '0' && c <= '9') || c == reptc
 		       || c == '-') {
 			if (c == reptc)
 				if ((n > 0) == ((n * 4) > 0))
@@ -425,7 +424,7 @@ int main(int argc, char **argv)
  * as an argument, because the main routine may have been told to read in a
  * file by default, and we want the buffer name to be right.
  */
-int edinit(char *bname)
+void edinit(char *bname)
 {
 	register BUFFER *bp;
 	register WINDOW *wp;
@@ -706,20 +705,28 @@ int resterr(void)
 	return (FALSE);
 }
 
+/* user function that does NOTHING */
 int nullproc(int f, int n)
-{				/* user function that does NOTHING */
+{
+	return (TRUE);
 }
 
+/* dummy function for binding to meta prefix */
 int meta(int f, int n)
-{				/* dummy function for binding to meta prefix */
+{
+	return (TRUE);
 }
 
+/* dummy function for binding to control-x prefix */
 int cex(int f, int n)
-{				/* dummy function for binding to control-x prefix */
+{
+	return (TRUE);
 }
 
+/* dummy function for binding to universal-argument */
 int unarg(int f, int n)
-{				/* dummy function for binding to universal-argument */
+{
+	return (TRUE);
 }
 
 /*****		Compiler specific Library functions	****/
