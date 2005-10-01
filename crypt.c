@@ -12,7 +12,7 @@
 
 #if	CRYPT
 
-static int mod95();
+static int mod95(int);
 
 /*
  * reset encryption key of current buffer

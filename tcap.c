@@ -109,7 +109,6 @@ TERM term = {
 
 static void tcapopen(void)
 {
-	char *getenv();
 	char *t, *p;
 	char tcbuf[1024];
 	char *tv_stype;

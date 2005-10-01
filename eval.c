@@ -34,8 +34,6 @@ char *gtfun(char *fname)
 	char arg2[NSTRING];	/* value of second argument */
 	char arg3[NSTRING];	/* value of third argument */
 	static char result[2 * NSTRING];	/* string result */
-	char *flook();		/* look file up on path */
-	char *xlat();		/* translate a char string */
 
 	/* look the function up in the function table */
 	fname[3] = 0;		/* only first 3 chars significant */

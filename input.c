@@ -112,7 +112,6 @@ fn_t getname(void)
 	register NBIND *cffp;	/* current ptr to entry in name binding table */
 	register NBIND *lffp;	/* last ptr to entry in name binding table */
 	char buf[NSTRING];	/* buffer to hold tentative command name */
-	int (*fncmatch()) ();
 
 	/* starting at the beginning of the string buffer */
 	cpos = 0;

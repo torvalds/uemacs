@@ -27,7 +27,6 @@ int lockchk(char *fname)
 {
 	register int i;		/* loop indexes */
 	register int status;	/* return status */
-	char *undolock();
 
 	/* check to see if that file is already locked here */
 	if (numlocks > 0)
@@ -97,7 +96,6 @@ int lock(char *fname)
 	register char *locker;	/* lock error message */
 	register int status;	/* return status */
 	char msg[NSTRING];	/* message string */
-	char *dolock();
 
 	/* attempt to lock the file */
 	locker = dolock(fname);
@@ -131,7 +129,6 @@ int lock(char *fname)
 int unlock(char *fname)
 {
 	register char *locker;	/* undolock return string */
-	char *undolock();
 
 	/* unclock and return */
 	locker = undolock(fname);

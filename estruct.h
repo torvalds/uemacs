@@ -601,7 +601,7 @@ typedef struct {
 
 typedef struct {
 	short k_code;		/* Key code                     */
-	int (*k_fp) ();		/* Routine to handle it         */
+	int (*k_fp)(int, int);	/* Routine to handle it         */
 } KEYTAB;
 
 /*	structure for the name binding table		*/

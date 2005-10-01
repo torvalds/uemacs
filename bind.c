@@ -89,7 +89,7 @@ int deskey(int f, int n)
 int bindtokey(int f, int n)
 {
 	register unsigned int c;	/* command key to bind */
-	register int (*kfunc) ();	/* ptr to the requested function to bind to */
+	register fn_t kfunc;	/* ptr to the requested function to bind to */
 	register KEYTAB *ktp;	/* pointer into the command table */
 	register int found;	/* matched command flag */
 	char outseq[80];	/* output buffer for keystroke sequence */
@@ -706,7 +706,6 @@ unsigned int stock(char *keyname)
 char *transbind(char *skey)
 {
 	char *bindname;
-	unsigned int stock();
 
 	bindname = getfname(getbind(stock(skey)));
 	if (bindname == NULL)

@@ -20,8 +20,7 @@
  */
 int namedcmd(int f, int n)
 {
-	register int (*kfunc) ();	/* ptr to the requexted function to bind to */
-	int (*getname()) ();
+	register fn_t kfunc;	/* ptr to the requexted function to bind to */
 
 	/* prompt the user to type a named command */
 	mlwrite(": ");
@@ -34,7 +33,7 @@ int namedcmd(int f, int n)
 	}
 
 	/* and then execute the command */
-	return ((*kfunc) (f, n));
+	return kfunc(f, n);
 }
 
 /*
@@ -74,12 +73,11 @@ int docmd(char *cline)
 {
 	register int f;		/* default argument flag */
 	register int n;		/* numeric repeat value */
-	int (*fnc) ();		/* function to execute */
+	fn_t fnc;		/* function to execute */
 	int status;		/* return status of function */
 	int oldcle;		/* old contents of clexec flag */
 	char *oldestr;		/* original exec string */
 	char tkn[NSTRING];	/* next token off of command line */
-	int (*fncmatch()) ();
 
 	/* if we are scanning and not executing..go back here */
 	if (execlevel)

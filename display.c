@@ -1512,7 +1512,6 @@ void getscreensize(int *widthp, int *heightp)
 void sizesignal(int signr)
 {
 	int w, h;
-	extern int errno;
 	int old_errno = errno;
 
 	getscreensize(&w, &h);

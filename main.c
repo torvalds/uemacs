@@ -82,9 +82,9 @@ extern unsigned _stklen = 32766;
 
 #if	UNIX
 #include <signal.h>
-static void emergencyexit();
+static void emergencyexit(int);
 #ifdef SIGWINCH
-extern void sizesignal();
+extern void sizesignal(int);
 #endif
 #endif
 

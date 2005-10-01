@@ -105,11 +105,7 @@ window_t *wheadp;		/* Head of list of windows      */
 BUFFER *bheadp;			/* Head of list of buffers      */
 BUFFER *blistp;			/* Buffer for C-X C-B           */
 
-BUFFER *bfind(char *bname, int cflag, int bflag);	/* Lookup a buffer by name      */
-window_t *wpopup();		/* Pop up window creation       */
-LINE *lalloc();			/* Allocate a line              */
 char sres[NBUFN];		/* current screen resolution    */
-
 char pat[NPAT];			/* Search pattern               */
 char tap[NPAT];			/* Reversed pattern array.      */
 char rpat[NPAT];		/* replacement pattern          */

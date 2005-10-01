@@ -17,16 +17,6 @@ typedef int (*fn_t)(int, int);
 
 struct VIDEO;
 
-char *getval();
-char *gtenv();
-char *gtfun();
-char *gtusr();
-char *itoa();
-char *ltos();
-char *mklower();
-char *mkupper();
-char *token();
-
 /* initialized global external declarations */
 
 extern int fillcol;		/* Fill column                  */
@@ -121,7 +111,7 @@ extern BUFFER *blistp;		/* Buffer for C-X C-B           */
 
 extern BUFFER *bfind(char *bname, int cflag, int bflag); /* Lookup a buffer by name      */
 extern window_t *wpopup();	/* Pop up window creation       */
-extern LINE *lalloc();		/* Allocate a line              */
+extern LINE *lalloc(int);	/* Allocate a line              */
 extern char sres[NBUFN];	/* current screen resolution    */
 extern char pat[];		/* Search pattern               */
 extern char tap[];		/* Reversed pattern array.      */
@@ -149,7 +139,4 @@ extern char outline[];		/* global string to hold debug line text */
 #endif
 
 /* terminal table defined only in TERM.C */
-
-#ifndef	termdef
 extern TERM term;		/* Terminal information.        */
-#endif
