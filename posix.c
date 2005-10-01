@@ -15,22 +15,23 @@
 #include <stdio.h>
 #include "estruct.h"
 #include "edef.h"
+#include "efunc.h"
 
 #include <signal.h>
 #include <termios.h>
 #include <fcntl.h>
 #include <errno.h>
 
-int kbdflgs;			/* saved keyboard fd flags      */
-int kbdpoll;			/* in O_NDELAY mode                     */
-int kbdqp;			/* there is a char in kbdq      */
-char kbdq;			/* char we've already read      */
+static int kbdflgs;			/* saved keyboard fd flags      */
+static int kbdpoll;			/* in O_NDELAY mode                     */
+static int kbdqp;			/* there is a char in kbdq      */
+static char kbdq;			/* char we've already read      */
 
-struct termios otermios;	/* original terminal characteristics */
-struct termios ntermios;	/* charactoristics to use inside */
+static struct termios otermios;		/* original terminal characteristics */
+static struct termios ntermios;		/* charactoristics to use inside */
 
 #define TBUFSIZ 128
-char tobuf[TBUFSIZ];		/* terminal output buffer */
+static char tobuf[TBUFSIZ];		/* terminal output buffer */
 
 
 /*

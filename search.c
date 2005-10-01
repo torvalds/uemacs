@@ -442,21 +442,23 @@ static int amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff)
 			 * notion that the meta-character '$' (and likewise
 			 * '^') match positions, not characters.
 			 */
-			if (mcptr->mc_type == BOL)
+			if (mcptr->mc_type == BOL) {
 				if (curoff == llength(curline)) {
 					c = nextch(&curline, &curoff,
 						   direct ^ REVERSE);
 					goto success;
 				} else
 					return FALSE;
+			}
 
-			if (mcptr->mc_type == EOL)
+			if (mcptr->mc_type == EOL) {
 				if (curoff == 0) {
 					c = nextch(&curline, &curoff,
 						   direct ^ REVERSE);
 					goto success;
 				} else
 					return FALSE;
+			}
 
 			/* Neither BOL nor EOL, so go through
 			 * the meta-character equal function.
@@ -1278,6 +1280,7 @@ static int rmcstr(void)
 	}
 
 	rmcptr->mc_type = MCNIL;
+	return status;
 }
 
 /*

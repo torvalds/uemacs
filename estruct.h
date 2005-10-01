@@ -687,7 +687,7 @@ typedef struct WHBLOCK {
 #define	EOL		6
 #define	DITTO		7
 #define	CLOSURE		256	/* An or-able value. */
-#define	MASKCL		CLOSURE - 1
+#define	MASKCL		(CLOSURE - 1)
 
 #define	MC_ANY		'.'	/* 'Any' character (except newline). */
 #define	MC_CCL		'['	/* Character class. */

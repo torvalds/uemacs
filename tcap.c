@@ -266,7 +266,6 @@ static void tcapeeop(void)
  */
 static void tcaprev(int state)
 {
-	static int revstate = FALSE;
 	if (state) {
 		if (SO != NULL)
 			putpad(SO);

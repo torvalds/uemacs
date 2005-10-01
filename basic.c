@@ -243,8 +243,8 @@ int gotobop(int f, int n)
 #if	PKCODE
 			    ((justflag == TRUE) ||
 #endif
-			     lgetc(curwp->w_dotp, curwp->w_doto) != TAB &&
-			     lgetc(curwp->w_dotp, curwp->w_doto) != ' ')
+			     (lgetc(curwp->w_dotp, curwp->w_doto) != TAB &&
+			      lgetc(curwp->w_dotp, curwp->w_doto) != ' '))
 #if	PKCODE
 			    )
 #endif
@@ -292,8 +292,8 @@ int gotoeop(int f, int n)
 #if	PKCODE
 			    ((justflag == TRUE) ||
 #endif
-			     lgetc(curwp->w_dotp, curwp->w_doto) != TAB &&
-			     lgetc(curwp->w_dotp, curwp->w_doto) != ' ')
+			     (lgetc(curwp->w_dotp, curwp->w_doto) != TAB &&
+			      lgetc(curwp->w_dotp, curwp->w_doto) != ' '))
 #if	PKCODE
 			    )
 #endif

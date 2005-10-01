@@ -653,15 +653,6 @@ int wordcount(int f, int n)
 	int status;		/* status return code */
 	REGION region;		/* region to look at */
 
-#if	PKCODE
-	struct {
-		long pk_1;
-		long pk_2;
-		int pk_3;
-		int pk_4;
-	} pk_mlrec;
-#endif
-
 	/* make sure we have a region to count */
 	if ((status = getregion(&region)) != TRUE)
 		return (status);

@@ -518,7 +518,7 @@ spal()
  *
  *  Nothing returned
  ***/
-hellovms()
+static void hellovms(void)
 {
 }
 
