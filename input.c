@@ -101,7 +101,7 @@ int ctoec(int c)
  * that pressing a <SPACE> will attempt to complete an unfinished command
  * name if it is unique.
  */
-int (*getname(void))(void)
+fn_t getname(void)
 {
 	register int cpos;	/* current column on screen output */
 	register int c;

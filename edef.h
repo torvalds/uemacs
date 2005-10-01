@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef int (*fn_t)(int, int);
+
 struct VIDEO;
 
 char *flook();
@@ -506,10 +508,30 @@ extern int mlreply(char *prompt, char *buf, int nbuf);
 extern int mlreplyt(char *prompt, char *buf, int nbuf, int eolchar);
 extern int ectoc(int c);
 extern int ctoec(int c);
-extern int (*getname(void))(void);
+extern fn_t getname(void);
 extern int tgetc(void);
 extern int get1key(void);
 extern int getcmd(void);
 extern int getstring(char *prompt, char *buf, int nbuf, int eolchar);
 extern void outstring(char *s);
 extern void ostring(char *s);
+
+/* bind.c */
+extern int help(int f, int n);
+extern int deskey(int f, int n);
+extern int bindtokey(int f, int n);
+extern int unbindkey(int f, int n);
+extern int unbindchar(int c);
+extern int desbind(int f, int n);
+extern int apro(int f, int n);
+extern int buildlist(int type, char *mstring);
+extern int strinc(char *source, char *sub);
+extern unsigned int getckey(int mflag);
+extern startup(char *sfname);
+extern char *flook(char *fname, int hflag);
+extern void cmdstr(int c, char *seq);
+extern fn_t getbind(int c);
+extern char *getfname(fn_t);
+extern fn_t fncmatch(char *);
+extern unsigned int stock(char *keyname);
+extern char *transbind(char *skey);

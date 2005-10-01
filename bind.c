@@ -14,7 +14,7 @@
 
 extern int meta(), cex(), unarg(), ctrlg();	/* dummy prefix binding functions */
 
-help(f, n)
+int help(int f, int n)
 {				/* give me some help!!!!
 				   bring up a fake buffer and read the help file
 				   into it with view mode                 */
@@ -55,7 +55,7 @@ help(f, n)
 	return (TRUE);
 }
 
-deskey(f, n)
+int deskey(int f, int n)
 {				/* describe the command for a certain key */
 	register int c;		/* key to describe */
 	register char *ptr;	/* string pointer to scan output strings */
@@ -81,12 +81,13 @@ deskey(f, n)
 	ostring(ptr);
 }
 
-/* bindtokey:	add a new key to the key binding table		*/
-
-bindtokey(f, n)
-
-int f, n;			/* command arguments [IGNORED] */
-
+/*
+ * bindtokey:
+ *	add a new key to the key binding table
+ *
+ * int f, n;		command arguments [IGNORED]
+ */
+int bindtokey(int f, int n)
 {
 	register unsigned int c;	/* command key to bind */
 	register int (*kfunc) ();	/* ptr to the requested function to bind to */
@@ -169,12 +170,13 @@ int f, n;			/* command arguments [IGNORED] */
 	return (TRUE);
 }
 
-/* unbindkey:	delete a key from the key binding table	*/
-
-unbindkey(f, n)
-
-int f, n;			/* command arguments [IGNORED] */
-
+/*
+ * unbindkey:
+ *	delete a key from the key binding table
+ *
+ * int f, n;		command arguments [IGNORED]
+ */
+unbindkey(int f, int n)
 {
 	register int c;		/* command key to unbind */
 	char outseq[80];	/* output buffer for keystroke sequence */
@@ -199,10 +201,13 @@ int f, n;			/* command arguments [IGNORED] */
 	return (TRUE);
 }
 
-unbindchar(c)
 
-int c;				/* command key to unbind */
-
+/*
+ * unbindchar()
+ *
+ * int c;		command key to unbind
+ */
+int unbindchar(int c)
 {
 	register KEYTAB *ktp;	/* pointer into the command table */
 	register KEYTAB *sktp;	/* saved pointer into the command table */
@@ -239,16 +244,17 @@ int c;				/* command key to unbind */
 	return (TRUE);
 }
 
-desbind(f, n)
-    /* describe bindings
-       bring up a fake buffer and list the key bindings
-       into it with view mode                   */
+/* describe bindings
+ * bring up a fake buffer and list the key bindings
+ * into it with view mode
+ */
+int desbind(int f, int n)
 #if	APROP
 {
 	buildlist(TRUE, "");
 }
 
-apro(f, n)
+int apro(int f, int n)
 {				/* Apropos (List functions that match a substring) */
 	char mstring[NSTRING];	/* string to match cmd names to */
 	int status;		/* status return */
@@ -260,11 +266,13 @@ apro(f, n)
 	return (buildlist(FALSE, mstring));
 }
 
-buildlist(type, mstring)
-    /* build a binding list (limited or full) */
-int type;			/* true = full list,   false = partial list */
-char *mstring;			/* match string if a partial list */
-
+/*
+ * build a binding list (limited or full)
+ *
+ * int type;		true = full list,   false = partial list
+ * char *mstring;	match string if a partial list
+ */
+int buildlist(int type, char *mstring)
 #endif
 {
 	register WINDOW *wp;	/* scanning pointer to windows */
@@ -372,11 +380,14 @@ char *mstring;			/* match string if a partial list */
 }
 
 #if	APROP
-strinc(source, sub)
-    /* does source include sub? */
-char *source;			/* string to search in */
-char *sub;			/* substring to look for */
 
+/*
+ * does source include sub?
+ *
+ * char *source;	string to search in
+ * char *sub;		substring to look for
+ */
+int strinc(char *source, char *sub)
 {
 	char *sp;		/* ptr into source */
 	char *nxtsp;		/* next ptr into source */
@@ -407,12 +418,12 @@ char *sub;			/* substring to look for */
 }
 #endif
 
-/* get a command key sequence from the keyboard	*/
-
-unsigned int getckey(mflag)
-
-int mflag;			/* going for a meta sequence? */
-
+/*
+ * get a command key sequence from the keyboard
+ *
+ * int mflag;		going for a meta sequence?
+ */
+unsigned int getckey(int mflag)
 {
 	register unsigned int c;	/* character fetched */
 	char tok[NSTRING];	/* command incoming */
@@ -431,12 +442,12 @@ int mflag;			/* going for a meta sequence? */
 	return (c);
 }
 
-/* execute the startup file */
-
-startup(sfname)
-
-char *sfname;			/* name of startup file (null if default) */
-
+/*
+ * execute the startup file
+ *
+ * char *sfname;	name of startup file (null if default)
+ */
+startup(char *sfname)
 {
 	char *fname;		/* resulting file name to execute */
 
@@ -454,16 +465,15 @@ char *sfname;			/* name of startup file (null if default) */
 	return (dofile(fname));
 }
 
-/*	Look up the existance of a file along the normal or PATH
-	environment variable. Look first in the HOME directory if
-	asked and possible
-*/
-
-char *flook(fname, hflag)
-
-char *fname;			/* base file name to search for */
-int hflag;			/* Look in the HOME environment variable first? */
-
+/*
+ * Look up the existance of a file along the normal or PATH
+ * environment variable. Look first in the HOME directory if
+ * asked and possible
+ *
+ * char *fname;		base file name to search for
+ * int hflag;		Look in the HOME environment variable first?
+ */
+char *flook(char *fname, int hflag)
 {
 	register char *home;	/* path to home directory */
 	register char *path;	/* environmental PATH variable */
@@ -539,11 +549,13 @@ int hflag;			/* Look in the HOME environment variable first? */
 	return (NULL);		/* no such luck */
 }
 
-cmdstr(c, seq)
-    /* change a key command to a string we can print out */
-int c;				/* sequence to translate */
-char *seq;			/* destination string for sequence */
-
+/*
+ * change a key command to a string we can print out
+ *
+ * int c;		sequence to translate
+ * char *seq;		destination string for sequence
+ */
+void cmdstr(int c, char *seq)
 {
 	char *ptr;		/* pointer into current position in sequence */
 
@@ -579,12 +591,12 @@ char *seq;			/* destination string for sequence */
 	*ptr = 0;		/* terminate the string */
 }
 
-/*	This function looks a key binding up in the binding table	*/
-
-int (*getbind(c)) ()
-
-int c;				/* key to find what is bound to it */
-
+/*
+ * This function looks a key binding up in the binding table
+ *
+ * int c;		key to find what is bound to it
+ */
+int (*getbind(int c))(int, int)
 {
 	register KEYTAB *ktp;
 
@@ -599,14 +611,12 @@ int c;				/* key to find what is bound to it */
 	return (NULL);
 }
 
-/* getfname:	This function takes a ptr to function and gets the name
-		associated with it
-*/
-
-char *getfname(func)
-
-int (*func) ();			/* ptr to the requested function to bind to */
-
+/*
+ * getfname:
+ *	This function takes a ptr to function and gets the name
+ * 	associated with it
+ */
+char *getfname(fn_t func)
 {
 	register NBIND *nptr;	/* pointer into the name binding table */
 
@@ -620,11 +630,13 @@ int (*func) ();			/* ptr to the requested function to bind to */
 	return (NULL);
 }
 
-int (*fncmatch(fname)) ()
-			     /* match fname to a function in the names table
-			        and return any match or NULL if none            */
-char *fname;			/* name to attempt to match */
-
+/*
+ * match fname to a function in the names table
+ * and return any match or NULL if none
+ *
+ * char *fname;		name to attempt to match
+ */
+int (*fncmatch(char *fname)) (int, int)
 {
 	register NBIND *ffp;	/* pointer to entry in name binding table */
 
@@ -638,12 +650,13 @@ char *fname;			/* name to attempt to match */
 	return (NULL);
 }
 
-/* stock:	String key name TO Command Key		*/
-
-unsigned int stock(keyname)
-
-char *keyname;			/* name of key to translate to Command key form */
-
+/*
+ * stock:
+ *	String key name TO Command Key
+ *
+ * char *keyname;	name of key to translate to Command key form
+ */
+unsigned int stock(char *keyname)
 {
 	register unsigned int c;	/* key sequence to return */
 
@@ -688,10 +701,12 @@ char *keyname;			/* name of key to translate to Command key form */
 	return (c);
 }
 
-char *transbind(skey)
-			    /* string key name to binding name.... */
-char *skey;			/* name of keey to get binding for */
-
+/*
+ * string key name to binding name....
+ *
+ * char *skey;		name of keey to get binding for
+ */
+char *transbind(char *skey)
 {
 	char *bindname;
 	unsigned int stock();
