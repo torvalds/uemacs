@@ -15,7 +15,7 @@ HDR=ebind.h edef.h efunc.h epath.h estruct.h evar.h
 # DO NOT ADD OR MODIFY ANY LINES ABOVE THIS -- make source creates them
 
 CC=gcc
-CFLAGS=-O4
+CFLAGS=-O2 -Wall
 #CC=c89 +O3			# HP
 #CFLAGS= -D_HPUX_SOURCE -DSYSV
 #CFLAGS=-O4 -DSVR4		# Sun
