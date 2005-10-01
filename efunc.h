@@ -141,7 +141,7 @@ extern void vtinit(void);
 extern void vtfree(void);
 extern void vttidy(void);
 extern void vtmove(int row, int col);
-extern void vtputc(int c);
+extern void vtputc(unsigned char c);
 extern void vteeol(void);
 extern int upscreen(int f, int n);
 extern int update(int force);

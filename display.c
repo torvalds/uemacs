@@ -155,7 +155,7 @@ void vtmove(int row, int col)
  * This routine only puts printing characters into the virtual
  * terminal buffers. Only column overflow is checked.
  */
-void vtputc(int c)
+void vtputc(unsigned char c)
 {
 	register VIDEO *vp;	/* ptr to line being updated */
 
@@ -164,20 +164,39 @@ void vtputc(int c)
 	if (vtcol >= term.t_ncol) {
 		++vtcol;
 		vp->v_text[term.t_ncol - 1] = '$';
-	} else if (c < 0x20 || c == 0x7F) {
-		if (c == '\t') {
-			do {
-				vtputc(' ');
-			} while (((vtcol + taboff) & tabmask) != 0);
-		} else {
-			vtputc('^');
-			vtputc(c ^ 0x40);
-		}
-	} else {
-		if (vtcol >= 0)
-			vp->v_text[vtcol] = c;
-		++vtcol;
+		return;
 	}
+
+	if (c == '\t') {
+		do {
+			vtputc(' ');
+		} while (((vtcol + taboff) & tabmask) != 0);
+		return;
+	}
+
+	if (c < 0x20) {
+		vtputc('^');
+		vtputc(c ^ 0x40);
+		return;
+	}
+
+	if (c == 0x7f) {
+		vtputc('^');
+		vtputc('?');
+		return;
+	}
+
+	if (c >= 0x80 && c < 0xA0) {
+		static const char hex[] = "0123456789abcdef";
+		vtputc('\\');
+		vtputc(hex[c >> 4]);
+		vtputc(hex[c & 15]);
+		return;
+	}
+	
+	if (vtcol >= 0)
+		vp->v_text[vtcol] = c;
+	++vtcol;
 }
 
 /*
@@ -505,6 +524,8 @@ void updpos(void)
 			curcol |= tabmask;
 		else if (c < 0x20 || c == 0x7f)
 			++curcol;
+		else if (c >= 0x80 && c <= 0xa0)
+			curcol+=2;
 
 		++curcol;
 	}
