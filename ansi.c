@@ -209,7 +209,6 @@ ansiopen()
 {
 #if     V7 | USG | BSD
 	register char *cp;
-	char *getenv();
 
 	if ((cp = getenv("TERM")) == NULL) {
 		puts("Shell variable TERM not defined!");

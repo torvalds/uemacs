@@ -45,7 +45,6 @@ int spawncli(int f, int n)
 {
 #if     V7 | USG | BSD
 	register char *cp;
-	char *getenv();
 #endif
 
 	/* don't allow this command if restricted */
@@ -267,9 +266,7 @@ int pipecmd(int f, int n)
 
 #if     MSDOS
 	char *tmp;
-	char *getenv();
 	FILE *fp;
-	FILE *fopen();
 	int len;
 #endif
 
@@ -512,7 +509,6 @@ int shellprog(char *cmd)
 	char swchar;		/* switch character to use */
 	union REGS regs;	/* parameters for dos call */
 	char comline[NSTRING];	/* constructed command line */
-	char *getenv();
 
 	/*  detect current switch character and set us up to use it */
 	regs.h.ah = 0x37;	/*  get setting data  */

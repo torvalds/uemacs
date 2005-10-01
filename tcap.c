@@ -61,16 +61,16 @@ static void tcapscroll_delins(int from, int to, int linestoscroll);
 
 
 #define TCAPSLEN 315
-char tcapbuf[TCAPSLEN];
-char *UP, PC, *CM, *CE, *CL, *SO, *SE;
+static char tcapbuf[TCAPSLEN];
+static char *UP, PC, *CM, *CE, *CL, *SO, *SE;
 
 #if	PKCODE
-char *TI, *TE;
-int term_init_ok = 0;
+static char *TI, *TE;
+static int term_init_ok = 0;
 #endif
 
 #if     SCROLLCODE
-char *CS, *DL, *AL, *SF, *SR;
+static char *CS, *DL, *AL, *SF, *SR;
 #endif
 
 TERM term = {

@@ -36,9 +36,6 @@ char *gtfun(char *fname)
 	static char result[2 * NSTRING];	/* string result */
 	char *flook();		/* look file up on path */
 	char *xlat();		/* translate a char string */
-#if	ENVFUNC
-	char *getenv();		/* get environment string */
-#endif
 
 	/* look the function up in the function table */
 	fname[3] = 0;		/* only first 3 chars significant */
@@ -209,7 +206,6 @@ char *gtenv(char *vname)
 	if (vnum == NEVARS)
 #if 	ENVFUNC
 	{
-		extern char *getenv();
 		char *ename = getenv(vname);
 
 		if (ename != NULL)

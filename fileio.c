@@ -11,10 +11,6 @@
 #include        "edef.h"
 #include	"efunc.h"
 
-#if	PKCODE
-extern int nullflag;
-#endif
-
 FILE *ffp;			/* File pointer, all functions. */
 int eofflag;			/* end-of-file flag */
 

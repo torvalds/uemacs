@@ -39,8 +39,7 @@ int gethostname(char *name, int namelen)
  * if other error, returns "LOCK ERROR: explanation"
  *
  *********************/
-char *dolock(fname)
-char *fname;
+char *dolock(char *fname)
 {
 	int fd, n;
 	static char lname[MAXLOCK], locker[MAXNAME + 1];
@@ -101,8 +100,7 @@ char *fname;
  *
  *********************/
 
-char *undolock(fname)
-char *fname;
+char *undolock(char *fname)
 {
 	static char lname[MAXLOCK];
 

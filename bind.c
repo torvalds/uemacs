@@ -77,6 +77,7 @@ int deskey(int f, int n)
 
 	/* output the command sequence */
 	ostring(ptr);
+	return (TRUE);
 }
 
 /*
@@ -173,7 +174,7 @@ int bindtokey(int f, int n)
  *
  * int f, n;		command arguments [IGNORED]
  */
-unbindkey(int f, int n)
+int unbindkey(int f, int n)
 {
 	register int c;		/* command key to unbind */
 	char outseq[80];	/* output buffer for keystroke sequence */
@@ -249,6 +250,7 @@ int desbind(int f, int n)
 #if	APROP
 {
 	buildlist(TRUE, "");
+	return (TRUE);
 }
 
 int apro(int f, int n)
@@ -276,7 +278,6 @@ int buildlist(int type, char *mstring)
 	register KEYTAB *ktp;	/* pointer into the command table */
 	register NBIND *nptr;	/* pointer into the name binding table */
 	register BUFFER *bp;	/* buffer to put binding list into */
-	char *strp;		/* pointer int string to send */
 	int cpos;		/* current position to use in outseq */
 	char outseq[80];	/* output buffer for keystroke sequence */
 
@@ -477,7 +478,6 @@ char *flook(char *fname, int hflag)
 	register char *sp;	/* pointer into path spec */
 	register int i;		/* index */
 	static char fspec[NSTRING];	/* full path spec to search */
-	char *getenv();
 
 #if	ENVFUNC
 
