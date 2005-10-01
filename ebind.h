@@ -28,15 +28,15 @@ KEYTAB keytab[NBINDS] = {
 	,
 	{CONTROL | 'H', backdel}
 	,
-	{CONTROL | 'I', tab}
+	{CONTROL | 'I', insert_tab}
 	,
 	{CONTROL | 'J', indent}
 	,
 	{CONTROL | 'K', killtext}
 	,
-	{CONTROL | 'L', refresh}
+	{CONTROL | 'L', redraw}
 	,
-	{CONTROL | 'M', newline}
+	{CONTROL | 'M', insert_newline}
 	,
 	{CONTROL | 'N', forwline}
 	,
@@ -64,7 +64,7 @@ KEYTAB keytab[NBINDS] = {
 	,
 	{CONTROL | 'Z', backpage}
 	,
-	{CONTROL | ']', meta}
+	{CONTROL | ']', metafn}
 	,
 	{CTLX | CONTROL | 'B', listbuffers}
 	,
@@ -125,7 +125,7 @@ KEYTAB keytab[NBINDS] = {
 	,
 	{CTLX | '@', pipecmd}
 	,
-	{CTLX | '#', filter}
+	{CTLX | '#', filter_buffer}
 	,
 	{CTLX | '$', execprg}
 	,
@@ -391,7 +391,7 @@ KEYTAB keytab[NBINDS] = {
 	,
 	{SPEC | 'D', backchar}
 	,
-	{SPEC | 'c', meta}
+	{SPEC | 'c', metafn}
 	,
 	{SPEC | 'd', backchar}
 	,

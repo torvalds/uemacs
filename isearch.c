@@ -29,6 +29,8 @@
 
 #if	ISRCH
 
+static int echo_char(int c, int col);
+
 /* A couple of "own" variables for re-eat */
 
 int (*saved_get_char) ();	/* Get character routine */
@@ -172,7 +174,7 @@ int isearch(int f, int n)
 	c = ectoc(expc = get_char());	/* Get the first character    */
 	if ((c == IS_FORWARD) || (c == IS_REVERSE) || (c == IS_VMSFORW)) {	/* Reuse old search string?   */
 		for (cpos = 0; pat[cpos] != 0; cpos++)	/* Yup, find the length           */
-			col = echochar(pat[cpos], col);	/*  and re-echo the string    */
+			col = echo_char(pat[cpos], col);	/*  and re-echo the string    */
 		if (c == IS_REVERSE) {	/* forward search?            */
 			n = -1;	/* No, search in reverse      */
 			backchar(TRUE, 1);	/* Be defensive about EOB     */
@@ -248,7 +250,7 @@ int isearch(int f, int n)
 			return (TRUE);	/* Return an error            */
 		}
 		pat[cpos] = 0;	/* null terminate the buffer  */
-		col = echochar(c, col);	/* Echo the character         */
+		col = echo_char(c, col);	/* Echo the character         */
 		if (!status) {	/* If we lost last time       */
 			TTputc(BELL);	/* Feep again                 */
 			TTflush();	/* see that the feep feeps    */
@@ -399,7 +401,7 @@ int promptpattern(char *prompt)
  * int c;		character to be echoed
  * int col;		column to be echoed in
  */
-int echochar(int c, int col)
+static int echo_char(int c, int col)
 {
 	movecursor(term.t_nrow, col);	/* Position the cursor        */
 	if ((c < ' ') || (c == 0x7F)) {	/* Control character?           */

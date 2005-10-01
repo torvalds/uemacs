@@ -14,6 +14,8 @@
 #define	termdef	1		/* don't define "term" external */
 
 #include <stdio.h>
+#include <curses.h>
+#include <term.h>
 
 #include	"estruct.h"
 #include        "edef.h"
@@ -32,12 +34,6 @@
 #define BEL     0x07
 #define ESC     0x1B
 
-/* FIXME! termcap */
-extern int tgetnum(char *);
-extern char *tgetstr(char *id, char **area);
-extern int tputs(const char *str, int affcnt, int (*putc)(int));
-extern char *tgoto(const char *cap, int col, int row);
-
 static void tcapkopen(void);
 static void tcapkclose(void);
 static void tcapmove(int, int);
@@ -53,15 +49,14 @@ static void tcapopen(void);
 #if	PKCODE
 static void tcapclose(void);
 #endif
-extern int tput();
-extern char *tgoto();
+
 #if	COLOR
-extern int tcapfcol();
-extern int tcapbcol();
+static void tcapfcol(void);
+static void tcapbcol(void);
 #endif
 #if     SCROLLCODE
-static void tcapscroll_reg(int from, int to, int lines);
-static void tcapscroll_delins(int from, int to, int lines);
+static void tcapscroll_reg(int from, int to, int linestoscroll);
+static void tcapscroll_delins(int from, int to, int linestoscroll);
 #endif
 
 
@@ -356,12 +351,6 @@ static void putpad(char *str)
 {
 	tputs(str, 1, ttputc);
 }
-
-static void putnpad(char *str, int n)
-{
-	tputs(str, n, ttputc);
-}
-
 
 #if	FNLABEL
 /*

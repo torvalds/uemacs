@@ -30,7 +30,7 @@ NBIND names[] = {
 	{"change-file-name", filename},
 	{"change-screen-size", newsize},
 	{"change-screen-width", newwidth},
-	{"clear-and-redraw", refresh},
+	{"clear-and-redraw", redraw},
 	{"clear-message-line", clrmes},
 	{"copy-region", copyregion},
 #if	WORDPRO
@@ -112,7 +112,7 @@ NBIND names[] = {
 #if	WORDPRO
 	{"fill-paragraph", fillpara},
 #endif
-	{"filter-buffer", filter},
+	{"filter-buffer", filter_buffer},
 	{"find-file", filefind},
 	{"forward-character", forwchar},
 	{"goto-line", gotoline},
@@ -120,7 +120,7 @@ NBIND names[] = {
 	{"goto-matching-fence", getfence},
 #endif
 	{"grow-window", enlargewind},
-	{"handle-tab", tab},
+	{"handle-tab", insert_tab},
 	{"hunt-forward", forwhunt},
 	{"hunt-backward", backhunt},
 	{"help", help},
@@ -143,11 +143,11 @@ NBIND names[] = {
 	{"label-function-key", fnclabel},
 #endif
 	{"list-buffers", listbuffers},
-	{"meta-prefix", meta},
+	{"meta-prefix", metafn},
 	{"move-window-down", mvdnwind},
 	{"move-window-up", mvupwind},
 	{"name-buffer", namebuffer},
-	{"newline", newline},
+	{"newline", insert_newline},
 	{"newline-and-indent", indent},
 	{"next-buffer", nextbuffer},
 	{"next-line", forwline},

@@ -42,7 +42,7 @@ int gethostname(char *name, int namelen)
 char *dolock(fname)
 char *fname;
 {
-	int fd, lk, n;
+	int fd, n;
 	static char lname[MAXLOCK], locker[MAXNAME + 1];
 	int mask;
 	struct stat sbuf;
@@ -104,7 +104,6 @@ char *fname;
 char *undolock(fname)
 char *fname;
 {
-	int fd, lk;
 	static char lname[MAXLOCK];
 
 	strcat(strcpy(lname, fname), ".lock~");

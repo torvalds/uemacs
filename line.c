@@ -50,7 +50,7 @@ LINE *lalloc(int used)
  * might be in. Release the memory. The buffers are updated too; the magic
  * conditions described in the above comments don't hold here.
  */
-int lfree(LINE *lp)
+void lfree(LINE *lp)
 {
 	register BUFFER *bp;
 	register window_t *wp;
@@ -95,7 +95,7 @@ int lfree(LINE *lp)
  * displayed in more than 1 window we change EDIT t HARD. Set MODE if the
  * mode line needs to be updated (the "*" has to be set).
  */
-int lchange(int flag)
+void lchange(int flag)
 {
 	register window_t *wp;
 
@@ -122,6 +122,7 @@ int insspace(int f, int n)
 {
 	linsert(n, ' ');
 	backchar(f, n);
+	return (TRUE);
 }
 
 /*
@@ -551,7 +552,7 @@ int ldelnewline(void)
  * new kill context is being created. The kill buffer array is released, just
  * in case the buffer has grown to immense size. No errors.
  */
-int kdelete(void)
+void kdelete(void)
 {
 	KILL *kp;		/* ptr to scan kill buffer chunk list */
 

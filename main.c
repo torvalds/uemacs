@@ -309,7 +309,8 @@ int main(int argc, char **argv)
 			fn_t execfunc;
 
 			if (c == newc && (execfunc = getbind(c)) != NULL
-			    && execfunc != newline && execfunc != tab)
+			    && execfunc != insert_newline
+			    && execfunc != insert_tab)
 				newc = getcmd();
 			else
 				break;
@@ -712,7 +713,7 @@ int nullproc(int f, int n)
 }
 
 /* dummy function for binding to meta prefix */
-int meta(int f, int n)
+int metafn(int f, int n)
 {
 	return (TRUE);
 }

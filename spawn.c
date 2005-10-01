@@ -379,7 +379,7 @@ int pipecmd(int f, int n)
  * filter a buffer through an external DOS program
  * Bound to ^X #
  */
-int filter(int f, int n)
+int filter_buffer(int f, int n)
 {
 	register int s;		/* return status from CLI */
 	register BUFFER *bp;	/* pointer to buffer to zot */

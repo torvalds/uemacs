@@ -235,7 +235,7 @@ int quote(int f, int n)
  * done in this slightly funny way because the tab (in ASCII) has been turned
  * into "C-I" (in 10 bit code) already. Bound to "C-I".
  */
-int tab(int f, int n)
+int insert_tab(int f, int n)
 {
 	if (n < 0)
 		return (FALSE);
@@ -438,7 +438,7 @@ int openline(int f, int n)
  * Insert a newline. Bound to "C-M". If we are in CMODE, do automatic
  * indentation as specified.
  */
-int newline(int f, int n)
+int insert_newline(int f, int n)
 {
 	register int s;
 
@@ -506,7 +506,7 @@ int cinsert(void)
 
 	/* and one more tab for a brace */
 	if (bracef)
-		tab(FALSE, 1);
+		insert_tab(FALSE, 1);
 
 #if SCROLLCODE
 	curwp->w_flag |= WFINS;

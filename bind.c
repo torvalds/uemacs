@@ -105,7 +105,7 @@ int bindtokey(int f, int n)
 	ostring(" ");
 
 	/* get the command sequence to bind */
-	c = getckey((kfunc == meta) || (kfunc == cex) ||
+	c = getckey((kfunc == metafn) || (kfunc == cex) ||
 		    (kfunc == unarg) || (kfunc == ctrlg));
 
 	/* change it to something we can print as well */
@@ -115,7 +115,7 @@ int bindtokey(int f, int n)
 	ostring(outseq);
 
 	/* if the function is a prefix key */
-	if (kfunc == meta || kfunc == cex ||
+	if (kfunc == metafn || kfunc == cex ||
 	    kfunc == unarg || kfunc == ctrlg) {
 
 		/* search for an existing binding for the prefix key */
@@ -128,7 +128,7 @@ int bindtokey(int f, int n)
 		}
 
 		/* reset the appropriate global prefix variable */
-		if (kfunc == meta)
+		if (kfunc == metafn)
 			metac = c;
 		if (kfunc == cex)
 			ctlxc = c;

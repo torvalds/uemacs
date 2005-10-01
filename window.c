@@ -29,7 +29,7 @@ int reposition(int f, int n)
  * Refresh the screen. With no argument, it just does the refresh. With an
  * argument it recenters "." in the current window. Bound to "C-L".
  */
-int refresh(int f, int n)
+int redraw(int f, int n)
 {
 	if (f == FALSE)
 		sgarbf = TRUE;
