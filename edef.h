@@ -17,9 +17,6 @@ typedef int (*fn_t)(int, int);
 
 struct VIDEO;
 
-char *flook();
-char *getctext();
-char *getfname();
 char *getval();
 char *gtenv();
 char *gtfun();
@@ -29,9 +26,6 @@ char *ltos();
 char *mklower();
 char *mkupper();
 char *token();
-char *transbind();
-unsigned int getckey();
-unsigned int stock();
 
 #ifdef	maindef
 
@@ -535,3 +529,18 @@ extern char *getfname(fn_t);
 extern fn_t fncmatch(char *);
 extern unsigned int stock(char *keyname);
 extern char *transbind(char *skey);
+
+/* buffer.c */
+extern int usebuffer(int f, int n);
+extern int nextbuffer(int f, int n);
+extern int swbuffer(BUFFER *bp);
+extern int killbuffer(int f, int n);
+extern int zotbuf(BUFFER *bp);
+extern int namebuffer(int f, int n);
+extern int listbuffers(int f, int n);
+extern int makelist(int iflag);
+extern void ltoa(char *buf, int width, long num);
+extern int addline(char *text);
+extern int anycb(void);
+extern int bclear(BUFFER *bp);
+extern int unmark(int f, int n);

@@ -12,8 +12,6 @@
 #include	"edef.h"
 #include	"epath.h"
 
-extern int meta(), cex(), unarg(), ctrlg();	/* dummy prefix binding functions */
-
 int help(int f, int n)
 {				/* give me some help!!!!
 				   bring up a fake buffer and read the help file
@@ -60,7 +58,6 @@ int deskey(int f, int n)
 	register int c;		/* key to describe */
 	register char *ptr;	/* string pointer to scan output strings */
 	char outseq[NSTRING];	/* output buffer for command sequence */
-	int (*getbind()) ();
 
 	/* prompt the user to type us a key to describe */
 	mlwrite(": describe-key ");
@@ -94,7 +91,6 @@ int bindtokey(int f, int n)
 	register KEYTAB *ktp;	/* pointer into the command table */
 	register int found;	/* matched command flag */
 	char outseq[80];	/* output buffer for keystroke sequence */
-	int (*getname()) ();
 
 	/* prompt the user to type in a key to bind */
 	mlwrite(": bind-to-key ");
@@ -710,7 +706,6 @@ char *transbind(char *skey)
 {
 	char *bindname;
 	unsigned int stock();
-	int (*getbind()) ();
 
 	bindname = getfname(getbind(stock(skey)));
 	if (bindname == NULL)

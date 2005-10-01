@@ -19,7 +19,7 @@
  * if the use count is 0. Otherwise, they come
  * from some other window.
  */
-usebuffer(f, n)
+int usebuffer(int f, int n)
 {
 	register BUFFER *bp;
 	register int s;
@@ -32,9 +32,12 @@ usebuffer(f, n)
 	return (swbuffer(bp));
 }
 
-nextbuffer(f, n)
-    /* switch to the next buffer in the buffer list */
-int f, n;			/* default flag, numeric argument */
+/*
+ * switch to the next buffer in the buffer list
+ *
+ * int f, n;		default flag, numeric argument
+ */
+int nextbuffer(int f, int n)
 {
 	register BUFFER *bp;	/* eligable buffer to switch to */
 	register BUFFER *bbp;	/* eligable buffer to switch to */
@@ -69,10 +72,10 @@ int f, n;			/* default flag, numeric argument */
 	return (swbuffer(bp));
 }
 
-swbuffer(bp)
-    /* make buffer BP current */
-BUFFER *bp;
-
+/*
+ * make buffer BP current
+ */
+int swbuffer(BUFFER *bp)
 {
 	register WINDOW *wp;
 
@@ -125,7 +128,7 @@ BUFFER *bp;
  * if the buffer has been changed). Then free the header
  * line and the buffer header. Bound to "C-X K".
  */
-killbuffer(f, n)
+int killbuffer(int f, int n)
 {
 	register BUFFER *bp;
 	register int s;
@@ -140,10 +143,10 @@ killbuffer(f, n)
 	return (zotbuf(bp));
 }
 
-zotbuf(bp)
-    /* kill the buffer pointed to by bp */
-register BUFFER *bp;
-
+/*
+ * kill the buffer pointed to by bp
+ */
+int zotbuf(BUFFER *bp)
 {
 	register BUFFER *bp1;
 	register BUFFER *bp2;
@@ -171,10 +174,12 @@ register BUFFER *bp;
 	return (TRUE);
 }
 
-namebuffer(f, n)
-    /*  Rename the current buffer       */
-int f, n;			/* default Flag & Numeric arg */
-
+/*
+ * Rename the current buffer
+ *
+ * int f, n;		default Flag & Numeric arg
+ */
+int namebuffer(int f, int n)
 {
 	register BUFFER *bp;	/* pointer to scan through all buffers */
 	char bufn[NBUFN];	/* buffer to hold buffer name */
@@ -202,16 +207,16 @@ int f, n;			/* default Flag & Numeric arg */
 }
 
 /*
-	List all of the active buffers.  First update the special
-	buffer that holds the list.  Next make sure at least 1
-	window is displaying the buffer list, splitting the screen
-	if this is what it takes.  Lastly, repaint all of the
-	windows that are displaying the list.  Bound to "C-X C-B". 
-	A numeric argument forces it to list invisable buffers as
-	well.
-*/
-
-listbuffers(f, n)
+ * List all of the active buffers.  First update the special
+ * buffer that holds the list.  Next make sure at least 1
+ * window is displaying the buffer list, splitting the screen
+ * if this is what it takes.  Lastly, repaint all of the
+ * windows that are displaying the list.  Bound to "C-X C-B". 
+ *
+ * A numeric argument forces it to list invisible buffers as
+ * well.
+ */
+int listbuffers(int f, int n)
 {
 	register WINDOW *wp;
 	register BUFFER *bp;
@@ -254,13 +259,12 @@ listbuffers(f, n)
  * by the list buffers command. Return TRUE
  * if everything works. Return FALSE if there
  * is an error (if there is no memory). Iflag
- * indecates weather to list hidden buffers.
+ * indicates wether to list hidden buffers.
+ *
+ * int iflag;		list hidden buffer flag
  */
 #define MAXLINE	MAXCOL
-makelist(iflag)
-
-int iflag;			/* list hidden buffer flag */
-
+int makelist(int iflag)
 {
 	register char *cp1;
 	register char *cp2;
@@ -368,12 +372,7 @@ int iflag;			/* list hidden buffer flag */
 	return (TRUE);		/* All done             */
 }
 
-ltoa(buf, width, num)
-
-char buf[];
-int width;
-long num;
-
+void ltoa(char *buf, int width, long num)
 {
 	buf[width] = 0;		/* End of string.       */
 	while (num >= 10) {	/* Conditional digits.  */
@@ -392,8 +391,7 @@ long num;
  * on the end. Return TRUE if it worked and
  * FALSE if you ran out of room.
  */
-addline(text)
-char *text;
+int addline(char *text)
 {
 	register LINE *lp;
 	register int i;
@@ -423,7 +421,7 @@ char *text;
  * Return FALSE if no buffers
  * have been changed.
  */
-anycb()
+int anycb(void)
 {
 	register BUFFER *bp;
 
@@ -444,8 +442,7 @@ anycb()
  * and the "cflag" is TRUE, create it. The "bflag" is
  * the settings for the flags in in buffer.
  */
-BUFFER *bfind(bname, cflag, bflag)
-register char *bname;
+BUFFER *bfind(char *bname, int cflag, int bflag)
 {
 	register BUFFER *bp;
 	register BUFFER *sb;	/* buffer to insert after */
@@ -513,8 +510,7 @@ register char *bname;
  * that are required. Return TRUE if everything
  * looks good.
  */
-bclear(bp)
-register BUFFER *bp;
+int bclear(BUFFER *bp)
 {
 	register LINE *lp;
 	register int s;
@@ -533,10 +529,12 @@ register BUFFER *bp;
 	return (TRUE);
 }
 
-unmark(f, n)
-    /* unmark the current buffers change flag */
-int f, n;			/* unused command arguments */
-
+/*
+ * unmark the current buffers change flag
+ *
+ * int f, n;		unused command arguments
+ */
+int unmark(int f, int n)
 {
 	curbp->b_flag &= ~BFCHG;
 	curwp->w_flag |= WFMODE;
