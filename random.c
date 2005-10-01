@@ -43,18 +43,6 @@ int showcpos(int f, int n)
 	int savepos;		/* temp save for current offset */
 	int ecol;		/* column pos/end of current line */
 
-#if	PKCODE
-	struct {
-		int pk_clin;
-		int pk_tlin;
-		int pk_ccol;
-		int pk_tcol;
-		long pk_cchr;
-		long pk_tchr;
-		int pk_perc;
-		int pk_char;
-	} pk_mlrec;
-#endif
 	/* starting at the beginning of the buffer */
 	lp = lforw(curbp->b_linep);
 
@@ -331,7 +319,7 @@ int entab(int f, int n)
 		ccol = 0;
 		while (curwp->w_doto < llength(curwp->w_dotp)) {
 			/* see if it is time to compress */
-			if ((fspace >= 0) && (nextab(fspace) <= ccol))
+			if ((fspace >= 0) && (nextab(fspace) <= ccol)) {
 				if (ccol - fspace < 2)
 					fspace = -1;
 				else {
@@ -343,6 +331,7 @@ int entab(int f, int n)
 					linsert(1, '\t');
 					fspace = -1;
 				}
+			}
 
 			/* get the current character */
 			cchar = lgetc(curwp->w_dotp, curwp->w_doto);
