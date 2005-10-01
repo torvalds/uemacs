@@ -273,7 +273,7 @@ extern int storeproc(int f, int n);
 extern int execproc(int f, int n);
 extern int execbuf(int f, int n);
 extern int dobuf(BUFFER *bp);
-extern int freewhile(WHBLOCK *wp);
+extern void freewhile(WHBLOCK *wp);
 extern int execfile(int f, int n);
 extern int dofile(char *fname);
 extern int cbuf(int f, int n, int bufnum);
@@ -336,7 +336,7 @@ extern int forwhunt(int f, int n);
 extern int backsearch(int f, int n);
 extern int backhunt(int f, int n);
 extern int mcscanner(MC *mcpatrn, int direct, int beg_or_end);
-extern int scanner(unsigned char *patrn, int direct, int beg_or_end);
+extern int scanner(const char *patrn, int direct, int beg_or_end);
 extern int eq(unsigned char bc, unsigned char pc);
 extern void savematch(void);
 extern void rvstrcpy(char *rvstr, char *str);
@@ -358,7 +358,7 @@ extern int match_pat(char *patrn);
 extern int promptpattern(char *prompt);
 extern int get_char(void);
 extern int uneat(void);
-extern int reeat(int c);
+extern void reeat(int c);
 
 /* eval.c */
 extern void varinit(void);
@@ -394,3 +394,10 @@ extern void lckerror(char *errstr);
 
 /* names.c */
 extern NBIND names[];
+
+/* pklock.c */
+extern char *dolock(char *fname);
+extern char *undolock(char *fname);
+
+/* tcap.c */
+extern void spal(char *dummy);

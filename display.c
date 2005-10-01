@@ -11,6 +11,7 @@
 #include	<errno.h>
 #include        <stdio.h>
 #include	<stdarg.h>
+#include	<unistd.h>
 #include	"estruct.h"
 #include        "edef.h"
 #include        "efunc.h"

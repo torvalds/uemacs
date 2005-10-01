@@ -126,45 +126,45 @@ typedef struct UFUNC {
 #define	TRINAMIC	3
 
 UFUNC funcs[] = {
-	"add", DYNAMIC,		/* add two numbers together */
-	"sub", DYNAMIC,		/* subtraction */
-	"tim", DYNAMIC,		/* multiplication */
-	"div", DYNAMIC,		/* division */
-	"mod", DYNAMIC,		/* mod */
-	"neg", MONAMIC,		/* negate */
-	"cat", DYNAMIC,		/* concatinate string */
-	"lef", DYNAMIC,		/* left string(string, len) */
-	"rig", DYNAMIC,		/* right string(string, pos) */
-	"mid", TRINAMIC,	/* mid string(string, pos, len) */
-	"not", MONAMIC,		/* logical not */
-	"equ", DYNAMIC,		/* logical equality check */
-	"les", DYNAMIC,		/* logical less than */
-	"gre", DYNAMIC,		/* logical greater than */
-	"seq", DYNAMIC,		/* string logical equality check */
-	"sle", DYNAMIC,		/* string logical less than */
-	"sgr", DYNAMIC,		/* string logical greater than */
-	"ind", MONAMIC,		/* evaluate indirect value */
-	"and", DYNAMIC,		/* logical and */
-	"or", DYNAMIC,		/* logical or */
-	"len", MONAMIC,		/* string length */
-	"upp", MONAMIC,		/* uppercase string */
-	"low", MONAMIC,		/* lower case string */
-	"tru", MONAMIC,		/* Truth of the universe logical test */
-	"asc", MONAMIC,		/* char to integer conversion */
-	"chr", MONAMIC,		/* integer to char conversion */
-	"gtk", NILNAMIC,	/* get 1 charater */
-	"rnd", MONAMIC,		/* get a random number */
-	"abs", MONAMIC,		/* absolute value of a number */
-	"sin", DYNAMIC,		/* find the index of one string in another */
-	"env", MONAMIC,		/* retrieve a system environment var */
-	"bin", MONAMIC,		/* loopup what function name is bound to a key */
-	"exi", MONAMIC,		/* check if a file exists */
-	"fin", MONAMIC,		/* look for a file on the path... */
-	"ban", DYNAMIC,		/* bitwise and   9-10-87  jwm */
-	"bor", DYNAMIC,		/* bitwise or    9-10-87  jwm */
-	"bxo", DYNAMIC,		/* bitwise xor   9-10-87  jwm */
-	"bno", MONAMIC,		/* bitwise not */
-	"xla", TRINAMIC,	/* XLATE character string translation */
+	{ "add", DYNAMIC },		/* add two numbers together */
+	{ "sub", DYNAMIC },		/* subtraction */
+	{ "tim", DYNAMIC },		/* multiplication */
+	{ "div", DYNAMIC },		/* division */
+	{ "mod", DYNAMIC },		/* mod */
+	{ "neg", MONAMIC },		/* negate */
+	{ "cat", DYNAMIC },		/* concatinate string */
+	{ "lef", DYNAMIC },		/* left string(string, len) */
+	{ "rig", DYNAMIC },		/* right string(string, pos) */
+	{ "mid", TRINAMIC },		/* mid string(string, pos, len) */
+	{ "not", MONAMIC },		/* logical not */
+	{ "equ", DYNAMIC },		/* logical equality check */
+	{ "les", DYNAMIC },		/* logical less than */
+	{ "gre", DYNAMIC },		/* logical greater than */
+	{ "seq", DYNAMIC },		/* string logical equality check */
+	{ "sle", DYNAMIC },		/* string logical less than */
+	{ "sgr", DYNAMIC },		/* string logical greater than */
+	{ "ind", MONAMIC },		/* evaluate indirect value */
+	{ "and", DYNAMIC },		/* logical and */
+	{ "or", DYNAMIC },		/* logical or */
+	{ "len", MONAMIC },		/* string length */
+	{ "upp", MONAMIC },		/* uppercase string */
+	{ "low", MONAMIC },		/* lower case string */
+	{ "tru", MONAMIC },		/* Truth of the universe logical test */
+	{ "asc", MONAMIC },		/* char to integer conversion */
+	{ "chr", MONAMIC },		/* integer to char conversion */
+	{ "gtk", NILNAMIC },		/* get 1 charater */
+	{ "rnd", MONAMIC },		/* get a random number */
+	{ "abs", MONAMIC },		/* absolute value of a number */
+	{ "sin", DYNAMIC },		/* find the index of one string in another */
+	{ "env", MONAMIC },		/* retrieve a system environment var */
+	{ "bin", MONAMIC },		/* loopup what function name is bound to a key */
+	{ "exi", MONAMIC },		/* check if a file exists */
+	{ "fin", MONAMIC },		/* look for a file on the path... */
+	{ "ban", DYNAMIC },		/* bitwise and   9-10-87  jwm */
+	{ "bor", DYNAMIC },		/* bitwise or    9-10-87  jwm */
+	{ "bxo", DYNAMIC },		/* bitwise xor   9-10-87  jwm */
+	{ "bno", MONAMIC },		/* bitwise not */
+	{ "xla", TRINAMIC },		/* XLATE character string translation */
 };
 
 #define	NFUNCS	sizeof(funcs) / sizeof(UFUNC)

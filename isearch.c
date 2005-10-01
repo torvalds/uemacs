@@ -75,6 +75,7 @@ int risearch(int f, int n)
 #if	PKCODE
 	matchlen = strlen(pat);
 #endif
+	return (TRUE);
 }
 
 /*
@@ -106,6 +107,7 @@ int fisearch(int f, int n)
 #if	PKCODE
 	matchlen = strlen(pat);
 #endif
+	return (TRUE);
 }
 
 /*
@@ -284,25 +286,25 @@ int checknext(char chr, char *patrn, int dir)	/* Check next character in search 
 
 	/* setup the local scan pointer to current "." */
 
-	curline = curwp->w_dotp;	/* Get the current line structure     */
-	curoff = curwp->w_doto;	/* Get the offset within that line    */
+	curline = curwp->w_dotp;		/* Get the current line structure     */
+	curoff = curwp->w_doto;			/* Get the offset within that line    */
 
-	if (dir > 0) {		/* If searching forward                 */
-		if (curoff == llength(curline)) {	/* If at end of line                    */
-			curline = lforw(curline);	/* Skip to the next line              */
+	if (dir > 0) {				/* If searching forward                 */
+		if (curoff == llength(curline)) {		/* If at end of line                    */
+			curline = lforw(curline);		/* Skip to the next line              */
 			if (curline == curbp->b_linep)
-				return (FALSE);	/* Abort if at end of buffer          */
-			curoff = 0;	/* Start at the beginning of the line */
-			buffchar = '\n';	/* And say the next char is NL        */
+				return (FALSE);			/* Abort if at end of buffer          */
+			curoff = 0;				/* Start at the beginning of the line */
+			buffchar = '\n';			/* And say the next char is NL        */
 		} else
 			buffchar = lgetc(curline, curoff++);	/* Get the next char         */
-		if (status = eq(buffchar, chr)) {	/* Is it what we're looking for?      */
-			curwp->w_dotp = curline;	/* Yes, set the buffer's point        */
-			curwp->w_doto = curoff;	/*  to the matched character          */
-			curwp->w_flag |= WFMOVE;	/* Say that we've moved               */
+		if ((status = eq(buffchar, chr)) != 0) {	/* Is it what we're looking for?      */
+			curwp->w_dotp = curline;		/* Yes, set the buffer's point        */
+			curwp->w_doto = curoff;			/*  to the matched character          */
+			curwp->w_flag |= WFMOVE;		/* Say that we've moved               */
 		}
-		return (status);	/* And return the status              */
-	} else			/* Else, if reverse search:       */
+		return (status);		/* And return the status              */
+	} else					/* Else, if reverse search:       */
 		return (match_pat(patrn));	/* See if we're in the right place    */
 }
 
@@ -487,7 +489,7 @@ int uneat(void)
 	return (c);		/* and return the last char           */
 }
 
-int reeat(int c)
+void reeat(int c)
 {
 	if (eaten_char != -1)	/* If we've already been here             */
 		return /*(NULL) */ ;	/* Don't do it again                  */

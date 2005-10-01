@@ -119,7 +119,7 @@ extern window_t *wheadp;	/* Head of list of windows      */
 extern BUFFER *bheadp;		/* Head of list of buffers      */
 extern BUFFER *blistp;		/* Buffer for C-X C-B           */
 
-extern BUFFER *bfind();		/* Lookup a buffer by name      */
+extern BUFFER *bfind(char *bname, int cflag, int bflag); /* Lookup a buffer by name      */
 extern window_t *wpopup();	/* Pop up window creation       */
 extern LINE *lalloc();		/* Allocate a line              */
 extern char sres[NBUFN];	/* current screen resolution    */

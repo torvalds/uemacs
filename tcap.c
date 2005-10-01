@@ -327,7 +327,7 @@ static void tcapscrollregion(int top, int bot)
 
 #endif
 
-void spal(int dummy)
+void spal(char *dummy)
 {				/* change palette string */
 	/*      Does nothing here       */
 }

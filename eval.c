@@ -839,6 +839,7 @@ char *getval(char *token)
 	case TKCMD:
 		return (token);
 	}
+	return (errorm);
 }
 
 /*

@@ -836,7 +836,7 @@ int dobuf(BUFFER *bp)
  *
  * WHBLOCK *wp;		head of structure to free
  */
-int freewhile(WHBLOCK *wp)
+void freewhile(WHBLOCK *wp)
 {
 	if (wp == NULL)
 		return;

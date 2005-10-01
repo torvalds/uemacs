@@ -494,10 +494,10 @@ static int amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff)
  * int direct;			which way to go.
  * int beg_or_end;		put point at beginning or end of pattern.
  */
-int scanner(unsigned char *patrn, int direct, int beg_or_end)
+int scanner(const char *patrn, int direct, int beg_or_end)
 {
 	register int c;		/* character at current position */
-	register unsigned char *patptr;	/* pointer into pattern */
+	const char *patptr;	/* pointer into pattern */
 	LINE *curline;		/* current line during scan */
 	int curoff;		/* position within current line */
 	LINE *scanline;		/* current line during scanning */

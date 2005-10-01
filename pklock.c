@@ -4,6 +4,8 @@
  */
 
 #include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
 
 #if (FILOCK && BSD) || SVR4
 #include <sys/types.h>
