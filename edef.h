@@ -499,3 +499,17 @@ extern int ttputc(int c);
 extern void ttflush(void);
 extern int ttgetc(void);
 extern int typahead(void);
+
+/* input.c */
+extern int mlyesno(char *prompt);
+extern int mlreply(char *prompt, char *buf, int nbuf);
+extern int mlreplyt(char *prompt, char *buf, int nbuf, int eolchar);
+extern int ectoc(int c);
+extern int ctoec(int c);
+extern int (*getname(void))(void);
+extern int tgetc(void);
+extern int get1key(void);
+extern int getcmd(void);
+extern int getstring(char *prompt, char *buf, int nbuf, int eolchar);
+extern void outstring(char *s);
+extern void ostring(char *s);

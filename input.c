@@ -27,11 +27,7 @@
  * ABORT. The ABORT status is returned if the user bumps out of the question
  * with a ^G. Used any time a confirmation is required.
  */
-
-mlyesno(prompt)
-
-char *prompt;
-
+int mlyesno(char *prompt)
 {
 	char c;			/* input character */
 	char buf[NPAT];		/* prompt to user */
@@ -64,30 +60,22 @@ char *prompt;
  * return. Handle erase, kill, and abort keys.
  */
 
-mlreply(prompt, buf, nbuf)
-char *prompt;
-char *buf;
+int mlreply(char *prompt, char *buf, int nbuf)
 {
 	return (nextarg(prompt, buf, nbuf, ctoec('\n')));
 }
 
-mlreplyt(prompt, buf, nbuf, eolchar)
-
-char *prompt;
-char *buf;
-int eolchar;
-
+int mlreplyt(char *prompt, char *buf, int nbuf, int eolchar)
 {
 	return (nextarg(prompt, buf, nbuf, eolchar));
 }
 
-/*	ectoc:	expanded character to character
-		colapse the CONTROL and SPEC flags back into an ascii code   */
-
-ectoc(c)
-
-int c;
-
+/*
+ * ectoc:
+ *	expanded character to character
+ *	collapse the CONTROL and SPEC flags back into an ascii code
+ */
+int ectoc(int c)
 {
 	if (c & CONTROL)
 		c = c & ~(CONTROL | 0x40);
@@ -96,25 +84,24 @@ int c;
 	return (c);
 }
 
-/*	ctoec:	character to extended character
-		pull out the CONTROL and SPEC prefixes (if possible)	*/
-
-ctoec(c)
-
-int c;
-
+/*
+ * ctoec:
+ *	character to extended character
+ *	pull out the CONTROL and SPEC prefixes (if possible)
+ */
+int ctoec(int c)
 {
 	if (c >= 0x00 && c <= 0x1F)
 		c = CONTROL | (c + '@');
 	return (c);
 }
 
-/* get a command name from the command line. Command completion means
-   that pressing a <SPACE> will attempt to complete an unfinished command
-   name if it is unique.
-*/
-
-int (*getname()) ()
+/*
+ * get a command name from the command line. Command completion means
+ * that pressing a <SPACE> will attempt to complete an unfinished command
+ * name if it is unique.
+ */
+int (*getname(void))(void)
 {
 	register int cpos;	/* current column on screen output */
 	register int c;
@@ -131,7 +118,7 @@ int (*getname()) ()
 	/* if we are executing a command line get the next arg and match it */
 	if (clexec) {
 		if (macarg(buf) != TRUE)
-			return (FALSE);
+			return NULL;
 		return (fncmatch(&buf[0]));
 	}
 
@@ -149,7 +136,7 @@ int (*getname()) ()
 		} else if (c == ectoc(abortc)) {	/* Bell, abort */
 			ctrlg(FALSE, 0);
 			TTflush();
-			return ((int (*)()) NULL);
+			return NULL;
 
 		} else if (c == 0x7F || c == 0x08) {	/* rubout/erase */
 			if (cpos != 0) {
@@ -261,7 +248,7 @@ int (*getname()) ()
 /*	tgetc:	Get a key from the terminal driver, resolve any keyboard
 		macro action					*/
 
-int tgetc()
+int tgetc(void)
 {
 	int c;			/* fetched character */
 
@@ -313,7 +300,7 @@ int tgetc()
 			are the SPEC and CONTROL prefixes.
 								*/
 
-get1key()
+int get1key(void)
 {
 	int c;
 
@@ -337,7 +324,7 @@ get1key()
 /*	GETCMD:	Get a command from the keyboard. Process all applicable
 		prefix keys
 							*/
-getcmd()
+int getcmd(void)
 {
 	int c;			/* fetched keystroke */
 #if VT220
@@ -445,12 +432,7 @@ getcmd()
 	to specify the proper terminator. If the terminator is not
 	a return ('\n') it will echo as "<NL>"
 							*/
-getstring(prompt, buf, nbuf, eolchar)
-
-char *prompt;
-char *buf;
-int eolchar;
-
+int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 {
 	register int cpos;	/* current character position in string */
 	register int c;
@@ -708,20 +690,24 @@ int eolchar;
 	}
 }
 
-outstring(s)
-    /* output a string of characters */
-char *s;			/* string to output */
-
+/*
+ * output a string of characters
+ *
+ * char *s;		string to output
+ */
+void outstring(char *s)
 {
 	if (disinp)
 		while (*s)
 			TTputc(*s++);
 }
 
-ostring(s)
-    /* output a string of output characters */
-char *s;			/* string to output */
-
+/*
+ * output a string of output characters
+ *
+ * char *s;		string to output
+ */
+void ostring(char *s)
 {
 	if (discmd)
 		while (*s)
