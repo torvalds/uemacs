@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "estruct.h"
 #include "edef.h"
+#include "efunc.h"
 
 #if	FILOCK
 #if	BSD | SVR4
@@ -19,12 +20,13 @@ extern int errno;		/* current error */
 char *lname[NLOCKS];		/* names of all locked files */
 int numlocks;			/* # of current locks active */
 
-/* lockchk:	check a file for locking and add it to the list */
-
-lockchk(fname)
-
-char *fname;			/* file to check for a lock */
-
+/*
+ * lockchk:
+ *	check a file for locking and add it to the list
+ *
+ * char *fname;			file to check for a lock
+ */
+int lockchk(char *fname)
 {
 	register int i;		/* loop indexes */
 	register int status;	/* return status */
@@ -63,9 +65,11 @@ char *fname;			/* file to check for a lock */
 	return (TRUE);
 }
 
-/*	lockrel:	release all the file locks so others may edit */
-
-lockrel()
+/*
+ * lockrel:
+ *	release all the file locks so others may edit
+ */
+int lockrel(void)
 {
 	register int i;		/* loop index */
 	register int status;	/* status of locks */
@@ -82,16 +86,16 @@ lockrel()
 	return (status);
 }
 
-/* lock:	Check and lock a file from access by others
-		returns	TRUE = files was not locked and now is
-			FALSE = file was locked and overridden
-			ABORT = file was locked, abort command
-*/
-
-lock(fname)
-
-char *fname;			/* file name to lock */
-
+/*
+ * lock:
+ *	Check and lock a file from access by others
+ *	returns	TRUE = files was not locked and now is
+ *		FALSE = file was locked and overridden
+ *		ABORT = file was locked, abort command
+ *
+ * char *fname;		file name to lock
+ */
+int lock(char *fname)
 {
 	register char *locker;	/* lock error message */
 	register int status;	/* return status */
@@ -120,14 +124,14 @@ char *fname;			/* file name to lock */
 		return (ABORT);
 }
 
-/*	unlock:	Unlock a file
-		this only warns the user if it fails
-							*/
-
-unlock(fname)
-
-char *fname;			/* file to unlock */
-
+/*
+ * unlock:
+ *	Unlock a file
+ *	this only warns the user if it fails
+ *
+ * char *fname;		file to unlock
+ */
+int unlock(char *fname)
 {
 	register char *locker;	/* undolock return string */
 	char *undolock();
@@ -142,10 +146,12 @@ char *fname;			/* file to unlock */
 	return (FALSE);
 }
 
-lckerror(errstr)
-    /* report a lock error */
-char *errstr;			/* lock error string to print out */
-
+/*
+ * report a lock error
+ *
+ * char *errstr;	lock error string to print out
+ */
+void lckerror(char *errstr)
 {
 	char obuf[NSTRING];	/* output buffer for error message */
 
@@ -159,7 +165,7 @@ char *errstr;			/* lock error string to print out */
 }
 #endif
 #else
-lckhello()
+static void lckhello(void )
 {				/* dummy function */
 }
 #endif

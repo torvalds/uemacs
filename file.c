@@ -8,8 +8,10 @@
  */
 
 #include        <stdio.h>
+#include        <unistd.h>
 #include	"estruct.h"
 #include        "edef.h"
+#include        "efunc.h"
 
 /*
  * Read a file into the current
@@ -18,7 +20,7 @@
  * "read a file into the current buffer" code.
  * Bound to "C-X C-R".
  */
-fileread(f, n)
+int fileread(int f, int n)
 {
 	register int s;
 	char fname[NFILEN];
@@ -37,7 +39,7 @@ fileread(f, n)
  * "insert a file into the current buffer" code.
  * Bound to "C-X C-I".
  */
-insfile(f, n)
+int insfile(int f, int n)
 {
 	register int s;
 	char fname[NFILEN];
@@ -62,7 +64,7 @@ insfile(f, n)
  * text, and switch to the new buffer.
  * Bound to C-X C-F.
  */
-filefind(f, n)
+int filefind(int f, int n)
 {
 	char fname[NFILEN];	/* file user wishes to find */
 	register int s;		/* status return */
@@ -74,7 +76,7 @@ filefind(f, n)
 	return (getfile(fname, TRUE));
 }
 
-viewfile(f, n)
+int viewfile(int f, int n)
 {				/* visit a file in VIEW mode */
 	char fname[NFILEN];	/* file user wishes to find */
 	register int s;		/* status return */
@@ -99,7 +101,7 @@ viewfile(f, n)
 }
 
 #if	CRYPT
-resetkey()
+int resetkey(void)
 {				/* reset the encryption key if needed */
 	register int s;		/* return status */
 
@@ -131,11 +133,13 @@ resetkey()
 }
 #endif
 
-getfile(fname, lockfl)
-
-char fname[];			/* file name to find */
-int lockfl;			/* check the file for locks? */
-
+/*
+ * getfile()
+ *
+ * char fname[];	file name to find
+ * int lockfl;		check the file for locks?
+ */
+int getfile(char *fname, int lockfl)
 {
 	register BUFFER *bp;
 	register LINE *lp;
@@ -191,19 +195,17 @@ int lockfl;			/* check the file for locks? */
 }
 
 /*
-	Read file "fname" into the current buffer, blowing away any text
-	found there.  Called by both the read and find commands.  Return
-	the final status of the read.  Also called by the mainline, to
-	read in a file specified on the command line as an argument.
-	The command bound to M-FNR is called after the buffer is set up
-	and before it is read.
-*/
-
-readin(fname, lockfl)
-
-char fname[];			/* name of file to read */
-int lockfl;			/* check for file locks? */
-
+ * Read file "fname" into the current buffer, blowing away any text
+ * found there.  Called by both the read and find commands.  Return
+ * the final status of the read.  Also called by the mainline, to
+ * read in a file specified on the command line as an argument.
+ * The command bound to M-FNR is called after the buffer is set up
+ * and before it is read.
+ *
+ * char fname[];	name of file to read
+ * int lockfl;		check for file locks?
+ */
+int readin(char *fname, int lockfl)
 {
 	register LINE *lp1;
 	register LINE *lp2;
@@ -323,9 +325,7 @@ int lockfl;			/* check for file locks? */
  * I suppose that this information could be put in
  * a better place than a line of code.
  */
-makename(bname, fname)
-char bname[];
-char fname[];
+void makename(char *bname, char *fname)
 {
 	register char *cp1;
 	register char *cp2;
@@ -358,10 +358,12 @@ char fname[];
 	*cp2 = 0;
 }
 
-unqname(name)
-    /* make sure a buffer name is unique */
-char *name;			/* name to check on */
-
+/*
+ * make sure a buffer name is unique
+ *
+ * char *name;		name to check on
+ */
+void unqname(char *name)
 {
 	register char *sp;
 
@@ -389,7 +391,7 @@ char *name;			/* name to check on */
  * is more compatable with Gosling EMACS than
  * with ITS EMACS. Bound to "C-X C-W".
  */
-filewrite(f, n)
+int filewrite(int f, int n)
 {
 	register WINDOW *wp;
 	register int s;
@@ -420,7 +422,7 @@ filewrite(f, n)
  * name for the buffer. Bound to "C-X C-S". May
  * get called by "C-Z".
  */
-filesave(f, n)
+int filesave(int f, int n)
 {
 	register WINDOW *wp;
 	register int s;
@@ -462,8 +464,7 @@ filesave(f, n)
  * a macro for this. Most of the grief is error
  * checking of some sort.
  */
-writeout(fn)
-char *fn;
+int writeout(char *fn)
 {
 	register int s;
 	register LINE *lp;
@@ -515,7 +516,7 @@ char *fn;
  * as needing an update. You can type a blank line at the
  * prompt if you wish.
  */
-filename(f, n)
+int filename(int f, int n)
 {
 	register WINDOW *wp;
 	register int s;
@@ -544,8 +545,7 @@ filename(f, n)
  * buffer, Called by insert file command. Return the final
  * status of the read.
  */
-ifile(fname)
-char fname[];
+int ifile(char *fname)
 {
 	register LINE *lp0;
 	register LINE *lp1;

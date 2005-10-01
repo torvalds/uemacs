@@ -25,11 +25,9 @@
 #include        <stdio.h>
 #include	"estruct.h"
 #include        "edef.h"
+#include	"efunc.h"
 
 #if	ISRCH
-
-extern int scanner();		/* Handy search routine */
-extern int eq();		/* Compare chars, match case */
 
 /* A couple of "own" variables for re-eat */
 
@@ -47,8 +45,7 @@ int cmd_reexecute = -1;		/* > 0 if re-executing command */
  * Subroutine to do incremental reverse search.  It actually uses the
  * same code as the normal incremental search, as both can go both ways.
  */
-
-int risearch(f, n)
+int risearch(int f, int n)
 {
 	LINE *curline;		/* Current line on entry              */
 	int curoff;		/* Current offset on entry            */
@@ -78,9 +75,10 @@ int risearch(f, n)
 #endif
 }
 
-/* Again, but for the forward direction */
-
-int fisearch(f, n)
+/*
+ * Again, but for the forward direction
+ */
+int fisearch(int f, int n)
 {
 	LINE *curline;		/* Current line on entry              */
 	int curoff;		/* Current offset on entry            */
@@ -134,7 +132,7 @@ int fisearch(f, n)
  * exists (or until the search is aborted).
  */
 
-isearch(f, n)
+int isearch(int f, int n)
 {
 	int status;		/* Search status */
 	int col;		/* prompt column */
@@ -269,12 +267,12 @@ isearch(f, n)
  *
  * If the compare fails, we return FALSE and assume the caller will call
  * scanmore or something.
+ *
+ * char chr;		Next char to look for
+ * char *patrn;		The entire search string (incl chr)
+ * int dir;		Search direction
  */
-
-int checknext(chr, patrn, dir)	/* Check next character in search string */
-char chr;			/* Next char to look for                 */
-char *patrn;			/* The entire search string (incl chr)   */
-int dir;			/* Search direction                      */
+int checknext(char chr, char *patrn, int dir)	/* Check next character in search string */
 {
 	register LINE *curline;	/* current line during scan           */
 	register int curoff;	/* position within current line       */
@@ -314,11 +312,11 @@ int dir;			/* Search direction                      */
  * we do find a match, "point" will be at the end of the matched string for
  * forward searches and at the beginning of the matched string for reverse
  * searches.
+ *
+ * char *patrn;			string to scan for
+ * int dir;			direction to search
  */
-
-int scanmore(patrn, dir)	/* search forward or back for a pattern           */
-char *patrn;			/* string to scan for                         */
-int dir;			/* direction to search                        */
+int scanmore(char *patrn, int dir)	/* search forward or back for a pattern           */
 {
 	int sts;		/* search status                      */
 
@@ -344,10 +342,10 @@ int dir;			/* direction to search                        */
  * This isn't used for forward searches, because forward searches leave "."
  * at the end of the search string (instead of in front), so all that needs to
  * be done is match the last char input.
+ *
+ * char *patrn;			String to match to buffer
  */
-
-int match_pat(patrn)		/* See if the pattern string matches string at "."   */
-char *patrn;			/* String to match to buffer                         */
+int match_pat(char *patrn)	/* See if the pattern string matches string at "."   */
 {
 	register int i;		/* Generic loop index/offset          */
 	register int buffchar;	/* character at current position      */
@@ -376,10 +374,10 @@ char *patrn;			/* String to match to buffer                         */
 	return (TRUE);		/* Everything matched? Let's celebrate */
 }
 
-/* Routine to prompt for I-Search string. */
-
-int promptpattern(prompt)
-char *prompt;
+/*
+ * Routine to prompt for I-Search string.
+ */
+int promptpattern(char *prompt)
 {
 	char tpat[NPAT + 20];
 
@@ -395,11 +393,13 @@ char *prompt;
 	return (strlen(tpat));
 }
 
-/* routine to echo i-search characters */
-
-int echochar(c, col)
-int c;				/* character to be echoed */
-int col;			/* column to be echoed in */
+/*
+ * routine to echo i-search characters
+ *
+ * int c;		character to be echoed
+ * int col;		column to be echoed in
+ */
+int echochar(int c, int col)
 {
 	movecursor(term.t_nrow, col);	/* Position the cursor        */
 	if ((c < ' ') || (c == 0x7F)) {	/* Control character?           */
@@ -444,8 +444,7 @@ int col;			/* column to be echoed in */
  * Otherwise, we must be re-executing the command string, so just return the
  * next character.
  */
-
-int get_char()
+int get_char(void)
 {
 	int c;			/* A place to get a character         */
 
@@ -476,7 +475,7 @@ int get_char()
 
 /* Come here on the next term.t_getchar call: */
 
-int uneat()
+int uneat(void)
 {
 	int c;
 
@@ -486,8 +485,7 @@ int uneat()
 	return (c);		/* and return the last char           */
 }
 
-int reeat(c)
-int c;
+int reeat(int c)
 {
 	if (eaten_char != -1)	/* If we've already been here             */
 		return /*(NULL) */ ;	/* Don't do it again                  */
@@ -496,7 +494,7 @@ int c;
 	term.t_getchar = uneat;	/* Replace it with ours               */
 }
 #else
-isearch()
+int isearch(int f, int n)
 {
 }
 #endif

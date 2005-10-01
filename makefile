@@ -3,12 +3,12 @@
 SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c \
 	file.c fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c \
 	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
-	termio.c vmsvt.c vt52.c window.c word.c
+	termio.c vmsvt.c vt52.c window.c word.c names.c
 
 OBJ=ansi.o basic.o bind.o buffer.o crypt.o display.o eval.o exec.o \
 	file.o fileio.o ibmpc.o input.o isearch.o line.o lock.o main.o \
 	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
-	termio.o vmsvt.o vt52.o window.o word.o
+	termio.o vmsvt.o vt52.o window.o word.o names.o
 
 HDR=ebind.h edef.h efunc.h epath.h estruct.h evar.h
 

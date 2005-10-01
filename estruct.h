@@ -608,7 +608,7 @@ typedef struct {
 
 typedef struct {
 	char *n_name;		/* name of function key */
-	int (*n_func) ();	/* function name is bound to */
+	int (*n_func)(int, int);/* function name is bound to */
 } NBIND;
 
 /*	The editor holds deleted text chunks in the KILL buffer. The

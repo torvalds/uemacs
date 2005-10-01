@@ -8,16 +8,19 @@
 #include	<stdio.h>
 #include	"estruct.h"
 #include	"edef.h"
+#include        "efunc.h"
 
 #if	CRYPT
 
 static int mod95();
 
-setkey(f, n)
-    /* reset encryption key of current buffer */
-int f;				/* default flag */
-int n;				/* numeric argument */
-
+/*
+ * reset encryption key of current buffer
+ *
+ * int f;		default flag
+ * int n;		numeric argument
+ */
+int setkey(int f, int n)
 {
 	register int status;	/* return status */
 	int odisinp;		/* original vlaue of disinp */
@@ -134,11 +137,13 @@ int n;				/* numeric argument */
  *	protection and security of the keys themselves are the 
  *	responsiblity of the user.  
  *
+ *
+ * char *bptr;		buffer of characters to be encrypted
+ * unsigned len;	number of characters in the buffer
+ *
  **********/
 
-crypt(bptr, len)
-register char *bptr;		/* buffer of characters to be encrypted */
-register unsigned len;		/* number of characters in the buffer */
+void crypt(char *bptr, unsigned len)
 {
 	register int cc;	/* current character being considered */
 
@@ -194,10 +199,7 @@ register unsigned len;		/* number of characters in the buffer */
 	return;
 }
 
-static int mod95(val)
-
-register int val;
-
+static int mod95(int val)
 {
 	/*  The mathematical MOD does not match the computer MOD  */
 
@@ -215,7 +217,7 @@ register int val;
 	return (val);
 }
 #else
-nocrypt()
+static void nocrypt(void)
 {
 }
 #endif

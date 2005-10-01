@@ -57,8 +57,8 @@
 #define	maindef
 
 #include        "estruct.h"	/* global structures and defines */
-#include	"efunc.h"	/* function declarations and name table */
 #include	"edef.h"	/* global definitions */
+#include	"efunc.h"	/* function declarations and name table */
 #include	"ebind.h"	/* default key bindings */
 
 /* for MSDOS, increase the default stack space */
@@ -117,10 +117,6 @@ int main(int argc, char **argv)
 #endif
 	extern *pathname[];	/* startup file path/name array */
 	int newc;
-#if	PKCODE
-	int (*getbind()) ();
-	int (*execfunc) ();	/* ptr to function to execute */
-#endif
 
 #if	PKCODE & VMS
 	(void) umask(-1);	/* use old protection (this is at wrong place) */
@@ -311,6 +307,8 @@ int main(int argc, char **argv)
 		newc = getcmd();
 		update(FALSE);
 		do {
+			fn_t execfunc;
+
 			if (c == newc && (execfunc = getbind(c)) != NULL
 			    && execfunc != newline && execfunc != tab)
 				newc = getcmd();
@@ -468,8 +466,7 @@ int edinit(char *bname)
 int execute(int c, int f, int n)
 {
 	register int status;
-	int (*execfunc) ();	/* ptr to function to execute */
-	int (*getbind()) ();
+	fn_t execfunc;
 
 	/* if the keystroke is a bound function...do it */
 	execfunc = getbind(c);

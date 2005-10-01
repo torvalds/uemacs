@@ -60,28 +60,28 @@
 #include        <stdio.h>
 #include	"estruct.h"
 #include        "edef.h"
+#include        "efunc.h"
 
-static int readpattern();
-static int replaces();
-static int nextch();
-#if	MAGIC
-static int cclmake();
-static int mcstr();
-static int rmcstr();
-static int mceq();
-static void setbit();
-static int amatch();
-static int biteq();
-static BITMAP clearbits();
-#endif
+static int amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff);
+static int readpattern(char *prompt, char *apat, int srch);
+static int replaces(int kind, int f, int n);
+static int nextch(LINE **pcurline, int *pcuroff, int dir);
+static int mcstr(void);
+static int rmcstr(void);
+static int mceq(int bc, MC *mt);
+static int cclmake(char **ppatptr, MC *mcptr);
+static int biteq(int bc, BITMAP cclmap);
+static BITMAP clearbits(void);
+static void setbit(int bc, BITMAP cclmap);
 
 /*
  * forwsearch -- Search forward.  Get a search string from the user, and
  *	search for the string.  If found, reset the "." to be just after
  *	the match string, and (perhaps) repaint the display.
+ *
+ * int f, n;			default flag / numeric argument
  */
-forwsearch(f, n)
-int f, n;			/* default flag / numeric argument */
+int forwsearch(int f, int n)
 {
 	register int status = TRUE;
 
@@ -124,10 +124,10 @@ int f, n;			/* default flag / numeric argument */
  * forwhunt -- Search forward for a previously acquired search string.
  *	If found, reset the "." to be just after the match string,
  *	and (perhaps) repaint the display.
+ *
+ * int f, n;		default flag / numeric argument
  */
-
-forwhunt(f, n)
-int f, n;			/* default flag / numeric argument */
+int forwhunt(int f, int n)
 {
 	register int status = TRUE;
 
@@ -178,9 +178,10 @@ int f, n;			/* default flag / numeric argument */
  *	search, starting at "." and proceeding toward the front of the buffer.
  *	If found "." is left pointing at the first character of the pattern
  *	(the last character that was matched).
+ *
+ * int f, n;		default flag / numeric argument
  */
-backsearch(f, n)
-int f, n;			/* default flag / numeric argument */
+int backsearch(int f, int n)
 {
 	register int status = TRUE;
 
@@ -225,9 +226,10 @@ int f, n;			/* default flag / numeric argument */
  *	starting at "." and proceeding toward the front of the buffer.
  *	If found "." is left pointing at the first character of the pattern
  *	(the last character that was matched).
+ *
+ * int f, n;		default flag / numeric argument
  */
-backhunt(f, n)
-int f, n;			/* default flag / numeric argument */
+int backhunt(int f, int n)
 {
 	register int status = TRUE;
 
@@ -278,11 +280,12 @@ int f, n;			/* default flag / numeric argument */
  * mcscanner -- Search for a meta-pattern in either direction.  If found,
  *	reset the "." to be at the start or just after the match string,
  *	and (perhaps) repaint the display.
+ *
+ * MC *mcpatrn;			pointer into pattern
+ * int direct;			which way to go.
+ * int beg_or_end;		put point at beginning or end of pattern.
  */
-int mcscanner(mcpatrn, direct, beg_or_end)
-MC *mcpatrn;			/* pointer into pattern */
-int direct;			/* which way to go. */
-int beg_or_end;			/* put point at beginning or end of pattern. */
+int mcscanner(MC *mcpatrn, int direct, int beg_or_end)
 {
 	LINE *curline;		/* current line during scan */
 	int curoff;		/* position within current line */
@@ -345,12 +348,13 @@ int beg_or_end;			/* put point at beginning or end of pattern. */
  * amatch -- Search for a meta-pattern in either direction.  Based on the
  *	recursive routine amatch() (for "anchored match") in
  *	Kernighan & Plauger's "Software Tools".
+ *
+ * MC *mcptr;		string to scan for
+ * int direct;		which way to go.
+ * LINE **pcwline;	current line during scan
+ * int *pcwoff;		position within current line
  */
-static int amatch(mcptr, direct, pcwline, pcwoff)
-register MC *mcptr;		/* string to scan for */
-int direct;			/* which way to go. */
-LINE **pcwline;			/* current line during scan */
-int *pcwoff;			/* position within current line */
+static int amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff)
 {
 	register int c;		/* character at current position */
 	LINE *curline;		/* current line during scan */
@@ -483,11 +487,12 @@ int *pcwoff;			/* position within current line */
  * scanner -- Search for a pattern in either direction.  If found,
  *	reset the "." to be at the start or just after the match string,
  *	and (perhaps) repaint the display.
+ *
+ * unsigned char *patrn;	string to scan for
+ * int direct;			which way to go.
+ * int beg_or_end;		put point at beginning or end of pattern.
  */
-int scanner(patrn, direct, beg_or_end)
-unsigned char *patrn;		/* string to scan for */
-int direct;			/* which way to go. */
-int beg_or_end;			/* put point at beginning or end of pattern. */
+int scanner(unsigned char *patrn, int direct, int beg_or_end)
 {
 	register int c;		/* character at current position */
 	register unsigned char *patptr;	/* pointer into pattern */
@@ -562,14 +567,7 @@ int beg_or_end;			/* put point at beginning or end of pattern. */
  * eq -- Compare two characters.  The "bc" comes from the buffer, "pc"
  *	from the pattern.  If we are not in EXACT mode, fold out the case.
  */
-int eq(bc, pc)
-#if	PKCODE
-register char bc;
-register char pc;
-#else
-register int bc;
-register int pc;
-#endif
+int eq(unsigned char bc, unsigned char pc)
 {
 	if ((curwp->w_bufp->b_mode & MDEXACT) == 0) {
 		if (islower(bc))
@@ -593,10 +591,7 @@ register int pc;
  *	<META> to delimit the end-of-pattern to allow <NL>s in the search
  *	string. 
  */
-static int readpattern(prompt, apat, srch)
-char *prompt;
-char apat[];
-int srch;
+static int readpattern(char *prompt, char *apat, int srch)
 {
 	int status;
 	char tpat[NPAT + 20];
@@ -640,7 +635,7 @@ int srch;
 /*
  * savematch -- We found the pattern?  Let's save it away.
  */
-savematch()
+void savematch(void)
 {
 	register char *ptr;	/* pointer to last match string */
 	register int j;
@@ -669,8 +664,7 @@ savematch()
 /*
  * rvstrcpy -- Reverse string copy.
  */
-rvstrcpy(rvstr, str)
-register char *rvstr, *str;
+void rvstrcpy(char *rvstr, char *str)
 {
 	register int i;
 
@@ -684,20 +678,22 @@ register char *rvstr, *str;
 
 /*
  * sreplace -- Search and replace.
+ *
+ * int f;		default flag
+ * int n;		# of repetitions wanted
  */
-sreplace(f, n)
-int f;				/* default flag */
-int n;				/* # of repetitions wanted */
+int sreplace(int f, int n)
 {
 	return (replaces(FALSE, f, n));
 }
 
 /*
  * qreplace -- search and replace with query.
+ *
+ * int f;		default flag
+ * int n;		# of repetitions wanted
  */
-qreplace(f, n)
-int f;				/* default flag */
-int n;				/* # of repetitions wanted */
+int qreplace(int f, int n)
 {
 	return (replaces(TRUE, f, n));
 }
@@ -705,11 +701,12 @@ int n;				/* # of repetitions wanted */
 /*
  * replaces -- Search for a string and replace it with another
  *	string.  Query might be enabled (according to kind).
+ *
+ * int kind;		Query enabled flag
+ * int f;		default flag
+ * int n;		# of repetitions wanted
  */
-static int replaces(kind, f, n)
-int kind;			/* Query enabled flag */
-int f;				/* default flag */
-int n;				/* # of repetitions wanted */
+static int replaces(int kind, int f, int n)
 {
 	register int status;	/* success flag on pattern inputs */
 	register int rlength;	/* length of replacement string */
@@ -925,10 +922,7 @@ int n;				/* # of repetitions wanted */
  *	then either insert the string directly, or make use of
  *	replacement meta-array.
  */
-delins(dlength, instr, use_meta)
-int dlength;
-char *instr;
-int use_meta;
+int delins(int dlength, char *instr, int use_meta)
 {
 	int status;
 #if	MAGIC
@@ -961,11 +955,12 @@ int use_meta;
 
 /*
  * expandp -- Expand control key sequences for output.
+ *
+ * char *srcstr;		string to expand
+ * char *deststr;		destination of expanded string
+ * int maxlength;		maximum chars in destination
  */
-expandp(srcstr, deststr, maxlength)
-char *srcstr;			/* string to expand */
-char *deststr;			/* destination of expanded string */
-int maxlength;			/* maximum chars in destination */
+int expandp(char *srcstr, char *deststr, int maxlength)
 {
 	unsigned char c;	/* current char to translate */
 
@@ -1016,9 +1011,7 @@ int maxlength;			/* maximum chars in destination */
  *	in future, a' la VMS EDT.  At the moment, just return TRUE or
  *	FALSE depending on if a boundry is hit (ouch).
  */
-int boundry(curline, curoff, dir)
-LINE *curline;
-int curoff, dir;
+int boundry(LINE *curline, int curoff, int dir)
 {
 	register int border;
 
@@ -1040,10 +1033,7 @@ int curoff, dir;
  *	the current character and move, reverse searches move and
  *	look at the character.
  */
-static int nextch(pcurline, pcuroff, dir)
-LINE **pcurline;
-int *pcuroff;
-int dir;
+static int nextch(LINE **pcurline, int *pcuroff, int dir)
 {
 	register LINE *curline;
 	register int curoff;
@@ -1089,7 +1079,7 @@ int dir;
  *	within the 64K limit.  C compilers actually do very little
  *	in the way of optimizing - they expect you to do that.
  */
-static int mcstr()
+static int mcstr(void)
 {
 	MC *mcptr, *rtpcm;
 	char *patptr;
@@ -1204,7 +1194,7 @@ static int mcstr()
  *	the array is never actually created - we will just use the
  *	character array rpat[] as the replacement string.
  */
-static int rmcstr()
+static int rmcstr(void)
 {
 	RMC *rmcptr;
 	char *patptr;
@@ -1293,7 +1283,7 @@ static int rmcstr()
 /*
  * mcclear -- Free up any CCL bitmaps, and MCNIL the MC search arrays.
  */
-mcclear()
+void mcclear(void)
 {
 	register MC *mcptr;
 
@@ -1311,7 +1301,7 @@ mcclear()
 /*
  * rmcclear -- Free up any strings, and MCNIL the RMC array.
  */
-rmcclear()
+void rmcclear(void)
 {
 	register RMC *rmcptr;
 
@@ -1331,9 +1321,7 @@ rmcclear()
  *	Software Tools, this is the function omatch(), but i felt there
  *	were too many functions with the 'match' name already.
  */
-static int mceq(bc, mt)
-int bc;
-MC *mt;
+static int mceq(int bc, MC *mt)
 {
 	register int result;
 
@@ -1382,9 +1370,7 @@ MC *mt;
  *	ppatptr is left pointing to the end-of-character-class character,
  *	so that a loop may automatically increment with safety.
  */
-static int cclmake(ppatptr, mcptr)
-char **ppatptr;
-MC *mcptr;
+static int cclmake(char **ppatptr, MC *mcptr)
 {
 	BITMAP clearbits();
 	BITMAP bmap;
@@ -1463,9 +1449,7 @@ MC *mcptr;
 /*
  * biteq -- is the character in the bitmap?
  */
-static int biteq(bc, cclmap)
-int bc;
-BITMAP cclmap;
+static int biteq(int bc, BITMAP cclmap)
 {
 #if	PKCODE
 	bc = bc & 0xFF;
@@ -1479,7 +1463,7 @@ BITMAP cclmap;
 /*
  * clearbits -- Allocate and zero out a CCL bitmap.
  */
-static BITMAP clearbits()
+static BITMAP clearbits(void)
 {
 	BITMAP cclstart, cclmap;
 	register int j;
@@ -1494,9 +1478,7 @@ static BITMAP clearbits()
 /*
  * setbit -- Set a bit (ON only) in the bitmap.
  */
-static void setbit(bc, cclmap)
-int bc;
-BITMAP cclmap;
+static void setbit(int bc, BITMAP cclmap)
 {
 #if	PKCODE
 	bc = bc & 0xFF;

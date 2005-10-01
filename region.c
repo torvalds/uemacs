@@ -12,6 +12,7 @@
 #include        <stdio.h>
 #include	"estruct.h"
 #include        "edef.h"
+#include        "efunc.h"
 
 /*
  * Kill the region. Ask "getregion"

@@ -9,6 +9,7 @@
 #include        <stdio.h>
 #include	"estruct.h"
 #include        "edef.h"
+#include	"efunc.h"
 
 #if	PKCODE
 extern int nullflag;
@@ -20,8 +21,7 @@ int eofflag;			/* end-of-file flag */
 /*
  * Open a file for reading.
  */
-ffropen(fn)
-char *fn;
+int ffropen(char *fn)
 {
 	if ((ffp = fopen(fn, "r")) == NULL)
 		return (FIOFNF);
@@ -33,8 +33,7 @@ char *fn;
  * Open a file for writing. Return TRUE if all is well, and FALSE on error
  * (cannot create).
  */
-ffwopen(fn)
-char *fn;
+int ffwopen(char *fn)
 {
 #if     VMS
 	register int fd;
@@ -53,7 +52,7 @@ char *fn;
 /*
  * Close a file. Should look at the status in all systems.
  */
-ffclose()
+int ffclose(void)
 {
 	/* free this since we do not need it anymore */
 	if (fline) {
@@ -83,8 +82,7 @@ ffclose()
  * and the "nbuf" is its length, less the free newline. Return the status.
  * Check only at the newline.
  */
-ffputline(buf, nbuf)
-char buf[];
+int ffputline(char *buf, int nbuf)
 {
 	register int i;
 #if	CRYPT
@@ -120,7 +118,7 @@ char buf[];
  * at the end of the file that don't have a newline present. Check for I/O
  * errors too. Return status.
  */
-ffgetline()
+int ffgetline(void)
 {
 	register int c;		/* current character read */
 	register int i;		/* current index into fline */
@@ -206,10 +204,12 @@ ffgetline()
 	return (FIOSUC);
 }
 
-int fexist(fname)
-			    /* does <fname> exist on disk? */
-char *fname;			/* file to check for existance */
-
+/*
+ * does <fname> exist on disk?
+ *
+ * char *fname;		file to check for existance
+ */
+int fexist(char *fname)
 {
 	FILE *fp;
 

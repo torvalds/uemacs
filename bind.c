@@ -10,6 +10,7 @@
 #include	<stdio.h>
 #include	"estruct.h"
 #include	"edef.h"
+#include	"efunc.h"
 #include	"epath.h"
 
 int help(int f, int n)
@@ -443,7 +444,7 @@ unsigned int getckey(int mflag)
  *
  * char *sfname;	name of startup file (null if default)
  */
-startup(char *sfname)
+int startup(char *sfname)
 {
 	char *fname;		/* resulting file name to execute */
 

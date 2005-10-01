@@ -17,6 +17,7 @@
 
 #include	"estruct.h"
 #include        "edef.h"
+#include        "efunc.h"
 
 
 #if TERMCAP

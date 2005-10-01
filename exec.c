@@ -10,13 +10,15 @@
 #include	<stdio.h>
 #include	"estruct.h"
 #include	"edef.h"
+#include	"efunc.h"
 
-/* namedcmd:	execute a named command even if it is not bound */
-
-namedcmd(f, n)
-
-int f, n;			/* command arguments [passed through to command executed] */
-
+/*
+ * namedcmd:
+ *	execute a named command even if it is not bound
+ *
+ * int f, n;		command arguments [passed through to command executed]
+ */
+int namedcmd(int f, int n)
 {
 	register int (*kfunc) ();	/* ptr to the requexted function to bind to */
 	int (*getname()) ();
@@ -35,13 +37,14 @@ int f, n;			/* command arguments [passed through to command executed] */
 	return ((*kfunc) (f, n));
 }
 
-/*	execcmd:	Execute a command line command to be typed in
-			by the user					*/
-
-execcmd(f, n)
-
-int f, n;			/* default Flag and Numeric argument */
-
+/*
+ * execcmd:
+ *	Execute a command line command to be typed in
+ *	by the user
+ *
+ * int f, n;		default Flag and Numeric argument
+ */
+int execcmd(int f, int n)
 {
 	register int status;	/* status return */
 	char cmdstr[NSTRING];	/* string holding command to execute */
@@ -54,21 +57,20 @@ int f, n;			/* default Flag and Numeric argument */
 	return (docmd(cmdstr));
 }
 
-/*	docmd:	take a passed string as a command line and translate
-		it to be executed as a command. This function will be
-		used by execute-command-line and by all source and
-		startup files. Lastflag/thisflag is also updated.
-
-	format of the command line is:
-
-		{# arg} <command-name> {<argument string(s)>}
-
-*/
-
-docmd(cline)
-
-char *cline;			/* command line to execute */
-
+/*
+ * docmd:
+ *	take a passed string as a command line and translate
+ * 	it to be executed as a command. This function will be
+ *	used by execute-command-line and by all source and
+ *	startup files. Lastflag/thisflag is also updated.
+ *
+ *	format of the command line is:
+ *
+ *		{# arg} <command-name> {<argument string(s)>}
+ *
+ * char *cline;		command line to execute
+ */
+int docmd(char *cline)
 {
 	register int f;		/* default argument flag */
 	register int n;		/* numeric repeat value */
@@ -127,15 +129,15 @@ char *cline;			/* command line to execute */
 	return (status);
 }
 
-/* token:	chop a token off a string
-		return a pointer past the token
-*/
-
-char *token(src, tok, size)
-
-char *src, *tok;		/* source string, destination token string */
-int size;			/* maximum size of token */
-
+/*
+ * token:
+ *	chop a token off a string
+ *	return a pointer past the token
+ *
+ * char *src, *tok;	source string, destination token string
+ * int size;		maximum size of token
+ */
+char *token(char *src, char *tok, int size)
 {
 	register int quotef;	/* is the current string quoted? */
 	register char c;	/* temporary character */
@@ -202,10 +204,12 @@ int size;			/* maximum size of token */
 	return (src);
 }
 
-macarg(tok)
-    /* get a macro line argument */
-char *tok;			/* buffer to place argument */
-
+/*
+ * get a macro line argument
+ *
+ * char *tok;		buffer to place argument
+ */
+int macarg(char *tok)
 {
 	int savcle;		/* buffer to store original clexec */
 	int status;
@@ -217,15 +221,16 @@ char *tok;			/* buffer to place argument */
 	return (status);
 }
 
-/*	nextarg:	get the next argument	*/
-
-nextarg(prompt, buffer, size, terminator)
-
-char *prompt;			/* prompt to use if we must be interactive */
-char *buffer;			/* buffer to put token into */
-int size;			/* size of the buffer */
-int terminator;			/* terminating char to be used on interactive fetch */
-
+/*
+ * nextarg:
+ *	get the next argument
+ *
+ * char *prompt;		prompt to use if we must be interactive
+ * char *buffer;		buffer to put token into
+ * int size;			size of the buffer
+ * int terminator;		terminating char to be used on interactive fetch
+ */
+int nextarg(char *prompt, char *buffer, int size, int terminator)
 {
 	/* if we are interactive, go get it! */
 	if (clexec == FALSE)
@@ -239,14 +244,15 @@ int terminator;			/* terminating char to be used on interactive fetch */
 	return (TRUE);
 }
 
-/*	storemac:	Set up a macro buffer and flag to store all
-			executed command lines there			*/
-
-storemac(f, n)
-
-int f;				/* default flag */
-int n;				/* macro number to use */
-
+/*
+ * storemac:
+ *	Set up a macro buffer and flag to store all
+ *	executed command lines there
+ *
+ * int f;		default flag
+ * int n;		macro number to use
+ */
+int storemac(int f, int n)
 {
 	register struct BUFFER *bp;	/* pointer to macro buffer */
 	char bname[NBUFN];	/* name of buffer to use */
@@ -284,14 +290,15 @@ int n;				/* macro number to use */
 }
 
 #if	PROC
-/*	storeproc:	Set up a procedure buffer and flag to store all
-			executed command lines there			*/
-
-storeproc(f, n)
-
-int f;				/* default flag */
-int n;				/* macro number to use */
-
+/*
+ * storeproc:
+ *	Set up a procedure buffer and flag to store all
+ *	executed command lines there
+ *
+ * int f;		default flag
+ * int n;		macro number to use
+ */
+int storeproc(int f, int n)
 {
 	register struct BUFFER *bp;	/* pointer to macro buffer */
 	register int status;	/* return status */
@@ -325,12 +332,13 @@ int n;				/* macro number to use */
 	return (TRUE);
 }
 
-/*	execproc:	Execute a procedure				*/
-
-execproc(f, n)
-
-int f, n;			/* default flag and numeric arg */
-
+/*
+ * execproc:
+ *	Execute a procedure
+ *
+ * int f, n;		default flag and numeric arg
+ */
+int execproc(int f, int n)
 {
 	register BUFFER *bp;	/* ptr to buffer to execute */
 	register int status;	/* status return */
@@ -359,12 +367,13 @@ int f, n;			/* default flag and numeric arg */
 }
 #endif
 
-/*	execbuf:	Execute the contents of a buffer of commands	*/
-
-execbuf(f, n)
-
-int f, n;			/* default flag and numeric arg */
-
+/*
+ * execbuf:
+ *	Execute the contents of a buffer of commands
+ *
+ * int f, n;		default flag and numeric arg
+ */
+int execbuf(int f, int n)
 {
 	register BUFFER *bp;	/* ptr to buffer to execute */
 	register int status;	/* status return */
@@ -387,30 +396,30 @@ int f, n;			/* default flag and numeric arg */
 	return (TRUE);
 }
 
-/*	dobuf:	execute the contents of the buffer pointed to
-		by the passed BP
-
-	Directives start with a "!" and include:
-
-	!endm		End a macro
-	!if (cond)	conditional execution
-	!else
-	!endif
-	!return		Return (terminating current macro)
-	!goto <label>	Jump to a label in the current macro
-	!force		Force macro to continue...even if command fails
-	!while (cond)	Execute a loop if the condition is true
-	!endwhile
-	
-	Line Labels begin with a "*" as the first nonblank char, like:
-
-	*LBL01
-*/
-
-dobuf(bp)
-
-BUFFER *bp;			/* buffer to execute */
-
+/*
+ * dobuf:
+ *	execute the contents of the buffer pointed to
+ *	by the passed BP
+ *
+ *	Directives start with a "!" and include:
+ *
+ *	!endm		End a macro
+ *	!if (cond)	conditional execution
+ *	!else
+ *	!endif
+ *	!return		Return (terminating current macro)
+ *	!goto <label>	Jump to a label in the current macro
+ *	!force		Force macro to continue...even if command fails
+ *	!while (cond)	Execute a loop if the condition is true
+ *	!endwhile
+ *
+ *	Line Labels begin with a "*" as the first nonblank char, like:
+ *
+ *	*LBL01
+ *
+ * BUFFER *bp;		buffer to execute
+ */
+int dobuf(BUFFER *bp)
 {
 	register int status;	/* status return */
 	register LINE *lp;	/* pointer to line to execute */
@@ -822,10 +831,12 @@ BUFFER *bp;			/* buffer to execute */
 	return (TRUE);
 }
 
-freewhile(wp)
-    /* free a list of while block pointers */
-WHBLOCK *wp;			/* head of structure to free */
-
+/*
+ * free a list of while block pointers
+ *
+ * WHBLOCK *wp;		head of structure to free
+ */
+int freewhile(WHBLOCK *wp)
 {
 	if (wp == NULL)
 		return;
@@ -834,10 +845,12 @@ WHBLOCK *wp;			/* head of structure to free */
 	free(wp);
 }
 
-execfile(f, n)
-    /* execute a series of commands in a file */
-int f, n;			/* default flag and numeric arg to pass on to file */
-
+/*
+ * execute a series of commands in a file
+ *
+ * int f, n;		default flag and numeric arg to pass on to file
+ */
+int execfile(int f, int n)
 {
 	register int status;	/* return status of name query */
 	char fname[NSTRING];	/* name of file to execute */
@@ -864,13 +877,14 @@ int f, n;			/* default flag and numeric arg to pass on to file */
 	return (TRUE);
 }
 
-/*	dofile:	yank a file into a buffer and execute it
-		if there are no errors, delete the buffer on exit */
-
-dofile(fname)
-
-char *fname;			/* file name to execute */
-
+/*
+ * dofile:
+ *	yank a file into a buffer and execute it
+ *	if there are no errors, delete the buffer on exit
+ *
+ * char *fname;		file name to execute
+ */
+int dofile(char *fname)
 {
 	register BUFFER *bp;	/* buffer to place file to exeute */
 	register BUFFER *cb;	/* temp to hold current buf while we read */
@@ -902,13 +916,14 @@ char *fname;			/* file name to execute */
 	return (TRUE);
 }
 
-/*	cbuf:	Execute the contents of a numbered buffer	*/
-
-cbuf(f, n, bufnum)
-
-int f, n;			/* default flag and numeric arg */
-int bufnum;			/* number of buffer to execute */
-
+/*
+ * cbuf:
+ *	Execute the contents of a numbered buffer
+ *
+ * int f, n;		default flag and numeric arg
+ * int bufnum;		number of buffer to execute
+ */
+int cbuf(int f, int n, int bufnum)
 {
 	register BUFFER *bp;	/* ptr to buffer to execute */
 	register int status;	/* status return */
@@ -931,202 +946,202 @@ int bufnum;			/* number of buffer to execute */
 	return (TRUE);
 }
 
-cbuf1(f, n)
+int cbuf1(int f, int n)
 {
 	return cbuf(f, n, 1);
 }
 
-cbuf2(f, n)
+int cbuf2(int f, int n)
 {
 	return cbuf(f, n, 2);
 }
 
-cbuf3(f, n)
+int cbuf3(int f, int n)
 {
 	return cbuf(f, n, 3);
 }
 
-cbuf4(f, n)
+int cbuf4(int f, int n)
 {
 	return cbuf(f, n, 4);
 }
 
-cbuf5(f, n)
+int cbuf5(int f, int n)
 {
 	return cbuf(f, n, 5);
 }
 
-cbuf6(f, n)
+int cbuf6(int f, int n)
 {
 	return cbuf(f, n, 6);
 }
 
-cbuf7(f, n)
+int cbuf7(int f, int n)
 {
 	return cbuf(f, n, 7);
 }
 
-cbuf8(f, n)
+int cbuf8(int f, int n)
 {
 	return cbuf(f, n, 8);
 }
 
-cbuf9(f, n)
+int cbuf9(int f, int n)
 {
 	return cbuf(f, n, 9);
 }
 
-cbuf10(f, n)
+int cbuf10(int f, int n)
 {
 	return cbuf(f, n, 10);
 }
 
-cbuf11(f, n)
+int cbuf11(int f, int n)
 {
 	return cbuf(f, n, 11);
 }
 
-cbuf12(f, n)
+int cbuf12(int f, int n)
 {
 	return cbuf(f, n, 12);
 }
 
-cbuf13(f, n)
+int cbuf13(int f, int n)
 {
 	return cbuf(f, n, 13);
 }
 
-cbuf14(f, n)
+int cbuf14(int f, int n)
 {
 	return cbuf(f, n, 14);
 }
 
-cbuf15(f, n)
+int cbuf15(int f, int n)
 {
 	return cbuf(f, n, 15);
 }
 
-cbuf16(f, n)
+int cbuf16(int f, int n)
 {
 	return cbuf(f, n, 16);
 }
 
-cbuf17(f, n)
+int cbuf17(int f, int n)
 {
 	return cbuf(f, n, 17);
 }
 
-cbuf18(f, n)
+int cbuf18(int f, int n)
 {
 	return cbuf(f, n, 18);
 }
 
-cbuf19(f, n)
+int cbuf19(int f, int n)
 {
 	return cbuf(f, n, 19);
 }
 
-cbuf20(f, n)
+int cbuf20(int f, int n)
 {
 	return cbuf(f, n, 20);
 }
 
-cbuf21(f, n)
+int cbuf21(int f, int n)
 {
 	return cbuf(f, n, 21);
 }
 
-cbuf22(f, n)
+int cbuf22(int f, int n)
 {
 	return cbuf(f, n, 22);
 }
 
-cbuf23(f, n)
+int cbuf23(int f, int n)
 {
 	return cbuf(f, n, 23);
 }
 
-cbuf24(f, n)
+int cbuf24(int f, int n)
 {
 	return cbuf(f, n, 24);
 }
 
-cbuf25(f, n)
+int cbuf25(int f, int n)
 {
 	return cbuf(f, n, 25);
 }
 
-cbuf26(f, n)
+int cbuf26(int f, int n)
 {
 	return cbuf(f, n, 26);
 }
 
-cbuf27(f, n)
+int cbuf27(int f, int n)
 {
 	return cbuf(f, n, 27);
 }
 
-cbuf28(f, n)
+int cbuf28(int f, int n)
 {
 	return cbuf(f, n, 28);
 }
 
-cbuf29(f, n)
+int cbuf29(int f, int n)
 {
 	return cbuf(f, n, 29);
 }
 
-cbuf30(f, n)
+int cbuf30(int f, int n)
 {
 	return cbuf(f, n, 30);
 }
 
-cbuf31(f, n)
+int cbuf31(int f, int n)
 {
 	return cbuf(f, n, 31);
 }
 
-cbuf32(f, n)
+int cbuf32(int f, int n)
 {
 	return cbuf(f, n, 32);
 }
 
-cbuf33(f, n)
+int cbuf33(int f, int n)
 {
 	return cbuf(f, n, 33);
 }
 
-cbuf34(f, n)
+int cbuf34(int f, int n)
 {
 	return cbuf(f, n, 34);
 }
 
-cbuf35(f, n)
+int cbuf35(int f, int n)
 {
 	return cbuf(f, n, 35);
 }
 
-cbuf36(f, n)
+int cbuf36(int f, int n)
 {
 	return cbuf(f, n, 36);
 }
 
-cbuf37(f, n)
+int cbuf37(int f, int n)
 {
 	return cbuf(f, n, 37);
 }
 
-cbuf38(f, n)
+int cbuf38(int f, int n)
 {
 	return cbuf(f, n, 38);
 }
 
-cbuf39(f, n)
+int cbuf39(int f, int n)
 {
 	return cbuf(f, n, 39);
 }
 
-cbuf40(f, n)
+int cbuf40(int f, int n)
 {
 	return cbuf(f, n, 40);
 }

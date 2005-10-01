@@ -16,6 +16,7 @@
 #include	<stdio.h>
 #include	"estruct.h"
 #include	"edef.h"
+#include	"efunc.h"
 
 KILL *ykbuf;			/* ptr to current kill buffer chunk being yanked */
 int ykboff;			/* offset into that chunk */

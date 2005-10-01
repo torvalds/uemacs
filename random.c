@@ -9,6 +9,7 @@
 #include        <stdio.h>
 #include	"estruct.h"
 #include        "edef.h"
+#include        "efunc.h"
 
 int tabsize;			/* Tab size (0: use real tabs)  */
 

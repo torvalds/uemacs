@@ -13,6 +13,7 @@
 #include	<stdarg.h>
 #include	"estruct.h"
 #include        "edef.h"
+#include        "efunc.h"
 
 typedef struct VIDEO {
 	int v_flag;		/* Flags */

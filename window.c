@@ -8,6 +8,7 @@
 #include        <stdio.h>
 #include        "estruct.h"
 #include	"edef.h"
+#include	"efunc.h"
 
 /*
  * Reposition dot in the current window to line "n". If the argument is
@@ -532,6 +533,7 @@ int scrnextup(int f, int n)
 	nextwind(FALSE, 1);
 	backpage(f, n);
 	prevwind(FALSE, 1);
+	return (TRUE);
 }
 
 int scrnextdw(int f, int n)
@@ -539,6 +541,7 @@ int scrnextdw(int f, int n)
 	nextwind(FALSE, 1);
 	forwpage(f, n);
 	prevwind(FALSE, 1);
+	return (TRUE);
 }
 
 int savewnd(int f, int n)
@@ -708,7 +711,7 @@ int getwpos(void)
 	return (sline);
 }
 
-int cknewwindow(void)
+void cknewwindow(void)
 {
 	execute(META | SPEC | 'X', FALSE, 1);
 }

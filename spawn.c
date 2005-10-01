@@ -7,6 +7,7 @@
 #include        <stdio.h>
 #include	"estruct.h"
 #include        "edef.h"
+#include        "efunc.h"
 
 #if     VMS
 #define EFN     0		/* Event flag.          */
@@ -39,7 +40,7 @@ extern void sizesignal();
  * repaint. Bound to "^X C". The message at the start in VMS puts out a newline.
  * Under some (unknown) condition, you don't get one free when DCL starts up.
  */
-spawncli(f, n)
+int spawncli(int f, int n)
 {
 #if     V7 | USG | BSD
 	register char *cp;
@@ -103,7 +104,7 @@ spawncli(f, n)
 
 #if	BSD | __hpux | SVR4
 
-bktoshell()
+void bktoshell(void)
 {				/* suspend MicroEMACS and wait to wake up */
 	int pid;
 
@@ -115,7 +116,7 @@ bktoshell()
 	kill(0, SIGTSTP);
 }
 
-rtfrmshell()
+void rtfrmshell(void)
 {
 	TTopen();
 	curwp->w_flag = WFHARD;
@@ -128,7 +129,7 @@ rtfrmshell()
  * character to be typed, then mark the screen as garbage so a full repaint is
  * done. Bound to "C-X !".
  */
-spawn(f, n)
+int spawn(int f, int n)
 {
 	register int s;
 	char line[NLINE];
@@ -194,7 +195,7 @@ spawn(f, n)
  * done. Bound to "C-X $".
  */
 
-execprg(f, n)
+int execprg(int f, int n)
 {
 	register int s;
 	char line[NLINE];
@@ -252,7 +253,7 @@ execprg(f, n)
  * Pipe a one line command into a window
  * Bound to ^X @
  */
-pipecmd(f, n)
+int pipecmd(int f, int n)
 {
 	register int s;		/* return status from CLI */
 	register WINDOW *wp;	/* pointer to new window */
@@ -376,7 +377,7 @@ pipecmd(f, n)
  * filter a buffer through an external DOS program
  * Bound to ^X #
  */
-filter(f, n)
+int filter(int f, int n)
 {
 	register int s;		/* return status from CLI */
 	register BUFFER *bp;	/* pointer to buffer to zot */
@@ -462,8 +463,7 @@ filter(f, n)
  * LIB$SPAWN works. You have to do wierd stuff with the terminal on the way in
  * and the way out, because DCL does not want the channel to be in raw mode.
  */
-sys(cmd)
-register char *cmd;
+int sys(char *cmd)
 {
 	struct dsc$descriptor cdsc;
 	struct dsc$descriptor *cdscp;
@@ -498,12 +498,12 @@ register char *cmd;
 
 #if	MSDOS & (TURBO | MSC)
 
-/*	SHELLPROG: Execute a command in a subshell		*/
-
-shellprog(cmd)
-
-char *cmd;			/*  Incoming command line to execute  */
-
+/*
+ * SHELLPROG: Execute a command in a subshell
+ *
+ * char *cmd;		Incoming command line to execute
+ */
+int shellprog(char *cmd)
 {
 	char *shell;		/* Name of system command processor */
 	char *p;		/* Temporary pointer */
@@ -543,14 +543,14 @@ char *cmd;			/*  Incoming command line to execute  */
 		return (execprog(shell));
 }
 
-/*	EXECPROG:	A function to execute a named program
-			with arguments
-*/
-
-execprog(cmd)
-
-char *cmd;			/*  Incoming command line to execute  */
-
+/*
+ * EXECPROG:
+ *	A function to execute a named program
+ *	with arguments
+ *
+ * char *cmd;		Incoming command line to execute
+ */
+int execprog(char *cmd)
 {
 	char *sp;		/* temporary string pointer */
 	char f1[38];		/* FCB1 area (not initialized */

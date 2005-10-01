@@ -9,9 +9,10 @@
 #include	<stdio.h>
 #include	"estruct.h"
 #include	"edef.h"
+#include "efunc.h"
 #include	"evar.h"
 
-varinit()
+void varinit(void)
 {				/* initialize the user variable list */
 	register int i;
 
@@ -19,10 +20,12 @@ varinit()
 		uv[i].u_name[0] = 0;
 }
 
-char *gtfun(fname)
-			    /* evaluate a function */
-char *fname;			/* name of function to evaluate */
-
+/*
+ * evaluate a function
+ *
+ * char *fname;		name of function to evaluate
+ */
+char *gtfun(char *fname)
 {
 	register int fnum;	/* index to function to eval */
 	register int status;	/* return status */
@@ -164,10 +167,12 @@ char *fname;			/* name of function to evaluate */
 	exit(-11);		/* never should get here */
 }
 
-char *gtusr(vname)
-			    /* look up a user var's value */
-char *vname;			/* name of user variable to fetch */
-
+/*
+ * look up a user var's value
+ *
+ * char *vname;			name of user variable to fetch
+ */
+char *gtusr(char *vname)
 {
 
 	register int vnum;	/* ordinal number of user var */
@@ -184,10 +189,13 @@ char *vname;			/* name of user variable to fetch */
 	return (errorm);
 }
 
-char *gtenv(vname)
 
-char *vname;			/* name of environment variable to retrieve */
-
+/*
+ * gtenv()
+ *
+ * char *vname;			name of environment variable to retrieve
+ */
+char *gtenv(char *vname)
 {
 	register int vnum;	/* ordinal number of var refrenced */
 	char *getkill();
@@ -313,8 +321,11 @@ char *vname;			/* name of environment variable to retrieve */
 	exit(-12);		/* again, we should never get here */
 }
 
-char *getkill()
-{				/* return some of the contents of the kill buffer */
+/*
+ * return some of the contents of the kill buffer
+ */
+char *getkill(void)
+{
 	register int size;	/* max number of chars to return */
 	static char value[NSTRING];	/* temp buffer for value */
 
@@ -334,11 +345,13 @@ char *getkill()
 	return (value);
 }
 
-int setvar(f, n)
-				    /* set a variable */
-int f;				/* default flag */
-int n;				/* numeric arg (can overide prompted value) */
-
+/*
+ * set a variable
+ *
+ * int f;		default flag
+ * int n;		numeric arg (can overide prompted value)
+ */
+int setvar(int f, int n)
 {
 	register int status;	/* status return */
 #if	DEBUGM
@@ -432,12 +445,14 @@ int n;				/* numeric arg (can overide prompted value) */
 	return (status);
 }
 
-findvar(var, vd, size)
-    /* find a variables type and name */
-char *var;			/* name of var to get */
-VDESC *vd;			/* structure to hold type and ptr */
-int size;			/* size of var array */
-
+/*
+ * find a variables type and name
+ *
+ * char *var;		name of var to get
+ * VDESC *vd;		structure to hold type and ptr
+ * int size;		size of var array
+ */
+void findvar(char *var, VDESC *vd, int size)
 {
 	register int vnum;	/* subscript in varable arrays */
 	register int vtype;	/* type to return */
@@ -487,11 +502,13 @@ int size;			/* size of var array */
 	return;
 }
 
-int svar(var, value)
-				    /* set a variable */
-VDESC *var;			/* variable to set */
-char *value;			/* value to set to */
-
+/*
+ * set a variable
+ *
+ * VDESC *var;		variable to set
+ * char *value;		value to set to
+ */
+int svar(VDESC *var, char *value)
 {
 	register int vnum;	/* ordinal number of var refrenced */
 	register int vtype;	/* type of variable to set */
@@ -660,13 +677,14 @@ char *value;			/* value to set to */
 	return (status);
 }
 
-/*	itoa:	integer to ascii string.......... This is too
-		inconsistant to use the system's	*/
-
-char *itoa(i)
-
-int i;				/* integer to translate to a string */
-
+/*
+ * itoa:
+ *	integer to ascii string.......... This is too
+ *	inconsistant to use the system's
+ *
+ * int i;		integer to translate to a string
+ */
+char *itoa(int i)
 {
 	register int digit;	/* current digit being used */
 	register char *sp;	/* pointer into result */
@@ -697,10 +715,12 @@ int i;				/* integer to translate to a string */
 	return (sp);
 }
 
-int gettyp(token)
-			    /* find the type of a passed token */
-char *token;			/* token to analyze */
-
+/*
+ * find the type of a passed token
+ *
+ * char *token;		token to analyze
+ */
+int gettyp(char *token)
 {
 	register char c;	/* first char in token */
 
@@ -739,10 +759,12 @@ char *token;			/* token to analyze */
 	}
 }
 
-char *getval(token)
-			    /* find the value of a token */
-char *token;			/* token to evaluate */
-
+/*
+ * find the value of a token
+ *
+ * char *token;		token to evaluate
+ */
+char *getval(char *token)
 {
 	register int status;	/* error return */
 	register BUFFER *bp;	/* temp buffer pointer */
@@ -823,10 +845,12 @@ char *token;			/* token to evaluate */
 	}
 }
 
-int stol(val)
-		    /* convert a string to a numeric logical */
-char *val;			/* value to check for stol */
-
+/*
+ * convert a string to a numeric logical
+ *
+ * char *val;		value to check for stol
+ */
+int stol(char *val)
 {
 	/* check for logical values */
 	if (val[0] == 'F')
@@ -838,10 +862,12 @@ char *val;			/* value to check for stol */
 	return ((atoi(val) != 0));
 }
 
-char *ltos(val)
-			    /* numeric logical to string logical */
-int val;			/* value to translate */
-
+/*
+ * numeric logical to string logical
+ *
+ * int val;		value to translate
+ */
+char *ltos(int val)
 {
 	if (val)
 		return (truem);
@@ -849,10 +875,12 @@ int val;			/* value to translate */
 		return (falsem);
 }
 
-char *mkupper(str)
-			    /* make a string upper case */
-char *str;			/* string to upper case */
-
+/*
+ * make a string upper case
+ *
+ * char *str;		string to upper case
+ */
+char *mkupper(char *str)
 {
 	char *sp;
 
@@ -865,10 +893,12 @@ char *str;			/* string to upper case */
 	return (str);
 }
 
-char *mklower(str)
-			    /* make a string lower case */
-char *str;			/* string to lower case */
-
+/*
+ * make a string lower case
+ *
+ * char *str;		string to lower case
+ */
+char *mklower(char *str)
 {
 	char *sp;
 
@@ -881,25 +911,30 @@ char *str;			/* string to lower case */
 	return (str);
 }
 
-int abs(x)
-		    /* take the absolute value of an integer */
-int x;
-
+/*
+ * take the absolute value of an integer
+ */
+int abs(int x)
 {
 	return (x < 0 ? -x : x);
 }
 
-int ernd()
-{				/* returns a random integer */
+/*
+ * returns a random integer
+ */
+int ernd(void)
+{
 	seed = abs(seed * 1721 + 10007);
 	return (seed);
 }
 
-int sindex(source, pattern)
-				    /* find pattern within source */
-char *source;			/* source string to search */
-char *pattern;			/* string to look for */
-
+/*
+ * find pattern within source
+ *
+ * char *source;	source string to search
+ * char *pattern;	string to look for
+ */
+int sindex(char *source, char *pattern)
 {
 	char *sp;		/* ptr to current position to scan */
 	char *csp;		/* ptr to source string during comparison */
@@ -928,14 +963,14 @@ char *pattern;			/* string to look for */
 	return (0);
 }
 
-/*	Filter a string through a translation table	*/
-
-char *xlat(source, lookup, trans)
-
-char *source;			/* string to filter */
-char *lookup;			/* characters to translate */
-char *trans;			/* resulting translated characters */
-
+/*
+ * Filter a string through a translation table
+ *
+ * char *source;	string to filter
+ * char *lookup;	characters to translate
+ * char *trans;		resulting translated characters
+ */
+char *xlat(char *source, char *lookup, char *trans)
 {
 	register char *sp;	/* pointer into source table */
 	register char *lp;	/* pointer into lookup table */
