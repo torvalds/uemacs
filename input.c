@@ -584,7 +584,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 				if (!iswild)
 					strcat(ffbuf, "*");
 				strcat(ffbuf, " >");
-				mktemp(tmp);
+				mkstemp(tmp);
 				strcat(ffbuf, tmp);
 				strcat(ffbuf, " 2>&1");
 				system(ffbuf);
