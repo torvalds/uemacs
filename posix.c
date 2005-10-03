@@ -23,6 +23,20 @@
 #include <fcntl.h>
 #include <errno.h>
 
+/*
+ * NOTE NOTE NOTE!
+ *
+ * Uemacs is currently very much byte-oriented, and not at all UTF8-aware
+ * interally. However, this allows it to understand a _terminal_ that is
+ * in utf-8 mode, and will turn input into the 8-bit subset, and will turn
+ * things back into UTF8 on output.
+ *
+ * Do _not_ confuse this with the notion of actually being able to edit
+ * UTF-8 file _contents_. That's a totally different thing.
+ */
+#define utf8_mode() \
+	(curwp && curwp->w_bufp && (curwp->w_bufp->b_mode & MDUTF8))
+
 static int kbdflgs;			/* saved keyboard fd flags      */
 static int kbdpoll;			/* in O_NDELAY mode             */
 
@@ -99,6 +113,22 @@ void ttclose(void)
  */
 int ttputc(int c)
 {
+	/*
+	 * We always represent things in 1 byte, but if we output
+	 * in UTF-8, we may need to expand that into 2 bytes..
+	 *
+	 * Some day we might even be able to handle UTF-8 _content_.
+	 *
+	 * That day is not today.
+	 */
+	if (utf8_mode()) {
+		c &= 0xff;
+		if (c >= 0x80) {
+			unsigned char first = (c >> 6) | 0xc0;
+			fputc(first, stdout);
+			c = (c & 0x3f) | 0x80;
+		}
+	}
 	fputc(c, stdout);
 	return (TRUE);
 }
@@ -138,7 +168,70 @@ void ttflush(void)
  */
 int ttgetc(void)
 {
-	return (255 & fgetc(stdin));	/* 8BIT P.K. */
+	static unsigned char pending;
+	unsigned char c, second;
+	int n;
+
+	if (pending) {
+		c = pending;
+		pending = 0;
+		return c;
+	}
+
+	n = read(0, &c, 1);
+	if (n != 1)
+		return 0;
+
+	if (!utf8_mode())
+		return c;
+
+	/* Normal 7-bit? */
+	if (!(c & 0x80))
+		return c;
+
+	/*
+	 * Unexpected UTF-8 continuation character? Maybe
+	 * we're in non-UTF mode, or maybe it's a control
+	 * character.. Regardless, just pass it on.
+	 */
+	if (!(c & 0x40))
+		return c;
+
+	/*
+	 * Multi-byte sequences.. Right now we only
+	 * want to get characters that can be represented
+	 * in a single byte, so we're not interested in
+	 * anything else..
+	 */
+	if (c & 0x3c)
+		return c;
+
+	/*
+	 * Two-byte sequence representing 0x80-0xff.. We want
+	 * to do this read with a timeout.
+	 */
+	ntermios.c_cc[VMIN] = 1;
+	ntermios.c_cc[VTIME] = 10;		/* 1 second */
+	tcsetattr(0, TCSANOW, &ntermios);
+
+	n = read(0, &second, 1);
+
+	/* Undo timeout */
+	ntermios.c_cc[VTIME] = 0;
+	tcsetattr(0, TCSANOW, &ntermios);
+
+	if (n != 1)
+		return c;
+
+	if ((second & 0xc0) != 0x80) {
+		pending = second;
+		return c;
+	}
+
+	c = (c << 6) | (second & 0x3f);
+
+	/* Ok, real UTF-8 character */
+	return c;
 }
 
 /* typahead:	Check to see if any characters are already in the
