@@ -37,7 +37,7 @@ SPARSE=sparse
 SPARSE_FLAGS=-D__BIG_ENDIAN__ -D__ppc__ -D__linux__ -D__unix__
 
 sparse:
-	for i in $(SRC); do $(SPARSE) $(SPARSE_FLAGS) $(DEFINES) $$i; done
+	$(SPARSE) $(SPARSE_FLAGS) $(DEFINES) $(SRC)
 
 clean:
 	rm -f core lintout makeout tags makefile.bak *.o
