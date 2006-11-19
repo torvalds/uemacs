@@ -38,7 +38,7 @@ VIDEO **vscreen;		/* Virtual screen. */
 VIDEO **pscreen;		/* Physical screen. */
 #endif
 
-int displaying = TRUE;
+static int displaying = TRUE;
 #if UNIX
 #include <signal.h>
 #endif
@@ -46,6 +46,25 @@ int displaying = TRUE;
 #include <sys/ioctl.h>
 /* for window size changes */
 int chg_width, chg_height;
+#endif
+
+static int reframe(window_t *wp);
+static void updone(window_t *wp);
+static void updall(window_t *wp);
+static int scrolls(int inserts);
+static void scrscroll(int from, int to, int count);
+static int texttest(int vrow, int prow);
+static int endofline(char *s, int n);
+static void updext(void);
+static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2);
+static void modeline(window_t *wp);
+static void mlputi(int i, int r);
+static void mlputli(long l, int r);
+static void mlputf(int s);
+static int newscreensize(int h, int w);
+
+#if RAINBOW
+static void putline(int row, int col, char *buf);
 #endif
 
 /*
@@ -155,7 +174,7 @@ void vtmove(int row, int col)
  * This routine only puts printing characters into the virtual
  * terminal buffers. Only column overflow is checked.
  */
-void vtputc(unsigned char c)
+static void vtputc(unsigned char c)
 {
 	register VIDEO *vp;	/* ptr to line being updated */
 
@@ -203,7 +222,7 @@ void vtputc(unsigned char c)
  * Erase from the end of the software cursor to the end of the line on which
  * the software cursor is located.
  */
-void vteeol(void)
+static void vteeol(void)
 {
 /*  register VIDEO      *vp;	*/
 	register char *vcp = vscreen[vtrow]->v_text;
@@ -226,7 +245,7 @@ int upscreen(int f, int n)
 }
 
 #if SCROLLCODE
-int scrflags;
+static int scrflags;
 #endif
 
 /*
@@ -340,10 +359,10 @@ int update(int force)
  *	check to see if the cursor is on in the window
  *	and re-frame it if needed or wanted
  */
-int reframe(window_t *wp)
+static int reframe(window_t *wp)
 {
 	register LINE *lp, *lp0;
-	register int i;
+	register int i = 0;
 
 	/* if not a requested reframe, check for a needed one */
 	if ((wp->w_flag & WFFORCE) == 0) {
@@ -430,7 +449,7 @@ int reframe(window_t *wp)
  *
  * window_t *wp;		window to update current line in
  */
-void updone(window_t *wp)
+static void updone(window_t *wp)
 {
 	register LINE *lp;	/* line to update */
 	register int sline;	/* physical screen line to update */
@@ -463,7 +482,7 @@ void updone(window_t *wp)
  *
  * window_t *wp;		window to update lines in
  */
-void updall(window_t *wp)
+static void updall(window_t *wp)
 {
 	register LINE *lp;	/* line to update */
 	register int sline;	/* physical screen line to update */
@@ -655,13 +674,13 @@ int updupd(int force)
  * optimize out scrolls (line breaks, and newlines)
  * arg. chooses between looking for inserts or deletes
  */
-int scrolls(int inserts)
+static int scrolls(int inserts)
 {				/* returns true if it does something */
 	struct VIDEO *vpv;	/* virtual screen image */
 	struct VIDEO *vpp;	/* physical screen image */
 	int i, j, k;
 	int rows, cols;
-	int first, match, count, ptarget, vtarget, end;
+	int first, match, count, target, end;
 	int longmatch, longcount;
 	int from, to;
 
@@ -689,20 +708,20 @@ int scrolls(int inserts)
 		/* determine types of potential scrolls */
 		end = endofline(vpv->v_text, cols);
 		if (end == 0)
-			ptarget = first;	/* newlines */
+			target = first;	/* newlines */
 		else if (strncmp(vpp->v_text, vpv->v_text, end) == 0)
-			ptarget = first + 1;	/* broken line newlines */
+			target = first + 1;	/* broken line newlines */
 		else
-			ptarget = first;
+			target = first;
 	} else {
-		vtarget = first + 1;
+		target = first + 1;
 	}
 
 	/* find the matching shifted area */
 	match = -1;
 	longmatch = -1;
 	longcount = 0;
-	from = inserts ? ptarget : vtarget;
+	from = target;
 	for (i = from + 1; i < rows - longcount /* P.K. */ ; i++) {
 		if (inserts ? texttest(i, from) : texttest(from, i)) {
 			match = i;
@@ -727,7 +746,7 @@ int scrolls(int inserts)
 	if (!inserts) {
 		/* full kill case? */
 		if (match > 0 && texttest(first, match - 1)) {
-			vtarget--;
+			target--;
 			match--;
 			count++;
 		}
@@ -735,13 +754,13 @@ int scrolls(int inserts)
 
 	/* do the scroll */
 	if (match > 0 && count > 2) {	/* got a scroll */
-		/* move the count lines starting at ptarget to match */
+		/* move the count lines starting at target to match */
 		if (inserts) {
-			from = ptarget;
+			from = target;
 			to = match;
 		} else {
 			from = match;
-			to = vtarget;
+			to = target;
 		}
 #if 0
 		{
@@ -770,10 +789,10 @@ int scrolls(int inserts)
 #endif
 		}
 		if (inserts) {
-			from = ptarget;
+			from = target;
 			to = match;
 		} else {
-			from = vtarget + count;
+			from = target + count;
 			to = match + count;
 		}
 #if	MEMMAP == 0
@@ -791,7 +810,7 @@ int scrolls(int inserts)
 }
 
 /* move the "count" lines starting at "from" to "to" */
-void scrscroll(int from, int to, int count)
+static void scrscroll(int from, int to, int count)
 {
 	ttrow = ttcol = -1;
 	(*term.t_scroll) (from, to, count);
@@ -802,7 +821,7 @@ void scrscroll(int from, int to, int count)
  *
  * int vrow, prow;		virtual, physical rows
  */
-int texttest(int vrow, int prow)
+static int texttest(int vrow, int prow)
 {
 	struct VIDEO *vpv = vscreen[vrow];	/* virtual screen image */
 	struct VIDEO *vpp = pscreen[prow];	/* physical screen image */
@@ -813,7 +832,7 @@ int texttest(int vrow, int prow)
 /*
  * return the index of the first blank of trailing whitespace
  */
-int endofline(char *s, int n)
+static int endofline(char *s, int n)
 {
 	int i;
 	for (i = n - 1; i >= 0; i--)
@@ -831,7 +850,7 @@ int endofline(char *s, int n)
  *	will be scrolled right or left to let the user see where
  *	the cursor is
  */
-void updext(void)
+static void updext(void)
 {
 	register int rcursor;	/* real cursor location */
 	register LINE *lp;	/* pointer to current line */
@@ -865,18 +884,7 @@ void updext(void)
 #if	MEMMAP
 /*	UPDATELINE specific code for the IBM-PC and other compatables */
 
-updateline(row, vp1
-#if	SCROLLCODE
-	   , vp2
-#endif
-    )
-
-int row;			/* row of screen to update */
-struct VIDEO *vp1;		/* virtual screen image */
-
-#if	SCROLLCODE
-struct VIDEO *vp2;
-#endif
+static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
 {
 #if	SCROLLCODE
 	register char *cp1;
@@ -1076,7 +1084,7 @@ int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
  * change the modeline format by hacking at this routine. Called by "update"
  * any time there is a dirty window.
  */
-void modeline(window_t *wp)
+static void modeline(window_t *wp)
 {
 	register char *cp;
 	register int c;
@@ -1236,6 +1244,7 @@ void modeline(window_t *wp)
 
 			lp = lforw(bp->b_linep);
 			numlines = 0;
+			predlines = 0;
 			while (lp != bp->b_linep) {
 				if (lp == wp->w_linep) {
 					predlines = numlines;
@@ -1434,7 +1443,7 @@ void mlputs(char *s)
  * Write out an integer, in the specified radix. Update the physical cursor
  * position.
  */
-void mlputi(int i, int r)
+static void mlputi(int i, int r)
 {
 	register int q;
 	static char hexdigits[] = "0123456789ABCDEF";
@@ -1456,7 +1465,7 @@ void mlputi(int i, int r)
 /*
  * do the same except as a long integer.
  */
-void mlputli(long l, int r)
+static void mlputli(long l, int r)
 {
 	register long q;
 
@@ -1479,7 +1488,7 @@ void mlputli(long l, int r)
  *
  * int s;		scaled integer to output
  */
-void mlputf(int s)
+static void mlputf(int s)
 {
 	int i;			/* integer portion of number */
 	int f;			/* fractional portion of number */
@@ -1498,7 +1507,7 @@ void mlputf(int s)
 
 #if RAINBOW
 
-void putline(int row, int col, char *buf)
+static void putline(int row, int col, char *buf)
 {
 	int n;
 
@@ -1544,7 +1553,7 @@ void sizesignal(int signr)
 	errno = old_errno;
 }
 
-int newscreensize(int h, int w)
+static int newscreensize(int h, int w)
 {
 	/* do the change later */
 	if (displaying) {
