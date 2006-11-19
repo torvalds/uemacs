@@ -34,7 +34,7 @@ em:	${OBJ}
 	${CC} ${DEFINES} -o em ${OBJ} ${LIBS}
 
 SPARSE=sparse
-SPARSE_FLAGS=-D__BIG_ENDIAN__ -D__ppc__ -D__linux__ -D__unix__
+SPARSE_FLAGS=-D__LITTLE_ENDIAN__ -D__x86_64__ -D__linux__ -D__unix__
 
 sparse:
 	$(SPARSE) $(SPARSE_FLAGS) $(DEFINES) $(SRC)
