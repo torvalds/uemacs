@@ -66,7 +66,9 @@ static char *UP, PC, *CM, *CE, *CL, *SO, *SE;
 
 #if	PKCODE
 static char *TI, *TE;
+#if USE_BROKEN_OPTIMIZATION
 static int term_init_ok = 0;
+#endif
 #endif
 
 #if     SCROLLCODE

@@ -236,8 +236,8 @@ int main(int argc, char **argv)
 #if	CRYPT
 			if (cryptflag) {
 				bp->b_mode |= MDCRYPT;
-				crypt((char *) NULL, 0);
-				crypt(ekey, strlen(ekey));
+				myencrypt((char *) NULL, 0);
+				myencrypt(ekey, strlen(ekey));
 				strncpy(bp->b_key, ekey, NPAT);
 			}
 #endif

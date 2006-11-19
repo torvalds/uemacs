@@ -19,7 +19,7 @@ int help(int f, int n)
 				   into it with view mode                 */
 	register window_t *wp;	/* scaning pointer to windows */
 	register BUFFER *bp;	/* buffer pointer to help */
-	char *fname;		/* ptr to file returned by flook() */
+	char *fname = NULL;	/* ptr to file returned by flook() */
 
 	/* first check if we are already here */
 	bp = bfind("emacs.hlp", FALSE, BFINVS);

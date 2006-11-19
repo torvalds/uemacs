@@ -439,7 +439,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 	register int c;
 	register int quotef;	/* are we quoting the next char? */
 #if	COMPLC
-	int ffile, ocpos, nskip, didtry = 0;
+	int ffile, ocpos, nskip = 0, didtry = 0;
 #if     MSDOS
 	struct ffblk ffblk;
 	char *fcp;

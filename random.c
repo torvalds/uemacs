@@ -49,6 +49,9 @@ int showcpos(int f, int n)
 	/* start counting chars and lines */
 	numchars = 0;
 	numlines = 0;
+	predchars = 0;
+	predlines = 0;
+	curchar = 0;
 	while (lp != curbp->b_linep) {
 		/* if we are on the current line, record it */
 		if (lp == curwp->w_dotp) {

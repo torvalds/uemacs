@@ -225,7 +225,6 @@ extern int fileread(int f, int n);
 extern int insfile(int f, int n);
 extern int filefind(int f, int n);
 extern int viewfile(int f, int n);
-extern int resetkey(void);
 extern int getfile(char *fname, int lockfl);
 extern int readin(char *fname, int lockfl);
 extern void makename(char *bname, char *fname);
@@ -365,8 +364,8 @@ extern int sindex(char *source, char *pattern);
 extern char *xlat(char *source, char *lookup, char *trans);
 
 /* crypt.c */
-extern int setkey(int f, int n);
-extern void crypt(char *bptr, unsigned len);
+extern int set_encryption_key(int f, int n);
+extern void myencrypt(char *bptr, unsigned len);
 
 /* lock.c */
 extern int lockchk(char *fname);

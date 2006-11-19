@@ -101,7 +101,7 @@ int viewfile(int f, int n)
 }
 
 #if	CRYPT
-int resetkey(void)
+static int resetkey(void)
 {				/* reset the encryption key if needed */
 	register int s;		/* return status */
 
@@ -111,7 +111,7 @@ int resetkey(void)
 	/* if we are in crypt mode */
 	if (curbp->b_mode & MDCRYPT) {
 		if (curbp->b_key[0] == 0) {
-			s = setkey(FALSE, 0);
+			s = set_encryption_key(FALSE, 0);
 			if (s != TRUE)
 				return (s);
 		}
@@ -121,12 +121,12 @@ int resetkey(void)
 
 		/* and set up the key to be used! */
 		/* de-encrypt it */
-		crypt((char *) NULL, 0);
-		crypt(curbp->b_key, strlen(curbp->b_key));
+		myencrypt((char *) NULL, 0);
+		myencrypt(curbp->b_key, strlen(curbp->b_key));
 
 		/* re-encrypt it...seeding it to start */
-		crypt((char *) NULL, 0);
-		crypt(curbp->b_key, strlen(curbp->b_key));
+		myencrypt((char *) NULL, 0);
+		myencrypt(curbp->b_key, strlen(curbp->b_key));
 	}
 
 	return (TRUE);

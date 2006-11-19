@@ -448,10 +448,12 @@ int setvar(int f, int n)
  */
 void findvar(char *var, VDESC *vd, int size)
 {
-	register int vnum;	/* subscript in varable arrays */
+	register int vnum;	/* subscript in variable arrays */
 	register int vtype;	/* type to return */
 
-      fvar:vtype = -1;
+	vnum = -1;
+fvar:
+      	vtype = -1;
 	switch (var[0]) {
 
 	case '$':		/* check for legal enviromnent var */

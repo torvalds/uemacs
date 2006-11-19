@@ -248,7 +248,7 @@ KEYTAB keytab[NBINDS] = {
 	{META | 'D', delfword}
 	,
 #if	CRYPT
-	{META | 'E', setkey}
+	{META | 'E', set_encryption_key}
 	,
 #endif
 	{META | 'F', forwword}

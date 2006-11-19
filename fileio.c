@@ -87,7 +87,7 @@ int ffputline(char *buf, int nbuf)
 	if (cryptflag) {
 		for (i = 0; i < nbuf; ++i) {
 			c = buf[i] & 0xff;
-			crypt(&c, 1);
+			myencrypt(&c, 1);
 			fputc(c, ffp);
 		}
 	} else
@@ -195,7 +195,7 @@ int ffgetline(void)
 	fline[i] = 0;
 #if	CRYPT
 	if (cryptflag)
-		crypt(fline, strlen(fline));
+		myencrypt(fline, strlen(fline));
 #endif
 	return (FIOSUC);
 }

@@ -502,7 +502,7 @@ int f, n;			/* default flag, numeric argument [unused] */
 }
 #endif
 #else
-static void ibmhello(void)
+void ibmhello(void)
 {
 }
 #endif

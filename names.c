@@ -191,7 +191,7 @@ NBIND names[] = {
 	{"select-buffer", usebuffer},
 	{"set", setvar},
 #if	CRYPT
-	{"set-encryption-key", setkey},
+	{"set-encryption-key", set_encryption_key},
 #endif
 	{"set-fill-column", setfillcol},
 	{"set-mark", setmark},

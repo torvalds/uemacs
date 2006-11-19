@@ -178,7 +178,7 @@ int f, n;			/* default flag, numeric argument [unused] */
 #endif
 #else
 
-static void vt52hello(void)
+void vt52hello(void)
 {
 }
 

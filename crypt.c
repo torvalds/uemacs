@@ -20,7 +20,7 @@ static int mod95(int);
  * int f;		default flag
  * int n;		numeric argument
  */
-int setkey(int f, int n)
+int set_encryption_key(int f, int n)
 {
 	register int status;	/* return status */
 	int odisinp;		/* original vlaue of disinp */
@@ -37,8 +37,8 @@ int setkey(int f, int n)
 		return (status);
 
 	/* and encrypt it */
-	crypt((char *) NULL, 0);
-	crypt(key, strlen(key));
+	myencrypt((char *) NULL, 0);
+	myencrypt(key, strlen(key));
 
 	/* and save it off */
 	strcpy(curbp->b_key, key);
@@ -48,7 +48,7 @@ int setkey(int f, int n)
 
 /**********
  *
- *	crypt - in place encryption/decryption of a buffer
+ *	myencrypt - in place encryption/decryption of a buffer
  *
  *	(C) Copyright 1986, Dana L. Hoggatt
  *	1216, Beck Lane, Lafayette, IN
@@ -77,7 +77,7 @@ int setkey(int f, int n)
  *	    4.	The system needed to be secure against all but the
  *		most determined of attackers.
  *
- *	For encryption of a block of data, one calls crypt passing 
+ *	For encryption of a block of data, one calls myencrypt passing 
  *	a pointer to the data block and its length. The data block is 
  *	encrypted in place, that is, the encrypted output overwrites 
  *	the input.  Decryption is totally isomorphic, and is performed 
@@ -86,9 +86,9 @@ int setkey(int f, int n)
  *	Before using this routine for encrypting data, you are expected 
  *	to specify an encryption key.  This key is an arbitrary string,
  *	to be supplied by the user.  To set the key takes two calls to 
- *	crypt().  First, you call 
+ *	myencrypt().  First, you call 
  *
- *		crypt(NULL, vector)
+ *		myencrypt(NULL, vector)
  *
  *	This resets all internal control information.  Typically (and 
  *	specifically in the case on MICRO-emacs) you would use a "vector" 
@@ -99,9 +99,9 @@ int setkey(int f, int n)
  *
  *	Then, you "encrypt" your password by calling 
  *
- *		crypt(pass, strlen(pass))
+ *		myencrypt(pass, strlen(pass))
  *
- *	where "pass" is your password string.  Crypt() will destroy 
+ *	where "pass" is your password string.  Myencrypt() will destroy 
  *	the original copy of the password (it becomes encrypted), 
  *	which is good.  You do not want someone on a multiuser system 
  *	to peruse your memory space and bump into your password.  
@@ -143,7 +143,7 @@ int setkey(int f, int n)
  *
  **********/
 
-void crypt(char *bptr, unsigned len)
+void myencrypt(char *bptr, unsigned len)
 {
 	register int cc;	/* current character being considered */
 
@@ -217,7 +217,7 @@ static int mod95(int val)
 	return (val);
 }
 #else
-static void nocrypt(void)
+static void myennocrypt(void)
 {
 }
 #endif
