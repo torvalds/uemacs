@@ -168,26 +168,56 @@ void ttflush(void)
  */
 int ttgetc(void)
 {
-	static unsigned char pending;
+	static unsigned char buffer[32];
+	static int pending;
 	unsigned char c, second;
-	int n;
+	int count;
 
-	if (pending) {
-		c = pending;
-		pending = 0;
-		return c;
+	count = pending;
+	if (!count) {
+		count = read(0, buffer, sizeof(buffer));
+		if (count <= 0)
+			return 0;
+		pending = count;
 	}
 
-	n = read(0, &c, 1);
-	if (n != 1)
-		return 0;
+	c = buffer[0];
+	if (c >= 32 && c < 128)
+		goto done;
+
+	/* Special character - try to fill buffer */
+	if (count == 1) {
+		int n;
+		ntermios.c_cc[VMIN] = 0;
+		ntermios.c_cc[VTIME] = 1;		/* A .1 second lag */
+		tcsetattr(0, TCSANOW, &ntermios);
+
+		n = read(0, buffer + count, sizeof(buffer) - count);
+
+		/* Undo timeout */
+		ntermios.c_cc[VMIN] = 1;
+		ntermios.c_cc[VTIME] = 0;
+		tcsetattr(0, TCSANOW, &ntermios);
+
+		if (n <= 0)
+			goto done;
+		pending += n;
+	}
+	second = buffer[1];
+
+	/* Turn ESC+'[' into CSI */
+	if (c == 27 && second == '[') {
+		pending -= 2;
+		memmove(buffer, buffer+2, pending);
+		return 128+27;
+	}
 
 	if (!utf8_mode())
-		return c;
+		goto done;
 
 	/* Normal 7-bit? */
 	if (!(c & 0x80))
-		return c;
+		goto done;
 
 	/*
 	 * Unexpected UTF-8 continuation character? Maybe
@@ -195,7 +225,7 @@ int ttgetc(void)
 	 * character.. Regardless, just pass it on.
 	 */
 	if (!(c & 0x40))
-		return c;
+		goto done;
 
 	/*
 	 * Multi-byte sequences.. Right now we only
@@ -204,33 +234,24 @@ int ttgetc(void)
 	 * anything else..
 	 */
 	if (c & 0x3c)
-		return c;
+		goto done;
+
+	if ((second & 0xc0) != 0x80)
+		goto done;
 
 	/*
-	 * Two-byte sequence representing 0x80-0xff.. We want
-	 * to do this read with a timeout.
+	 * Ok, it's a two-byte UTF-8 character that can be represented
+	 * as a single-byte Latin1 character!
 	 */
-	ntermios.c_cc[VMIN] = 1;
-	ntermios.c_cc[VTIME] = 10;		/* 1 second */
-	tcsetattr(0, TCSANOW, &ntermios);
-
-	n = read(0, &second, 1);
-
-	/* Undo timeout */
-	ntermios.c_cc[VTIME] = 0;
-	tcsetattr(0, TCSANOW, &ntermios);
-
-	if (n != 1)
-		return c;
-
-	if ((second & 0xc0) != 0x80) {
-		pending = second;
-		return c;
-	}
-
 	c = (c << 6) | (second & 0x3f);
+	pending -= 2;
+	memmove(buffer, buffer+2, pending);
 
-	/* Ok, real UTF-8 character */
+	return c;
+
+done:
+	pending--;
+	memmove(buffer, buffer+1, pending);
 	return c;
 }
 
