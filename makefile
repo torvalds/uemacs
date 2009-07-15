@@ -23,9 +23,9 @@ CFLAGS=-O2 -Wall
 DEFINES=-DAUTOCONF -DPOSIX -DUSG -D_BSD_SOURCE -D_SVID_SOURCE -D_XOPEN_SOURCE=600	# Linux
 #DEFINES=-DAUTOCONF
 #LIBS=-ltermcap			# BSD
-#LIBS=-lcurses			# SYSV
+LIBS=-lcurses			# SYSV
 #LIBS=-ltermlib
-LIBS=-L/usr/lib/termcap -ltermcap
+#LIBS=-L/usr/lib/termcap -ltermcap
 LFLAGS=-hbx
 BINDIR=/usr/bin
 LIBDIR=/usr/lib
