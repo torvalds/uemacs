@@ -97,7 +97,7 @@ char tobuf[TBUFSIZ];		/* terminal output buffer */
  * On VMS, it translates TT until it finds the terminal, then assigns
  * a channel to it and sets it raw. On CPM it is a no-op.
  */
-ttopen()
+void ttopen(void)
 {
 #if     VMS
 	struct dsc$descriptor idsc;
@@ -168,7 +168,7 @@ ttopen()
 	ntermio.c_line = otermio.c_line;
 	ntermio.c_cc[VMIN] = 1;
 	ntermio.c_cc[VTIME] = 0;
-#if 	PKCODE
+#if	PKCODE
 	ioctl(0, TCSETAW, &ntermio);	/* and activate them */
 #else
 	ioctl(0, TCSETA, &ntermio);	/* and activate them */
@@ -222,7 +222,7 @@ ttopen()
  * interpreter. On VMS it puts the terminal back in a reasonable state.
  * Another no-operation on CPM.
  */
-ttclose()
+void ttclose(void)
 {
 #if     VMS
 	int status;
@@ -269,7 +269,7 @@ ttclose()
  * On CPM terminal I/O unbuffered, so we just write the byte out. Ditto on
  * MS-DOS (use the very very raw console output routine).
  */
-ttputc(c)
+void ttputc(c)
 {
 #if     VMS
 	if (nobuf >= NOBUF)
@@ -290,7 +290,7 @@ ttputc(c)
  * Flush terminal buffer. Does real work where the terminal output is buffered
  * up. A no-operation on systems where byte at a time terminal I/O is done.
  */
-ttflush()
+int ttflush(void)
 {
 #if     VMS
 	int status;
@@ -305,7 +305,7 @@ ttflush()
 			status = iosb[0] & 0xFFFF;
 		nobuf = 0;
 	}
-	return (status);
+	return status;
 #endif
 
 #if     MSDOS

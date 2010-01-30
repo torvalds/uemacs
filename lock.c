@@ -14,8 +14,8 @@
 #if	BSD | SVR4
 #include <sys/errno.h>
 
-char *lname[NLOCKS];		/* names of all locked files */
-int numlocks;			/* # of current locks active */
+static char *lname[NLOCKS];		/* names of all locked files */
+static int numlocks;			/* # of current locks active */
 
 /*
  * lockchk:

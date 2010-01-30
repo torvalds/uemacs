@@ -17,11 +17,11 @@ typedef struct UVAR {
 
 #define	MAXVARS		255
 
-UVAR uv[MAXVARS + 1];		/* user variables */
+static UVAR uv[MAXVARS + 1];		/* user variables */
 
 /*	list of recognized environment variables	*/
 
-char *envars[] = {
+static char *envars[] = {
 	"fillcol",		/* current fill column */
 	"pagelen",		/* number of lines used by editor */
 	"curcol",		/* current column pos of cursor */
@@ -125,7 +125,7 @@ typedef struct UFUNC {
 #define	DYNAMIC		2
 #define	TRINAMIC	3
 
-UFUNC funcs[] = {
+static UFUNC funcs[] = {
 	{ "add", DYNAMIC },		/* add two numbers together */
 	{ "sub", DYNAMIC },		/* subtraction */
 	{ "tim", DYNAMIC },		/* multiplication */

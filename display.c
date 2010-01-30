@@ -33,9 +33,9 @@ typedef struct VIDEO {
 #define	VFREQ	0x0008		/* reverse video request        */
 #define	VFCOL	0x0010		/* color change requested       */
 
-VIDEO **vscreen;		/* Virtual screen. */
+static VIDEO **vscreen;		/* Virtual screen. */
 #if	MEMMAP == 0 || SCROLLCODE
-VIDEO **pscreen;		/* Physical screen. */
+static VIDEO **pscreen;		/* Physical screen. */
 #endif
 
 static int displaying = TRUE;
@@ -924,7 +924,7 @@ static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
  * struct VIDEO *vp1;	virtual screen image
  * struct VIDEO *vp2;	physical screen image
  */
-int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
+static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
 {
 #if RAINBOW
 /*	UPDATELINE specific code for the DEC rainbow 100 micro	*/

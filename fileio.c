@@ -11,8 +11,8 @@
 #include        "edef.h"
 #include	"efunc.h"
 
-FILE *ffp;			/* File pointer, all functions. */
-int eofflag;			/* end-of-file flag */
+static FILE *ffp;			/* File pointer, all functions. */
+static int eofflag;			/* end-of-file flag */
 
 /*
  * Open a file for reading.

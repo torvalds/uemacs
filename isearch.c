@@ -2,7 +2,7 @@
  *
  * The functions in this file implement commands that perform incremental
  * searches in the forward and backward directions.  This "ISearch" command
- * is intended to emulate the same command from the original EMACS 
+ * is intended to emulate the same command from the original EMACS
  * implementation (ITS).  Contains references to routines internal to
  * SEARCH.C.
  *
@@ -19,7 +19,7 @@
  *	  checknext(), since there were no circumstances where
  *	  it ever equalled FALSE.
  *
- *	modified by Petri Kutvonen	
+ *	modified by Petri Kutvonen
  */
 
 #include        <stdio.h>
@@ -33,14 +33,14 @@ static int echo_char(int c, int col);
 
 /* A couple of "own" variables for re-eat */
 
-int (*saved_get_char) ();	/* Get character routine */
-int eaten_char = -1;		/* Re-eaten char */
+static int (*saved_get_char) ();	/* Get character routine */
+static int eaten_char = -1;		/* Re-eaten char */
 
 /* A couple more "own" variables for the command string */
 
-int cmd_buff[CMDBUFLEN];	/* Save the command args here */
-int cmd_offset;			/* Current offset into command buff */
-int cmd_reexecute = -1;		/* > 0 if re-executing command */
+static int cmd_buff[CMDBUFLEN];	/* Save the command args here */
+static int cmd_offset;			/* Current offset into command buff */
+static int cmd_reexecute = -1;		/* > 0 if re-executing command */
 
 
 /*

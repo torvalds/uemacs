@@ -252,7 +252,7 @@ int f, n;			/* default flag, numeric argument [unused] */
 }
 #endif
 #else
-void ansihello(void)
+static void ansihello(void)
 {
 }
 #endif

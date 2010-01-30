@@ -8,7 +8,7 @@
 
 /*	possible names and paths of help files under different OSs	*/
 
-char *pathname[] =
+static char *pathname[] =
 #if	MSDOS
 {
 	"emacs.rc",

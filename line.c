@@ -18,8 +18,8 @@
 #include	"edef.h"
 #include	"efunc.h"
 
-KILL *ykbuf;			/* ptr to current kill buffer chunk being yanked */
-int ykboff;			/* offset into that chunk */
+static KILL *ykbuf;			/* ptr to current kill buffer chunk being yanked */
+static int ykboff;			/* offset into that chunk */
 
 /*
  * This routine allocates a block of memory large enough to hold a LINE
