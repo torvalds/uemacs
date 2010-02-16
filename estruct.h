@@ -430,7 +430,7 @@
  */
 typedef struct window {
 	struct window *w_wndp;	/* Next window                  */
-	struct BUFFER *w_bufp;	/* Buffer displayed in window   */
+	struct buffer *w_bufp;	/* Buffer displayed in window   */
 	struct LINE *w_linep;	/* Top line in the window       */
 	struct LINE *w_dotp;	/* Line containing "."          */
 	short w_doto;		/* Byte offset for "."          */
@@ -470,8 +470,8 @@ typedef struct window {
  * 	Buffers may be "Inactive" which means the files associated with them
  * have not been read in yet. These get read in at "use buffer" time.
  */
-typedef struct BUFFER {
-	struct BUFFER *b_bufp;	/* Link to next BUFFER          */
+struct buffer {
+        struct buffer *b_bufp;	/* Link to next struct buffer   */
 	struct LINE *b_dotp;	/* Link to "." LINE structure   */
 	short b_doto;		/* Offset of "." in above LINE  */
 	struct LINE *b_markp;	/* The same as the above two,   */
@@ -486,7 +486,7 @@ typedef struct BUFFER {
 #if	CRYPT
 	char b_key[NPAT];	/* current encrypted key        */
 #endif
-} BUFFER;
+};
 
 #define BFINVS  0x01		/* Internal invisable buffer    */
 #define BFCHG   0x02		/* Changed since last write     */
@@ -519,7 +519,7 @@ typedef struct {
 /*
  * All text is kept in circularly linked lists of "LINE" structures. These
  * begin at the header line (which is the blank line beyond the end of the
- * buffer). This line is pointed to by the "BUFFER". Each line contains a the
+ * buffer). This line is pointed to by the "struct buffer". Each line contains a the
  * number of bytes in the line (the "used" size), the size of the text array,
  * and the text. The end of line is not stored as a byte; it's implied. Future
  * additions will include update hints, and a list of marks into the line.

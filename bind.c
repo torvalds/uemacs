@@ -18,7 +18,7 @@ int help(int f, int n)
 				   bring up a fake buffer and read the help file
 				   into it with view mode                 */
 	register window_t *wp;	/* scaning pointer to windows */
-	register BUFFER *bp;	/* buffer pointer to help */
+	register struct buffer *bp;	/* buffer pointer to help */
 	char *fname = NULL;	/* ptr to file returned by flook() */
 
 	/* first check if we are already here */
@@ -277,7 +277,7 @@ int buildlist(int type, char *mstring)
 	register window_t *wp;	/* scanning pointer to windows */
 	register KEYTAB *ktp;	/* pointer into the command table */
 	register NBIND *nptr;	/* pointer into the name binding table */
-	register BUFFER *bp;	/* buffer to put binding list into */
+	register struct buffer *bp;	/* buffer to put binding list into */
 	int cpos;		/* current position to use in outseq */
 	char outseq[80];	/* output buffer for keystroke sequence */
 

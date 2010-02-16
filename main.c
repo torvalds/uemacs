@@ -98,11 +98,11 @@ int main(int argc, char **argv)
 	register int f;		/* default flag */
 	register int n;		/* numeric repeat count */
 	register int mflag;	/* negative flag on repeat */
-	register BUFFER *bp;	/* temp buffer pointer */
+	register struct buffer *bp;	/* temp buffer pointer */
 	register int firstfile;	/* first file flag */
 	register int carg;	/* current arg to scan */
 	register int startflag;	/* startup executed flag */
-	BUFFER *firstbp = NULL;	/* ptr to first buffer in cmd line */
+	struct buffer *firstbp = NULL;	/* ptr to first buffer in cmd line */
 	int basec;		/* c stripped of meta character */
 	int viewflag;		/* are we starting in view mode? */
 	int gotoflag;		/* do we need to goto a line at start? */
@@ -427,7 +427,7 @@ int main(int argc, char **argv)
  */
 void edinit(char *bname)
 {
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register window_t *wp;
 
 	bp = bfind(bname, TRUE, 0);	/* First buffer         */
@@ -555,8 +555,8 @@ int execute(int c, int f, int n)
  */
 int quickexit(int f, int n)
 {
-	register BUFFER *bp;	/* scanning pointer to buffers */
-	register BUFFER *oldcb;	/* original current buffer */
+	register struct buffer *bp;	/* scanning pointer to buffers */
+	register struct buffer *oldcb;	/* original current buffer */
 	register int status;
 
 	oldcb = curbp;		/* save in case we fail */
@@ -817,7 +817,7 @@ dspram()
  */
 int cexit(int status)
 {
-	register BUFFER *bp;	/* buffer list pointer */
+	register struct buffer *bp;	/* buffer list pointer */
 	register window_t *wp;	/* window list pointer */
 	register window_t *tp;	/* temporary window pointer */
 

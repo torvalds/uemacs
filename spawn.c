@@ -258,7 +258,7 @@ int pipecmd(int f, int n)
 {
 	register int s;		/* return status from CLI */
 	register window_t *wp;	/* pointer to new window */
-	register BUFFER *bp;	/* pointer to buffer to zot */
+	register struct buffer *bp;	/* pointer to buffer to zot */
 	char line[NLINE];	/* command line send to shell */
 	static char bname[] = "command";
 
@@ -379,7 +379,7 @@ int pipecmd(int f, int n)
 int filter_buffer(int f, int n)
 {
 	register int s;		/* return status from CLI */
-	register BUFFER *bp;	/* pointer to buffer to zot */
+	register struct buffer *bp;	/* pointer to buffer to zot */
 	char line[NLINE];	/* command line send to shell */
 	char tmpnam[NFILEN];	/* place to store real file name */
 	static char bname1[] = "fltinp";

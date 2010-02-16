@@ -52,7 +52,7 @@ LINE *lalloc(int used)
  */
 void lfree(LINE *lp)
 {
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register window_t *wp;
 
 	wp = wheadp;

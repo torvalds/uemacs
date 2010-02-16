@@ -36,7 +36,7 @@ int clexec = FALSE;		/* command line execution flag  */
 int mstore = FALSE;		/* storing text to macro flag   */
 int discmd = TRUE;		/* display command flag         */
 int disinp = TRUE;		/* display input characters     */
-struct BUFFER *bstore = NULL;	/* buffer to store macro text to */
+struct buffer *bstore = NULL;	/* buffer to store macro text to */
 int vtrow = 0;			/* Row location of SW cursor */
 int vtcol = 0;			/* Column location of SW cursor */
 int ttrow = HUGE;		/* Row location of HW cursor */
@@ -100,10 +100,10 @@ int thisflag;			/* Flags, this command          */
 int lastflag;			/* Flags, last command          */
 int curgoal;			/* Goal for C-P, C-N            */
 window_t *curwp;		/* Current window               */
-BUFFER *curbp;			/* Current buffer               */
+struct buffer *curbp;			/* Current buffer               */
 window_t *wheadp;		/* Head of list of windows      */
-BUFFER *bheadp;			/* Head of list of buffers      */
-BUFFER *blistp;			/* Buffer for C-X C-B           */
+struct buffer *bheadp;			/* Head of list of buffers      */
+struct buffer *blistp;			/* Buffer for C-X C-B           */
 
 char sres[NBUFN];		/* current screen resolution    */
 char pat[NPAT];			/* Search pattern               */

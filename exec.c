@@ -252,7 +252,7 @@ int nextarg(char *prompt, char *buffer, int size, int terminator)
  */
 int storemac(int f, int n)
 {
-	register struct BUFFER *bp;	/* pointer to macro buffer */
+	register struct buffer *bp;	/* pointer to macro buffer */
 	char bname[NBUFN];	/* name of buffer to use */
 
 	/* must have a numeric argument to this function */
@@ -298,7 +298,7 @@ int storemac(int f, int n)
  */
 int storeproc(int f, int n)
 {
-	register struct BUFFER *bp;	/* pointer to macro buffer */
+	register struct buffer *bp;	/* pointer to macro buffer */
 	register int status;	/* return status */
 	char bname[NBUFN];	/* name of buffer to use */
 
@@ -338,7 +338,7 @@ int storeproc(int f, int n)
  */
 int execproc(int f, int n)
 {
-	register BUFFER *bp;	/* ptr to buffer to execute */
+	register struct buffer *bp;	/* ptr to buffer to execute */
 	register int status;	/* status return */
 	char bufn[NBUFN + 2];	/* name of buffer to execute */
 
@@ -373,7 +373,7 @@ int execproc(int f, int n)
  */
 int execbuf(int f, int n)
 {
-	register BUFFER *bp;	/* ptr to buffer to execute */
+	register struct buffer *bp;	/* ptr to buffer to execute */
 	register int status;	/* status return */
 	char bufn[NSTRING];	/* name of buffer to execute */
 
@@ -415,9 +415,9 @@ int execbuf(int f, int n)
  *
  *	*LBL01
  *
- * BUFFER *bp;		buffer to execute
+ * struct buffer *bp;		buffer to execute
  */
-int dobuf(BUFFER *bp)
+int dobuf(struct buffer *bp)
 {
 	register int status;	/* status return */
 	register LINE *lp;	/* pointer to line to execute */
@@ -884,8 +884,8 @@ int execfile(int f, int n)
  */
 int dofile(char *fname)
 {
-	register BUFFER *bp;	/* buffer to place file to exeute */
-	register BUFFER *cb;	/* temp to hold current buf while we read */
+	register struct buffer *bp;	/* buffer to place file to exeute */
+	register struct buffer *cb;	/* temp to hold current buf while we read */
 	register int status;	/* results of various calls */
 	char bname[NBUFN];	/* name of buffer */
 
@@ -923,7 +923,7 @@ int dofile(char *fname)
  */
 int cbuf(int f, int n, int bufnum)
 {
-	register BUFFER *bp;	/* ptr to buffer to execute */
+	register struct buffer *bp;	/* ptr to buffer to execute */
 	register int status;	/* status return */
 	static char bufname[] = "*Macro xx*";
 

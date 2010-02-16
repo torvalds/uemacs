@@ -46,7 +46,7 @@ extern int clexec;		/* command line execution flag  */
 extern int mstore;		/* storing text to macro flag   */
 extern int discmd;		/* display command flag         */
 extern int disinp;		/* display input characters     */
-extern struct BUFFER *bstore;	/* buffer to store macro text to */
+extern struct buffer *bstore;	/* buffer to store macro text to */
 extern int vtrow;		/* Row location of SW cursor */
 extern int vtcol;		/* Column location of SW cursor */
 extern int ttrow;		/* Row location of HW cursor */
@@ -104,12 +104,12 @@ extern int thisflag;		/* Flags, this command          */
 extern int lastflag;		/* Flags, last command          */
 extern int curgoal;		/* Goal for C-P, C-N            */
 extern window_t *curwp;		/* Current window               */
-extern BUFFER *curbp;		/* Current buffer               */
+extern struct buffer *curbp;		/* Current buffer               */
 extern window_t *wheadp;	/* Head of list of windows      */
-extern BUFFER *bheadp;		/* Head of list of buffers      */
-extern BUFFER *blistp;		/* Buffer for C-X C-B           */
+extern struct buffer *bheadp;		/* Head of list of buffers      */
+extern struct buffer *blistp;		/* Buffer for C-X C-B           */
 
-extern BUFFER *bfind(char *bname, int cflag, int bflag); /* Lookup a buffer by name      */
+extern struct buffer *bfind(char *bname, int cflag, int bflag); /* Lookup a buffer by name      */
 extern window_t *wpopup();	/* Pop up window creation       */
 extern LINE *lalloc(int);	/* Allocate a line              */
 extern char sres[NBUFN];	/* current screen resolution    */

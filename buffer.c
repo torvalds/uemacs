@@ -1,11 +1,11 @@
-/*	BUFFER.C
+/*	buffer.c
  *
  *	Buffer management.
  *	Some of the functions are internal,
  *	and some are actually attached to user
  *	keys. Like everyone else, they set hints
  *	for the display system
- * 
+ *
  *	modified by Petri Kutvonen
  */
 
@@ -22,7 +22,7 @@
  */
 int usebuffer(int f, int n)
 {
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register int s;
 	char bufn[NBUFN];
 
@@ -40,8 +40,8 @@ int usebuffer(int f, int n)
  */
 int nextbuffer(int f, int n)
 {
-	register BUFFER *bp;	/* eligable buffer to switch to */
-	register BUFFER *bbp;	/* eligable buffer to switch to */
+	register struct buffer *bp;	/* eligable buffer to switch to */
+	register struct buffer *bbp;	/* eligable buffer to switch to */
 
 	/* make sure the arg is legit */
 	if (f == FALSE)
@@ -76,7 +76,7 @@ int nextbuffer(int f, int n)
 /*
  * make buffer BP current
  */
-int swbuffer(BUFFER *bp)
+int swbuffer(struct buffer *bp)
 {
 	register window_t *wp;
 
@@ -131,7 +131,7 @@ int swbuffer(BUFFER *bp)
  */
 int killbuffer(int f, int n)
 {
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register int s;
 	char bufn[NBUFN];
 
@@ -147,10 +147,10 @@ int killbuffer(int f, int n)
 /*
  * kill the buffer pointed to by bp
  */
-int zotbuf(BUFFER *bp)
+int zotbuf(struct buffer *bp)
 {
-	register BUFFER *bp1;
-	register BUFFER *bp2;
+	register struct buffer *bp1;
+	register struct buffer *bp2;
 	register int s;
 
 	if (bp->b_nwnd != 0) {	/* Error if on screen.  */
@@ -182,7 +182,7 @@ int zotbuf(BUFFER *bp)
  */
 int namebuffer(int f, int n)
 {
-	register BUFFER *bp;	/* pointer to scan through all buffers */
+	register struct buffer *bp;	/* pointer to scan through all buffers */
 	char bufn[NBUFN];	/* buffer to hold buffer name */
 
 	/* prompt for and get the new buffer name */
@@ -220,7 +220,7 @@ int namebuffer(int f, int n)
 int listbuffers(int f, int n)
 {
 	register window_t *wp;
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register int s;
 
 	if ((s = makelist(f)) != TRUE)
@@ -270,7 +270,7 @@ int makelist(int iflag)
 	register char *cp1;
 	register char *cp2;
 	register int c;
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register LINE *lp;
 	register int s;
 	register int i;
@@ -424,7 +424,7 @@ int addline(char *text)
  */
 int anycb(void)
 {
-	register BUFFER *bp;
+	register struct buffer *bp;
 
 	bp = bheadp;
 	while (bp != NULL) {
@@ -438,15 +438,15 @@ int anycb(void)
 
 /*
  * Find a buffer, by name. Return a pointer
- * to the BUFFER structure associated with it.
+ * to the buffer structure associated with it.
  * If the buffer is not found
  * and the "cflag" is TRUE, create it. The "bflag" is
  * the settings for the flags in in buffer.
  */
-BUFFER *bfind(char *bname, int cflag, int bflag)
+struct buffer *bfind(char *bname, int cflag, int bflag)
 {
-	register BUFFER *bp;
-	register BUFFER *sb;	/* buffer to insert after */
+	register struct buffer *bp;
+	register struct buffer *sb;	/* buffer to insert after */
 	register LINE *lp;
 
 	bp = bheadp;
@@ -456,7 +456,7 @@ BUFFER *bfind(char *bname, int cflag, int bflag)
 		bp = bp->b_bufp;
 	}
 	if (cflag != FALSE) {
-		if ((bp = (BUFFER *) malloc(sizeof(BUFFER))) == NULL)
+		if ((bp = (struct buffer *)malloc(sizeof(struct buffer))) == NULL)
 			return (NULL);
 		if ((lp = lalloc(0)) == NULL) {
 			free((char *) bp);
@@ -511,7 +511,7 @@ BUFFER *bfind(char *bname, int cflag, int bflag)
  * that are required. Return TRUE if everything
  * looks good.
  */
-int bclear(BUFFER *bp)
+int bclear(struct buffer *bp)
 {
 	register LINE *lp;
 	register int s;

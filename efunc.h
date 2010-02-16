@@ -208,16 +208,16 @@ extern char *transbind(char *skey);
 /* buffer.c */
 extern int usebuffer(int f, int n);
 extern int nextbuffer(int f, int n);
-extern int swbuffer(BUFFER *bp);
+extern int swbuffer(struct buffer *bp);
 extern int killbuffer(int f, int n);
-extern int zotbuf(BUFFER *bp);
+extern int zotbuf(struct buffer *bp);
 extern int namebuffer(int f, int n);
 extern int listbuffers(int f, int n);
 extern int makelist(int iflag);
 extern void ltoa(char *buf, int width, long num);
 extern int addline(char *text);
 extern int anycb(void);
-extern int bclear(BUFFER *bp);
+extern int bclear(struct buffer *bp);
 extern int unmark(int f, int n);
 
 /* file.c */
@@ -254,7 +254,7 @@ extern int storemac(int f, int n);
 extern int storeproc(int f, int n);
 extern int execproc(int f, int n);
 extern int execbuf(int f, int n);
-extern int dobuf(BUFFER *bp);
+extern int dobuf(struct buffer *bp);
 extern void freewhile(WHBLOCK *wp);
 extern int execfile(int f, int n);
 extern int dofile(char *fname);

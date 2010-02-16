@@ -141,7 +141,7 @@ static int resetkey(void)
  */
 int getfile(char *fname, int lockfl)
 {
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register LINE *lp;
 	register int i;
 	register int s;
@@ -211,7 +211,7 @@ int readin(char *fname, int lockfl)
 	register LINE *lp2;
 	register int i;
 	register window_t *wp;
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register int s;
 	register int nbytes;
 	register int nline;
@@ -512,7 +512,7 @@ int writeout(char *fn)
  * to modify the file name associated with
  * the current buffer. It is like the "f" command
  * in UNIX "ed". The operation is simple; just zap
- * the name in the BUFFER structure, and mark the windows
+ * the name in the buffer structure, and mark the windows
  * as needing an update. You can type a blank line at the
  * prompt if you wish.
  */
@@ -551,7 +551,7 @@ int ifile(char *fname)
 	register LINE *lp1;
 	register LINE *lp2;
 	register int i;
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register int s;
 	register int nbytes;
 	register int nline;

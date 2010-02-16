@@ -1089,7 +1089,7 @@ static void modeline(window_t *wp)
 	register char *cp;
 	register int c;
 	register int n;		/* cursor position count */
-	register BUFFER *bp;
+	register struct buffer *bp;
 	register int i;		/* loop index */
 	register int lchar;	/* character to draw line in buffer with */
 	register int firstm;	/* is this the first mode? */

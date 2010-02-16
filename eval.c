@@ -763,7 +763,7 @@ int gettyp(char *token)
 char *getval(char *token)
 {
 	register int status;	/* error return */
-	register BUFFER *bp;	/* temp buffer pointer */
+	register struct buffer *bp;	/* temp buffer pointer */
 	register int blen;	/* length of buffer argument */
 	register int distmp;	/* temporary discmd flag */
 	static char buf[NSTRING];	/* string buffer for some returns */
