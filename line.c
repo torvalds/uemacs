@@ -18,9 +18,6 @@
 #include	"edef.h"
 #include	"efunc.h"
 
-static KILL *ykbuf;			/* ptr to current kill buffer chunk being yanked */
-static int ykboff;			/* offset into that chunk */
-
 /*
  * This routine allocates a block of memory large enough to hold a LINE
  * containing "used" characters. The block is always rounded up a bit. Return
