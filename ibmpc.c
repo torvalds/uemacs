@@ -501,8 +501,4 @@ int f, n;			/* default flag, numeric argument [unused] */
 	return (TRUE);
 }
 #endif
-#else
-static void ibmhello(void)
-{
-}
 #endif

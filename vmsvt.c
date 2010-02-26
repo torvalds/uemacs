@@ -511,15 +511,4 @@ spal()
 {
 }
 
-#else
-
-/***
- *  hellovms  -  Avoid error because of empty module
- *
- *  Nothing returned
- ***/
-static void hellovms(void)
-{
-}
-
 #endif

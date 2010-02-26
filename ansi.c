@@ -251,8 +251,4 @@ int f, n;			/* default flag, numeric argument [unused] */
 	return (TRUE);
 }
 #endif
-#else
-static void ansihello(void)
-{
-}
 #endif
