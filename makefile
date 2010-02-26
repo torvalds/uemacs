@@ -1,5 +1,17 @@
 # makefile for emacs, updated Sun Apr 28 17:59:07 EET DST 1996
 
+# Make the build silent by default
+V =
+
+ifeq ($(strip $(V)),)
+	E = @echo
+	Q = @
+else
+	E = @\#
+	Q =
+endif
+export E Q
+
 SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c \
 	file.c fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c \
 	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
@@ -31,7 +43,8 @@ BINDIR=/usr/bin
 LIBDIR=/usr/lib
 
 em:	${OBJ}
-	${CC} ${DEFINES} -o em ${OBJ} ${LIBS}
+	$(E) "  LINK    " $@
+	$(Q) ${CC} ${DEFINES} -o em ${OBJ} ${LIBS}
 
 SPARSE=sparse
 SPARSE_FLAGS=-D__LITTLE_ENDIAN__ -D__x86_64__ -D__linux__ -D__unix__
@@ -40,7 +53,8 @@ sparse:
 	$(SPARSE) $(SPARSE_FLAGS) $(DEFINES) $(SRC)
 
 clean:
-	rm -f core lintout makeout tags makefile.bak *.o
+	$(E) "  CLEAN"
+	$(Q) rm -f core lintout makeout tags makefile.bak *.o
 
 install: em
 	strip em
@@ -93,7 +107,8 @@ depend: ${SRC}
 	@echo '# see make depend above' >>makefile
 
 .c.o:
-	${CC} ${CFLAGS} ${DEFINES} -c $*.c
+	$(E) "  CC      " $@
+	$(Q) ${CC} ${CFLAGS} ${DEFINES} -c $*.c
 
 # DO NOT DELETE THIS LINE -- make depend uses it
 
