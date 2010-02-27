@@ -33,7 +33,7 @@ static int echo_char(int c, int col);
 
 /* A couple of "own" variables for re-eat */
 
-static int (*saved_get_char) ();	/* Get character routine */
+static int (*saved_get_char) (void);	/* Get character routine */
 static int eaten_char = -1;		/* Re-eaten char */
 
 /* A couple more "own" variables for the command string */

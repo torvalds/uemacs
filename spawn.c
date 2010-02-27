@@ -27,7 +27,7 @@ extern short iochan;		/* In "termio.c"        */
 #include        <signal.h>
 #ifdef SIGWINCH
 extern int chg_width, chg_height;
-extern void sizesignal();
+extern void sizesignal(int);
 #endif
 #endif
 

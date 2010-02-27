@@ -110,7 +110,7 @@ extern struct buffer *bheadp;		/* Head of list of buffers      */
 extern struct buffer *blistp;		/* Buffer for C-X C-B           */
 
 extern struct buffer *bfind(char *bname, int cflag, int bflag); /* Lookup a buffer by name      */
-extern window_t *wpopup();	/* Pop up window creation       */
+extern window_t *wpopup(void);	/* Pop up window creation       */
 extern LINE *lalloc(int);	/* Allocate a line              */
 extern char sres[NBUFN];	/* current screen resolution    */
 extern char pat[];		/* Search pattern               */

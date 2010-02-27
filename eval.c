@@ -184,6 +184,7 @@ char *gtusr(char *vname)
 	return (errorm);
 }
 
+extern char *getkill(void);
 
 /*
  * gtenv()
@@ -193,7 +194,6 @@ char *gtusr(char *vname)
 char *gtenv(char *vname)
 {
 	int vnum;	/* ordinal number of var refrenced */
-	char *getkill();
 
 	/* scan the list, looking for the referenced name */
 	for (vnum = 0; vnum < NEVARS; vnum++)

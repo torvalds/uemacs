@@ -1368,6 +1368,8 @@ static int mceq(int bc, MC *mt)
 	return (result);
 }
 
+extern BITMAP clearbits(void);
+
 /*
  * cclmake -- create the bitmap for the character class.
  *	ppatptr is left pointing to the end-of-character-class character,
@@ -1375,7 +1377,6 @@ static int mceq(int bc, MC *mt)
  */
 static int cclmake(char **ppatptr, MC *mcptr)
 {
-	BITMAP clearbits();
 	BITMAP bmap;
 	char *patptr;
 	int pchr, ochr;
