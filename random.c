@@ -32,12 +32,12 @@ int setfillcol(int f, int n)
  */
 int showcpos(int f, int n)
 {
-	register LINE *lp;	/* current line */
-	register long numchars;	/* # of chars in file */
-	register int numlines;	/* # of lines in file */
-	register long predchars;	/* # chars preceding point */
-	register int predlines;	/* # lines preceding point */
-	register int curchar;	/* character under cursor */
+	LINE *lp;	/* current line */
+	long numchars;	/* # of chars in file */
+	int numlines;	/* # of lines in file */
+	long predchars;	/* # chars preceding point */
+	int predlines;	/* # lines preceding point */
+	int curchar;	/* character under cursor */
 	int ratio;
 	int col;
 	int savepos;		/* temp save for current offset */
@@ -97,8 +97,8 @@ int showcpos(int f, int n)
 
 int getcline(void)
 {				/* get the current line number */
-	register LINE *lp;	/* current line */
-	register int numlines;	/* # of lines before point */
+	LINE *lp;	/* current line */
+	int numlines;	/* # of lines before point */
 
 	/* starting at the beginning of the buffer */
 	lp = lforw(curbp->b_linep);
@@ -122,7 +122,7 @@ int getcline(void)
  */
 int getccol(int bflg)
 {
-	register int c, i, col;
+	int c, i, col;
 	col = 0;
 	for (i = 0; i < curwp->w_doto; ++i) {
 		c = lgetc(curwp->w_dotp, i);
@@ -144,10 +144,10 @@ int getccol(int bflg)
  */
 int setccol(int pos)
 {
-	register int c;		/* character being scanned */
-	register int i;		/* index into current line */
-	register int col;	/* current cursor column   */
-	register int llen;	/* length of line in bytes */
+	int c;		/* character being scanned */
+	int i;		/* index into current line */
+	int col;	/* current cursor column   */
+	int llen;	/* length of line in bytes */
 
 	col = 0;
 	llen = llength(curwp->w_dotp);
@@ -183,10 +183,10 @@ int setccol(int pos)
  */
 int twiddle(int f, int n)
 {
-	register LINE *dotp;
-	register int doto;
-	register int cl;
-	register int cr;
+	LINE *dotp;
+	int doto;
+	int cl;
+	int cr;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -212,8 +212,8 @@ int twiddle(int f, int n)
  */
 int quote(int f, int n)
 {
-	register int s;
-	register int c;
+	int s;
+	int c;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -259,7 +259,7 @@ int insert_tab(int f, int n)
  */
 int detab(int f, int n)
 {
-	register int inc;	/* increment to next line [sgn(n)] */
+	int inc;	/* increment to next line [sgn(n)] */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -301,10 +301,10 @@ int detab(int f, int n)
  */
 int entab(int f, int n)
 {
-	register int inc;	/* increment to next line [sgn(n)] */
-	register int fspace;	/* pointer to first space if in a run */
-	register int ccol;	/* current cursor column */
-	register char cchar;	/* current character */
+	int inc;	/* increment to next line [sgn(n)] */
+	int fspace;	/* pointer to first space if in a run */
+	int ccol;	/* current cursor column */
+	char cchar;	/* current character */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -375,10 +375,10 @@ int entab(int f, int n)
  */
 int trim(int f, int n)
 {
-	register LINE *lp;	/* current line pointer */
-	register int offset;	/* original line offset position */
-	register int length;	/* current length */
-	register int inc;	/* increment to next line [sgn(n)] */
+	LINE *lp;	/* current line pointer */
+	int offset;	/* original line offset position */
+	int length;	/* current length */
+	int inc;	/* increment to next line [sgn(n)] */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -419,8 +419,8 @@ int trim(int f, int n)
  */
 int openline(int f, int n)
 {
-	register int i;
-	register int s;
+	int i;
+	int s;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -443,7 +443,7 @@ int openline(int f, int n)
  */
 int insert_newline(int f, int n)
 {
-	register int s;
+	int s;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -478,10 +478,10 @@ int insert_newline(int f, int n)
 
 int cinsert(void)
 {				/* insert a newline and indentation for C */
-	register char *cptr;	/* string pointer into text to copy */
-	register int tptr;	/* index to scan into line */
-	register int bracef;	/* was there a brace at the end of line? */
-	register int i;
+	char *cptr;	/* string pointer into text to copy */
+	int tptr;	/* index to scan into line */
+	int bracef;	/* was there a brace at the end of line? */
+	int i;
 	char ichar[NSTRING];	/* buffer to hold indent of last line */
 
 	/* grab a pointer to text to copy indentation from */
@@ -526,12 +526,12 @@ int cinsert(void)
  */
 int insbrace(int n, int c)
 {
-	register int ch;	/* last character before input */
-	register int oc;	/* caractere oppose a c */
-	register int i, count;
-	register int target;	/* column brace should go after */
-	register LINE *oldlp;
-	register int oldoff;
+	int ch;	/* last character before input */
+	int oc;	/* caractere oppose a c */
+	int i, count;
+	int target;	/* column brace should go after */
+	LINE *oldlp;
+	int oldoff;
 
 	/* if we aren't at the beginning of the line... */
 	if (curwp->w_doto != 0)
@@ -622,9 +622,9 @@ int insbrace(int n, int c)
  */
 int insbrace(int n, int c)
 {
-	register int ch;	/* last character before input */
-	register int i;
-	register int target;	/* column brace should go after */
+	int ch;	/* last character before input */
+	int i;
+	int target;	/* column brace should go after */
 
 	/* if we are at the beginning of the line, no go */
 	if (curwp->w_doto == 0)
@@ -651,8 +651,8 @@ int insbrace(int n, int c)
 
 int inspound(void)
 {				/* insert a # into the text here...we are in CMODE */
-	register int ch;	/* last character before input */
-	register int i;
+	int ch;	/* last character before input */
+	int i;
 
 	/* if we are at the beginning of the line, no go */
 	if (curwp->w_doto == 0)
@@ -683,8 +683,8 @@ int inspound(void)
  */
 int deblank(int f, int n)
 {
-	register LINE *lp1;
-	register LINE *lp2;
+	LINE *lp1;
+	LINE *lp2;
 	long nld;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -713,9 +713,9 @@ int deblank(int f, int n)
  */
 int indent(int f, int n)
 {
-	register int nicol;
-	register int c;
-	register int i;
+	int nicol;
+	int c;
+	int i;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -767,7 +767,7 @@ int forwdel(int f, int n)
  */
 int backdel(int f, int n)
 {
-	register int s;
+	int s;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -793,7 +793,7 @@ int backdel(int f, int n)
  */
 int killtext(int f, int n)
 {
-	register LINE *nextp;
+	LINE *nextp;
 	long chunk;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -888,11 +888,11 @@ int delgmode(int f, int n)
  */
 int adjustmode(int kind, int global)
 {
-	register char *scan;	/* scanning pointer to convert prompt */
-	register int i;		/* loop index */
-	register int status;	/* error return on input */
+	char *scan;	/* scanning pointer to convert prompt */
+	int i;		/* loop index */
+	int status;	/* error return on input */
 #if	COLOR
-	register int uflag;	/* was modename uppercase?      */
+	int uflag;	/* was modename uppercase?      */
 #endif
 	char prompt[50];	/* string to prompt user with */
 	char cbuf[NPAT];	/* buffer to recieve mode name into */
@@ -1004,9 +1004,9 @@ int clrmes(int f, int n)
  */
 int writemsg(int f, int n)
 {
-	register char *sp;	/* pointer into buf to expand %s */
-	register char *np;	/* ptr into nbuf */
-	register int status;
+	char *sp;	/* pointer into buf to expand %s */
+	char *np;	/* ptr into nbuf */
+	int status;
 	char buf[NPAT];		/* buffer to recieve message into */
 	char nbuf[NPAT * 2];	/* buffer to expand string into */
 
@@ -1037,13 +1037,13 @@ int writemsg(int f, int n)
  */
 int getfence(int f, int n)
 {
-	register LINE *oldlp;	/* original line pointer */
-	register int oldoff;	/* and offset */
-	register int sdir;	/* direction of search (1/-1) */
-	register int count;	/* current fence level count */
-	register char ch;	/* fence type to match against */
-	register char ofence;	/* open fence */
-	register char c;	/* current character in scan */
+	LINE *oldlp;	/* original line pointer */
+	int oldoff;	/* and offset */
+	int sdir;	/* direction of search (1/-1) */
+	int count;	/* current fence level count */
+	char ch;	/* fence type to match against */
+	char ofence;	/* open fence */
+	char c;	/* current character in scan */
 
 	/* save the original cursor position */
 	oldlp = curwp->w_dotp;
@@ -1137,13 +1137,13 @@ int getfence(int f, int n)
  */
 int fmatch(int ch)
 {
-	register LINE *oldlp;	/* original line pointer */
-	register int oldoff;	/* and offset */
-	register LINE *toplp;	/* top line in current window */
-	register int count;	/* current fence level count */
-	register char opench;	/* open fence */
-	register char c;	/* current character in scan */
-	register int i;
+	LINE *oldlp;	/* original line pointer */
+	int oldoff;	/* and offset */
+	LINE *toplp;	/* top line in current window */
+	int count;	/* current fence level count */
+	char opench;	/* open fence */
+	char c;	/* current character in scan */
+	int i;
 
 	/* first get the display update out there */
 	update(FALSE);
@@ -1204,7 +1204,7 @@ int fmatch(int ch)
  */
 int istring(int f, int n)
 {
-	register int status;	/* status return code */
+	int status;	/* status return code */
 	char tstring[NPAT + 1];	/* string to add */
 
 	/* ask for string to insert */
@@ -1232,7 +1232,7 @@ int istring(int f, int n)
  */
 int ovstring(int f, int n)
 {
-	register int status;	/* status return code */
+	int status;	/* status return code */
 	char tstring[NPAT + 1];	/* string to add */
 
 	/* ask for string to insert */

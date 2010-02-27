@@ -25,8 +25,8 @@
  */
 int wrapword(int f, int n)
 {
-	register int cnt;	/* size of word wrapped to next line */
-	register int c;		/* charector temporary */
+	int cnt;	/* size of word wrapped to next line */
+	int c;		/* charector temporary */
 
 	/* backup from the <NL> 1 char */
 	if (!backchar(0, 1))
@@ -116,7 +116,7 @@ int forwword(int f, int n)
  */
 int upperword(int f, int n)
 {
-	register int c;
+	int c;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -152,7 +152,7 @@ int upperword(int f, int n)
  */
 int lowerword(int f, int n)
 {
-	register int c;
+	int c;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -189,7 +189,7 @@ int lowerword(int f, int n)
  */
 int capword(int f, int n)
 {
-	register int c;
+	int c;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -241,9 +241,9 @@ int capword(int f, int n)
  */
 int delfword(int f, int n)
 {
-	register LINE *dotp;	/* original cursor line */
-	register int doto;	/*      and row */
-	register int c;		/* temp char */
+	LINE *dotp;	/* original cursor line */
+	int doto;	/*      and row */
+	int c;		/* temp char */
 	long size;		/* # of chars to delete */
 
 	/* don't allow this command if we are in read only mode */
@@ -371,7 +371,7 @@ int delbword(int f, int n)
  */
 int inword(void)
 {
-	register int c;
+	int c;
 
 	if (curwp->w_doto == llength(curwp->w_dotp))
 		return (FALSE);
@@ -398,15 +398,15 @@ int inword(void)
  */
 int fillpara(int f, int n)
 {
-	register int c;		/* current char durring scan    */
-	register int wordlen;	/* length of current word       */
-	register int clength;	/* position on line during fill */
-	register int i;		/* index during word copy       */
-	register int newlength;	/* tentative new line length    */
-	register int eopflag;	/* Are we at the End-Of-Paragraph? */
-	register int firstflag;	/* first word? (needs no space) */
-	register LINE *eopline;	/* pointer to line just past EOP */
-	register int dotflag;	/* was the last char a period?  */
+	int c;		/* current char durring scan    */
+	int wordlen;	/* length of current word       */
+	int clength;	/* position on line during fill */
+	int i;		/* index during word copy       */
+	int newlength;	/* tentative new line length    */
+	int eopflag;	/* Are we at the End-Of-Paragraph? */
+	int firstflag;	/* first word? (needs no space) */
+	LINE *eopline;	/* pointer to line just past EOP */
+	int dotflag;	/* was the last char a period?  */
 	char wbuf[NSTRING];	/* buffer for current word      */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -495,14 +495,14 @@ int fillpara(int f, int n)
  */
 int justpara(int f, int n)
 {
-	register int c;		/* current char durring scan    */
-	register int wordlen;	/* length of current word       */
-	register int clength;	/* position on line during fill */
-	register int i;		/* index during word copy       */
-	register int newlength;	/* tentative new line length    */
-	register int eopflag;	/* Are we at the End-Of-Paragraph? */
-	register int firstflag;	/* first word? (needs no space) */
-	register LINE *eopline;	/* pointer to line just past EOP */
+	int c;		/* current char durring scan    */
+	int wordlen;	/* length of current word       */
+	int clength;	/* position on line during fill */
+	int i;		/* index during word copy       */
+	int newlength;	/* tentative new line length    */
+	int eopflag;	/* Are we at the End-Of-Paragraph? */
+	int firstflag;	/* first word? (needs no space) */
+	LINE *eopline;	/* pointer to line just past EOP */
 	char wbuf[NSTRING];	/* buffer for current word      */
 	int leftmarg;		/* left marginal */
 
@@ -605,7 +605,7 @@ int justpara(int f, int n)
  */
 int killpara(int f, int n)
 {
-	register int status;	/* returned status of functions */
+	int status;	/* returned status of functions */
 
 	while (n--) {		/* for each paragraph to delete */
 
@@ -640,12 +640,12 @@ int killpara(int f, int n)
  */
 int wordcount(int f, int n)
 {
-	register LINE *lp;	/* current line to scan */
-	register int offset;	/* current char to scan */
+	LINE *lp;	/* current line to scan */
+	int offset;	/* current char to scan */
 	long size;		/* size of region left to count */
-	register int ch;	/* current character to scan */
-	register int wordflag;	/* are we in a word now? */
-	register int lastword;	/* were we just in a word? */
+	int ch;	/* current character to scan */
+	int wordflag;	/* are we in a word now? */
+	int lastword;	/* were we just in a word? */
 	long nwords;		/* total # of words */
 	long nchars;		/* total number of chars */
 	int nlines;		/* total number of lines in region */

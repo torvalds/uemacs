@@ -190,9 +190,9 @@ ansibeep()
 }
 
 ansiparm(n)
-register int n;
+int n;
 {
-	register int q, r;
+	int q, r;
 
 	q = n / 10;
 	if (q != 0) {
@@ -208,7 +208,7 @@ register int n;
 ansiopen()
 {
 #if     V7 | USG | BSD
-	register char *cp;
+	char *cp;
 
 	if ((cp = getenv("TERM")) == NULL) {
 		puts("Shell variable TERM not defined!");

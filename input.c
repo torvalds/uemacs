@@ -105,12 +105,12 @@ int ctoec(int c)
  */
 fn_t getname(void)
 {
-	register int cpos;	/* current column on screen output */
-	register int c;
-	register char *sp;	/* pointer to string for output */
-	register NBIND *ffp;	/* first ptr to entry in name binding table */
-	register NBIND *cffp;	/* current ptr to entry in name binding table */
-	register NBIND *lffp;	/* last ptr to entry in name binding table */
+	int cpos;	/* current column on screen output */
+	int c;
+	char *sp;	/* pointer to string for output */
+	NBIND *ffp;	/* first ptr to entry in name binding table */
+	NBIND *cffp;	/* current ptr to entry in name binding table */
+	NBIND *lffp;	/* last ptr to entry in name binding table */
 	char buf[NSTRING];	/* buffer to hold tentative command name */
 
 	/* starting at the beginning of the string buffer */
@@ -438,9 +438,9 @@ handle_CSI:
 							*/
 int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 {
-	register int cpos;	/* current character position in string */
-	register int c;
-	register int quotef;	/* are we quoting the next char? */
+	int cpos;	/* current character position in string */
+	int c;
+	int quotef;	/* are we quoting the next char? */
 #if	COMPLC
 	int ffile, ocpos, nskip = 0, didtry = 0;
 #if     MSDOS

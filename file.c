@@ -22,7 +22,7 @@
  */
 int fileread(int f, int n)
 {
-	register int s;
+	int s;
 	char fname[NFILEN];
 
 	if (restflag)		/* don't allow this command if restricted */
@@ -41,7 +41,7 @@ int fileread(int f, int n)
  */
 int insfile(int f, int n)
 {
-	register int s;
+	int s;
 	char fname[NFILEN];
 
 	if (restflag)		/* don't allow this command if restricted */
@@ -67,7 +67,7 @@ int insfile(int f, int n)
 int filefind(int f, int n)
 {
 	char fname[NFILEN];	/* file user wishes to find */
-	register int s;		/* status return */
+	int s;		/* status return */
 
 	if (restflag)		/* don't allow this command if restricted */
 		return (resterr());
@@ -79,8 +79,8 @@ int filefind(int f, int n)
 int viewfile(int f, int n)
 {				/* visit a file in VIEW mode */
 	char fname[NFILEN];	/* file user wishes to find */
-	register int s;		/* status return */
-	register window_t *wp;	/* scan for windows that need updating */
+	int s;		/* status return */
+	window_t *wp;	/* scan for windows that need updating */
 
 	if (restflag)		/* don't allow this command if restricted */
 		return (resterr());
@@ -103,7 +103,7 @@ int viewfile(int f, int n)
 #if	CRYPT
 static int resetkey(void)
 {				/* reset the encryption key if needed */
-	register int s;		/* return status */
+	int s;		/* return status */
 
 	/* turn off the encryption flag */
 	cryptflag = FALSE;
@@ -141,10 +141,10 @@ static int resetkey(void)
  */
 int getfile(char *fname, int lockfl)
 {
-	register struct buffer *bp;
-	register LINE *lp;
-	register int i;
-	register int s;
+	struct buffer *bp;
+	LINE *lp;
+	int i;
+	int s;
 	char bname[NBUFN];	/* buffer name to put file */
 
 #if	MSDOS
@@ -207,14 +207,14 @@ int getfile(char *fname, int lockfl)
  */
 int readin(char *fname, int lockfl)
 {
-	register LINE *lp1;
-	register LINE *lp2;
-	register int i;
-	register window_t *wp;
-	register struct buffer *bp;
-	register int s;
-	register int nbytes;
-	register int nline;
+	LINE *lp1;
+	LINE *lp2;
+	int i;
+	window_t *wp;
+	struct buffer *bp;
+	int s;
+	int nbytes;
+	int nline;
 	int lflag;		/* any lines longer than allowed? */
 	char mesg[NSTRING];
 
@@ -327,8 +327,8 @@ int readin(char *fname, int lockfl)
  */
 void makename(char *bname, char *fname)
 {
-	register char *cp1;
-	register char *cp2;
+	char *cp1;
+	char *cp2;
 
 	cp1 = &fname[0];
 	while (*cp1 != 0)
@@ -365,7 +365,7 @@ void makename(char *bname, char *fname)
  */
 void unqname(char *name)
 {
-	register char *sp;
+	char *sp;
 
 	/* check to see if it is in the buffer list */
 	while (bfind(name, 0, FALSE) != NULL) {
@@ -393,8 +393,8 @@ void unqname(char *name)
  */
 int filewrite(int f, int n)
 {
-	register window_t *wp;
-	register int s;
+	window_t *wp;
+	int s;
 	char fname[NFILEN];
 
 	if (restflag)		/* don't allow this command if restricted */
@@ -424,8 +424,8 @@ int filewrite(int f, int n)
  */
 int filesave(int f, int n)
 {
-	register window_t *wp;
-	register int s;
+	window_t *wp;
+	int s;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -466,9 +466,9 @@ int filesave(int f, int n)
  */
 int writeout(char *fn)
 {
-	register int s;
-	register LINE *lp;
-	register int nline;
+	int s;
+	LINE *lp;
+	int nline;
 
 #if	CRYPT
 	s = resetkey();
@@ -518,8 +518,8 @@ int writeout(char *fn)
  */
 int filename(int f, int n)
 {
-	register window_t *wp;
-	register int s;
+	window_t *wp;
+	int s;
 	char fname[NFILEN];
 
 	if (restflag)		/* don't allow this command if restricted */
@@ -547,14 +547,14 @@ int filename(int f, int n)
  */
 int ifile(char *fname)
 {
-	register LINE *lp0;
-	register LINE *lp1;
-	register LINE *lp2;
-	register int i;
-	register struct buffer *bp;
-	register int s;
-	register int nbytes;
-	register int nline;
+	LINE *lp0;
+	LINE *lp1;
+	LINE *lp2;
+	int i;
+	struct buffer *bp;
+	int s;
+	int nbytes;
+	int nline;
 	int lflag;		/* any lines longer than allowed? */
 	char mesg[NSTRING];
 

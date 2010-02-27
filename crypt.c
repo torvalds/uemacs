@@ -22,7 +22,7 @@ static int mod95(int);
  */
 int set_encryption_key(int f, int n)
 {
-	register int status;	/* return status */
+	int status;	/* return status */
 	int odisinp;		/* original vlaue of disinp */
 	char key[NPAT];		/* new encryption string */
 
@@ -145,7 +145,7 @@ int set_encryption_key(int f, int n)
 
 void myencrypt(char *bptr, unsigned len)
 {
-	register int cc;	/* current character being considered */
+	int cc;	/* current character being considered */
 
 	static long key = 0;	/* 29 bit encipherment key */
 	static int salt = 0;	/* salt to spice up key with */

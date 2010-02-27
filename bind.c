@@ -17,8 +17,8 @@ int help(int f, int n)
 {				/* give me some help!!!!
 				   bring up a fake buffer and read the help file
 				   into it with view mode                 */
-	register window_t *wp;	/* scaning pointer to windows */
-	register struct buffer *bp;	/* buffer pointer to help */
+	window_t *wp;	/* scaning pointer to windows */
+	struct buffer *bp;	/* buffer pointer to help */
 	char *fname = NULL;	/* ptr to file returned by flook() */
 
 	/* first check if we are already here */
@@ -56,8 +56,8 @@ int help(int f, int n)
 
 int deskey(int f, int n)
 {				/* describe the command for a certain key */
-	register int c;		/* key to describe */
-	register char *ptr;	/* string pointer to scan output strings */
+	int c;		/* key to describe */
+	char *ptr;	/* string pointer to scan output strings */
 	char outseq[NSTRING];	/* output buffer for command sequence */
 
 	/* prompt the user to type us a key to describe */
@@ -88,10 +88,10 @@ int deskey(int f, int n)
  */
 int bindtokey(int f, int n)
 {
-	register unsigned int c;	/* command key to bind */
-	register fn_t kfunc;	/* ptr to the requested function to bind to */
-	register KEYTAB *ktp;	/* pointer into the command table */
-	register int found;	/* matched command flag */
+	unsigned int c;	/* command key to bind */
+	fn_t kfunc;	/* ptr to the requested function to bind to */
+	KEYTAB *ktp;	/* pointer into the command table */
+	int found;	/* matched command flag */
 	char outseq[80];	/* output buffer for keystroke sequence */
 
 	/* prompt the user to type in a key to bind */
@@ -176,7 +176,7 @@ int bindtokey(int f, int n)
  */
 int unbindkey(int f, int n)
 {
-	register int c;		/* command key to unbind */
+	int c;		/* command key to unbind */
 	char outseq[80];	/* output buffer for keystroke sequence */
 
 	/* prompt the user to type in a key to unbind */
@@ -207,9 +207,9 @@ int unbindkey(int f, int n)
  */
 int unbindchar(int c)
 {
-	register KEYTAB *ktp;	/* pointer into the command table */
-	register KEYTAB *sktp;	/* saved pointer into the command table */
-	register int found;	/* matched command flag */
+	KEYTAB *ktp;	/* pointer into the command table */
+	KEYTAB *sktp;	/* saved pointer into the command table */
+	int found;	/* matched command flag */
 
 	/* search the table to see if the key exists */
 	ktp = &keytab[0];
@@ -274,10 +274,10 @@ int apro(int f, int n)
 int buildlist(int type, char *mstring)
 #endif
 {
-	register window_t *wp;	/* scanning pointer to windows */
-	register KEYTAB *ktp;	/* pointer into the command table */
-	register NBIND *nptr;	/* pointer into the name binding table */
-	register struct buffer *bp;	/* buffer to put binding list into */
+	window_t *wp;	/* scanning pointer to windows */
+	KEYTAB *ktp;	/* pointer into the command table */
+	NBIND *nptr;	/* pointer into the name binding table */
+	struct buffer *bp;	/* buffer to put binding list into */
 	int cpos;		/* current position to use in outseq */
 	char outseq[80];	/* output buffer for keystroke sequence */
 
@@ -423,7 +423,7 @@ int strinc(char *source, char *sub)
  */
 unsigned int getckey(int mflag)
 {
-	register unsigned int c;	/* character fetched */
+	unsigned int c;	/* character fetched */
 	char tok[NSTRING];	/* command incoming */
 
 	/* check to see if we are executing a command line */
@@ -473,10 +473,10 @@ int startup(char *sfname)
  */
 char *flook(char *fname, int hflag)
 {
-	register char *home;	/* path to home directory */
-	register char *path;	/* environmental PATH variable */
-	register char *sp;	/* pointer into path spec */
-	register int i;		/* index */
+	char *home;	/* path to home directory */
+	char *path;	/* environmental PATH variable */
+	char *sp;	/* pointer into path spec */
+	int i;		/* index */
 	static char fspec[NSTRING];	/* full path spec to search */
 
 #if	ENVFUNC
@@ -595,7 +595,7 @@ void cmdstr(int c, char *seq)
  */
 int (*getbind(int c))(int, int)
 {
-	register KEYTAB *ktp;
+	KEYTAB *ktp;
 
 	ktp = &keytab[0];	/* Look in key table.   */
 	while (ktp->k_fp != NULL) {
@@ -615,7 +615,7 @@ int (*getbind(int c))(int, int)
  */
 char *getfname(fn_t func)
 {
-	register NBIND *nptr;	/* pointer into the name binding table */
+	NBIND *nptr;	/* pointer into the name binding table */
 
 	/* skim through the table, looking for a match */
 	nptr = &names[0];
@@ -635,7 +635,7 @@ char *getfname(fn_t func)
  */
 int (*fncmatch(char *fname)) (int, int)
 {
-	register NBIND *ffp;	/* pointer to entry in name binding table */
+	NBIND *ffp;	/* pointer to entry in name binding table */
 
 	/* scan through the table, returning any match */
 	ffp = &names[0];
@@ -655,7 +655,7 @@ int (*fncmatch(char *fname)) (int, int)
  */
 unsigned int stock(char *keyname)
 {
-	register unsigned int c;	/* key sequence to return */
+	unsigned int c;	/* key sequence to return */
 
 	/* parse it up */
 	c = 0;

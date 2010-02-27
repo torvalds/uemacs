@@ -83,7 +83,7 @@ static void setbit(int bc, BITMAP cclmap);
  */
 int forwsearch(int f, int n)
 {
-	register int status = TRUE;
+	int status = TRUE;
 
 	/* If n is negative, search backwards.
 	 * Otherwise proceed by asking for the search string.
@@ -129,7 +129,7 @@ int forwsearch(int f, int n)
  */
 int forwhunt(int f, int n)
 {
-	register int status = TRUE;
+	int status = TRUE;
 
 	if (n < 0)		/* search backwards */
 		return (backhunt(f, -n));
@@ -183,7 +183,7 @@ int forwhunt(int f, int n)
  */
 int backsearch(int f, int n)
 {
-	register int status = TRUE;
+	int status = TRUE;
 
 	/* If n is negative, search forwards.
 	 * Otherwise proceed by asking for the search string.
@@ -231,7 +231,7 @@ int backsearch(int f, int n)
  */
 int backhunt(int f, int n)
 {
-	register int status = TRUE;
+	int status = TRUE;
 
 	if (n < 0)
 		return (forwhunt(f, -n));
@@ -356,7 +356,7 @@ int mcscanner(MC *mcpatrn, int direct, int beg_or_end)
  */
 static int amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff)
 {
-	register int c;		/* character at current position */
+	int c;		/* character at current position */
 	LINE *curline;		/* current line during scan */
 	int curoff;		/* position within current line */
 	int nchars;
@@ -496,7 +496,7 @@ static int amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff)
  */
 int scanner(const char *patrn, int direct, int beg_or_end)
 {
-	register int c;		/* character at current position */
+	int c;		/* character at current position */
 	const char *patptr;	/* pointer into pattern */
 	LINE *curline;		/* current line during scan */
 	int curoff;		/* position within current line */
@@ -639,8 +639,8 @@ static int readpattern(char *prompt, char *apat, int srch)
  */
 void savematch(void)
 {
-	register char *ptr;	/* pointer to last match string */
-	register int j;
+	char *ptr;	/* pointer to last match string */
+	int j;
 	LINE *curline;		/* line of last match */
 	int curoff;		/* offset "      "    */
 
@@ -668,7 +668,7 @@ void savematch(void)
  */
 void rvstrcpy(char *rvstr, char *str)
 {
-	register int i;
+	int i;
 
 	str += (i = strlen(str));
 
@@ -710,10 +710,10 @@ int qreplace(int f, int n)
  */
 static int replaces(int kind, int f, int n)
 {
-	register int status;	/* success flag on pattern inputs */
-	register int rlength;	/* length of replacement string */
-	register int numsub;	/* number of substitutions */
-	register int nummatch;	/* number of found matches */
+	int status;	/* success flag on pattern inputs */
+	int rlength;	/* length of replacement string */
+	int numsub;	/* number of substitutions */
+	int nummatch;	/* number of found matches */
 	int nlflag;		/* last char of search string a <NL>? */
 	int nlrepl;		/* was a replace done on the last line? */
 	char c;			/* input char for query */
@@ -1015,7 +1015,7 @@ int expandp(char *srcstr, char *deststr, int maxlength)
  */
 int boundry(LINE *curline, int curoff, int dir)
 {
-	register int border;
+	int border;
 
 	if (dir == FORWARD) {
 		border = (curoff == llength(curline)) &&
@@ -1037,9 +1037,9 @@ int boundry(LINE *curline, int curoff, int dir)
  */
 static int nextch(LINE **pcurline, int *pcuroff, int dir)
 {
-	register LINE *curline;
-	register int curoff;
-	register int c;
+	LINE *curline;
+	int curoff;
+	int c;
 
 	curline = *pcurline;
 	curoff = *pcuroff;
@@ -1288,7 +1288,7 @@ static int rmcstr(void)
  */
 void mcclear(void)
 {
-	register MC *mcptr;
+	MC *mcptr;
 
 	mcptr = &mcpat[0];
 
@@ -1306,7 +1306,7 @@ void mcclear(void)
  */
 void rmcclear(void)
 {
-	register RMC *rmcptr;
+	RMC *rmcptr;
 
 	rmcptr = &rmcpat[0];
 
@@ -1326,7 +1326,7 @@ void rmcclear(void)
  */
 static int mceq(int bc, MC *mt)
 {
-	register int result;
+	int result;
 
 #if	PKCODE
 	bc = bc & 0xFF;
@@ -1377,8 +1377,8 @@ static int cclmake(char **ppatptr, MC *mcptr)
 {
 	BITMAP clearbits();
 	BITMAP bmap;
-	register char *patptr;
-	register int pchr, ochr;
+	char *patptr;
+	int pchr, ochr;
 
 	if ((bmap = clearbits()) == NULL) {
 		mlwrite("%%Out of memory");
@@ -1469,7 +1469,7 @@ static int biteq(int bc, BITMAP cclmap)
 static BITMAP clearbits(void)
 {
 	BITMAP cclstart, cclmap;
-	register int j;
+	int j;
 
 	if ((cclmap = cclstart = (BITMAP) malloc(HIBYTE)) != NULL)
 		for (j = 0; j < HIBYTE; j++)

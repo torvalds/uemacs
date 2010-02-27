@@ -140,9 +140,9 @@ int isearch(int f, int n)
 {
 	int status;		/* Search status */
 	int col;		/* prompt column */
-	register int cpos;	/* character number in search string  */
-	register int c;		/* current input character */
-	register int expc;	/* function expanded input char       */
+	int cpos;	/* character number in search string  */
+	int c;		/* current input character */
+	int expc;	/* function expanded input char       */
 	char pat_save[NPAT];	/* Saved copy of the old pattern str  */
 	LINE *curline;		/* Current line on entry              */
 	int curoff;		/* Current offset on entry            */
@@ -278,9 +278,9 @@ int isearch(int f, int n)
  */
 int checknext(char chr, char *patrn, int dir)	/* Check next character in search string */
 {
-	register LINE *curline;	/* current line during scan           */
-	register int curoff;	/* position within current line       */
-	register int buffchar;	/* character at current position      */
+	LINE *curline;	/* current line during scan           */
+	int curoff;	/* position within current line       */
+	int buffchar;	/* character at current position      */
 	int status;		/* how well things go                 */
 
 
@@ -351,10 +351,10 @@ int scanmore(char *patrn, int dir)	/* search forward or back for a pattern      
  */
 int match_pat(char *patrn)	/* See if the pattern string matches string at "."   */
 {
-	register int i;		/* Generic loop index/offset          */
-	register int buffchar;	/* character at current position      */
-	register LINE *curline;	/* current line during scan           */
-	register int curoff;	/* position within current line       */
+	int i;		/* Generic loop index/offset          */
+	int buffchar;	/* character at current position      */
+	LINE *curline;	/* current line during scan           */
+	int curoff;	/* position within current line       */
 
 	/* setup the local scan pointer to current "." */
 

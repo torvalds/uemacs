@@ -22,7 +22,7 @@
  */
 int killregion(int f, int n)
 {
-	register int s;
+	int s;
 	REGION region;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -45,9 +45,9 @@ int killregion(int f, int n)
  */
 int copyregion(int f, int n)
 {
-	register LINE *linep;
-	register int loffs;
-	register int s;
+	LINE *linep;
+	int loffs;
+	int s;
 	REGION region;
 
 	if ((s = getregion(&region)) != TRUE)
@@ -83,10 +83,10 @@ int copyregion(int f, int n)
  */
 int lowerregion(int f, int n)
 {
-	register LINE *linep;
-	register int loffs;
-	register int c;
-	register int s;
+	LINE *linep;
+	int loffs;
+	int c;
+	int s;
 	REGION region;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -120,10 +120,10 @@ int lowerregion(int f, int n)
  */
 int upperregion(int f, int n)
 {
-	register LINE *linep;
-	register int loffs;
-	register int c;
-	register int s;
+	LINE *linep;
+	int loffs;
+	int c;
+	int s;
 	REGION region;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -160,8 +160,8 @@ int upperregion(int f, int n)
  */
 int getregion(REGION *rp)
 {
-	register LINE *flp;
-	register LINE *blp;
+	LINE *flp;
+	LINE *blp;
 	long fsize;
 	long bsize;
 

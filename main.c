@@ -94,14 +94,14 @@ int emacs(int argc, char **argv)
 int main(int argc, char **argv)
 #endif
 {
-	register int c = -1;	/* command character */
-	register int f;		/* default flag */
-	register int n;		/* numeric repeat count */
-	register int mflag;	/* negative flag on repeat */
-	register struct buffer *bp;	/* temp buffer pointer */
-	register int firstfile;	/* first file flag */
-	register int carg;	/* current arg to scan */
-	register int startflag;	/* startup executed flag */
+	int c = -1;	/* command character */
+	int f;		/* default flag */
+	int n;		/* numeric repeat count */
+	int mflag;	/* negative flag on repeat */
+	struct buffer *bp;	/* temp buffer pointer */
+	int firstfile;	/* first file flag */
+	int carg;	/* current arg to scan */
+	int startflag;	/* startup executed flag */
 	struct buffer *firstbp = NULL;	/* ptr to first buffer in cmd line */
 	int basec;		/* c stripped of meta character */
 	int viewflag;		/* are we starting in view mode? */
@@ -427,8 +427,8 @@ int main(int argc, char **argv)
  */
 void edinit(char *bname)
 {
-	register struct buffer *bp;
-	register window_t *wp;
+	struct buffer *bp;
+	window_t *wp;
 
 	bp = bfind(bname, TRUE, 0);	/* First buffer         */
 	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
@@ -465,7 +465,7 @@ void edinit(char *bname)
  */
 int execute(int c, int f, int n)
 {
-	register int status;
+	int status;
 	fn_t execfunc;
 
 	/* if the keystroke is a bound function...do it */
@@ -555,9 +555,9 @@ int execute(int c, int f, int n)
  */
 int quickexit(int f, int n)
 {
-	register struct buffer *bp;	/* scanning pointer to buffers */
-	register struct buffer *oldcb;	/* original current buffer */
-	register int status;
+	struct buffer *bp;	/* scanning pointer to buffers */
+	struct buffer *oldcb;	/* original current buffer */
+	int status;
 
 	oldcb = curbp;		/* save in case we fail */
 
@@ -595,7 +595,7 @@ static void emergencyexit(int signr)
  */
 int quit(int f, int n)
 {
-	register int s;
+	int s;
 
 	if (f != FALSE		/* Argument forces it.  */
 	    || anycb() == FALSE	/* All buffers clean.   */
@@ -817,9 +817,9 @@ dspram()
  */
 int cexit(int status)
 {
-	register struct buffer *bp;	/* buffer list pointer */
-	register window_t *wp;	/* window list pointer */
-	register window_t *tp;	/* temporary window pointer */
+	struct buffer *bp;	/* buffer list pointer */
+	window_t *wp;	/* window list pointer */
+	window_t *tp;	/* temporary window pointer */
 
 	/* first clean up the windows */
 	wp = wheadp;

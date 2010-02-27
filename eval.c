@@ -14,7 +14,7 @@
 
 void varinit(void)
 {				/* initialize the user variable list */
-	register int i;
+	int i;
 
 	for (i = 0; i < MAXVARS; i++)
 		uv[i].u_name[0] = 0;
@@ -27,9 +27,9 @@ void varinit(void)
  */
 char *gtfun(char *fname)
 {
-	register int fnum;	/* index to function to eval */
-	register int status;	/* return status */
-	register char *tsp;	/* temporary string pointer */
+	int fnum;	/* index to function to eval */
+	int status;	/* return status */
+	char *tsp;	/* temporary string pointer */
 	char arg1[NSTRING];	/* value of first argument */
 	char arg2[NSTRING];	/* value of second argument */
 	char arg3[NSTRING];	/* value of third argument */
@@ -170,7 +170,7 @@ char *gtfun(char *fname)
 char *gtusr(char *vname)
 {
 
-	register int vnum;	/* ordinal number of user var */
+	int vnum;	/* ordinal number of user var */
 
 	/* scan the list looking for the user var name */
 	for (vnum = 0; vnum < MAXVARS; vnum++) {
@@ -192,7 +192,7 @@ char *gtusr(char *vname)
  */
 char *gtenv(char *vname)
 {
-	register int vnum;	/* ordinal number of var refrenced */
+	int vnum;	/* ordinal number of var refrenced */
 	char *getkill();
 
 	/* scan the list, looking for the referenced name */
@@ -320,7 +320,7 @@ char *gtenv(char *vname)
  */
 char *getkill(void)
 {
-	register int size;	/* max number of chars to return */
+	int size;	/* max number of chars to return */
 	static char value[NSTRING];	/* temp buffer for value */
 
 	if (kbufh == NULL)
@@ -347,10 +347,10 @@ char *getkill(void)
  */
 int setvar(int f, int n)
 {
-	register int status;	/* status return */
+	int status;	/* status return */
 #if	DEBUGM
-	register char *sp;	/* temp string pointer */
-	register char *ep;	/* ptr to end of outline */
+	char *sp;	/* temp string pointer */
+	char *ep;	/* ptr to end of outline */
 #endif
 	VDESC vd;		/* variable num/type */
 	char var[NVSIZE + 1];	/* name of variable to fetch */
@@ -448,8 +448,8 @@ int setvar(int f, int n)
  */
 void findvar(char *var, VDESC *vd, int size)
 {
-	register int vnum;	/* subscript in variable arrays */
-	register int vtype;	/* type to return */
+	int vnum;	/* subscript in variable arrays */
+	int vtype;	/* type to return */
 
 	vnum = -1;
 fvar:
@@ -506,11 +506,11 @@ fvar:
  */
 int svar(VDESC *var, char *value)
 {
-	register int vnum;	/* ordinal number of var refrenced */
-	register int vtype;	/* type of variable to set */
-	register int status;	/* status return */
-	register int c;		/* translated character */
-	register char *sp;	/* scratch string pointer */
+	int vnum;	/* ordinal number of var refrenced */
+	int vtype;	/* type of variable to set */
+	int status;	/* status return */
+	int c;		/* translated character */
+	char *sp;	/* scratch string pointer */
 
 	/* simplify the vd structure (we are gonna look at it a lot) */
 	vnum = var->v_num;
@@ -682,9 +682,9 @@ int svar(VDESC *var, char *value)
  */
 char *itoa(int i)
 {
-	register int digit;	/* current digit being used */
-	register char *sp;	/* pointer into result */
-	register int sign;	/* sign of resulting number */
+	int digit;	/* current digit being used */
+	char *sp;	/* pointer into result */
+	int sign;	/* sign of resulting number */
 	static char result[INTWIDTH + 1];	/* resulting string */
 
 	/* record the sign... */
@@ -718,7 +718,7 @@ char *itoa(int i)
  */
 int gettyp(char *token)
 {
-	register char c;	/* first char in token */
+	char c;	/* first char in token */
 
 	/* grab the first char (this is all we need) */
 	c = *token;
@@ -762,10 +762,10 @@ int gettyp(char *token)
  */
 char *getval(char *token)
 {
-	register int status;	/* error return */
-	register struct buffer *bp;	/* temp buffer pointer */
-	register int blen;	/* length of buffer argument */
-	register int distmp;	/* temporary discmd flag */
+	int status;	/* error return */
+	struct buffer *bp;	/* temp buffer pointer */
+	int blen;	/* length of buffer argument */
+	int distmp;	/* temporary discmd flag */
 	static char buf[NSTRING];	/* string buffer for some returns */
 
 	switch (gettyp(token)) {
@@ -969,9 +969,9 @@ int sindex(char *source, char *pattern)
  */
 char *xlat(char *source, char *lookup, char *trans)
 {
-	register char *sp;	/* pointer into source table */
-	register char *lp;	/* pointer into lookup table */
-	register char *rp;	/* pointer into result */
+	char *sp;	/* pointer into source table */
+	char *lp;	/* pointer into lookup table */
+	char *rp;	/* pointer into result */
 	static char result[NSTRING];	/* temporary result */
 
 	/* scan source string */

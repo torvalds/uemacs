@@ -76,8 +76,8 @@ static void putline(int row, int col, char *buf);
  */
 void vtinit(void)
 {
-	register int i;
-	register VIDEO *vp;
+	int i;
+	VIDEO *vp;
 
 	TTopen();		/* open the screen */
 	TTkopen();		/* open the keyboard */
@@ -176,7 +176,7 @@ void vtmove(int row, int col)
  */
 static void vtputc(unsigned char c)
 {
-	register VIDEO *vp;	/* ptr to line being updated */
+	VIDEO *vp;	/* ptr to line being updated */
 
 	vp = vscreen[vtrow];
 
@@ -224,8 +224,8 @@ static void vtputc(unsigned char c)
  */
 static void vteeol(void)
 {
-/*  register VIDEO      *vp;	*/
-	register char *vcp = vscreen[vtrow]->v_text;
+/*  VIDEO      *vp;	*/
+	char *vcp = vscreen[vtrow]->v_text;
 
 /*  vp = vscreen[vtrow];	*/
 	while (vtcol < term.t_ncol)
@@ -259,7 +259,7 @@ static int scrflags;
  */
 int update(int force)
 {
-	register window_t *wp;
+	window_t *wp;
 
 #if	TYPEAH && ! PKCODE
 	if (force == FALSE && typahead())
@@ -281,7 +281,7 @@ int update(int force)
 		if (wp->w_flag & WFMODE) {
 			if (wp->w_bufp->b_nwnd > 1) {
 				/* make sure all previous windows have this */
-				register window_t *owp;
+				window_t *owp;
 				owp = wheadp;
 				while (owp != NULL) {
 					if (owp->w_bufp == wp->w_bufp)
@@ -361,8 +361,8 @@ int update(int force)
  */
 static int reframe(window_t *wp)
 {
-	register LINE *lp, *lp0;
-	register int i = 0;
+	LINE *lp, *lp0;
+	int i = 0;
 
 	/* if not a requested reframe, check for a needed one */
 	if ((wp->w_flag & WFFORCE) == 0) {
@@ -451,9 +451,9 @@ static int reframe(window_t *wp)
  */
 static void updone(window_t *wp)
 {
-	register LINE *lp;	/* line to update */
-	register int sline;	/* physical screen line to update */
-	register int i;
+	LINE *lp;	/* line to update */
+	int sline;	/* physical screen line to update */
+	int i;
 
 	/* search down the line we want */
 	lp = wp->w_linep;
@@ -484,9 +484,9 @@ static void updone(window_t *wp)
  */
 static void updall(window_t *wp)
 {
-	register LINE *lp;	/* line to update */
-	register int sline;	/* physical screen line to update */
-	register int i;
+	LINE *lp;	/* line to update */
+	int sline;	/* physical screen line to update */
+	int i;
 
 	/* search down the lines, updating them */
 	lp = wp->w_linep;
@@ -522,9 +522,9 @@ static void updall(window_t *wp)
  */
 void updpos(void)
 {
-	register LINE *lp;
-	register int c;
-	register int i;
+	LINE *lp;
+	int c;
+	int i;
 
 	/* find the current row */
 	lp = curwp->w_linep;
@@ -563,9 +563,9 @@ void updpos(void)
  */
 void upddex(void)
 {
-	register window_t *wp;
-	register LINE *lp;
-	register int i, j;
+	window_t *wp;
+	LINE *lp;
+	int i, j;
 
 	wp = wheadp;
 
@@ -602,8 +602,8 @@ void upddex(void)
  */
 void updgar(void)
 {
-	register char *txt;
-	register int i, j;
+	char *txt;
+	int i, j;
 
 	for (i = 0; i < term.t_nrow; ++i) {
 		vscreen[i]->v_flag |= VFCHG;
@@ -638,8 +638,8 @@ void updgar(void)
  */
 int updupd(int force)
 {
-	register VIDEO *vp1;
-	register int i;
+	VIDEO *vp1;
+	int i;
 
 #if SCROLLCODE
 	if (scrflags & WFKILLS)
@@ -852,9 +852,9 @@ static int endofline(char *s, int n)
  */
 static void updext(void)
 {
-	register int rcursor;	/* real cursor location */
-	register LINE *lp;	/* pointer to current line */
-	register int j;		/* index into line */
+	int rcursor;	/* real cursor location */
+	LINE *lp;	/* pointer to current line */
+	int j;		/* index into line */
 
 	/* calculate what column the real cursor will end up in */
 	rcursor = ((curcol - term.t_ncol) % term.t_scrsiz) + term.t_margin;
@@ -887,9 +887,9 @@ static void updext(void)
 static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
 {
 #if	SCROLLCODE
-	register char *cp1;
-	register char *cp2;
-	register int nch;
+	char *cp1;
+	char *cp2;
+	int nch;
 
 	cp1 = &vp1->v_text[0];
 	cp2 = &vp2->v_text[0];
@@ -929,9 +929,9 @@ static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
 #if RAINBOW
 /*	UPDATELINE specific code for the DEC rainbow 100 micro	*/
 
-	register char *cp1;
-	register char *cp2;
-	register int nch;
+	char *cp1;
+	char *cp2;
+	int nch;
 
 	/* since we don't know how to make the rainbow do this, turn it off */
 	flags &= (~VFREV & ~VFREQ);
@@ -951,12 +951,12 @@ static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
 #else
 /*	UPDATELINE code for all other versions		*/
 
-	register char *cp1;
-	register char *cp2;
-	register char *cp3;
-	register char *cp4;
-	register char *cp5;
-	register int nbflag;	/* non-blanks to the right flag? */
+	char *cp1;
+	char *cp2;
+	char *cp3;
+	char *cp4;
+	char *cp5;
+	int nbflag;	/* non-blanks to the right flag? */
 	int rev;		/* reverse video flag */
 	int req;		/* reverse video request flag */
 
@@ -1086,13 +1086,13 @@ static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
  */
 static void modeline(window_t *wp)
 {
-	register char *cp;
-	register int c;
-	register int n;		/* cursor position count */
-	register struct buffer *bp;
-	register int i;		/* loop index */
-	register int lchar;	/* character to draw line in buffer with */
-	register int firstm;	/* is this the first mode? */
+	char *cp;
+	int c;
+	int n;		/* cursor position count */
+	struct buffer *bp;
+	int i;		/* loop index */
+	int lchar;	/* character to draw line in buffer with */
+	int firstm;	/* is this the first mode? */
 	char tline[NLINE];	/* buffer for part of mode line */
 
 	n = wp->w_toprow + wp->w_ntrows;	/* Location. */
@@ -1276,7 +1276,7 @@ static void modeline(window_t *wp)
 
 void upmode(void)
 {				/* update all the mode lines */
-	register window_t *wp;
+	window_t *wp;
 
 	wp = wheadp;
 	while (wp != NULL) {
@@ -1339,7 +1339,7 @@ void mlerase(void)
  */
 void mlwrite(const char *fmt, ...)
 {
-	register int c;		/* current char in format string */
+	int c;		/* current char in format string */
 	va_list ap;
 
 	/* if we are not currently echoing on the command line, abort this */
@@ -1416,7 +1416,7 @@ void mlwrite(const char *fmt, ...)
  */
 void mlforce(char *s)
 {
-	register int oldcmd;	/* original command display flag */
+	int oldcmd;	/* original command display flag */
 
 	oldcmd = discmd;	/* save the discmd value */
 	discmd = TRUE;		/* and turn display on */
@@ -1431,7 +1431,7 @@ void mlforce(char *s)
  */
 void mlputs(char *s)
 {
-	register int c;
+	int c;
 
 	while ((c = *s++) != 0) {
 		TTputc(c);
@@ -1445,7 +1445,7 @@ void mlputs(char *s)
  */
 static void mlputi(int i, int r)
 {
-	register int q;
+	int q;
 	static char hexdigits[] = "0123456789ABCDEF";
 
 	if (i < 0) {
@@ -1467,7 +1467,7 @@ static void mlputi(int i, int r)
  */
 static void mlputli(long l, int r)
 {
-	register long q;
+	long q;
 
 	if (l < 0) {
 		l = -l;

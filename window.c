@@ -53,8 +53,8 @@ int redraw(int f, int n)
  */
 int nextwind(int f, int n)
 {
-	register window_t *wp;
-	register int nwindows;	/* total number of windows */
+	window_t *wp;
+	int nwindows;	/* total number of windows */
 
 	if (f) {
 
@@ -96,8 +96,8 @@ int nextwind(int f, int n)
  */
 int prevwind(int f, int n)
 {
-	register window_t *wp1;
-	register window_t *wp2;
+	window_t *wp1;
+	window_t *wp2;
 
 	/* if we have an argument, we mean the nth window from the bottom */
 	if (f)
@@ -140,8 +140,8 @@ int mvdnwind(int f, int n)
  */
 int mvupwind(int f, int n)
 {
-	register LINE *lp;
-	register int i;
+	LINE *lp;
+	int i;
 
 	lp = curwp->w_linep;
 
@@ -184,9 +184,9 @@ int mvupwind(int f, int n)
  */
 int onlywind(int f, int n)
 {
-	register window_t *wp;
-	register LINE *lp;
-	register int i;
+	window_t *wp;
+	LINE *lp;
+	int i;
 
 	while (wheadp != curwp) {
 		wp = wheadp;
@@ -231,9 +231,9 @@ int onlywind(int f, int n)
  */
 int delwind(int f, int n)
 {
-	register window_t *wp;	/* window to recieve deleted space */
-	register window_t *lwp;	/* ptr window before curwp */
-	register int target;	/* target line to search for */
+	window_t *wp;	/* window to recieve deleted space */
+	window_t *lwp;	/* ptr window before curwp */
+	int target;	/* target line to search for */
 
 	/* if there is only one window, don't delete it */
 	if (wheadp->w_wndp == NULL) {
@@ -309,13 +309,13 @@ int delwind(int f, int n)
  */
 int splitwind(int f, int n)
 {
-	register window_t *wp;
-	register LINE *lp;
-	register int ntru;
-	register int ntrl;
-	register int ntrd;
-	register window_t *wp1;
-	register window_t *wp2;
+	window_t *wp;
+	LINE *lp;
+	int ntru;
+	int ntrl;
+	int ntrd;
+	window_t *wp1;
+	window_t *wp2;
 
 	if (curwp->w_ntrows < 3) {
 		mlwrite("Cannot split a %d line window", curwp->w_ntrows);
@@ -391,9 +391,9 @@ int splitwind(int f, int n)
  */
 int enlargewind(int f, int n)
 {
-	register window_t *adjwp;
-	register LINE *lp;
-	register int i;
+	window_t *adjwp;
+	LINE *lp;
+	int i;
 
 	if (n < 0)
 		return (shrinkwind(f, -n));
@@ -442,9 +442,9 @@ int enlargewind(int f, int n)
  */
 int shrinkwind(int f, int n)
 {
-	register window_t *adjwp;
-	register LINE *lp;
-	register int i;
+	window_t *adjwp;
+	LINE *lp;
+	int i;
 
 	if (n < 0)
 		return (enlargewind(f, -n));
@@ -517,7 +517,7 @@ int resize(int f, int n)
  */
 window_t *wpopup(void)
 {
-	register window_t *wp;
+	window_t *wp;
 
 	if (wheadp->w_wndp == NULL	/* Only 1 window        */
 	    && splitwind(FALSE, 0) == FALSE)	/* and it won't split   */
@@ -552,7 +552,7 @@ int savewnd(int f, int n)
 
 int restwnd(int f, int n)
 {				/* restore the saved screen */
-	register window_t *wp;
+	window_t *wp;
 
 	/* find the window */
 	wp = wheadp;
@@ -666,7 +666,7 @@ int newsize(int f, int n)
  */
 int newwidth(int f, int n)
 {
-	register window_t *wp;
+	window_t *wp;
 
 	/* if the command defaults, assume the largest */
 	if (f == FALSE)
@@ -696,8 +696,8 @@ int newwidth(int f, int n)
 
 int getwpos(void)
 {				/* get screen offset of current line in current window */
-	register int sline;	/* screen line from top of window */
-	register LINE *lp;	/* scannile line pointer */
+	int sline;	/* screen line from top of window */
+	LINE *lp;	/* scannile line pointer */
 
 	/* search down the line we want */
 	lp = curwp->w_linep;

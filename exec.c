@@ -20,7 +20,7 @@
  */
 int namedcmd(int f, int n)
 {
-	register fn_t kfunc;	/* ptr to the requexted function to bind to */
+	fn_t kfunc;	/* ptr to the requexted function to bind to */
 
 	/* prompt the user to type a named command */
 	mlwrite(": ");
@@ -45,7 +45,7 @@ int namedcmd(int f, int n)
  */
 int execcmd(int f, int n)
 {
-	register int status;	/* status return */
+	int status;	/* status return */
 	char cmdstr[NSTRING];	/* string holding command to execute */
 
 	/* get the line wanted */
@@ -71,8 +71,8 @@ int execcmd(int f, int n)
  */
 int docmd(char *cline)
 {
-	register int f;		/* default argument flag */
-	register int n;		/* numeric repeat value */
+	int f;		/* default argument flag */
+	int n;		/* numeric repeat value */
 	fn_t fnc;		/* function to execute */
 	int status;		/* return status of function */
 	int oldcle;		/* old contents of clexec flag */
@@ -137,8 +137,8 @@ int docmd(char *cline)
  */
 char *token(char *src, char *tok, int size)
 {
-	register int quotef;	/* is the current string quoted? */
-	register char c;	/* temporary character */
+	int quotef;	/* is the current string quoted? */
+	char c;	/* temporary character */
 
 	/* first scan past any whitespace in the source string */
 	while (*src == ' ' || *src == '\t')
@@ -252,7 +252,7 @@ int nextarg(char *prompt, char *buffer, int size, int terminator)
  */
 int storemac(int f, int n)
 {
-	register struct buffer *bp;	/* pointer to macro buffer */
+	struct buffer *bp;	/* pointer to macro buffer */
 	char bname[NBUFN];	/* name of buffer to use */
 
 	/* must have a numeric argument to this function */
@@ -298,8 +298,8 @@ int storemac(int f, int n)
  */
 int storeproc(int f, int n)
 {
-	register struct buffer *bp;	/* pointer to macro buffer */
-	register int status;	/* return status */
+	struct buffer *bp;	/* pointer to macro buffer */
+	int status;	/* return status */
 	char bname[NBUFN];	/* name of buffer to use */
 
 	/* a numeric argument means its a numbered macro */
@@ -338,8 +338,8 @@ int storeproc(int f, int n)
  */
 int execproc(int f, int n)
 {
-	register struct buffer *bp;	/* ptr to buffer to execute */
-	register int status;	/* status return */
+	struct buffer *bp;	/* ptr to buffer to execute */
+	int status;	/* status return */
 	char bufn[NBUFN + 2];	/* name of buffer to execute */
 
 	/* find out what buffer the user wants to execute */
@@ -373,8 +373,8 @@ int execproc(int f, int n)
  */
 int execbuf(int f, int n)
 {
-	register struct buffer *bp;	/* ptr to buffer to execute */
-	register int status;	/* status return */
+	struct buffer *bp;	/* ptr to buffer to execute */
+	int status;	/* status return */
 	char bufn[NSTRING];	/* name of buffer to execute */
 
 	/* find out what buffer the user wants to execute */
@@ -419,10 +419,10 @@ int execbuf(int f, int n)
  */
 int dobuf(struct buffer *bp)
 {
-	register int status;	/* status return */
-	register LINE *lp;	/* pointer to line to execute */
-	register LINE *hlp;	/* pointer to line header */
-	register LINE *glp;	/* line to goto */
+	int status;	/* status return */
+	LINE *lp;	/* pointer to line to execute */
+	LINE *hlp;	/* pointer to line header */
+	LINE *glp;	/* line to goto */
 	LINE *mp;		/* Macro line storage temp */
 	int dirnum;		/* directive index */
 	int linlen;		/* length of line to execute */
@@ -439,7 +439,7 @@ int dobuf(struct buffer *bp)
 
 #if	DEBUGM
 	char *sp;		/* temp for building debug string */
-	register char *ep;	/* ptr to end of outline */
+	char *ep;	/* ptr to end of outline */
 #endif
 
 	/* clear IF level flags/while ptr */
@@ -850,7 +850,7 @@ void freewhile(WHBLOCK *wp)
  */
 int execfile(int f, int n)
 {
-	register int status;	/* return status of name query */
+	int status;	/* return status of name query */
 	char fname[NSTRING];	/* name of file to execute */
 	char *fspec;		/* full file spec */
 
@@ -884,9 +884,9 @@ int execfile(int f, int n)
  */
 int dofile(char *fname)
 {
-	register struct buffer *bp;	/* buffer to place file to exeute */
-	register struct buffer *cb;	/* temp to hold current buf while we read */
-	register int status;	/* results of various calls */
+	struct buffer *bp;	/* buffer to place file to exeute */
+	struct buffer *cb;	/* temp to hold current buf while we read */
+	int status;	/* results of various calls */
 	char bname[NBUFN];	/* name of buffer */
 
 	makename(bname, fname);	/* derive the name of the buffer */
@@ -923,8 +923,8 @@ int dofile(char *fname)
  */
 int cbuf(int f, int n, int bufnum)
 {
-	register struct buffer *bp;	/* ptr to buffer to execute */
-	register int status;	/* status return */
+	struct buffer *bp;	/* ptr to buffer to execute */
+	int status;	/* status return */
 	static char bufname[] = "*Macro xx*";
 
 	/* make the buffer name */

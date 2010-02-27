@@ -26,8 +26,8 @@
  */
 LINE *lalloc(int used)
 {
-	register LINE *lp;
-	register int size;
+	LINE *lp;
+	int size;
 
 	size = (used + NBLOCK - 1) & ~(NBLOCK - 1);
 	if (size == 0)		/* Assume that an empty */
@@ -49,8 +49,8 @@ LINE *lalloc(int used)
  */
 void lfree(LINE *lp)
 {
-	register struct buffer *bp;
-	register window_t *wp;
+	struct buffer *bp;
+	window_t *wp;
 
 	wp = wheadp;
 	while (wp != NULL) {
@@ -94,7 +94,7 @@ void lfree(LINE *lp)
  */
 void lchange(int flag)
 {
-	register window_t *wp;
+	window_t *wp;
 
 	if (curbp->b_nwnd != 1)	/* Ensure hard.     */
 		flag = WFHARD;
@@ -128,7 +128,7 @@ int insspace(int f, int n)
 
 int linstr(char *instr)
 {
-	register int status = TRUE;
+	int status = TRUE;
 	char tmpc;
 
 	if (instr != NULL)
@@ -158,14 +158,14 @@ int linstr(char *instr)
 
 int linsert(int n, int c)
 {
-	register char *cp1;
-	register char *cp2;
-	register LINE *lp1;
-	register LINE *lp2;
-	register LINE *lp3;
-	register int doto;
-	register int i;
-	register window_t *wp;
+	char *cp1;
+	char *cp2;
+	LINE *lp1;
+	LINE *lp2;
+	LINE *lp3;
+	int doto;
+	int i;
+	window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -253,7 +253,7 @@ int lowrite(int c)
  */
 int lover(char *ostr)
 {
-	register int status = TRUE;
+	int status = TRUE;
 	char tmpc;
 
 	if (ostr != NULL)
@@ -282,12 +282,12 @@ int lover(char *ostr)
  */
 int lnewline(void)
 {
-	register char *cp1;
-	register char *cp2;
-	register LINE *lp1;
-	register LINE *lp2;
-	register int doto;
-	register window_t *wp;
+	char *cp1;
+	char *cp2;
+	LINE *lp1;
+	LINE *lp2;
+	int doto;
+	window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -344,12 +344,12 @@ int lnewline(void)
  */
 int ldelete(long n, int kflag)
 {
-	register char *cp1;
-	register char *cp2;
-	register LINE *dotp;
-	register int doto;
-	register int chunk;
-	register window_t *wp;
+	char *cp1;
+	char *cp2;
+	LINE *dotp;
+	int doto;
+	int chunk;
+	window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -412,10 +412,10 @@ int ldelete(long n, int kflag)
  */
 char *getctext(void)
 {
-	register LINE *lp;	/* line to copy */
-	register int size;	/* length of line to return */
-	register char *sp;	/* string pointer into line */
-	register char *dp;	/* string pointer into returned line */
+	LINE *lp;	/* line to copy */
+	int size;	/* length of line to return */
+	char *sp;	/* string pointer into line */
+	char *dp;	/* string pointer into returned line */
 	static char rline[NSTRING];	/* line to return */
 
 	/* find the contents of the current line and its length */
@@ -441,7 +441,7 @@ char *getctext(void)
  */
 int putctext(char *iline)
 {
-	register int status;
+	int status;
 
 	/* delete the current line */
 	curwp->w_doto = 0;	/* starting at the beginning of the line */
@@ -467,12 +467,12 @@ int putctext(char *iline)
  */
 int ldelnewline(void)
 {
-	register char *cp1;
-	register char *cp2;
-	register LINE *lp1;
-	register LINE *lp2;
-	register LINE *lp3;
-	register window_t *wp;
+	char *cp1;
+	char *cp2;
+	LINE *lp1;
+	LINE *lp2;
+	LINE *lp3;
+	window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -604,9 +604,9 @@ int kinsert(int c)
  */
 int yank(int f, int n)
 {
-	register int c;
-	register int i;
-	register char *sp;	/* pointer into string to insert */
+	int c;
+	int i;
+	char *sp;	/* pointer into string to insert */
 	KILL *kp;		/* pointer into kill buffer */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */

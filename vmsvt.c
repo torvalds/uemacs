@@ -119,9 +119,9 @@ int col;			/* Column position              */
 	static int request_code = SMG$K_SET_CURSOR_ABS;
 	static int max_buffer_length = sizeof(buffer);
 	static int arg_list[3] = { 2 };
-	register char *cp;
+	char *cp;
 
-	register int i;
+	int i;
 
 	/* Set the arguments into the arg_list array
 	 * SMG assumes the row/column positions are 1 based (boo!)
@@ -181,9 +181,9 @@ int bot;			/* Bottom position              */
 	static int request_code = SMG$K_SET_SCROLL_REGION;
 	static int max_buffer_length = sizeof(buffer);
 	static int arg_list[3] = { 2 };
-	register char *cp;
+	char *cp;
 
-	register int i;
+	int i;
 
 	/* Set the arguments into the arg_list array
 	 * SMG assumes the row/column positions are 1 based (boo!)
@@ -303,7 +303,7 @@ vmsbeep()
 char *vmsgetstr(request_code)
 int request_code;		/* Request code                 */
 {
-	register char *result;
+	char *result;
 	static char seq_storage[1024];
 	static char *buffer = seq_storage;
 	static int arg_list[2] = { 1, 1 };

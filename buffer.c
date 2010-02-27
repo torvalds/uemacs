@@ -22,8 +22,8 @@
  */
 int usebuffer(int f, int n)
 {
-	register struct buffer *bp;
-	register int s;
+	struct buffer *bp;
+	int s;
 	char bufn[NBUFN];
 
 	if ((s = mlreply("Use buffer: ", bufn, NBUFN)) != TRUE)
@@ -40,8 +40,8 @@ int usebuffer(int f, int n)
  */
 int nextbuffer(int f, int n)
 {
-	register struct buffer *bp;	/* eligable buffer to switch to */
-	register struct buffer *bbp;	/* eligable buffer to switch to */
+	struct buffer *bp;	/* eligable buffer to switch to */
+	struct buffer *bbp;	/* eligable buffer to switch to */
 
 	/* make sure the arg is legit */
 	if (f == FALSE)
@@ -78,7 +78,7 @@ int nextbuffer(int f, int n)
  */
 int swbuffer(struct buffer *bp)
 {
-	register window_t *wp;
+	window_t *wp;
 
 	if (--curbp->b_nwnd == 0) {	/* Last use.            */
 		curbp->b_dotp = curwp->w_dotp;
@@ -131,8 +131,8 @@ int swbuffer(struct buffer *bp)
  */
 int killbuffer(int f, int n)
 {
-	register struct buffer *bp;
-	register int s;
+	struct buffer *bp;
+	int s;
 	char bufn[NBUFN];
 
 	if ((s = mlreply("Kill buffer: ", bufn, NBUFN)) != TRUE)
@@ -149,9 +149,9 @@ int killbuffer(int f, int n)
  */
 int zotbuf(struct buffer *bp)
 {
-	register struct buffer *bp1;
-	register struct buffer *bp2;
-	register int s;
+	struct buffer *bp1;
+	struct buffer *bp2;
+	int s;
 
 	if (bp->b_nwnd != 0) {	/* Error if on screen.  */
 		mlwrite("Buffer is being displayed");
@@ -182,7 +182,7 @@ int zotbuf(struct buffer *bp)
  */
 int namebuffer(int f, int n)
 {
-	register struct buffer *bp;	/* pointer to scan through all buffers */
+	struct buffer *bp;	/* pointer to scan through all buffers */
 	char bufn[NBUFN];	/* buffer to hold buffer name */
 
 	/* prompt for and get the new buffer name */
@@ -219,9 +219,9 @@ int namebuffer(int f, int n)
  */
 int listbuffers(int f, int n)
 {
-	register window_t *wp;
-	register struct buffer *bp;
-	register int s;
+	window_t *wp;
+	struct buffer *bp;
+	int s;
 
 	if ((s = makelist(f)) != TRUE)
 		return (s);
@@ -267,13 +267,13 @@ int listbuffers(int f, int n)
 #define MAXLINE	MAXCOL
 int makelist(int iflag)
 {
-	register char *cp1;
-	register char *cp2;
-	register int c;
-	register struct buffer *bp;
-	register LINE *lp;
-	register int s;
-	register int i;
+	char *cp1;
+	char *cp2;
+	int c;
+	struct buffer *bp;
+	LINE *lp;
+	int s;
+	int i;
 	long nbytes;		/* # of bytes in current buffer */
 	char b[7 + 1];
 	char line[MAXLINE];
@@ -394,9 +394,9 @@ void ltoa(char *buf, int width, long num)
  */
 int addline(char *text)
 {
-	register LINE *lp;
-	register int i;
-	register int ntext;
+	LINE *lp;
+	int i;
+	int ntext;
 
 	ntext = strlen(text);
 	if ((lp = lalloc(ntext)) == NULL)
@@ -424,7 +424,7 @@ int addline(char *text)
  */
 int anycb(void)
 {
-	register struct buffer *bp;
+	struct buffer *bp;
 
 	bp = bheadp;
 	while (bp != NULL) {
@@ -445,9 +445,9 @@ int anycb(void)
  */
 struct buffer *bfind(char *bname, int cflag, int bflag)
 {
-	register struct buffer *bp;
-	register struct buffer *sb;	/* buffer to insert after */
-	register LINE *lp;
+	struct buffer *bp;
+	struct buffer *sb;	/* buffer to insert after */
+	LINE *lp;
 
 	bp = bheadp;
 	while (bp != NULL) {
@@ -513,8 +513,8 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
  */
 int bclear(struct buffer *bp)
 {
-	register LINE *lp;
-	register int s;
+	LINE *lp;
+	int s;
 
 	if ((bp->b_flag & BFINVS) == 0	/* Not scratch buffer.  */
 	    && (bp->b_flag & BFCHG) != 0	/* Something changed    */

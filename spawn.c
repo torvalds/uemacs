@@ -44,7 +44,7 @@ extern void sizesignal();
 int spawncli(int f, int n)
 {
 #if     V7 | USG | BSD
-	register char *cp;
+	char *cp;
 #endif
 
 	/* don't allow this command if restricted */
@@ -132,7 +132,7 @@ void rtfrmshell(void)
  */
 int spawn(int f, int n)
 {
-	register int s;
+	int s;
 	char line[NLINE];
 
 	/* don't allow this command if restricted */
@@ -198,7 +198,7 @@ int spawn(int f, int n)
 
 int execprg(int f, int n)
 {
-	register int s;
+	int s;
 	char line[NLINE];
 
 	/* don't allow this command if restricted */
@@ -256,9 +256,9 @@ int execprg(int f, int n)
  */
 int pipecmd(int f, int n)
 {
-	register int s;		/* return status from CLI */
-	register window_t *wp;	/* pointer to new window */
-	register struct buffer *bp;	/* pointer to buffer to zot */
+	int s;		/* return status from CLI */
+	window_t *wp;	/* pointer to new window */
+	struct buffer *bp;	/* pointer to buffer to zot */
 	char line[NLINE];	/* command line send to shell */
 	static char bname[] = "command";
 
@@ -378,8 +378,8 @@ int pipecmd(int f, int n)
  */
 int filter_buffer(int f, int n)
 {
-	register int s;		/* return status from CLI */
-	register struct buffer *bp;	/* pointer to buffer to zot */
+	int s;		/* return status from CLI */
+	struct buffer *bp;	/* pointer to buffer to zot */
 	char line[NLINE];	/* command line send to shell */
 	char tmpnam[NFILEN];	/* place to store real file name */
 	static char bname1[] = "fltinp";

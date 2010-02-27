@@ -32,7 +32,7 @@ int ffropen(char *fn)
 int ffwopen(char *fn)
 {
 #if     VMS
-	register int fd;
+	int fd;
 
 	if ((fd = creat(fn, 0666, "rfm=var", "rat=cr")) < 0
 	    || (ffp = fdopen(fd, "w")) == NULL) {
@@ -80,7 +80,7 @@ int ffclose(void)
  */
 int ffputline(char *buf, int nbuf)
 {
-	register int i;
+	int i;
 #if	CRYPT
 	char c;			/* character to translate */
 
@@ -116,9 +116,9 @@ int ffputline(char *buf, int nbuf)
  */
 int ffgetline(void)
 {
-	register int c;		/* current character read */
-	register int i;		/* current index into fline */
-	register char *tmpline;	/* temp storage for expanding line */
+	int c;		/* current character read */
+	int i;		/* current index into fline */
+	char *tmpline;	/* temp storage for expanding line */
 
 	/* if we are at the end...return it */
 	if (eofflag)
