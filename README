@@ -2,24 +2,24 @@
 | uEmacs/PK 4.0 |
 +---------------+
 
-	Full screen editor based on MicroEMACS 3.9e
-	
-	MicroEMACS was written by Dave G. Conroy and
-	greatly modified by Daniel M. Lawrence
+        Full screen editor based on MicroEMACS 3.9e
 
-	Copyright Notices:
+        MicroEMACS was written by Dave G. Conroy and
+        greatly modified by Daniel M. Lawrence
 
-	MicroEMACS 3.9 (c) Copyright 1987 Daniel M. Lawrence.
-	Reference Manual Copyright 1987 by Brian Straight and
-	Daniel M. Lawrence. No copyright claimed for modifications
-	made by Petri H. Kutvonen.
+        Copyright Notices:
 
-	Original statement of copying policy:
+        MicroEMACS 3.9 (c) Copyright 1987 Daniel M. Lawrence.
+        Reference Manual Copyright 1987 by Brian Straight and
+        Daniel M. Lawrence. No copyright claimed for modifications
+        made by Petri H. Kutvonen.
 
-	MicroEMACS 3.9 can be copied and distributed freely for any
-	non-commercial purposes. MicroEMACS 3.9 can only be incorporated
-	into commercial software with the permission of the current author
-	[Daniel M. Lawrence].
+        Original statement of copying policy:
+
+        MicroEMACS 3.9 can be copied and distributed freely for any
+        non-commercial purposes. MicroEMACS 3.9 can only be incorporated
+        into commercial software with the permission of the current author
+        [Daniel M. Lawrence].
 
 
 WHAT IS uEmacs/PK?
@@ -45,15 +45,15 @@ WHAT IS NEW - COMPARED TO MicroEMACS 3.9e?
 Enhachements:
 
 o  advisory file locking on BSD-derived systems
-o  new screen update algorithm, borrowed largely form "vile" by 
-   Paul G. Fox <pgf@cayman.com>, uEmacs can now be used on slow (1200 bps) 
+o  new screen update algorithm, borrowed largely form "vile" by
+   Paul G. Fox <pgf@cayman.com>, uEmacs can now be used on slow (1200 bps)
    connections because it uses terminal scrolling capabilities
 o  new variables $scroll, $jump, and $overlap to control scrolling
 o  uEmacs reacts to windows size change signals (UNIX), also from "vile"
 o  automatic file name completion, works under UNIX and PC/MS-DOS
 o  functions keys on VT200 style keyboards can be used
 o  new command: justify-paragraph (Meta J)
-o  something important for us Europeans: allow the use of 8 bit ISO Latin 1 
+o  something important for us Europeans: allow the use of 8 bit ISO Latin 1
    alphabet (UNIX and VMS), on an IBM-PC the accented characters are
    interpreted as letters too
 o  the characters {|}[\] can be interpreted as letters, these are
@@ -95,16 +95,16 @@ WHERE HAS IT BEEN TESTED?
 
 uEmacs/PK 4.0 has been tested by myself on the following platforms:
 
-	IBM PC and compatibles, PC/MS-DOS 3.2 and up
-	Sun 3, SunOS 4.1.1
+        IBM PC and compatibles, PC/MS-DOS 3.2 and up
+        Sun 3, SunOS 4.1.1
         SPARC, SunOS 4.1.X and 5.{2|3|4|5} (Solaris 2)
-	VAX 8800 and 6000-420, VMS 5.4
-	DECstation 3100, Ultrix V4.1
-	IBM RS/6000, AIX 3.1.5
-	IBM PS/2, UNIX System V/386 Release 3.2
-	uVAX II, Ultrix V2.0
-	AT&T 3B2/400, UNIX System V Release 2.0
-	Various Toshiba i486 laptops, Linux 0.99pl13 thru 2.0.21
+        VAX 8800 and 6000-420, VMS 5.4
+        DECstation 3100, Ultrix V4.1
+        IBM RS/6000, AIX 3.1.5
+        IBM PS/2, UNIX System V/386 Release 3.2
+        uVAX II, Ultrix V2.0
+        AT&T 3B2/400, UNIX System V Release 2.0
+        Various Toshiba i486 laptops, Linux 0.99pl13 thru 2.0.21
 
 I have no reason to believe that there would be any problems to port
 uEmacs/PK 4.0 to any reasonable BSD-, OSF/1-, or SVR4-based UNIX system.
@@ -147,7 +147,7 @@ CONTACT INFORMATION
 
 There will probably not be many new versions of uEmacs/PK, maybe just
 some bug fixes. I have no intention to develope the code any further.
-However, if you have some comments or good suggestions, you may find 
+However, if you have some comments or good suggestions, you may find
 the email address below useful.
 
 Petri H. Kutvonen
