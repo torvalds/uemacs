@@ -120,7 +120,7 @@ char rpat[NPAT];		/* replacement pattern          */
 unsigned int matchlen = 0;
 unsigned int mlenold = 0;
 char *patmatch = NULL;
-LINE *matchline = NULL;
+struct line *matchline = NULL;
 int matchoff = 0;
 
 #if	MAGIC

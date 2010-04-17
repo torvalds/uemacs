@@ -140,7 +140,7 @@ int mvdnwind(int f, int n)
  */
 int mvupwind(int f, int n)
 {
-	LINE *lp;
+	struct line *lp;
 	int i;
 
 	lp = curwp->w_linep;
@@ -185,7 +185,7 @@ int mvupwind(int f, int n)
 int onlywind(int f, int n)
 {
 	window_t *wp;
-	LINE *lp;
+	struct line *lp;
 	int i;
 
 	while (wheadp != curwp) {
@@ -310,7 +310,7 @@ int delwind(int f, int n)
 int splitwind(int f, int n)
 {
 	window_t *wp;
-	LINE *lp;
+	struct line *lp;
 	int ntru;
 	int ntrl;
 	int ntrd;
@@ -392,7 +392,7 @@ int splitwind(int f, int n)
 int enlargewind(int f, int n)
 {
 	window_t *adjwp;
-	LINE *lp;
+	struct line *lp;
 	int i;
 
 	if (n < 0)
@@ -443,7 +443,7 @@ int enlargewind(int f, int n)
 int shrinkwind(int f, int n)
 {
 	window_t *adjwp;
-	LINE *lp;
+	struct line *lp;
 	int i;
 
 	if (n < 0)
@@ -697,7 +697,7 @@ int newwidth(int f, int n)
 int getwpos(void)
 {				/* get screen offset of current line in current window */
 	int sline;	/* screen line from top of window */
-	LINE *lp;	/* scannile line pointer */
+	struct line *lp;	/* scannile line pointer */
 
 	/* search down the line we want */
 	lp = curwp->w_linep;

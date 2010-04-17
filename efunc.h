@@ -28,7 +28,7 @@ extern int killpara(int f, int n);
 extern int wordcount(int f, int n);
 
 /* line.c */
-extern void lfree(LINE *lp);
+extern void lfree(struct line *lp);
 extern void lchange(int flag);
 extern int insspace(int f, int n);
 extern int linstr(char *instr);
@@ -78,7 +78,7 @@ extern int forwline(int f, int n);
 extern int backline(int f, int n);
 extern int gotobop(int f, int n);
 extern int gotoeop(int f, int n);
-extern int getgoal(LINE *dlp);
+extern int getgoal(struct line *dlp);
 extern int forwpage(int f, int n);
 extern int backpage(int f, int n);
 extern int setmark(int f, int n);
@@ -326,7 +326,7 @@ extern int sreplace(int f, int n);
 extern int qreplace(int f, int n);
 extern int delins(int dlength, char *instr, int use_meta);
 extern int expandp(char *srcstr, char *deststr, int maxlength);
-extern int boundry(LINE *curline, int curoff, int dir);
+extern int boundry(struct line *curline, int curoff, int dir);
 extern void mcclear(void);
 extern void rmcclear(void);
 

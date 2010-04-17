@@ -32,7 +32,7 @@ int setfillcol(int f, int n)
  */
 int showcpos(int f, int n)
 {
-	LINE *lp;	/* current line */
+	struct line *lp;	/* current line */
 	long numchars;	/* # of chars in file */
 	int numlines;	/* # of lines in file */
 	long predchars;	/* # chars preceding point */
@@ -97,7 +97,7 @@ int showcpos(int f, int n)
 
 int getcline(void)
 {				/* get the current line number */
-	LINE *lp;	/* current line */
+	struct line *lp;	/* current line */
 	int numlines;	/* # of lines before point */
 
 	/* starting at the beginning of the buffer */
@@ -183,7 +183,7 @@ int setccol(int pos)
  */
 int twiddle(int f, int n)
 {
-	LINE *dotp;
+	struct line *dotp;
 	int doto;
 	int cl;
 	int cr;
@@ -375,7 +375,7 @@ int entab(int f, int n)
  */
 int trim(int f, int n)
 {
-	LINE *lp;	/* current line pointer */
+	struct line *lp;	/* current line pointer */
 	int offset;	/* original line offset position */
 	int length;	/* current length */
 	int inc;	/* increment to next line [sgn(n)] */
@@ -530,7 +530,7 @@ int insbrace(int n, int c)
 	int oc;	/* caractere oppose a c */
 	int i, count;
 	int target;	/* column brace should go after */
-	LINE *oldlp;
+	struct line *oldlp;
 	int oldoff;
 
 	/* if we aren't at the beginning of the line... */
@@ -683,8 +683,8 @@ int inspound(void)
  */
 int deblank(int f, int n)
 {
-	LINE *lp1;
-	LINE *lp2;
+	struct line *lp1;
+	struct line *lp2;
 	long nld;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -793,7 +793,7 @@ int backdel(int f, int n)
  */
 int killtext(int f, int n)
 {
-	LINE *nextp;
+	struct line *nextp;
 	long chunk;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -1037,7 +1037,7 @@ int writemsg(int f, int n)
  */
 int getfence(int f, int n)
 {
-	LINE *oldlp;	/* original line pointer */
+	struct line *oldlp;	/* original line pointer */
 	int oldoff;	/* and offset */
 	int sdir;	/* direction of search (1/-1) */
 	int count;	/* current fence level count */
@@ -1137,9 +1137,9 @@ int getfence(int f, int n)
  */
 int fmatch(int ch)
 {
-	LINE *oldlp;	/* original line pointer */
+	struct line *oldlp;	/* original line pointer */
 	int oldoff;	/* and offset */
-	LINE *toplp;	/* top line in current window */
+	struct line *toplp;	/* top line in current window */
 	int count;	/* current fence level count */
 	char opench;	/* open fence */
 	char c;	/* current character in scan */

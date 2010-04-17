@@ -111,7 +111,7 @@ extern struct buffer *blistp;		/* Buffer for C-X C-B           */
 
 extern struct buffer *bfind(char *bname, int cflag, int bflag); /* Lookup a buffer by name      */
 extern window_t *wpopup(void);	/* Pop up window creation       */
-extern LINE *lalloc(int);	/* Allocate a line              */
+extern struct line *lalloc(int);	/* Allocate a line              */
 extern char sres[NBUFN];	/* current screen resolution    */
 extern char pat[];		/* Search pattern               */
 extern char tap[];		/* Reversed pattern array.      */
@@ -120,7 +120,7 @@ extern char rpat[];		/* replacement pattern          */
 extern unsigned int matchlen;
 extern unsigned int mlenold;
 extern char *patmatch;
-extern LINE *matchline;
+extern struct line *matchline;
 extern int matchoff;
 
 #if	MAGIC

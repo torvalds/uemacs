@@ -1,4 +1,4 @@
-/*	LINE.C
+/*	line.c
  *
  * The functions in this file are a general set of line management utilities.
  * They are the only routines that touch the text. They also touch the buffer
@@ -19,20 +19,20 @@
 #include	"efunc.h"
 
 /*
- * This routine allocates a block of memory large enough to hold a LINE
+ * This routine allocates a block of memory large enough to hold a struct line
  * containing "used" characters. The block is always rounded up a bit. Return
  * a pointer to the new block, or NULL if there isn't any memory left. Print a
  * message in the message line if no space.
  */
-LINE *lalloc(int used)
+struct line *lalloc(int used)
 {
-	LINE *lp;
+	struct line *lp;
 	int size;
 
 	size = (used + NBLOCK - 1) & ~(NBLOCK - 1);
 	if (size == 0)		/* Assume that an empty */
 		size = NBLOCK;	/* line is for type-in. */
-	if ((lp = (LINE *) malloc(sizeof(LINE) + size)) == NULL) {
+	if ((lp = (struct line *)malloc(sizeof(struct line) + size)) == NULL) {
 		mlwrite("(OUT OF MEMORY)");
 		return (NULL);
 	}
@@ -47,7 +47,7 @@ LINE *lalloc(int used)
  * might be in. Release the memory. The buffers are updated too; the magic
  * conditions described in the above comments don't hold here.
  */
-void lfree(LINE *lp)
+void lfree(struct line *lp)
 {
 	struct buffer *bp;
 	window_t *wp;
@@ -160,9 +160,9 @@ int linsert(int n, int c)
 {
 	char *cp1;
 	char *cp2;
-	LINE *lp1;
-	LINE *lp2;
-	LINE *lp3;
+	struct line *lp1;
+	struct line *lp2;
+	struct line *lp3;
 	int doto;
 	int i;
 	window_t *wp;
@@ -284,8 +284,8 @@ int lnewline(void)
 {
 	char *cp1;
 	char *cp2;
-	LINE *lp1;
-	LINE *lp2;
+	struct line *lp1;
+	struct line *lp2;
 	int doto;
 	window_t *wp;
 
@@ -346,7 +346,7 @@ int ldelete(long n, int kflag)
 {
 	char *cp1;
 	char *cp2;
-	LINE *dotp;
+	struct line *dotp;
 	int doto;
 	int chunk;
 	window_t *wp;
@@ -412,7 +412,7 @@ int ldelete(long n, int kflag)
  */
 char *getctext(void)
 {
-	LINE *lp;	/* line to copy */
+	struct line *lp;	/* line to copy */
 	int size;	/* length of line to return */
 	char *sp;	/* string pointer into line */
 	char *dp;	/* string pointer into returned line */
@@ -469,9 +469,9 @@ int ldelnewline(void)
 {
 	char *cp1;
 	char *cp2;
-	LINE *lp1;
-	LINE *lp2;
-	LINE *lp3;
+	struct line *lp1;
+	struct line *lp2;
+	struct line *lp3;
 	window_t *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */

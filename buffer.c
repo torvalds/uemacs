@@ -271,7 +271,7 @@ int makelist(int iflag)
 	char *cp2;
 	int c;
 	struct buffer *bp;
-	LINE *lp;
+	struct line *lp;
 	int s;
 	int i;
 	long nbytes;		/* # of bytes in current buffer */
@@ -394,7 +394,7 @@ void ltoa(char *buf, int width, long num)
  */
 int addline(char *text)
 {
-	LINE *lp;
+	struct line *lp;
 	int i;
 	int ntext;
 
@@ -447,7 +447,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 {
 	struct buffer *bp;
 	struct buffer *sb;	/* buffer to insert after */
-	LINE *lp;
+	struct line *lp;
 
 	bp = bheadp;
 	while (bp != NULL) {
@@ -513,7 +513,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
  */
 int bclear(struct buffer *bp)
 {
-	LINE *lp;
+	struct line *lp;
 	int s;
 
 	if ((bp->b_flag & BFINVS) == 0	/* Not scratch buffer.  */

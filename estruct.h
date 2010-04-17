@@ -431,10 +431,10 @@
 typedef struct window {
 	struct window *w_wndp;	/* Next window                  */
 	struct buffer *w_bufp;	/* Buffer displayed in window   */
-	struct LINE *w_linep;	/* Top line in the window       */
-	struct LINE *w_dotp;	/* Line containing "."          */
+	struct line *w_linep;	/* Top line in the window       */
+	struct line *w_dotp;	/* Line containing "."          */
 	short w_doto;		/* Byte offset for "."          */
-	struct LINE *w_markp;	/* Line containing "mark"       */
+	struct line *w_markp;	/* Line containing "mark"       */
 	short w_marko;		/* Byte offset for "mark"       */
 	char w_toprow;		/* Origin 0 top row of window   */
 	char w_ntrows;		/* # of rows of text in window  */
@@ -472,11 +472,11 @@ typedef struct window {
  */
 struct buffer {
         struct buffer *b_bufp;	/* Link to next struct buffer   */
-	struct LINE *b_dotp;	/* Link to "." LINE structure   */
-	short b_doto;		/* Offset of "." in above LINE  */
-	struct LINE *b_markp;	/* The same as the above two,   */
+	struct line *b_dotp;	/* Link to "." struct line structure   */
+	short b_doto;		/* Offset of "." in above struct line  */
+	struct line *b_markp;	/* The same as the above two,   */
 	short b_marko;		/* but for the "mark"           */
-	struct LINE *b_linep;	/* Link to the header LINE      */
+	struct line *b_linep;	/* Link to the header struct line      */
 	char b_active;		/* window activated flag        */
 	char b_nwnd;		/* Count of windows on buffer   */
 	char b_flag;		/* Flags                        */
@@ -511,26 +511,26 @@ struct buffer {
  * characters, is kept in a region structure.  Used by the region commands.
  */
 typedef struct {
-	struct LINE *r_linep;	/* Origin LINE address.         */
-	short r_offset;		/* Origin LINE offset.          */
+	struct line *r_linep;	/* Origin struct line address.         */
+	short r_offset;		/* Origin struct line offset.          */
 	long r_size;		/* Length in characters.        */
 } REGION;
 
 /*
- * All text is kept in circularly linked lists of "LINE" structures. These
+ * All text is kept in circularly linked lists of "struct line" structures. These
  * begin at the header line (which is the blank line beyond the end of the
  * buffer). This line is pointed to by the "struct buffer". Each line contains a the
  * number of bytes in the line (the "used" size), the size of the text array,
  * and the text. The end of line is not stored as a byte; it's implied. Future
  * additions will include update hints, and a list of marks into the line.
  */
-typedef struct LINE {
-	struct LINE *l_fp;	/* Link to the next line        */
-	struct LINE *l_bp;	/* Link to the previous line    */
+struct line {
+	struct line *l_fp;	/* Link to the next line        */
+	struct line *l_bp;	/* Link to the previous line    */
 	short l_size;		/* Allocated size               */
 	short l_used;		/* Used size                    */
 	char l_text[1];		/* A bunch of characters.       */
-} LINE;
+};
 
 #define lforw(lp)       ((lp)->l_fp)
 #define lback(lp)       ((lp)->l_bp)
@@ -642,8 +642,8 @@ typedef struct VDESC {
 */
 
 typedef struct WHBLOCK {
-	LINE *w_begin;		/* ptr to !while statement */
-	LINE *w_end;		/* ptr to the !endwhile statement */
+	struct line *w_begin;		/* ptr to !while statement */
+	struct line *w_end;		/* ptr to the !endwhile statement */
 	int w_type;		/* block type */
 	struct WHBLOCK *w_next;	/* next while */
 } WHBLOCK;

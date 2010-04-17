@@ -45,7 +45,7 @@ int killregion(int f, int n)
  */
 int copyregion(int f, int n)
 {
-	LINE *linep;
+	struct line *linep;
 	int loffs;
 	int s;
 	REGION region;
@@ -83,7 +83,7 @@ int copyregion(int f, int n)
  */
 int lowerregion(int f, int n)
 {
-	LINE *linep;
+	struct line *linep;
 	int loffs;
 	int c;
 	int s;
@@ -120,7 +120,7 @@ int lowerregion(int f, int n)
  */
 int upperregion(int f, int n)
 {
-	LINE *linep;
+	struct line *linep;
 	int loffs;
 	int c;
 	int s;
@@ -160,8 +160,8 @@ int upperregion(int f, int n)
  */
 int getregion(REGION *rp)
 {
-	LINE *flp;
-	LINE *blp;
+	struct line *flp;
+	struct line *blp;
 	long fsize;
 	long bsize;
 

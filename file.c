@@ -142,7 +142,7 @@ static int resetkey(void)
 int getfile(char *fname, int lockfl)
 {
 	struct buffer *bp;
-	LINE *lp;
+	struct line *lp;
 	int i;
 	int s;
 	char bname[NBUFN];	/* buffer name to put file */
@@ -207,8 +207,8 @@ int getfile(char *fname, int lockfl)
  */
 int readin(char *fname, int lockfl)
 {
-	LINE *lp1;
-	LINE *lp2;
+	struct line *lp1;
+	struct line *lp2;
 	int i;
 	window_t *wp;
 	struct buffer *bp;
@@ -460,14 +460,14 @@ int filesave(int f, int n)
  * This function performs the details of file
  * writing. Uses the file management routines in the
  * "fileio.c" package. The number of lines written is
- * displayed. Sadly, it looks inside a LINE; provide
+ * displayed. Sadly, it looks inside a struct line; provide
  * a macro for this. Most of the grief is error
  * checking of some sort.
  */
 int writeout(char *fn)
 {
 	int s;
-	LINE *lp;
+	struct line *lp;
 	int nline;
 
 #if	CRYPT
@@ -547,9 +547,9 @@ int filename(int f, int n)
  */
 int ifile(char *fname)
 {
-	LINE *lp0;
-	LINE *lp1;
-	LINE *lp2;
+	struct line *lp0;
+	struct line *lp1;
+	struct line *lp2;
 	int i;
 	struct buffer *bp;
 	int s;

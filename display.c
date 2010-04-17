@@ -361,7 +361,7 @@ int update(int force)
  */
 static int reframe(window_t *wp)
 {
-	LINE *lp, *lp0;
+	struct line *lp, *lp0;
 	int i = 0;
 
 	/* if not a requested reframe, check for a needed one */
@@ -451,7 +451,7 @@ static int reframe(window_t *wp)
  */
 static void updone(window_t *wp)
 {
-	LINE *lp;	/* line to update */
+	struct line *lp;	/* line to update */
 	int sline;	/* physical screen line to update */
 	int i;
 
@@ -484,7 +484,7 @@ static void updone(window_t *wp)
  */
 static void updall(window_t *wp)
 {
-	LINE *lp;	/* line to update */
+	struct line *lp;	/* line to update */
 	int sline;	/* physical screen line to update */
 	int i;
 
@@ -522,7 +522,7 @@ static void updall(window_t *wp)
  */
 void updpos(void)
 {
-	LINE *lp;
+	struct line *lp;
 	int c;
 	int i;
 
@@ -564,7 +564,7 @@ void updpos(void)
 void upddex(void)
 {
 	window_t *wp;
-	LINE *lp;
+	struct line *lp;
 	int i, j;
 
 	wp = wheadp;
@@ -853,7 +853,7 @@ static int endofline(char *s, int n)
 static void updext(void)
 {
 	int rcursor;	/* real cursor location */
-	LINE *lp;	/* pointer to current line */
+	struct line *lp;	/* pointer to current line */
 	int j;		/* index into line */
 
 	/* calculate what column the real cursor will end up in */
@@ -1216,7 +1216,7 @@ static void modeline(window_t *wp)
 	}
 
 	{			/* determine if top line, bottom line, or both are visible */
-		LINE *lp = wp->w_linep;
+		struct line *lp = wp->w_linep;
 		int rows = wp->w_ntrows;
 		char *msg = NULL;
 
@@ -1239,7 +1239,7 @@ static void modeline(window_t *wp)
 			}
 		}
 		if (!msg) {
-			LINE *lp;
+			struct line *lp;
 			int numlines, predlines, ratio;
 
 			lp = lforw(bp->b_linep);

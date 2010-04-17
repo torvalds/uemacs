@@ -62,10 +62,10 @@
 #include        "edef.h"
 #include        "efunc.h"
 
-static int amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff);
+static int amatch(MC *mcptr, int direct, struct line **pcwline, int *pcwoff);
 static int readpattern(char *prompt, char *apat, int srch);
 static int replaces(int kind, int f, int n);
-static int nextch(LINE **pcurline, int *pcuroff, int dir);
+static int nextch(struct line **pcurline, int *pcuroff, int dir);
 static int mcstr(void);
 static int rmcstr(void);
 static int mceq(int bc, MC *mt);
@@ -287,7 +287,7 @@ int backhunt(int f, int n)
  */
 int mcscanner(MC *mcpatrn, int direct, int beg_or_end)
 {
-	LINE *curline;		/* current line during scan */
+	struct line *curline;		/* current line during scan */
 	int curoff;		/* position within current line */
 
 	/* If we are going in reverse, then the 'end' is actually
@@ -351,13 +351,13 @@ int mcscanner(MC *mcpatrn, int direct, int beg_or_end)
  *
  * MC *mcptr;		string to scan for
  * int direct;		which way to go.
- * LINE **pcwline;	current line during scan
+ * struct line **pcwline;	current line during scan
  * int *pcwoff;		position within current line
  */
-static int amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff)
+static int amatch(MC *mcptr, int direct, struct line **pcwline, int *pcwoff)
 {
 	int c;		/* character at current position */
-	LINE *curline;		/* current line during scan */
+	struct line *curline;		/* current line during scan */
 	int curoff;		/* position within current line */
 	int nchars;
 
@@ -498,9 +498,9 @@ int scanner(const char *patrn, int direct, int beg_or_end)
 {
 	int c;		/* character at current position */
 	const char *patptr;	/* pointer into pattern */
-	LINE *curline;		/* current line during scan */
+	struct line *curline;		/* current line during scan */
 	int curoff;		/* position within current line */
-	LINE *scanline;		/* current line during scanning */
+	struct line *scanline;		/* current line during scanning */
 	int scanoff;		/* position in scanned line */
 
 	/* If we are going in reverse, then the 'end' is actually
@@ -641,7 +641,7 @@ void savematch(void)
 {
 	char *ptr;	/* pointer to last match string */
 	int j;
-	LINE *curline;		/* line of last match */
+	struct line *curline;		/* line of last match */
 	int curoff;		/* offset "      "    */
 
 	/* Free any existing match string, then
@@ -718,9 +718,9 @@ static int replaces(int kind, int f, int n)
 	int nlrepl;		/* was a replace done on the last line? */
 	char c;			/* input char for query */
 	char tpat[NPAT];	/* temporary to hold search pattern */
-	LINE *origline;		/* original "." position */
+	struct line *origline;		/* original "." position */
 	int origoff;		/* and offset (for . query option) */
-	LINE *lastline;		/* position of last replace and */
+	struct line *lastline;		/* position of last replace and */
 	int lastoff;		/* offset (for 'u' query option) */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -1013,7 +1013,7 @@ int expandp(char *srcstr, char *deststr, int maxlength)
  *	in future, a' la VMS EDT.  At the moment, just return TRUE or
  *	FALSE depending on if a boundry is hit (ouch).
  */
-int boundry(LINE *curline, int curoff, int dir)
+int boundry(struct line *curline, int curoff, int dir)
 {
 	int border;
 
@@ -1035,9 +1035,9 @@ int boundry(LINE *curline, int curoff, int dir)
  *	the current character and move, reverse searches move and
  *	look at the character.
  */
-static int nextch(LINE **pcurline, int *pcuroff, int dir)
+static int nextch(struct line **pcurline, int *pcuroff, int dir)
 {
-	LINE *curline;
+	struct line *curline;
 	int curoff;
 	int c;
 

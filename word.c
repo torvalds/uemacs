@@ -241,7 +241,7 @@ int capword(int f, int n)
  */
 int delfword(int f, int n)
 {
-	LINE *dotp;	/* original cursor line */
+	struct line *dotp;	/* original cursor line */
 	int doto;	/*      and row */
 	int c;		/* temp char */
 	long size;		/* # of chars to delete */
@@ -405,7 +405,7 @@ int fillpara(int f, int n)
 	int newlength;	/* tentative new line length    */
 	int eopflag;	/* Are we at the End-Of-Paragraph? */
 	int firstflag;	/* first word? (needs no space) */
-	LINE *eopline;	/* pointer to line just past EOP */
+	struct line *eopline;	/* pointer to line just past EOP */
 	int dotflag;	/* was the last char a period?  */
 	char wbuf[NSTRING];	/* buffer for current word      */
 
@@ -502,7 +502,7 @@ int justpara(int f, int n)
 	int newlength;	/* tentative new line length    */
 	int eopflag;	/* Are we at the End-Of-Paragraph? */
 	int firstflag;	/* first word? (needs no space) */
-	LINE *eopline;	/* pointer to line just past EOP */
+	struct line *eopline;	/* pointer to line just past EOP */
 	char wbuf[NSTRING];	/* buffer for current word      */
 	int leftmarg;		/* left marginal */
 
@@ -640,7 +640,7 @@ int killpara(int f, int n)
  */
 int wordcount(int f, int n)
 {
-	LINE *lp;	/* current line to scan */
+	struct line *lp;	/* current line to scan */
 	int offset;	/* current char to scan */
 	long size;		/* size of region left to count */
 	int ch;	/* current character to scan */

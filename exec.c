@@ -420,10 +420,10 @@ int execbuf(int f, int n)
 int dobuf(struct buffer *bp)
 {
 	int status;	/* status return */
-	LINE *lp;	/* pointer to line to execute */
-	LINE *hlp;	/* pointer to line header */
-	LINE *glp;	/* line to goto */
-	LINE *mp;		/* Macro line storage temp */
+	struct line *lp;	/* pointer to line to execute */
+	struct line *hlp;	/* pointer to line header */
+	struct line *glp;	/* line to goto */
+	struct line *mp;		/* Macro line storage temp */
 	int dirnum;		/* directive index */
 	int linlen;		/* length of line to execute */
 	int i;			/* index */

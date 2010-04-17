@@ -33,7 +33,7 @@ int gotobol(int f, int n)
  */
 int backchar(int f, int n)
 {
-	LINE *lp;
+	struct line *lp;
 
 	if (n < 0)
 		return (forwchar(f, -n));
@@ -146,7 +146,7 @@ int gotoeob(int f, int n)
  */
 int forwline(int f, int n)
 {
-	LINE *dlp;
+	struct line *dlp;
 
 	if (n < 0)
 		return (backline(f, -n));
@@ -183,7 +183,7 @@ int forwline(int f, int n)
  */
 int backline(int f, int n)
 {
-	LINE *dlp;
+	struct line *dlp;
 
 	if (n < 0)
 		return (forwline(f, -n));
@@ -315,11 +315,11 @@ int gotoeop(int f, int n)
 #endif
 
 /*
- * This routine, given a pointer to a LINE, and the current cursor goal
+ * This routine, given a pointer to a struct line, and the current cursor goal
  * column, return the best choice for the offset. The offset is returned.
  * Used by "C-N" and "C-P".
  */
-int getgoal(LINE *dlp)
+int getgoal(struct line *dlp)
 {
 	int c;
 	int col;
@@ -352,7 +352,7 @@ int getgoal(LINE *dlp)
  */
 int forwpage(int f, int n)
 {
-	LINE *lp;
+	struct line *lp;
 
 	if (f == FALSE) {
 #if SCROLLCODE
@@ -394,7 +394,7 @@ int forwpage(int f, int n)
  */
 int backpage(int f, int n)
 {
-	LINE *lp;
+	struct line *lp;
 
 	if (f == FALSE) {
 #if SCROLLCODE
@@ -448,7 +448,7 @@ int setmark(int f, int n)
  */
 int swapmark(int f, int n)
 {
-	LINE *odotp;
+	struct line *odotp;
 	int odoto;
 
 	if (curwp->w_markp == NULL) {
