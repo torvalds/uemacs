@@ -16,7 +16,7 @@
 #include        "edef.h"
 #include        "efunc.h"
 
-typedef struct VIDEO {
+struct video {
 	int v_flag;		/* Flags */
 #if	COLOR
 	int v_fcolor;		/* current forground color */
@@ -25,7 +25,7 @@ typedef struct VIDEO {
 	int v_rbcolor;		/* requested background color */
 #endif
 	char v_text[1];		/* Screen data. */
-} VIDEO;
+};
 
 #define VFCHG   0x0001		/* Changed flag                 */
 #define	VFEXT	0x0002		/* extended (beyond column 80)  */
@@ -33,9 +33,9 @@ typedef struct VIDEO {
 #define	VFREQ	0x0008		/* reverse video request        */
 #define	VFCOL	0x0010		/* color change requested       */
 
-static VIDEO **vscreen;		/* Virtual screen. */
+static struct video **vscreen;		/* Virtual screen. */
 #if	MEMMAP == 0 || SCROLLCODE
-static VIDEO **pscreen;		/* Physical screen. */
+static struct video **pscreen;		/* Physical screen. */
 #endif
 
 static int displaying = TRUE;
@@ -56,7 +56,7 @@ static void scrscroll(int from, int to, int count);
 static int texttest(int vrow, int prow);
 static int endofline(char *s, int n);
 static void updext(void);
-static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2);
+static int updateline(int row, struct video *vp1, struct video *vp2);
 static void modeline(window_t *wp);
 static void mlputi(int i, int r);
 static void mlputli(long l, int r);
@@ -77,25 +77,25 @@ static void putline(int row, int col, char *buf);
 void vtinit(void)
 {
 	int i;
-	VIDEO *vp;
+	struct video *vp;
 
 	TTopen();		/* open the screen */
 	TTkopen();		/* open the keyboard */
 	TTrev(FALSE);
-	vscreen = (VIDEO **) malloc(term.t_mrow * sizeof(VIDEO *));
+	vscreen = (struct video **) malloc(term.t_mrow * sizeof(struct video *));
 
 	if (vscreen == NULL)
 		exit(1);
 
 #if	MEMMAP == 0 || SCROLLCODE
-	pscreen = (VIDEO **) malloc(term.t_mrow * sizeof(VIDEO *));
+	pscreen = (struct video **) malloc(term.t_mrow * sizeof(struct video *));
 
 	if (pscreen == NULL)
 		exit(1);
 #endif
 
 	for (i = 0; i < term.t_mrow; ++i) {
-		vp = (VIDEO *) malloc(sizeof(VIDEO) + term.t_mcol);
+		vp = (struct video *)malloc(sizeof(struct video) + term.t_mcol);
 
 		if (vp == NULL)
 			exit(1);
@@ -107,7 +107,7 @@ void vtinit(void)
 #endif
 		vscreen[i] = vp;
 #if	MEMMAP == 0 || SCROLLCODE
-		vp = (VIDEO *) malloc(sizeof(VIDEO) + term.t_mcol);
+		vp = (struct video *)malloc(sizeof(struct video) + term.t_mcol);
 
 		if (vp == NULL)
 			exit(1);
@@ -176,7 +176,7 @@ void vtmove(int row, int col)
  */
 static void vtputc(unsigned char c)
 {
-	VIDEO *vp;	/* ptr to line being updated */
+	struct video *vp;	/* ptr to line being updated */
 
 	vp = vscreen[vtrow];
 
@@ -224,7 +224,7 @@ static void vtputc(unsigned char c)
  */
 static void vteeol(void)
 {
-/*  VIDEO      *vp;	*/
+/*  struct video *vp;	*/
 	char *vcp = vscreen[vtrow]->v_text;
 
 /*  vp = vscreen[vtrow];	*/
@@ -638,7 +638,7 @@ void updgar(void)
  */
 int updupd(int force)
 {
-	VIDEO *vp1;
+	struct video *vp1;
 	int i;
 
 #if SCROLLCODE
@@ -676,8 +676,8 @@ int updupd(int force)
  */
 static int scrolls(int inserts)
 {				/* returns true if it does something */
-	struct VIDEO *vpv;	/* virtual screen image */
-	struct VIDEO *vpp;	/* physical screen image */
+	struct video *vpv;	/* virtual screen image */
+	struct video *vpp;	/* physical screen image */
 	int i, j, k;
 	int rows, cols;
 	int first, match, count, target, end;
@@ -823,8 +823,8 @@ static void scrscroll(int from, int to, int count)
  */
 static int texttest(int vrow, int prow)
 {
-	struct VIDEO *vpv = vscreen[vrow];	/* virtual screen image */
-	struct VIDEO *vpp = pscreen[prow];	/* physical screen image */
+	struct video *vpv = vscreen[vrow];	/* virtual screen image */
+	struct video *vpp = pscreen[prow];	/* physical screen image */
 
 	return (!memcmp(vpv->v_text, vpp->v_text, term.t_ncol));
 }
@@ -884,7 +884,7 @@ static void updext(void)
 #if	MEMMAP
 /*	UPDATELINE specific code for the IBM-PC and other compatables */
 
-static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
+static int updateline(int row, struct video *vp1, struct video *vp2)
 {
 #if	SCROLLCODE
 	char *cp1;
@@ -921,10 +921,10 @@ static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
  * updateline()
  *
  * int row;		row of screen to update
- * struct VIDEO *vp1;	virtual screen image
- * struct VIDEO *vp2;	physical screen image
+ * struct video *vp1;	virtual screen image
+ * struct video *vp2;	physical screen image
  */
-static int updateline(int row, struct VIDEO *vp1, struct VIDEO *vp2)
+static int updateline(int row, struct video *vp1, struct video *vp2)
 {
 #if RAINBOW
 /*	UPDATELINE specific code for the DEC rainbow 100 micro	*/

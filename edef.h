@@ -15,7 +15,7 @@
 
 typedef int (*fn_t)(int, int);
 
-struct VIDEO;
+struct video;
 
 /* initialized global external declarations */
 
