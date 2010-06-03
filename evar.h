@@ -67,9 +67,7 @@ static char *envars[] = {
 #endif
 };
 
-#define	NEVARS	sizeof(envars) / sizeof(char *)
-
-/* 	and its preprocesor definitions		*/
+/*	and its preprocesor definitions		*/
 
 #define	EVFILLCOL	0
 #define	EVPAGELEN	1

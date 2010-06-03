@@ -6,11 +6,12 @@
  *	modified by Petri Kutvonen
  */
 
-#include	<stdio.h>
-#include	"estruct.h"
-#include	"edef.h"
+#include <stdio.h>
+#include "estruct.h"
+#include "edef.h"
 #include "efunc.h"
-#include	"evar.h"
+#include "evar.h"
+#include "util.h"
 
 void varinit(void)
 {				/* initialize the user variable list */
@@ -196,13 +197,13 @@ char *gtenv(char *vname)
 	int vnum;	/* ordinal number of var refrenced */
 
 	/* scan the list, looking for the referenced name */
-	for (vnum = 0; vnum < NEVARS; vnum++)
+	for (vnum = 0; vnum < ARRAY_SIZE(envars); vnum++)
 		if (strcmp(vname, envars[vnum]) == 0)
 			break;
 
 	/* return errorm on a bad reference */
-	if (vnum == NEVARS)
-#if 	ENVFUNC
+	if (vnum == ARRAY_SIZE(envars))
+#if	ENVFUNC
 	{
 		char *ename = getenv(vname);
 
@@ -453,11 +454,11 @@ void findvar(char *var, VDESC *vd, int size)
 
 	vnum = -1;
 fvar:
-      	vtype = -1;
+	vtype = -1;
 	switch (var[0]) {
 
 	case '$':		/* check for legal enviromnent var */
-		for (vnum = 0; vnum < NEVARS; vnum++)
+		for (vnum = 0; vnum < ARRAY_SIZE(envars); vnum++)
 			if (strcmp(&var[1], envars[vnum]) == 0) {
 				vtype = TKENV;
 				break;
