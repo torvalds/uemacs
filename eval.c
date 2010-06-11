@@ -39,12 +39,12 @@ char *gtfun(char *fname)
 	/* look the function up in the function table */
 	fname[3] = 0;		/* only first 3 chars significant */
 	mklower(fname);		/* and let it be upper or lower case */
-	for (fnum = 0; fnum < NFUNCS; fnum++)
+	for (fnum = 0; fnum < ARRAY_SIZE(funcs); fnum++)
 		if (strcmp(fname, funcs[fnum].f_name) == 0)
 			break;
 
 	/* return errorm on a bad reference */
-	if (fnum == NFUNCS)
+	if (fnum == ARRAY_SIZE(funcs))
 		return (errorm);
 
 	/* if needed, retrieve the first argument */

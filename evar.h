@@ -6,8 +6,10 @@
  *	modified by Petri Kutvonen
  */
 
-/*	structure to hold user variables and their definitions	*/
+#ifndef EVAR_H_
+#define EVAR_H_
 
+/*	structure to hold user variables and their definitions	*/
 typedef struct UVAR {
 	char u_name[NVSIZE + 1];	/* name of user variable */
 	char *u_value;		/* value (string) */
@@ -165,9 +167,7 @@ static UFUNC funcs[] = {
 	{ "xla", TRINAMIC },		/* XLATE character string translation */
 };
 
-#define	NFUNCS	sizeof(funcs) / sizeof(UFUNC)
-
-/* 	and its preprocesor definitions		*/
+/*	and its preprocesor definitions		*/
 
 #define	UFADD		0
 #define	UFSUB		1
@@ -208,3 +208,5 @@ static UFUNC funcs[] = {
 #define UFBXOR		36
 #define	UFBNOT		37
 #define	UFXLATE		38
+
+#endif  /* EVAR_H_ */

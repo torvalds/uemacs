@@ -5,9 +5,10 @@
  *
  *	modified by Petri Kutvonen
  */
+#ifndef EPATH_H_
+#define EPATH_H_
 
 /*	possible names and paths of help files under different OSs	*/
-
 static char *pathname[] =
 #if	MSDOS
 {
@@ -39,4 +40,4 @@ static char *pathname[] =
 "sys$sysdevice:[vmstools]"};
 #endif
 
-#define	NPNAMES	(sizeof(pathname)/sizeof(char *))
+#endif  /* EPATH_H_ */

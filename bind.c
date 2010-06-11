@@ -7,11 +7,12 @@
  *	modified by Petri Kutvonen
  */
 
-#include	<stdio.h>
-#include	"estruct.h"
-#include	"edef.h"
-#include	"efunc.h"
-#include	"epath.h"
+#include <stdio.h>
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "epath.h"
+#include "util.h"
 
 int help(int f, int n)
 {				/* give me some help!!!!
@@ -532,7 +533,7 @@ char *flook(char *fname, int hflag)
 #endif
 
 	/* look it up via the old table method */
-	for (i = 2; i < NPNAMES; i++) {
+	for (i = 2; i < ARRAY_SIZE(pathname); i++) {
 		strcpy(fspec, pathname[i]);
 		strcat(fspec, fname);
 
