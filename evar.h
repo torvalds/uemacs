@@ -113,19 +113,18 @@ static char *envars[] = {
 #define EVSCROLLCOUNT	39
 #define EVSCROLL	40
 
-/*	list of recognized user functions	*/
-
-typedef struct UFUNC {
-	char *f_name;		/* name of function */
-	int f_type;		/* 1 = monamic, 2 = dynamic */
-} UFUNC;
+/* List of recognized user functions */
+struct user_function {
+	char *f_name;  /* name of function */
+	int f_type;    /* 1 = monamic, 2 = dynamic */
+};
 
 #define	NILNAMIC	0
 #define	MONAMIC		1
 #define	DYNAMIC		2
 #define	TRINAMIC	3
 
-static UFUNC funcs[] = {
+static struct user_function funcs[] = {
 	{ "add", DYNAMIC },		/* add two numbers together */
 	{ "sub", DYNAMIC },		/* subtraction */
 	{ "tim", DYNAMIC },		/* multiplication */
