@@ -9,19 +9,21 @@
 #ifndef EVAR_H_
 #define EVAR_H_
 
-/*	structure to hold user variables and their definitions	*/
-typedef struct UVAR {
-	char u_name[NVSIZE + 1];	/* name of user variable */
-	char *u_value;		/* value (string) */
-} UVAR;
+/* Max #chars in a var name */
+#define	NVSIZE	10
 
-/*	current user variables (This structure will probably change)	*/
+/* Structure to hold user variables and their definitions */
+struct user_variable {
+	char u_name[NVSIZE + 1]; /* name of user variable */
+	char *u_value;		 /* value (string) */
+};
 
-#define	MAXVARS		255
+#define	MAXVARS	255
 
-static UVAR uv[MAXVARS + 1];		/* user variables */
+/* User variables */
+static struct user_variable uv[MAXVARS + 1];
 
-/*	list of recognized environment variables	*/
+/* List of recognized environment variables */
 
 static char *envars[] = {
 	"fillcol",		/* current fill column */
