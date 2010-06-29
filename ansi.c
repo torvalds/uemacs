@@ -105,10 +105,10 @@ int color;			/* color to set */
 	cfcolor = color;
 }
 
-ansibcol(color)
-    /* set the current background color */
-int color;			/* color to set */
-
+/* Set the current background color.
+ * color: color to set.
+ */
+void ansibcol(int color)
 {
 	if (color == cbcolor)
 		return;
@@ -130,14 +130,14 @@ ansimove(row, col)
 	ttputc('H');
 }
 
-ansieeol()
+void ansieeol(void)
 {
 	ttputc(ESC);
 	ttputc('[');
 	ttputc('K');
 }
 
-ansieeop()
+void ansieeop(void)
 {
 #if	COLOR
 	ansifcol(gfcolor);
@@ -148,10 +148,10 @@ ansieeop()
 	ttputc('J');
 }
 
-ansirev(state)
-    /* change reverse video state */
-int state;			/* TRUE = reverse, FALSE = normal */
-
+/* Change reverse video state.
+ * state: TRUE = reverse, FALSE = normal
+ */
+void ansirev(int state)
 {
 #if	COLOR
 	int ftmp, btmp;		/* temporaries for colors */
@@ -173,24 +173,25 @@ int state;			/* TRUE = reverse, FALSE = normal */
 #endif
 }
 
-ansicres()
-{				/* change screen resolution */
+/* Change screen resolution. */
+int ansicres()
+{
 	return (TRUE);
 }
 
-spal(dummy)
-{				/* change pallette settings */
+/* Change pallette settings. */
+void spal(void)
+{
 	/* none for now */
 }
 
-ansibeep()
+void ansibeep(void)
 {
 	ttputc(BEL);
 	ttflush();
 }
 
-ansiparm(n)
-int n;
+void ansiparm(int n)
 {
 	int q, r;
 
@@ -205,7 +206,7 @@ int n;
 	ttputc((n % 10) + '0');
 }
 
-ansiopen()
+void ansiopen(void)
 {
 #if     V7 | USG | BSD
 	char *cp;
@@ -224,7 +225,7 @@ ansiopen()
 	ttopen();
 }
 
-ansiclose()
+void ansiclose(void)
 {
 #if	COLOR
 	ansifcol(7);
@@ -233,21 +234,24 @@ ansiclose()
 	ttclose();
 }
 
-ansikopen()
-{				/* open the keyboard (a noop here) */
+/* Open the keyboard (a noop here). */
+void ansikopen(void)
+{
 }
 
-ansikclose()
-{				/* close the keyboard (a noop here) */
+/* Close the keyboard (a noop here). */
+void ansikclose(void)
+{
 }
 
 #if	FNLABEL
-fnclabel(f, n)
-    /* label a function key */
-int f, n;			/* default flag, numeric argument [unused] */
-
+/* Label a function key.
+ * f: default flag
+ * n: numeric argument [unused]
+ */
+int fnclabel(int f, int n)
 {
-	/* on machines with no function keys...don't bother */
+	/* On machines with no function keys...don't bother. */
 	return (TRUE);
 }
 #endif
