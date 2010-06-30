@@ -1,9 +1,12 @@
 /*	EBIND.H
- *		
+ *
  *	Initial default key to function bindings
  *
  *	Modified by Petri Kutvonen
  */
+
+#ifndef EBIND_H_
+#define EBIND_H_
 
 /*
  * Command table.
@@ -11,7 +14,7 @@
  * characters of the command. This explains the funny location of the
  * control-X commands.
  */
-KEYTAB keytab[NBINDS] = {
+struct key_tab keytab[NBINDS] = {
 	{CONTROL | 'A', gotobol}
 	,
 	{CONTROL | 'B', backchar}
@@ -416,3 +419,5 @@ KEYTAB keytab[NBINDS] = {
 
 	{0, NULL}
 };
+
+#endif  /* EBIND_H_ */

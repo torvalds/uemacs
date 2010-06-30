@@ -597,18 +597,16 @@ typedef struct {
 #define	TTbacg		(*term.t_setback)
 #endif
 
-/*	structure for the table of initial key bindings		*/
+/* Structure for the table of initial key bindings. */
+struct key_tab {
+	short k_code;		 /* Key code */
+	int (*k_fp)(int, int);	 /* Routine to handle it */
+};
 
+/* Structure for the name binding table. */
 typedef struct {
-	short k_code;		/* Key code                     */
-	int (*k_fp)(int, int);	/* Routine to handle it         */
-} KEYTAB;
-
-/*	structure for the name binding table		*/
-
-typedef struct {
-	char *n_name;		/* name of function key */
-	int (*n_func)(int, int);/* function name is bound to */
+	char *n_name;		 /* name of function key */
+	int (*n_func)(int, int); /* function name is bound to */
 } NBIND;
 
 /*	The editor holds deleted text chunks in the KILL buffer. The

@@ -89,11 +89,11 @@ int deskey(int f, int n)
  */
 int bindtokey(int f, int n)
 {
-	unsigned int c;	/* command key to bind */
-	fn_t kfunc;	/* ptr to the requested function to bind to */
-	KEYTAB *ktp;	/* pointer into the command table */
-	int found;	/* matched command flag */
-	char outseq[80];	/* output buffer for keystroke sequence */
+	unsigned int c;	     /* command key to bind */
+	fn_t kfunc;	     /* ptr to the requested function to bind to */
+	struct key_tab *ktp; /* pointer into the command table */
+	int found;	     /* matched command flag */
+	char outseq[80];     /* output buffer for keystroke sequence */
 
 	/* prompt the user to type in a key to bind */
 	mlwrite(": bind-to-key ");
@@ -208,9 +208,9 @@ int unbindkey(int f, int n)
  */
 int unbindchar(int c)
 {
-	KEYTAB *ktp;	/* pointer into the command table */
-	KEYTAB *sktp;	/* saved pointer into the command table */
-	int found;	/* matched command flag */
+	struct key_tab *ktp;   /* pointer into the command table */
+	struct key_tab *sktp;  /* saved pointer into the command table */
+	int found;             /* matched command flag */
 
 	/* search the table to see if the key exists */
 	ktp = &keytab[0];
@@ -275,12 +275,12 @@ int apro(int f, int n)
 int buildlist(int type, char *mstring)
 #endif
 {
-	window_t *wp;	/* scanning pointer to windows */
-	KEYTAB *ktp;	/* pointer into the command table */
-	NBIND *nptr;	/* pointer into the name binding table */
-	struct buffer *bp;	/* buffer to put binding list into */
-	int cpos;		/* current position to use in outseq */
-	char outseq[80];	/* output buffer for keystroke sequence */
+	window_t *wp;         /* scanning pointer to windows */
+	struct key_tab *ktp;  /* pointer into the command table */
+	NBIND *nptr;          /* pointer into the name binding table */
+	struct buffer *bp;    /* buffer to put binding list into */
+	int cpos;             /* current position to use in outseq */
+	char outseq[80];      /* output buffer for keystroke sequence */
 
 	/* split the current window to make room for the binding list */
 	if (splitwind(FALSE, 1) == FALSE)
@@ -596,9 +596,9 @@ void cmdstr(int c, char *seq)
  */
 int (*getbind(int c))(int, int)
 {
-	KEYTAB *ktp;
+	struct key_tab *ktp;
 
-	ktp = &keytab[0];	/* Look in key table.   */
+	ktp = &keytab[0];  /* Look in key table. */
 	while (ktp->k_fp != NULL) {
 		if (ktp->k_code == c)
 			return (ktp->k_fp);
@@ -612,7 +612,7 @@ int (*getbind(int c))(int, int)
 /*
  * getfname:
  *	This function takes a ptr to function and gets the name
- * 	associated with it
+ *	associated with it.
  */
 char *getfname(fn_t func)
 {
