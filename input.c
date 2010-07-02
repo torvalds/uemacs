@@ -108,9 +108,9 @@ fn_t getname(void)
 	int cpos;	/* current column on screen output */
 	int c;
 	char *sp;	/* pointer to string for output */
-	NBIND *ffp;	/* first ptr to entry in name binding table */
-	NBIND *cffp;	/* current ptr to entry in name binding table */
-	NBIND *lffp;	/* last ptr to entry in name binding table */
+	struct name_bind *ffp;	/* first ptr to entry in name binding table */
+	struct name_bind *cffp;	/* current ptr to entry in name binding table */
+	struct name_bind *lffp;	/* last ptr to entry in name binding table */
 	char buf[NSTRING];	/* buffer to hold tentative command name */
 
 	/* starting at the beginning of the string buffer */

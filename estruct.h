@@ -604,10 +604,10 @@ struct key_tab {
 };
 
 /* Structure for the name binding table. */
-typedef struct {
+struct name_bind {
 	char *n_name;		 /* name of function key */
 	int (*n_func)(int, int); /* function name is bound to */
-} NBIND;
+};
 
 /*	The editor holds deleted text chunks in the KILL buffer. The
 	kill buffer is logically a stream of ascii characters, however

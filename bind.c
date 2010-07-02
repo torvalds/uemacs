@@ -277,7 +277,7 @@ int buildlist(int type, char *mstring)
 {
 	window_t *wp;         /* scanning pointer to windows */
 	struct key_tab *ktp;  /* pointer into the command table */
-	NBIND *nptr;          /* pointer into the name binding table */
+	struct name_bind *nptr;          /* pointer into the name binding table */
 	struct buffer *bp;    /* buffer to put binding list into */
 	int cpos;             /* current position to use in outseq */
 	char outseq[80];      /* output buffer for keystroke sequence */
@@ -616,7 +616,7 @@ int (*getbind(int c))(int, int)
  */
 char *getfname(fn_t func)
 {
-	NBIND *nptr;	/* pointer into the name binding table */
+	struct name_bind *nptr;	/* pointer into the name binding table */
 
 	/* skim through the table, looking for a match */
 	nptr = &names[0];
@@ -636,7 +636,7 @@ char *getfname(fn_t func)
  */
 int (*fncmatch(char *fname)) (int, int)
 {
-	NBIND *ffp;	/* pointer to entry in name binding table */
+	struct name_bind *ffp;	/* pointer to entry in name binding table */
 
 	/* scan through the table, returning any match */
 	ffp = &names[0];

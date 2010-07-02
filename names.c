@@ -9,7 +9,7 @@
 #include "edef.h"
 #include "efunc.h"
 
-NBIND names[] = {
+struct name_bind names[] = {
 	{"abort-command", ctrlg},
 	{"add-mode", setmode},
 	{"add-global-mode", setgmode},
