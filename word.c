@@ -651,7 +651,7 @@ int wordcount(int f, int n)
 	int nlines;		/* total number of lines in region */
 	int avgch;		/* average number of chars/word */
 	int status;		/* status return code */
-	REGION region;		/* region to look at */
+	struct region region;		/* region to look at */
 
 	/* make sure we have a region to count */
 	if ((status = getregion(&region)) != TRUE)

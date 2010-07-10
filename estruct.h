@@ -509,11 +509,11 @@ struct buffer {
  * The starting position of a region, and the size of the region in
  * characters, is kept in a region structure.  Used by the region commands.
  */
-typedef struct {
+struct region {
 	struct line *r_linep;	/* Origin struct line address.         */
 	short r_offset;		/* Origin struct line offset.          */
 	long r_size;		/* Length in characters.        */
-} REGION;
+};
 
 /*
  * All text is kept in circularly linked lists of "struct line" structures. These

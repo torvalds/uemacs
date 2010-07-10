@@ -1,4 +1,4 @@
-/*	REGION.C
+/*	region.c
  *
  * The routines in this file
  * deal with the region, that magic space
@@ -23,7 +23,7 @@
 int killregion(int f, int n)
 {
 	int s;
-	REGION region;
+	struct region region;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -48,7 +48,7 @@ int copyregion(int f, int n)
 	struct line *linep;
 	int loffs;
 	int s;
-	REGION region;
+	struct region region;
 
 	if ((s = getregion(&region)) != TRUE)
 		return (s);
@@ -87,7 +87,7 @@ int lowerregion(int f, int n)
 	int loffs;
 	int c;
 	int s;
-	REGION region;
+	struct region region;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -124,7 +124,7 @@ int upperregion(int f, int n)
 	int loffs;
 	int c;
 	int s;
-	REGION region;
+	struct region region;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -150,7 +150,7 @@ int upperregion(int f, int n)
 /*
  * This routine figures out the
  * bounds of the region in the current window, and
- * fills in the fields of the "REGION" structure pointed
+ * fills in the fields of the "struct region" structure pointed
  * to by "rp". Because the dot and mark are usually very
  * close together, we scan outward from dot looking for
  * mark. This should save time. Return a standard code.
@@ -158,7 +158,7 @@ int upperregion(int f, int n)
  * an "ABORT" status; we might make this have the
  * conform thing later.
  */
-int getregion(REGION *rp)
+int getregion(struct region *rp)
 {
 	struct line *flp;
 	struct line *blp;

@@ -161,7 +161,7 @@ extern int killregion(int f, int n);
 extern int copyregion(int f, int n);
 extern int lowerregion(int f, int n);
 extern int upperregion(int f, int n);
-extern int getregion(REGION *rp);
+extern int getregion(struct region *rp);
 
 /* posix.c */
 extern void ttopen(void);
