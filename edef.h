@@ -1,4 +1,4 @@
-/*	EDEF.H
+/*	edef.h
  *
  *	Global variable definitions
  *
@@ -7,17 +7,19 @@
  *	greatly modified by Daniel Lawrence
  *	modified by Petri Kutvonen
  */
+#ifndef EDEF_H_
+#define EDEF_H_
 
-/* some global fuction declarations */
 
 #include <stdlib.h>
 #include <string.h>
 
+/* Some global fuction declarations. */
 typedef int (*fn_t)(int, int);
 
 struct video;
 
-/* initialized global external declarations */
+/* Initialized global external declarations. */
 
 extern int fillcol;		/* Fill column                  */
 extern short kbdm[];		/* Holds kayboard macro data    */
@@ -33,7 +35,7 @@ extern char *modename[];	/* text names of modes          */
 extern char *mode2name[];	/* text names of modes          */
 extern char modecode[];		/* letters to represent modes   */
 extern struct key_tab keytab[];	/* key bind to functions table  */
-extern struct name_bind names[];		/* name to function table       */
+extern struct name_bind names[];/* name to function table */
 extern int gmode;		/* global editor mode           */
 extern int gflags;		/* global control flag          */
 extern int gfcolor;		/* global forgrnd color (white) */
@@ -96,7 +98,7 @@ extern int justflag;		/* justify, don't fill */
 extern int overlap;		/* line overlap in forw/back page */
 extern int scrollcount;		/* number of lines to scroll */
 
-/* uninitialized global external declarations */
+/* Uninitialized global external declarations. */
 
 extern int currow;		/* Cursor row                   */
 extern int curcol;		/* Cursor column                */
@@ -105,17 +107,18 @@ extern int lastflag;		/* Flags, last command          */
 extern int curgoal;		/* Goal for C-P, C-N            */
 extern window_t *curwp;		/* Current window               */
 extern struct buffer *curbp;		/* Current buffer               */
-extern window_t *wheadp;	/* Head of list of windows      */
+extern window_t *wheadp;                /* Head of list of windows      */
 extern struct buffer *bheadp;		/* Head of list of buffers      */
 extern struct buffer *blistp;		/* Buffer for C-X C-B           */
 
-extern struct buffer *bfind(char *bname, int cflag, int bflag); /* Lookup a buffer by name      */
-extern window_t *wpopup(void);	/* Pop up window creation       */
-extern struct line *lalloc(int);	/* Allocate a line              */
-extern char sres[NBUFN];	/* current screen resolution    */
-extern char pat[];		/* Search pattern               */
-extern char tap[];		/* Reversed pattern array.      */
-extern char rpat[];		/* replacement pattern          */
+/* Lookup a buffer by name. */
+extern struct buffer *bfind(char *bname, int cflag, int bflag);
+extern window_t *wpopup(void);	        /* Pop up window creation.      */
+extern struct line *lalloc(int);	/* Allocate a line.             */
+extern char sres[NBUFN];	        /* Current screen resolution.   */
+extern char pat[];		        /* Search pattern.              */
+extern char tap[];		        /* Reversed pattern array.      */
+extern char rpat[];		        /* Replacement pattern.         */
 
 extern unsigned int matchlen;
 extern unsigned int mlenold;
@@ -126,17 +129,19 @@ extern int matchoff;
 #if	MAGIC
 extern short int magical;
 extern short int rmagical;
-extern MC mcpat[NPAT];		/* the magic pattern            */
-extern MC tapcm[NPAT];		/* the reversed magic pattern   */
-extern RMC rmcpat[NPAT];	/* the replacement magic array  */
+extern MC mcpat[NPAT];		/* The magic pattern.           */
+extern MC tapcm[NPAT];		/* The reversed magic patterni. */
+extern RMC rmcpat[NPAT];	/* The replacement magic array. */
 #endif
 
-extern char *dname[];		/* directive name table         */
+extern char *dname[];		/* Directive name table.        */
 
 #if	DEBUGM
-/*	vars needed for macro debugging output	*/
-extern char outline[];		/* global string to hold debug line text */
+/* Vars needed for macro debugging output. */
+extern char outline[];		/* Global string to hold debug line text. */
 #endif
 
-/* terminal table defined only in TERM.C */
-extern TERM term;		/* Terminal information.        */
+/* Terminal table defined only in term.c */
+extern struct terminal term;
+
+#endif  /* EDEF_H_ */

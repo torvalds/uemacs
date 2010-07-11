@@ -99,7 +99,7 @@ int ctrans[] =			/* ansi to ibm color translation table */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-TERM term = {
+struct terminal term = {
 	NROW - 1,
 	NROW - 1,
 	NCOL,

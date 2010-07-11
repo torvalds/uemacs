@@ -546,7 +546,7 @@ struct line {
  * "termp->t_field" style in the future, to make it possible to run more than
  * one terminal type.
  */
-typedef struct {
+struct terminal {
 	short t_mrow;		/* max number of rows allowable */
 	short t_nrow;		/* current number of rows used  */
 	short t_mcol;		/* max Number of columns.       */
@@ -574,7 +574,7 @@ typedef struct {
 #if     SCROLLCODE
 	void (*t_scroll)(int, int,int);	/* scroll a region of the screen */
 #endif
-} TERM;
+};
 
 /*	TEMPORARY macros for terminal I/O  (to be placed in a machine
 					    dependant place later)	*/

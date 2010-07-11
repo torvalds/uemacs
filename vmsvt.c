@@ -46,7 +46,7 @@ static int termtype;
 
 #if SCROLLCODE
 
-#define SMG$K_SCROLL_FORWARD 	561	/* from sys$library:smgtrmptr.h */
+#define SMG$K_SCROLL_FORWARD    561	/* from sys$library:smgtrmptr.h */
 #define SMG$K_SCROLL_REVERSE	562
 #define SMG$K_SET_SCROLL_REGION	572
 
@@ -55,7 +55,7 @@ static char *scroll_forward, *scroll_reverse;
 #endif
 
 /* Dispatch table. All hard fields just point into the terminal I/O code. */
-TERM term = {
+struct terminal term = {
 #if	PKCODE
 	MAXROW,
 #else

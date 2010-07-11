@@ -75,8 +75,8 @@ static int term_init_ok = 0;
 static char *CS, *DL, *AL, *SF, *SR;
 #endif
 
-TERM term = {
-	0,			/* these four values are set dynamically at open time */
+struct terminal term = {
+	0, /* These four values are set dynamically at open time. */
 	0,
 	0,
 	0,

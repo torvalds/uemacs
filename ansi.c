@@ -56,7 +56,7 @@ int cbcolor = -1;		/* current background color */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-TERM term = {
+struct terminal term = {
 #if	PKCODE
 	MROW - 1,
 #else

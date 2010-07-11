@@ -1,4 +1,4 @@
-/*	VT52.C
+/*	vt52.c
  *
  * The routines in this file
  * provide support for VT52 style terminals
@@ -43,17 +43,16 @@ extern int vt52cres();
 extern int vt52kopen();
 extern int vt52kclose();
 
-#if	COLOR
+#if COLOR
 extern int vt52fcol();
 extern int vt52bcol();
 #endif
 
 /*
- * Dispatch table. All the
- * hard fields just point into the
- * terminal I/O code.
+ * Dispatch table.
+ * All the hard fields just point into the terminal I/O code.
  */
-TERM term = {
+struct terminal term = {
 	NROW - 1,
 	NROW - 1,
 	NCOL,
