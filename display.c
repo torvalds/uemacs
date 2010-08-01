@@ -48,16 +48,16 @@ static int displaying = TRUE;
 int chg_width, chg_height;
 #endif
 
-static int reframe(window_t *wp);
-static void updone(window_t *wp);
-static void updall(window_t *wp);
+static int reframe(struct window *wp);
+static void updone(struct window *wp);
+static void updall(struct window *wp);
 static int scrolls(int inserts);
 static void scrscroll(int from, int to, int count);
 static int texttest(int vrow, int prow);
 static int endofline(char *s, int n);
 static void updext(void);
 static int updateline(int row, struct video *vp1, struct video *vp2);
-static void modeline(window_t *wp);
+static void modeline(struct window *wp);
 static void mlputi(int i, int r);
 static void mlputli(long l, int r);
 static void mlputf(int s);
@@ -259,7 +259,7 @@ static int scrflags;
  */
 int update(int force)
 {
-	window_t *wp;
+	struct window *wp;
 
 #if	TYPEAH && ! PKCODE
 	if (force == FALSE && typahead())
@@ -281,7 +281,7 @@ int update(int force)
 		if (wp->w_flag & WFMODE) {
 			if (wp->w_bufp->b_nwnd > 1) {
 				/* make sure all previous windows have this */
-				window_t *owp;
+				struct window *owp;
 				owp = wheadp;
 				while (owp != NULL) {
 					if (owp->w_bufp == wp->w_bufp)
@@ -359,7 +359,7 @@ int update(int force)
  *	check to see if the cursor is on in the window
  *	and re-frame it if needed or wanted
  */
-static int reframe(window_t *wp)
+static int reframe(struct window *wp)
 {
 	struct line *lp, *lp0;
 	int i = 0;
@@ -447,9 +447,9 @@ static int reframe(window_t *wp)
  * updone:
  *	update the current line	to the virtual screen
  *
- * window_t *wp;		window to update current line in
+ * struct window *wp;		window to update current line in
  */
-static void updone(window_t *wp)
+static void updone(struct window *wp)
 {
 	struct line *lp;	/* line to update */
 	int sline;	/* physical screen line to update */
@@ -480,9 +480,9 @@ static void updone(window_t *wp)
  * updall:
  *	update all the lines in a window on the virtual screen
  *
- * window_t *wp;		window to update lines in
+ * struct window *wp;		window to update lines in
  */
-static void updall(window_t *wp)
+static void updall(struct window *wp)
 {
 	struct line *lp;	/* line to update */
 	int sline;	/* physical screen line to update */
@@ -563,7 +563,7 @@ void updpos(void)
  */
 void upddex(void)
 {
-	window_t *wp;
+	struct window *wp;
 	struct line *lp;
 	int i, j;
 
@@ -1084,7 +1084,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
  * change the modeline format by hacking at this routine. Called by "update"
  * any time there is a dirty window.
  */
-static void modeline(window_t *wp)
+static void modeline(struct window *wp)
 {
 	char *cp;
 	int c;
@@ -1276,7 +1276,7 @@ static void modeline(window_t *wp)
 
 void upmode(void)
 {				/* update all the mode lines */
-	window_t *wp;
+	struct window *wp;
 
 	wp = wheadp;
 	while (wp != NULL) {

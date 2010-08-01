@@ -50,7 +50,7 @@ struct line *lalloc(int used)
 void lfree(struct line *lp)
 {
 	struct buffer *bp;
-	window_t *wp;
+	struct window *wp;
 
 	wp = wheadp;
 	while (wp != NULL) {
@@ -94,7 +94,7 @@ void lfree(struct line *lp)
  */
 void lchange(int flag)
 {
-	window_t *wp;
+	struct window *wp;
 
 	if (curbp->b_nwnd != 1)	/* Ensure hard.     */
 		flag = WFHARD;
@@ -165,7 +165,7 @@ int linsert(int n, int c)
 	struct line *lp3;
 	int doto;
 	int i;
-	window_t *wp;
+	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -287,7 +287,7 @@ int lnewline(void)
 	struct line *lp1;
 	struct line *lp2;
 	int doto;
-	window_t *wp;
+	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -349,7 +349,7 @@ int ldelete(long n, int kflag)
 	struct line *dotp;
 	int doto;
 	int chunk;
-	window_t *wp;
+	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */
@@ -472,7 +472,7 @@ int ldelnewline(void)
 	struct line *lp1;
 	struct line *lp2;
 	struct line *lp3;
-	window_t *wp;
+	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */

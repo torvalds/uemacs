@@ -80,7 +80,7 @@ int viewfile(int f, int n)
 {				/* visit a file in VIEW mode */
 	char fname[NFILEN];	/* file user wishes to find */
 	int s;		/* status return */
-	window_t *wp;	/* scan for windows that need updating */
+	struct window *wp;	/* scan for windows that need updating */
 
 	if (restflag)		/* don't allow this command if restricted */
 		return (resterr());
@@ -210,7 +210,7 @@ int readin(char *fname, int lockfl)
 	struct line *lp1;
 	struct line *lp2;
 	int i;
-	window_t *wp;
+	struct window *wp;
 	struct buffer *bp;
 	int s;
 	int nbytes;
@@ -393,7 +393,7 @@ void unqname(char *name)
  */
 int filewrite(int f, int n)
 {
-	window_t *wp;
+	struct window *wp;
 	int s;
 	char fname[NFILEN];
 
@@ -424,7 +424,7 @@ int filewrite(int f, int n)
  */
 int filesave(int f, int n)
 {
-	window_t *wp;
+	struct window *wp;
 	int s;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -518,7 +518,7 @@ int writeout(char *fn)
  */
 int filename(int f, int n)
 {
-	window_t *wp;
+	struct window *wp;
 	int s;
 	char fname[NFILEN];
 

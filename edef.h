@@ -67,7 +67,7 @@ extern char *cname[];		/* names of colors              */
 extern KILL *kbufp;		/* current kill buffer chunk pointer */
 extern KILL *kbufh;		/* kill buffer header pointer   */
 extern int kused;		/* # of bytes used in KB        */
-extern window_t *swindow;	/* saved window pointer         */
+extern struct window *swindow;	/* saved window pointer         */
 extern int cryptflag;		/* currently encrypting?        */
 extern short *kbdptr;		/* current position in keyboard buf */
 extern short *kbdend;		/* ptr to end of the keyboard */
@@ -105,15 +105,15 @@ extern int curcol;		/* Cursor column                */
 extern int thisflag;		/* Flags, this command          */
 extern int lastflag;		/* Flags, last command          */
 extern int curgoal;		/* Goal for C-P, C-N            */
-extern window_t *curwp;		/* Current window               */
+extern struct window *curwp;		/* Current window               */
 extern struct buffer *curbp;		/* Current buffer               */
-extern window_t *wheadp;                /* Head of list of windows      */
+extern struct window *wheadp;                /* Head of list of windows      */
 extern struct buffer *bheadp;		/* Head of list of buffers      */
 extern struct buffer *blistp;		/* Buffer for C-X C-B           */
 
 /* Lookup a buffer by name. */
 extern struct buffer *bfind(char *bname, int cflag, int bflag);
-extern window_t *wpopup(void);	        /* Pop up window creation.      */
+extern struct window *wpopup(void);	        /* Pop up window creation.      */
 extern struct line *lalloc(int);	/* Allocate a line.             */
 extern char sres[NBUFN];	        /* Current screen resolution.   */
 extern char pat[];		        /* Search pattern.              */

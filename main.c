@@ -428,11 +428,11 @@ int main(int argc, char **argv)
 void edinit(char *bname)
 {
 	struct buffer *bp;
-	window_t *wp;
+	struct window *wp;
 
 	bp = bfind(bname, TRUE, 0);	/* First buffer         */
 	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
-	wp = (window_t *) malloc(sizeof(window_t));	/* First window         */
+	wp = (struct window *)malloc(sizeof(struct window));	/* First window         */
 	if (bp == NULL || wp == NULL || blistp == NULL)
 		exit(1);
 	curbp = bp;		/* Make this current    */
@@ -818,8 +818,8 @@ dspram()
 int cexit(int status)
 {
 	struct buffer *bp;	/* buffer list pointer */
-	window_t *wp;	/* window list pointer */
-	window_t *tp;	/* temporary window pointer */
+	struct window *wp;	/* window list pointer */
+	struct window *tp;	/* temporary window pointer */
 
 	/* first clean up the windows */
 	wp = wheadp;

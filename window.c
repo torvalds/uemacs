@@ -53,7 +53,7 @@ int redraw(int f, int n)
  */
 int nextwind(int f, int n)
 {
-	window_t *wp;
+	struct window *wp;
 	int nwindows;	/* total number of windows */
 
 	if (f) {
@@ -96,8 +96,8 @@ int nextwind(int f, int n)
  */
 int prevwind(int f, int n)
 {
-	window_t *wp1;
-	window_t *wp2;
+	struct window *wp1;
+	struct window *wp2;
 
 	/* if we have an argument, we mean the nth window from the bottom */
 	if (f)
@@ -184,7 +184,7 @@ int mvupwind(int f, int n)
  */
 int onlywind(int f, int n)
 {
-	window_t *wp;
+	struct window *wp;
 	struct line *lp;
 	int i;
 
@@ -231,8 +231,8 @@ int onlywind(int f, int n)
  */
 int delwind(int f, int n)
 {
-	window_t *wp;	/* window to recieve deleted space */
-	window_t *lwp;	/* ptr window before curwp */
+	struct window *wp;	/* window to recieve deleted space */
+	struct window *lwp;	/* ptr window before curwp */
 	int target;	/* target line to search for */
 
 	/* if there is only one window, don't delete it */
@@ -309,19 +309,19 @@ int delwind(int f, int n)
  */
 int splitwind(int f, int n)
 {
-	window_t *wp;
+	struct window *wp;
 	struct line *lp;
 	int ntru;
 	int ntrl;
 	int ntrd;
-	window_t *wp1;
-	window_t *wp2;
+	struct window *wp1;
+	struct window *wp2;
 
 	if (curwp->w_ntrows < 3) {
 		mlwrite("Cannot split a %d line window", curwp->w_ntrows);
 		return (FALSE);
 	}
-	if ((wp = (window_t *) malloc(sizeof(window_t))) == NULL) {
+	if ((wp = (struct window *)malloc(sizeof(struct window))) == NULL) {
 		mlwrite("(OUT OF MEMORY)");
 		return (FALSE);
 	}
@@ -391,7 +391,7 @@ int splitwind(int f, int n)
  */
 int enlargewind(int f, int n)
 {
-	window_t *adjwp;
+	struct window *adjwp;
 	struct line *lp;
 	int i;
 
@@ -442,7 +442,7 @@ int enlargewind(int f, int n)
  */
 int shrinkwind(int f, int n)
 {
-	window_t *adjwp;
+	struct window *adjwp;
 	struct line *lp;
 	int i;
 
@@ -515,9 +515,9 @@ int resize(int f, int n)
  * Pick the uppermost window that isn't the current window. An LRU algorithm
  * might be better. Return a pointer, or NULL on error.
  */
-window_t *wpopup(void)
+struct window *wpopup(void)
 {
-	window_t *wp;
+	struct window *wp;
 
 	if (wheadp->w_wndp == NULL	/* Only 1 window        */
 	    && splitwind(FALSE, 0) == FALSE)	/* and it won't split   */
@@ -552,7 +552,7 @@ int savewnd(int f, int n)
 
 int restwnd(int f, int n)
 {				/* restore the saved screen */
-	window_t *wp;
+	struct window *wp;
 
 	/* find the window */
 	wp = wheadp;
@@ -578,9 +578,9 @@ int restwnd(int f, int n)
  */
 int newsize(int f, int n)
 {
-	window_t *wp;		/* current window being examined */
-	window_t *nextwp;	/* next window to scan */
-	window_t *lastwp;	/* last window scanned */
+	struct window *wp;		/* current window being examined */
+	struct window *nextwp;	/* next window to scan */
+	struct window *lastwp;	/* last window scanned */
 	int lastline;		/* screen line of last line of current window */
 
 	/* if the command defaults, assume the largest */
@@ -666,7 +666,7 @@ int newsize(int f, int n)
  */
 int newwidth(int f, int n)
 {
-	window_t *wp;
+	struct window *wp;
 
 	/* if the command defaults, assume the largest */
 	if (f == FALSE)

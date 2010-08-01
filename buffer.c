@@ -78,7 +78,7 @@ int nextbuffer(int f, int n)
  */
 int swbuffer(struct buffer *bp)
 {
-	window_t *wp;
+	struct window *wp;
 
 	if (--curbp->b_nwnd == 0) {	/* Last use.            */
 		curbp->b_dotp = curwp->w_dotp;
@@ -219,7 +219,7 @@ int namebuffer(int f, int n)
  */
 int listbuffers(int f, int n)
 {
-	window_t *wp;
+	struct window *wp;
 	struct buffer *bp;
 	int s;
 

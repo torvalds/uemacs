@@ -61,7 +61,7 @@ char *cname[] = {		/* names of colors              */
 KILL *kbufp = NULL;		/* current kill buffer chunk pointer    */
 KILL *kbufh = NULL;		/* kill buffer header pointer           */
 int kused = KBLOCK;		/* # of bytes used in kill buffer       */
-window_t *swindow = NULL;	/* saved window pointer                 */
+struct window *swindow = NULL;	/* saved window pointer                 */
 int cryptflag = FALSE;		/* currently encrypting?                */
 short *kbdptr;			/* current position in keyboard buf */
 short *kbdend = &kbdm[0];	/* ptr to end of the keyboard */
@@ -99,9 +99,9 @@ int curcol;			/* Cursor column                */
 int thisflag;			/* Flags, this command          */
 int lastflag;			/* Flags, last command          */
 int curgoal;			/* Goal for C-P, C-N            */
-window_t *curwp;		/* Current window               */
+struct window *curwp;		/* Current window               */
 struct buffer *curbp;			/* Current buffer               */
-window_t *wheadp;		/* Head of list of windows      */
+struct window *wheadp;		/* Head of list of windows      */
 struct buffer *bheadp;			/* Head of list of buffers      */
 struct buffer *blistp;			/* Buffer for C-X C-B           */
 
