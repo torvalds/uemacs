@@ -1,4 +1,4 @@
-/* 	IBMPC.C
+/*	ibmpc.c
  *
  * The routines in this file provide support for the IBM-PC and other
  * compatible terminals. It goes directly to the graphics RAM to do
@@ -130,24 +130,26 @@ struct terminal term = {
 };
 
 #if	COLOR
-ibmfcol(color)
-    /* set the current output color */
-int color;			/* color to set */
-
+/* Set the current output color.
+ *
+ * @color: color to set.
+ */
+void ibmfcol(int color)
 {
 	cfcolor = ctrans[color];
 }
 
-ibmbcol(color)
-    /* set the current background color */
-int color;			/* color to set */
-
+/* Set the current background color.
+ *
+ * @color: color to set.
+ */
+void ibmbcol(int color)
 {
 	cbcolor = ctrans[color];
 }
 #endif
 
-ibmmove(row, col)
+void ibmmove(int row, int col)
 {
 	rg.h.ah = 2;		/* set cursor position function code */
 	rg.h.dl = col;
@@ -156,7 +158,7 @@ ibmmove(row, col)
 	int86(0x10, &rg, &rg);
 }
 
-ibmeeol()
+void ibmeeol(void)
 {				/* erase to the end of the line */
 	unsigned int attr;	/* attribute byte mask to place in RAM */
 	unsigned int *lnptr;	/* pointer to the destination line */
@@ -197,11 +199,8 @@ ibmeeol()
 
 }
 
-ibmputc(ch)
-    /* put a character at the current position in the
-       current colors */
-int ch;
-
+/* Put a character at the current position in the current colors */
+void ibmputc(int ch)
 {
 	rg.h.ah = 14;		/* write char to screen with current attrs */
 	rg.h.al = ch;
@@ -216,7 +215,7 @@ int ch;
 	int86(0x10, &rg, &rg);
 }
 
-ibmeeop()
+void ibmeeop(void)
 {
 	int attr;		/* attribute to fill screen with */
 
@@ -238,67 +237,73 @@ ibmeeop()
 	int86(0x10, &rg, &rg);
 }
 
-ibmrev(state)
-    /* change reverse video state */
-int state;			/* TRUE = reverse, FALSE = normal */
-
+/* Change reverse video state.
+ *
+ * @state: TRUE = reverse, FALSE = normal.
+ */
+void ibmrev(int state)
 {
 	/* This never gets used under the IBM-PC driver */
 }
 
-ibmcres(res)
-    /* change screen resolution */
-char *res;			/* resolution to change to */
-
+/* Change screen resolution.
+ *
+ * @res: resolution to change to.
+ */
+void ibmcres(char *res)
 {
-	int i;			/* index */
-
-	for (i = 0; i < NDRIVE; i++)
+	int i;
+	for (i = 0; i < NDRIVE; i++) {
 		if (strcmp(res, drvname[i]) == 0) {
 			scinit(i);
-			return (TRUE);
+			return TRUE;
 		}
-	return (FALSE);
+	}
+	return FALSE;
 }
 
 #if SCROLLCODE
 
-/* move howmany lines starting at from to to */
-ibmscroll_reg(from, to, howmany)
+/* Move howmany lines starting at from to to. */
+void ibmscroll_reg(from, to, howmany)
 {
 	int i;
 
-	if (to < from)
-		for (i = 0; i < howmany; i++)
+	if (to < from) {
+		for (i = 0; i < howmany; i++) {
 			movmem(scptr[from + i], scptr[to + i],
 			       term.t_ncol * 2);
-	else if (to > from)
-		for (i = howmany - 1; i >= 0; i--)
+		}
+	}
+	else if (to > from) {
+		for (i = howmany - 1; i >= 0; i--) {
 			movmem(scptr[from + i], scptr[to + i],
 			       term.t_ncol * 2);
-	return;
+		}
+	}
 }
 
 #endif
 
-spal()
-{				/* reset the pallette registers */
+/* Reset the pallette registers. */
+void spal(void)
+{
 	/* nothin here now..... */
 }
 
-ibmbeep()
+void ibmbeep(void)
 {
 	bdos(6, BEL, 0);
 }
 
-ibmopen()
+void ibmopen(void)
 {
 	scinit(CDSENSE);
 	revexist = TRUE;
 	ttopen();
 }
 
-ibmclose()
+void ibmclose(void)
 {
 #if	COLOR
 	ibmfcol(7);
@@ -315,18 +320,21 @@ ibmclose()
 	ttclose();
 }
 
-ibmkopen()
-{				/* open the keyboard */
+/* Open the keyboard. */
+void ibmkopen(void)
+{
 }
 
-ibmkclose()
-{				/* close the keyboard */
+/* Close the keyboard. */
+void ibmkclose(void)
+{
 }
 
-scinit(type)
-    /* initialize the screen head pointers */
-int type;			/* type of adapter to init for */
-
+/* Initialize the screen head pointers.
+ *
+ * @type: type of adapter to init for.
+ */
+static int scinit(int type)
 {
 	union {
 		long laddr;	/* long form of address */
@@ -403,8 +411,7 @@ int type;			/* type of adapter to init for */
 		   CGA		set to CGA	EGAexist = FALSE
 		   EGA		set to CGA	EGAexist = TRUE
 */
-
-int getboard()
+int getboard(void)
 {
 	int type;		/* board type to return */
 
@@ -421,8 +428,9 @@ int getboard()
 	return (type);
 }
 
-egaopen()
-{				/* init the computer to work with the EGA */
+/* init the computer to work with the EGA */
+void egaopen(void)
+{
 	/* put the beast into EGA 43 row mode */
 	rg.x.ax = 3;
 	int86(16, &rg, &rg);
@@ -445,20 +453,21 @@ egaopen()
 	outp(0x3d5, 6);
 }
 
-egaclose()
+void egaclose(void)
 {
 	/* put the beast into 80 column mode */
 	rg.x.ax = 3;
 	int86(16, &rg, &rg);
 }
 
-scwrite(row, outstr, forg, bacg)
-    /* write a line out */
-int row;			/* row of screen to place outstr on */
-char *outstr;			/* string to write out (must be term.t_ncol long) */
-int forg;			/* forground color of string to write */
-int bacg;			/* background color */
-
+/* Write a line out.
+ *
+ * @row:    row of screen to place outstr on.
+ * @outstr: string to write out (must be term.t_ncol long).
+ * @forg:   forground color of string to write.
+ * @bacg:   background color.
+ */
+void scwrite(int row, char *outstr, int forg, int bacg)
 {
 	unsigned int attr;	/* attribute byte mask to place in RAM */
 	unsigned int *lnptr;	/* pointer to the destination line */
@@ -467,9 +476,7 @@ int bacg;			/* background color */
 	/* build the attribute byte and setup the screen pointer */
 #if	COLOR
 	if (dtype != CDMONO)
-		attr =
-		    (((ctrans[bacg] & 15) << 4) | (ctrans[forg] & 15)) <<
-		    8;
+		attr = (((ctrans[bacg] & 15) << 4) | (ctrans[forg] & 15)) << 8;
 	else
 		attr = (((bacg & 15) << 4) | (forg & 15)) << 8;
 #else
@@ -492,13 +499,15 @@ int bacg;			/* background color */
 }
 
 #if	FNLABEL
-fnclabel(f, n)
-    /* label a function key */
-int f, n;			/* default flag, numeric argument [unused] */
-
+/* Label a function key.
+ *
+ * @f: default flag
+ * @n: numeric argument [unused].
+ */
+int fnclabel(int f, int n)
 {
 	/* on machines with no function keys...don't bother */
-	return (TRUE);
+	return TRUE;
 }
 #endif
 #endif
