@@ -5,14 +5,13 @@
  *	written 1986 by Daniel Lawrence
  *	modified by Petri Kutvonen
  */
-
 #ifndef EVAR_H_
 #define EVAR_H_
 
-/* Max #chars in a var name */
+/* Max #chars in a var name. */
 #define	NVSIZE	10
 
-/* Structure to hold user variables and their definitions */
+/* Structure to hold user variables and their definitions. */
 struct user_variable {
 	char u_name[NVSIZE + 1]; /* name of user variable */
 	char *u_value;		 /* value (string) */
@@ -23,7 +22,7 @@ struct user_variable {
 /* User variables */
 static struct user_variable uv[MAXVARS + 1];
 
-/* List of recognized environment variables */
+/* List of recognized environment variables. */
 
 static char *envars[] = {
 	"fillcol",		/* current fill column */
@@ -71,7 +70,7 @@ static char *envars[] = {
 #endif
 };
 
-/*	and its preprocesor definitions		*/
+/* And its preprocesor definitions. */
 
 #define	EVFILLCOL	0
 #define	EVPAGELEN	1
@@ -115,60 +114,62 @@ static char *envars[] = {
 #define EVSCROLLCOUNT	39
 #define EVSCROLL	40
 
-/* List of recognized user functions */
-struct user_function {
-	char *f_name;  /* name of function */
-	int f_type;    /* 1 = monamic, 2 = dynamic */
+enum function_type {
+	NILNAMIC = 0,
+	MONAMIC,
+	DYNAMIC,
+	TRINAMIC,
 };
 
-#define	NILNAMIC	0
-#define	MONAMIC		1
-#define	DYNAMIC		2
-#define	TRINAMIC	3
+/* List of recognized user functions. */
+struct user_function {
+	char *f_name;
+	enum function_type f_type;
+};
 
 static struct user_function funcs[] = {
-	{ "add", DYNAMIC },		/* add two numbers together */
-	{ "sub", DYNAMIC },		/* subtraction */
-	{ "tim", DYNAMIC },		/* multiplication */
-	{ "div", DYNAMIC },		/* division */
-	{ "mod", DYNAMIC },		/* mod */
-	{ "neg", MONAMIC },		/* negate */
-	{ "cat", DYNAMIC },		/* concatinate string */
-	{ "lef", DYNAMIC },		/* left string(string, len) */
-	{ "rig", DYNAMIC },		/* right string(string, pos) */
-	{ "mid", TRINAMIC },		/* mid string(string, pos, len) */
-	{ "not", MONAMIC },		/* logical not */
-	{ "equ", DYNAMIC },		/* logical equality check */
-	{ "les", DYNAMIC },		/* logical less than */
-	{ "gre", DYNAMIC },		/* logical greater than */
-	{ "seq", DYNAMIC },		/* string logical equality check */
-	{ "sle", DYNAMIC },		/* string logical less than */
-	{ "sgr", DYNAMIC },		/* string logical greater than */
-	{ "ind", MONAMIC },		/* evaluate indirect value */
-	{ "and", DYNAMIC },		/* logical and */
-	{ "or", DYNAMIC },		/* logical or */
-	{ "len", MONAMIC },		/* string length */
-	{ "upp", MONAMIC },		/* uppercase string */
-	{ "low", MONAMIC },		/* lower case string */
-	{ "tru", MONAMIC },		/* Truth of the universe logical test */
-	{ "asc", MONAMIC },		/* char to integer conversion */
-	{ "chr", MONAMIC },		/* integer to char conversion */
-	{ "gtk", NILNAMIC },		/* get 1 charater */
-	{ "rnd", MONAMIC },		/* get a random number */
-	{ "abs", MONAMIC },		/* absolute value of a number */
-	{ "sin", DYNAMIC },		/* find the index of one string in another */
-	{ "env", MONAMIC },		/* retrieve a system environment var */
-	{ "bin", MONAMIC },		/* loopup what function name is bound to a key */
-	{ "exi", MONAMIC },		/* check if a file exists */
-	{ "fin", MONAMIC },		/* look for a file on the path... */
-	{ "ban", DYNAMIC },		/* bitwise and   9-10-87  jwm */
-	{ "bor", DYNAMIC },		/* bitwise or    9-10-87  jwm */
-	{ "bxo", DYNAMIC },		/* bitwise xor   9-10-87  jwm */
-	{ "bno", MONAMIC },		/* bitwise not */
-	{ "xla", TRINAMIC },		/* XLATE character string translation */
+	{ "add", DYNAMIC },	/* add two numbers together */
+	{ "sub", DYNAMIC },	/* subtraction */
+	{ "tim", DYNAMIC },	/* multiplication */
+	{ "div", DYNAMIC },	/* division */
+	{ "mod", DYNAMIC },	/* mod */
+	{ "neg", MONAMIC },	/* negate */
+	{ "cat", DYNAMIC },	/* concatinate string */
+	{ "lef", DYNAMIC },	/* left string(string, len) */
+	{ "rig", DYNAMIC },	/* right string(string, pos) */
+	{ "mid", TRINAMIC },	/* mid string(string, pos, len) */
+	{ "not", MONAMIC },	/* logical not */
+	{ "equ", DYNAMIC },	/* logical equality check */
+	{ "les", DYNAMIC },	/* logical less than */
+	{ "gre", DYNAMIC },	/* logical greater than */
+	{ "seq", DYNAMIC },	/* string logical equality check */
+	{ "sle", DYNAMIC },	/* string logical less than */
+	{ "sgr", DYNAMIC },	/* string logical greater than */
+	{ "ind", MONAMIC },	/* evaluate indirect value */
+	{ "and", DYNAMIC },	/* logical and */
+	{ "or", DYNAMIC },	/* logical or */
+	{ "len", MONAMIC },	/* string length */
+	{ "upp", MONAMIC },	/* uppercase string */
+	{ "low", MONAMIC },	/* lower case string */
+	{ "tru", MONAMIC },	/* Truth of the universe logical test */
+	{ "asc", MONAMIC },	/* char to integer conversion */
+	{ "chr", MONAMIC },	/* integer to char conversion */
+	{ "gtk", NILNAMIC },	/* get 1 charater */
+	{ "rnd", MONAMIC },	/* get a random number */
+	{ "abs", MONAMIC },	/* absolute value of a number */
+	{ "sin", DYNAMIC },	/* find the index of one string in another */
+	{ "env", MONAMIC },	/* retrieve a system environment var */
+	{ "bin", MONAMIC },	/* loopup what function name is bound to a key */
+	{ "exi", MONAMIC },	/* check if a file exists */
+	{ "fin", MONAMIC },	/* look for a file on the path... */
+	{ "ban", DYNAMIC },	/* bitwise and   9-10-87  jwm */
+	{ "bor", DYNAMIC },	/* bitwise or    9-10-87  jwm */
+	{ "bxo", DYNAMIC },	/* bitwise xor   9-10-87  jwm */
+	{ "bno", MONAMIC },	/* bitwise not */
+	{ "xla", TRINAMIC },	/* XLATE character string translation */
 };
 
-/*	and its preprocesor definitions		*/
+/* And its preprocesor definitions. */
 
 #define	UFADD		0
 #define	UFSUB		1
