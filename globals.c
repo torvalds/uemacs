@@ -58,8 +58,8 @@ char *cname[] = {		/* names of colors              */
 	    , "HIGH"
 #endif
 };
-KILL *kbufp = NULL;		/* current kill buffer chunk pointer    */
-KILL *kbufh = NULL;		/* kill buffer header pointer           */
+struct kill *kbufp = NULL;		/* current kill buffer chunk pointer    */
+struct kill *kbufh = NULL;		/* kill buffer header pointer           */
 int kused = KBLOCK;		/* # of bytes used in kill buffer       */
 struct window *swindow = NULL;	/* saved window pointer                 */
 int cryptflag = FALSE;		/* currently encrypting?                */

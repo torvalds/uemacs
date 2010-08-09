@@ -609,17 +609,17 @@ struct name_bind {
 	int (*n_func)(int, int); /* function name is bound to */
 };
 
-/*	The editor holds deleted text chunks in the KILL buffer. The
+/*	The editor holds deleted text chunks in the struct kill buffer. The
 	kill buffer is logically a stream of ascii characters, however
 	due to its unpredicatable size, it gets implemented as a linked
 	list of chunks. (The d_ prefix is for "deleted" text, as k_
 	was taken up by the keycode structure)
 */
 
-typedef struct KILL {
-	struct KILL *d_next;	/* link to next chunk, NULL if last */
+struct kill {
+	struct kill *d_next;	/* link to next chunk, NULL if last */
 	char d_chunk[KBLOCK];	/* deleted text */
-} KILL;
+};
 
 /*	When emacs' command interpetor needs to get a variable's name,
 	rather than it's value, it is passed back as a VDESC variable

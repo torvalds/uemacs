@@ -551,7 +551,7 @@ int ldelnewline(void)
  */
 void kdelete(void)
 {
-	KILL *kp;		/* ptr to scan kill buffer chunk list */
+	struct kill *kp;		/* ptr to scan kill buffer chunk list */
 
 	if (kbufh != NULL) {
 
@@ -577,11 +577,11 @@ void kdelete(void)
  */
 int kinsert(int c)
 {
-	KILL *nchunk;		/* ptr to newly malloced chunk */
+	struct kill *nchunk;		/* ptr to newly malloced chunk */
 
 	/* check to see if we need a new chunk */
 	if (kused >= KBLOCK) {
-		if ((nchunk = (KILL *) malloc(sizeof(KILL))) == NULL)
+		if ((nchunk = (struct kill *)malloc(sizeof(struct kill))) == NULL)
 			return (FALSE);
 		if (kbufh == NULL)	/* set head ptr if first time */
 			kbufh = nchunk;
@@ -607,7 +607,7 @@ int yank(int f, int n)
 	int c;
 	int i;
 	char *sp;	/* pointer into string to insert */
-	KILL *kp;		/* pointer into kill buffer */
+	struct kill *kp;		/* pointer into kill buffer */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return (rdonly());	/* we are in read only mode     */

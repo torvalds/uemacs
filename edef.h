@@ -64,8 +64,8 @@ extern int abortc;		/* current abort command char   */
 extern int quotec;		/* quote char during mlreply() */
 extern int tabmask;
 extern char *cname[];		/* names of colors              */
-extern KILL *kbufp;		/* current kill buffer chunk pointer */
-extern KILL *kbufh;		/* kill buffer header pointer   */
+extern struct kill *kbufp;		/* current kill buffer chunk pointer */
+extern struct kill *kbufh;		/* kill buffer header pointer   */
 extern int kused;		/* # of bytes used in KB        */
 extern struct window *swindow;	/* saved window pointer         */
 extern int cryptflag;		/* currently encrypting?        */
