@@ -1,14 +1,16 @@
 /*
+ *	main.c
+
  *	uEmacs/PK 4.0
  *
- *		based on
+ *	Based on:
  *
  *	MicroEMACS 3.9
- * 			written by Dave G. Conroy.
- *			substatially modified by Daniel M. Lawrence
- *			modified by Petri Kutvonen
- *	
- *	MicroEMACS 3.9 (C)opyright 1987 by Daniel M. Lawrence
+ *	Written by Dave G. Conroy.
+ *	Substatially modified by Daniel M. Lawrence
+ *	Modified by Petri Kutvonen
+ *
+ *	MicroEMACS 3.9 (c) Copyright 1987 by Daniel M. Lawrence
  *
  *	Original statement of copying policy:
  *
@@ -17,8 +19,6 @@
  *	into commercial software with the permission of the current author.
  *
  *	No copyright claimed for modifications made by Petri Kutvonen.
- *
- *	MAIN.C
  *
  *	This file contains the main driving routine, and some keyboard
  *	processing code.
@@ -51,28 +51,27 @@
  *
  */
 
-#include        <stdio.h>
+#include <stdio.h>
 
-/* make global definitions not external */
+/* Make global definitions not external. */
 #define	maindef
 
-#include        "estruct.h"	/* global structures and defines */
-#include	"edef.h"	/* global definitions */
-#include	"efunc.h"	/* function declarations and name table */
-#include	"ebind.h"	/* default key bindings */
+#include "estruct.h" /* Global structures and defines. */
+#include "edef.h"    /* Global definitions. */
+#include "efunc.h"   /* Function declarations and name table. */
+#include "ebind.h"   /* Default key bindings. */
 
-/* for MSDOS, increase the default stack space */
-
-#if	MSDOS & TURBO
-#if	PKCODE
+/* For MSDOS, increase the default stack space. */
+#if MSDOS & TURBO
+#if PKCODE
 extern unsigned _stklen = 20000;
 #else
 extern unsigned _stklen = 32766;
 #endif
 #endif
 
-#if     VMS
-#include        <ssdef.h>
+#if VMS
+#include <ssdef.h>
 #define GOOD    (SS$_NORMAL)
 #endif
 
@@ -80,7 +79,7 @@ extern unsigned _stklen = 32766;
 #define GOOD    0
 #endif
 
-#if	UNIX
+#if UNIX
 #include <signal.h>
 static void emergencyexit(int);
 #ifdef SIGWINCH
@@ -88,7 +87,7 @@ extern void sizesignal(int);
 #endif
 #endif
 
-#if	CALLED
+#if CALLED
 int emacs(int argc, char **argv)
 #else
 int main(int argc, char **argv)
@@ -130,6 +129,12 @@ int main(int argc, char **argv)
 	signal(SIGWINCH, sizesignal);
 #endif
 #endif
+	if (argc == 2) {
+		if (!strcmp(argv[1], "--version")) {
+			printf("%s version %s\n", PROGNAME, VERSION);
+			exit(EXIT_SUCCESS);
+		}
+	}
 
 	/* initialize the editor */
 	vtinit();		/* Display */
@@ -151,7 +156,6 @@ int main(int argc, char **argv)
 
 	/* Parse the command line */
 	for (carg = 1; carg < argc; ++carg) {
-
 		/* Process Switches */
 #if	PKCODE
 		if (argv[carg][0] == '+') {
