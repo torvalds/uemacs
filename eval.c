@@ -1,4 +1,4 @@
-/*	EVAL.C
+/*	eval.c
  *
  *	Expression evaluation functions
  *
@@ -12,19 +12,20 @@
 #include "efunc.h"
 #include "evar.h"
 #include "util.h"
+#include "version.h"
 
+/* Initialize the user variable list. */
 void varinit(void)
-{				/* initialize the user variable list */
+{
 	int i;
-
 	for (i = 0; i < MAXVARS; i++)
 		uv[i].u_name[0] = 0;
 }
 
 /*
- * evaluate a function
+ * Evaluate a function.
  *
- * char *fname;		name of function to evaluate
+ * @fname: name of function to evaluate.
  */
 char *gtfun(char *fname)
 {
@@ -259,7 +260,7 @@ char *gtenv(char *vname)
 	case EVVERSION:
 		return (VERSION);
 	case EVPROGNAME:
-		return (PROGNAME);
+		return (PROGRAM_NAME_LONG);
 	case EVSEED:
 		return (itoa(seed));
 	case EVDISINP:

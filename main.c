@@ -60,6 +60,7 @@
 #include "edef.h"    /* Global definitions. */
 #include "efunc.h"   /* Function declarations and name table. */
 #include "ebind.h"   /* Default key bindings. */
+#include "version.h"
 
 /* For MSDOS, increase the default stack space. */
 #if MSDOS & TURBO
@@ -86,6 +87,16 @@ static void emergencyexit(int);
 extern void sizesignal(int);
 #endif
 #endif
+
+void usage(int status)
+{
+  printf("Usage: %s filename\n", PROGRAM_NAME);
+  printf("   or: %s [options]\n\n", PROGRAM_NAME);
+  fputs("      --help     display this help and exit\n", stdout);
+  fputs("      --version  output version information and exit\n", stdout);
+
+  exit(status);
+}
 
 #if CALLED
 int emacs(int argc, char **argv)
@@ -117,11 +128,11 @@ int main(int argc, char **argv)
 	int newc;
 
 #if	PKCODE & VMS
-	(void) umask(-1);	/* use old protection (this is at wrong place) */
+	(void) umask(-1); /* Use old protection (this is at wrong place). */
 #endif
 
 #if	PKCODE & BSD
-	sleep(1);		/* time for window manager */
+	sleep(1); /* Time for window manager. */
 #endif
 
 #if	UNIX
@@ -130,13 +141,16 @@ int main(int argc, char **argv)
 #endif
 #endif
 	if (argc == 2) {
-		if (!strcmp(argv[1], "--version")) {
-			printf("%s version %s\n", PROGNAME, VERSION);
+		if (strcmp(argv[1], "--help") == 0) {
+			usage(EXIT_FAILURE);
+		}
+		if (strcmp(argv[1], "--version") == 0) {
+			printf("%s version %s\n", PROGRAM_NAME_LONG, VERSION);
 			exit(EXIT_SUCCESS);
 		}
 	}
 
-	/* initialize the editor */
+	/* Initialize the editor. */
 	vtinit();		/* Display */
 	edinit("main");		/* Buffers, windows */
 	varinit();		/* user variables */

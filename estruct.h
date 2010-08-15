@@ -21,58 +21,45 @@
 #undef	CTRLZ
 #endif
 
-/*	Program Identification.....
-
-	PROGNAME should always be MicroEMACS for a distibrution
-	unmodified version. People using MicroEMACS as a shell
-	for other products should change this to reflect their
-	product. Macros can query this via the $progname variable
-
-	this version in called uEmacs/PK
-*/
-
-#define	PROGNAME	"uEmacs/PK"
-#define	VERSION		"4.0.15"
-
-/*	Machine/OS definitions			*/
+/* Machine/OS definitions. */
 
 #if defined(AUTOCONF) || defined(MSDOS) || defined(BSD) || defined(SYSV) || defined(VMS)
 
-/*  make an intelligent guess about the target system */
+/* Make an intelligent guess about the target system. */
 
 #if defined(__TURBOC__)
-#define MSDOS	1		/* MS/PC DOS 3.1-4.0 with Turbo C 2.0 */
+#define MSDOS 1 /* MS/PC DOS 3.1-4.0 with Turbo C 2.0 */
 #else
-#define	MSDOS	0
+#define	MSDOS 0
 #endif
 
 #if defined(BSD) || defined(sun) || defined(ultrix) || (defined(vax) && defined(unix)) || defined(ultrix) || defined(__osf__)
 #ifndef BSD
-#define BSD	1		/* Berkeley UNIX */
+#define BSD 1 /* Berkeley UNIX */
 #endif
 #else
-#define	BSD	0
+#define	BSD 0
 #endif
 
 #if defined(SVR4) || defined(__linux__)	/* ex. SunOS 5.3 */
-#define SVR4	1
-#define SYSV	1
+#define SVR4 1
+#define SYSV 1
 #undef BSD
 #endif
 
 #if defined(SYSV) || defined(u3b2) || defined(_AIX) || (defined(i386) && defined(unix)) || defined(__hpux)
-#define	USG	1		/* System V UNIX */
+#define	USG 1 /* System V UNIX */
 #else
-#define	USG	0
+#define	USG 0
 #endif
 
 #if defined(VMS) || (defined(vax) && ! defined(unix))
-#define VMS	1		/* VAX/VMS */
+#define VMS 1 /* VAX/VMS */
 #else
-#define VMS	0
+#define VMS 0
 #endif
 
-#define	V7	0		/* no more */
+#define	V7 0 /* No more. */
 
 #else
 
@@ -130,25 +117,25 @@
 #define	TERMCAP	UNIX
 #define	IBMPC	MSDOS
 
-#endif				/*autoconf */
+#endif /* Autoconf. */
 
 /*	Configuration options	*/
 
-#define CVMVAS  1		/* arguments to page forward/back in pages      */
-#define	CLRMSG	0		/* space clears the message line with no insert */
-#define	CFENCE	1		/* fench matching in CMODE                      */
-#define	TYPEAH	1		/* type ahead causes update to be skipped       */
-#define DEBUGM	1		/* $debug triggers macro debugging              */
-#define	VISMAC	0		/* update display during keyboard macros        */
-#define	CTRLZ	0		/* add a ^Z at end of files under MSDOS only    */
-#define ADDCR	0		/* ajout d'un CR en fin de chaque ligne (ST520) */
-#define	NBRACE	1		/* new style brace matching command             */
-#define	REVSTA	1		/* Status line appears in reverse video         */
+#define CVMVAS  1  /* arguments to page forward/back in pages      */
+#define	CLRMSG	0  /* space clears the message line with no insert */
+#define	CFENCE	1  /* fench matching in CMODE                      */
+#define	TYPEAH	1  /* type ahead causes update to be skipped       */
+#define DEBUGM	1  /* $debug triggers macro debugging              */
+#define	VISMAC	0  /* update display during keyboard macros        */
+#define	CTRLZ	0  /* add a ^Z at end of files under MSDOS only    */
+#define ADDCR	0  /* ajout d'un CR en fin de chaque ligne (ST520) */
+#define	NBRACE	1  /* new style brace matching command             */
+#define	REVSTA	1  /* Status line appears in reverse video         */
 
 #ifndef	AUTOCONF
 
-#define	COLOR	1		/* color commands and windows                   */
-#define	FILOCK	0		/* file locking under unix BSD 4.2              */
+#define	COLOR	1  /* color commands and windows                   */
+#define	FILOCK	0  /* file locking under unix BSD 4.2              */
 
 #else
 
@@ -159,43 +146,43 @@
 #define	FILOCK	BSD
 #endif
 
-#endif				/* autoconf */
+#endif /* Autoconf. */
 
-#define	ISRCH	1		/* Incremental searches like ITS EMACS          */
-#define	WORDPRO	1		/* Advanced word processing features            */
-#define	FNLABEL	0		/* function key label code [HP150]              */
-#define	APROP	1		/* Add code for Apropos command                 */
-#define	CRYPT	1		/* file encryption enabled?                     */
-#define MAGIC	1		/* include regular expression matching?         */
-#define	AEDIT	1		/* advanced editing options: en/detabbing       */
-#define	PROC	1		/* named procedures                             */
-#define	CLEAN	0		/* de-alloc memory on exit                      */
-#define	CALLED	0		/* is emacs a called subroutine? or stand alone */
+#define	ISRCH	1  /* Incremental searches like ITS EMACS          */
+#define	WORDPRO	1  /* Advanced word processing features            */
+#define	FNLABEL	0  /* function key label code [HP150]              */
+#define	APROP	1  /* Add code for Apropos command                 */
+#define	CRYPT	1  /* file encryption enabled?                     */
+#define MAGIC	1  /* include regular expression matching?         */
+#define	AEDIT	1  /* advanced editing options: en/detabbing       */
+#define	PROC	1  /* named procedures                             */
+#define	CLEAN	0  /* de-alloc memory on exit                      */
+#define	CALLED	0  /* is emacs a called subroutine? or stand alone */
 
-#define ASCII	1		/* always using ASCII char sequences for now    */
-#define EBCDIC	0		/* later IBM mainfraim versions will use EBCDIC */
+#define ASCII	1  /* always using ASCII char sequences for now    */
+#define EBCDIC	0  /* later IBM mainfraim versions will use EBCDIC */
 
 #ifndef	AUTOCONF
 
-#define	XONXOFF	0		/* don't disable XON-XOFF flow control P.K.     */
-#define	NATIONL	0		/* interprete [,],\,{,},| as characters P.K.    */
+#define	XONXOFF	0  /* don't disable XON-XOFF flow control P.K.     */
+#define	NATIONL	0  /* interprete [,],\,{,},| as characters P.K.    */
 
 #else
 
 #define	XONXOFF	(UNIX | VMS)
 #define	NATIONL	(UNIX | VMS)
 
-#endif				/* autoconf */
+#endif /* Autoconf. */
 
-#define	PKCODE	1		/* include my extensions P.K., define always    */
-#define	IBMCHR	MSDOS		/* use IBM PC character set P.K.                */
-#define SCROLLCODE 1		/* scrolling code P.K.                          */
+#define	PKCODE	1      /* include my extensions P.K., define always    */
+#define	IBMCHR	MSDOS  /* use IBM PC character set P.K.                */
+#define SCROLLCODE 1   /* scrolling code P.K.                          */
 
-/*	System dependant library redefinitions, structures and includes	*/
+/* System dependant library redefinitions, structures and includes. */
 
-#if	TURBO
-#include      <dos.h>
-#include      <mem.h>
+#if TURBO
+#include <dos.h>
+#include <mem.h>
 #undef peek
 #undef poke
 #define       peek(a,b,c,d)   movedata(a,b,FP_SEG(c),FP_OFF(c),d)
@@ -208,7 +195,7 @@
 #define	getname	xgetname
 #endif
 
-#if	MSDOS & MSC
+#if MSDOS & MSC
 #include	<dos.h>
 #include	<memory.h>
 #define	peek(a,b,c,d)	movedata(a,b,FP_SEG(c),FP_OFF(c),d)
@@ -220,7 +207,7 @@
 #define	unlink(a)	delete(a)
 #endif
 
-/*	define some ability flags */
+/* Define some ability flags. */
 
 #if	IBMPC
 #define	MEMMAP	1
@@ -234,11 +221,11 @@
 #define	ENVFUNC	0
 #endif
 
-/*	Emacs global flag bit definitions (for gflags)	*/
+/* Emacs global flag bit definitions (for gflags). */
 
 #define	GFREAD	1
 
-/*	internal constants	*/
+/* Internal constants. */
 
 #define	NBINDS	256		/* max # of bound keys          */
 #define NFILEN  80		/* # of bytes, file name        */

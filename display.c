@@ -1,4 +1,4 @@
-/*	DISPLAY.C
+/*	display.c
  *
  * The functions in this file handle redisplay. There are two halves, the
  * ones that update the virtual display screen, and the ones that make the
@@ -8,13 +8,14 @@
  *	modified by Petri Kutvonen
  */
 
-#include	<errno.h>
-#include        <stdio.h>
-#include	<stdarg.h>
-#include	<unistd.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "version.h"
 
 struct video {
 	int v_flag;		/* Flags */
@@ -1132,7 +1133,7 @@ static void modeline(struct window *wp)
 	n = 2;
 
 	strcpy(tline, " ");
-	strcat(tline, PROGNAME);
+	strcat(tline, PROGRAM_NAME_LONG);
 	strcat(tline, " ");
 	strcat(tline, VERSION);
 	strcat(tline, ": ");
