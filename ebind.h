@@ -162,7 +162,7 @@ struct key_tab keytab[NBINDS] = {
 	,
 	{CTLX | 'K', killbuffer}
 	,
-	{CTLX | 'M', setmode}
+	{CTLX | 'M', setemode}
 	,
 	{CTLX | 'N', filename}
 	,

@@ -11,7 +11,7 @@
 
 struct name_bind names[] = {
 	{"abort-command", ctrlg},
-	{"add-mode", setmode},
+	{"add-mode", setemode},
 	{"add-global-mode", setgmode},
 #if	APROP
 	{"apropos", apro},

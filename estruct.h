@@ -713,3 +713,10 @@ typedef struct {
 	char *rstr;
 } RMC;
 #endif
+
+/* Since Mac OS X's termios.h doesn't have the following 2 macros, define them.
+ */
+#if defined(SYSV) && defined(_DARWIN_C_SOURCE)
+#define OLCUC 0000002
+#define XCASE 0000004
+#endif

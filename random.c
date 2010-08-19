@@ -829,7 +829,7 @@ int killtext(int f, int n)
  *
  * int f, n;		default and argument
  */
-int setmode(int f, int n)
+int setemode(int f, int n)
 {
 #if 	PKCODE
 	return adjustmode(TRUE, FALSE);
