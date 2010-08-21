@@ -1,4 +1,4 @@
-/*	BASIC.C
+/*	basic.c
  *
  * The routines in this file move the cursor around on the screen. They
  * compute a new value for the cursor, then adjust ".". The display code
@@ -9,20 +9,18 @@
  *	modified by Petri Kutvonen
  */
 
-#include        <stdio.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
+#include <stdio.h>
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
 
 /*
- * Move the cursor to the
- * beginning of the current line.
- * Trivial.
+ * Move the cursor to the beginning of the current line.
  */
 int gotobol(int f, int n)
 {
 	curwp->w_doto = 0;
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -36,7 +34,7 @@ int backchar(int f, int n)
 	struct line *lp;
 
 	if (n < 0)
-		return (forwchar(f, -n));
+		return forwchar(f, -n);
 	while (n--) {
 		if (curwp->w_doto == 0) {
 			if ((lp = lback(curwp->w_dotp)) == curbp->b_linep)
@@ -47,7 +45,7 @@ int backchar(int f, int n)
 		} else
 			curwp->w_doto--;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -56,7 +54,7 @@ int backchar(int f, int n)
 int gotoeol(int f, int n)
 {
 	curwp->w_doto = llength(curwp->w_dotp);
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -68,7 +66,7 @@ int gotoeol(int f, int n)
 int forwchar(int f, int n)
 {
 	if (n < 0)
-		return (backchar(f, -n));
+		return backchar(f, -n);
 	while (n--) {
 		if (curwp->w_doto == llength(curwp->w_dotp)) {
 			if (curwp->w_dotp == curbp->b_linep)
@@ -79,21 +77,20 @@ int forwchar(int f, int n)
 		} else
 			curwp->w_doto++;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
- * move to a particular line.
+ * Move to a particular line.
  *
- * argument (n) must be a positive integer for
- * this to actually do anything
+ * @n: The specified line position at the current buffer.
  */
 int gotoline(int f, int n)
 {
-	int status;	/* status return */
-	char arg[NSTRING];	/* buffer to hold argument */
+	int status;
+	char arg[NSTRING]; /* Buffer to hold argument. */
 
-	/* get an argument if one doesnt exist */
+	/* Get an argument if one doesnt exist. */
 	if (f == FALSE) {
 		if ((status =
 		     mlreply("Line to GOTO: ", arg, NSTRING)) != TRUE) {
@@ -102,14 +99,20 @@ int gotoline(int f, int n)
 		}
 		n = atoi(arg);
 	}
+        /* Handle the case where the user may be passed something like this:
+         * em filename +
+         * In this case we just go to the end of the buffer.
+         */
+	if (n == 0)
+		return gotoeob(f, n);
 
-	if (n < 1)		/* if a bogus argument...then leave */
-		return (FALSE);
+	/* If a bogus argument was passed, then returns false. */
+	if (n < 0)
+		return FALSE;
 
-	/* first, we go to the start of the buffer */
-	curwp->w_dotp = lforw(curbp->b_linep);
-	curwp->w_doto = 0;
-	return (forwline(f, n - 1));
+	/* First, we go to the begin of the buffer. */
+	gotobob(f, n);
+	return forwline(f, n - 1);
 }
 
 /*
@@ -122,7 +125,7 @@ int gotobob(int f, int n)
 	curwp->w_dotp = lforw(curbp->b_linep);
 	curwp->w_doto = 0;
 	curwp->w_flag |= WFHARD;
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -135,7 +138,7 @@ int gotoeob(int f, int n)
 	curwp->w_dotp = curbp->b_linep;
 	curwp->w_doto = 0;
 	curwp->w_flag |= WFHARD;
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -149,11 +152,11 @@ int forwline(int f, int n)
 	struct line *dlp;
 
 	if (n < 0)
-		return (backline(f, -n));
+		return backline(f, -n);
 
 	/* if we are on the last line as we start....fail the command */
 	if (curwp->w_dotp == curbp->b_linep)
-		return (FALSE);
+		return FALSE;
 
 	/* if the last command was not note a line move,
 	   reset the goal column */
@@ -172,7 +175,7 @@ int forwline(int f, int n)
 	curwp->w_dotp = dlp;
 	curwp->w_doto = getgoal(dlp);
 	curwp->w_flag |= WFMOVE;
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -186,12 +189,11 @@ int backline(int f, int n)
 	struct line *dlp;
 
 	if (n < 0)
-		return (forwline(f, -n));
-
+		return forwline(f, -n);
 
 	/* if we are on the last line as we start....fail the command */
 	if (lback(curwp->w_dotp) == curbp->b_linep)
-		return (FALSE);
+		return FALSE;
 
 	/* if the last command was not note a line move,
 	   reset the goal column */
@@ -210,7 +212,7 @@ int backline(int f, int n)
 	curwp->w_dotp = dlp;
 	curwp->w_doto = getgoal(dlp);
 	curwp->w_flag |= WFMOVE;
-	return (TRUE);
+	return TRUE;
 }
 
 #if	WORDPRO
@@ -223,12 +225,12 @@ int backline(int f, int n)
  */
 int gotobop(int f, int n)
 {
-	int suc;	/* success of last backchar */
+	int suc;  /* success of last backchar */
 
-	if (n < 0)		/* the other way... */
-		return (gotoeop(f, -n));
+	if (n < 0) /* the other way... */
+		return gotoeop(f, -n);
 
-	while (n-- > 0) {	/* for each one asked for */
+	while (n-- > 0) {  /* for each one asked for */
 
 		/* first scan back until we are in a word */
 		suc = backchar(FALSE, 1);
@@ -258,11 +260,11 @@ int gotobop(int f, int n)
 			suc = forwchar(FALSE, 1);
 	}
 	curwp->w_flag |= WFMOVE;	/* force screen update */
-	return (TRUE);
+	return TRUE;
 }
 
 /*
- * go forword to the end of the current paragraph
+ * Go forword to the end of the current paragraph
  * here we look for a <NL><NL> or <NL><TAB> or <NL><SPACE>
  * combination to delimit the beginning of a paragraph
  *
@@ -270,13 +272,12 @@ int gotobop(int f, int n)
  */
 int gotoeop(int f, int n)
 {
-	int suc;	/* success of last backchar */
+	int suc;  /* success of last backchar */
 
-	if (n < 0)		/* the other way... */
-		return (gotobop(f, -n));
+	if (n < 0)  /* the other way... */
+		return gotobop(f, -n);
 
-	while (n-- > 0) {	/* for each one asked for */
-
+	while (n-- > 0) {  /* for each one asked for */
 		/* first scan forward until we are in a word */
 		suc = forwchar(FALSE, 1);
 		while (!inword() && suc)
@@ -309,8 +310,8 @@ int gotoeop(int f, int n)
 		}
 		curwp->w_doto = llength(curwp->w_dotp);	/* and to the EOL */
 	}
-	curwp->w_flag |= WFMOVE;	/* force screen update */
-	return (TRUE);
+	curwp->w_flag |= WFMOVE;  /* force screen update */
+	return TRUE;
 }
 #endif
 
@@ -363,14 +364,14 @@ int forwpage(int f, int n)
 				n = curwp->w_ntrows - overlap;
 		else
 #endif
-			n = curwp->w_ntrows - 2;	/* Default scroll.      */
-		if (n <= 0)	/* Forget the overlap   */
-			n = 1;	/* if tiny window.      */
+			n = curwp->w_ntrows - 2;  /* Default scroll. */
+		if (n <= 0)	/* Forget the overlap. */
+			n = 1;	/* If tiny window. */
 	} else if (n < 0)
 		return (backpage(f, -n));
 #if     CVMVAS
-	else			/* Convert from pages   */
-		n *= curwp->w_ntrows;	/* to lines.            */
+	else			/* Convert from pages. */
+		n *= curwp->w_ntrows;	/* To lines. */
 #endif
 	lp = curwp->w_linep;
 	while (n-- && lp != curbp->b_linep)
@@ -383,7 +384,7 @@ int forwpage(int f, int n)
 #else
 	curwp->w_flag |= WFHARD;
 #endif
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -405,9 +406,9 @@ int backpage(int f, int n)
 				n = curwp->w_ntrows - overlap;
 		else
 #endif
-			n = curwp->w_ntrows - 2;	/* Default scroll.      */
-		if (n <= 0)	/* Don't blow up if the */
-			n = 1;	/* window is tiny.      */
+			n = curwp->w_ntrows - 2; /* Default scroll. */
+		if (n <= 0)	/* Don't blow up if the. */
+			n = 1;	/* Window is tiny. */
 	} else if (n < 0)
 		return (forwpage(f, -n));
 #if     CVMVAS
@@ -425,7 +426,7 @@ int backpage(int f, int n)
 #else
 	curwp->w_flag |= WFHARD;
 #endif
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -437,7 +438,7 @@ int setmark(int f, int n)
 	curwp->w_markp = curwp->w_dotp;
 	curwp->w_marko = curwp->w_doto;
 	mlwrite("(Mark set)");
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -453,7 +454,7 @@ int swapmark(int f, int n)
 
 	if (curwp->w_markp == NULL) {
 		mlwrite("No mark in this window");
-		return (FALSE);
+		return FALSE;
 	}
 	odotp = curwp->w_dotp;
 	odoto = curwp->w_doto;
@@ -462,5 +463,5 @@ int swapmark(int f, int n)
 	curwp->w_markp = odotp;
 	curwp->w_marko = odoto;
 	curwp->w_flag |= WFMOVE;
-	return (TRUE);
+	return TRUE;
 }
