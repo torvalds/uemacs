@@ -12,6 +12,8 @@ else
 endif
 export E Q
 
+uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+
 SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c \
 	file.c fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c \
 	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
@@ -33,8 +35,12 @@ CFLAGS=-O2 $(WARNINGS)
 #CFLAGS= -D_HPUX_SOURCE -DSYSV
 #CFLAGS=-O4 -DSVR4		# Sun
 #CFLAGS=-O -qchars=signed	# RS/6000
-DEFINES=-DAUTOCONF -DPOSIX -DUSG -D_BSD_SOURCE -D_SVID_SOURCE -D_XOPEN_SOURCE=600	# Linux
-#DEFINES=-DAUTOCONF -DPOSIX -DSYSV -D_DARWIN_C_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_XOPEN_SOURCE=600	# Mac OS X
+ifeq ($(uname_S),Linux)
+ DEFINES=-DAUTOCONF -DPOSIX -DUSG -D_BSD_SOURCE -D_SVID_SOURCE -D_XOPEN_SOURCE=600
+endif
+ifeq ($(uname_S),Darwin)
+ DEFINES=-DAUTOCONF -DPOSIX -DSYSV -D_DARWIN_C_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_XOPEN_SOURCE=600
+endif
 #DEFINES=-DAUTOCONF
 #LIBS=-ltermcap			# BSD
 LIBS=-lcurses			# SYSV
