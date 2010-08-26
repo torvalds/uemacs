@@ -15,6 +15,36 @@
 #include "efunc.h"
 
 /*
+ * This routine, given a pointer to a struct line, and the current cursor goal
+ * column, return the best choice for the offset. The offset is returned.
+ * Used by "C-N" and "C-P".
+ */
+static int getgoal(struct line *dlp)
+{
+	int c;
+	int col;
+	int newcol;
+	int dbo;
+
+	col = 0;
+	dbo = 0;
+	while (dbo != llength(dlp)) {
+		c = lgetc(dlp, dbo);
+		newcol = col;
+		if (c == '\t')
+			newcol |= tabmask;
+		else if (c < 0x20 || c == 0x7F)
+			++newcol;
+		++newcol;
+		if (newcol > curgoal)
+			break;
+		col = newcol;
+		++dbo;
+	}
+	return dbo;
+}
+
+/*
  * Move the cursor to the beginning of the current line.
  */
 int gotobol(int f, int n)
@@ -316,36 +346,6 @@ int gotoeop(int f, int n)
 #endif
 
 /*
- * This routine, given a pointer to a struct line, and the current cursor goal
- * column, return the best choice for the offset. The offset is returned.
- * Used by "C-N" and "C-P".
- */
-int getgoal(struct line *dlp)
-{
-	int c;
-	int col;
-	int newcol;
-	int dbo;
-
-	col = 0;
-	dbo = 0;
-	while (dbo != llength(dlp)) {
-		c = lgetc(dlp, dbo);
-		newcol = col;
-		if (c == '\t')
-			newcol |= tabmask;
-		else if (c < 0x20 || c == 0x7F)
-			++newcol;
-		++newcol;
-		if (newcol > curgoal)
-			break;
-		col = newcol;
-		++dbo;
-	}
-	return (dbo);
-}
-
-/*
  * Scroll forward by a specified number of lines, or by a full page if no
  * argument. Bound to "C-V". The "2" in the arithmetic on the window size is
  * the overlap; this value is the default overlap value in ITS EMACS. Because
@@ -368,7 +368,7 @@ int forwpage(int f, int n)
 		if (n <= 0)	/* Forget the overlap. */
 			n = 1;	/* If tiny window. */
 	} else if (n < 0)
-		return (backpage(f, -n));
+		return backpage(f, -n);
 #if     CVMVAS
 	else			/* Convert from pages. */
 		n *= curwp->w_ntrows;	/* To lines. */
@@ -410,10 +410,10 @@ int backpage(int f, int n)
 		if (n <= 0)	/* Don't blow up if the. */
 			n = 1;	/* Window is tiny. */
 	} else if (n < 0)
-		return (forwpage(f, -n));
+		return forwpage(f, -n);
 #if     CVMVAS
-	else			/* Convert from pages   */
-		n *= curwp->w_ntrows;	/* to lines.            */
+	else  /* Convert from pages. */
+		n *= curwp->w_ntrows;  /* To lines. */
 #endif
 	lp = curwp->w_linep;
 	while (n-- && lback(lp) != curbp->b_linep)

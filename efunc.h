@@ -1,16 +1,15 @@
-/*	EFUNC.H
+/*	efunc.h
  *
- *	Function declarations and names
+ *	Function declarations and names.
  *
- *	This file list all the C code functions used 
- *	and the names to use to bind keys to them. To add functions,
- *	declare it here in both the extern function list and the name
- *	binding table.
+ *	This file list all the C code functions used and the names to use
+ *      to bind keys to them. To add functions,	declare it here in both the
+ *      extern function list and the name binding table.
  *
  *	modified by Petri Kutvonen
  */
 
-/*	External function declarations		*/
+/* External function declarations. */
 
 /* word.c */
 extern int wrapword(int f, int n);
@@ -78,14 +77,13 @@ extern int forwline(int f, int n);
 extern int backline(int f, int n);
 extern int gotobop(int f, int n);
 extern int gotoeop(int f, int n);
-extern int getgoal(struct line *dlp);
 extern int forwpage(int f, int n);
 extern int backpage(int f, int n);
 extern int setmark(int f, int n);
 extern int swapmark(int f, int n);
 
 /* random.c */
-extern int tabsize;			/* Tab size (0: use real tabs)  */;
+extern int tabsize;  /* Tab size (0: use real tabs). */
 extern int setfillcol(int f, int n);
 extern int showcpos(int f, int n);
 extern int getcline(void);
