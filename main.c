@@ -92,6 +92,8 @@ void usage(int status)
 {
   printf("Usage: %s filename\n", PROGRAM_NAME);
   printf("   or: %s [options]\n\n", PROGRAM_NAME);
+  fputs("      +          go to end of buffer n\n", stdout);
+  fputs("      +<n>       go to line n\n", stdout);
   fputs("      --help     display this help and exit\n", stdout);
   fputs("      --version  output version information and exit\n", stdout);
 
@@ -116,7 +118,7 @@ int main(int argc, char **argv)
 	int basec;		/* c stripped of meta character */
 	int viewflag;		/* are we starting in view mode? */
 	int gotoflag;		/* do we need to goto a line at start? */
-	int gline;		/* if so, what line? */
+	int gline = 0;		/* if so, what line? */
 	int searchflag;		/* Do we need to search at start? */
 	int saveflag;		/* temp store for lastflag */
 	int errflag;		/* C error processing? */
