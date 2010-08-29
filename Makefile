@@ -14,6 +14,8 @@ export E Q
 
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
+PROGRAM=em
+
 SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c \
 	file.c fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c \
 	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
@@ -50,9 +52,9 @@ LFLAGS=-hbx
 BINDIR=/usr/bin
 LIBDIR=/usr/lib
 
-em:	${OBJ}
+$(PROGRAM): $(OBJ)
 	$(E) "  LINK    " $@
-	$(Q) ${CC} ${DEFINES} -o em ${OBJ} ${LIBS}
+	$(Q) $(CC) $(DEFINES) -o $@ $(OBJ) $(LIBS)
 
 SPARSE=sparse
 SPARSE_FLAGS=-D__LITTLE_ENDIAN__ -D__x86_64__ -D__linux__ -D__unix__
@@ -62,10 +64,10 @@ sparse:
 
 clean:
 	$(E) "  CLEAN"
-	$(Q) rm -f core lintout makeout tags makefile.bak *.o
+	$(Q) rm -f $(PROGRAM) core lintout makeout tags makefile.bak *.o
 
-install: em
-	strip em
+install: $(PROGRAM)
+	strip $(PROGRAM)
 	cp em ${BINDIR}
 	cp emacs.hlp ${LIBDIR}
 	cp emacs.rc ${LIBDIR}/.emacsrc
