@@ -242,7 +242,7 @@ static void vteeol(void)
 int upscreen(int f, int n)
 {
 	update(TRUE);
-	return (TRUE);
+	return TRUE;
 }
 
 #if SCROLLCODE
@@ -264,11 +264,11 @@ int update(int force)
 
 #if	TYPEAH && ! PKCODE
 	if (force == FALSE && typahead())
-		return (TRUE);
+		return TRUE;
 #endif
 #if	VISMAC == 0
 	if (force == FALSE && kbdmode == PLAY)
-		return (TRUE);
+		return TRUE;
 #endif
 
 	displaying = TRUE;
@@ -352,7 +352,7 @@ int update(int force)
 	while (chg_width || chg_height)
 		newscreensize(chg_height, chg_width);
 #endif
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -395,7 +395,7 @@ static int reframe(struct window *wp)
 					break;
 				}
 #endif
-				return (TRUE);
+				return TRUE;
 			}
 
 			/* if we are at the end of the file, reframe */
@@ -441,7 +441,7 @@ static int reframe(struct window *wp)
 	wp->w_linep = lp;
 	wp->w_flag |= WFHARD;
 	wp->w_flag &= ~WFFORCE;
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -657,7 +657,7 @@ int updupd(int force)
 		if ((vp1->v_flag & VFCHG) != 0) {
 #if	TYPEAH && ! PKCODE
 			if (force == FALSE && typahead())
-				return (TRUE);
+				return TRUE;
 #endif
 #if	MEMMAP && ! SCROLLCODE
 			updateline(i, vp1);
@@ -666,7 +666,7 @@ int updupd(int force)
 #endif
 		}
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 #if SCROLLCODE
@@ -774,7 +774,7 @@ static int scrolls(int inserts)
 		}
 #endif
 		if (2 * count < abs(from - to))
-			return (FALSE);
+			return FALSE;
 		scrscroll(from, to, count);
 		for (i = 0; i < count; i++) {
 			vpp = pscreen[to + i];
@@ -805,9 +805,9 @@ static int scrolls(int inserts)
 			vscreen[i]->v_flag |= VFCHG;
 		}
 #endif
-		return (TRUE);
+		return TRUE;
 	}
-	return (FALSE);
+	return FALSE;
 }
 
 /* move the "count" lines starting at "from" to "to" */
@@ -827,7 +827,7 @@ static int texttest(int vrow, int prow)
 	struct video *vpv = vscreen[vrow];	/* virtual screen image */
 	struct video *vpp = pscreen[prow];	/* physical screen image */
 
-	return (!memcmp(vpv->v_text, vpp->v_text, term.t_ncol));
+	return !memcmp(vpv->v_text, vpp->v_text, term.t_ncol);
 }
 
 /*
@@ -838,8 +838,8 @@ static int endofline(char *s, int n)
 	int i;
 	for (i = n - 1; i >= 0; i--)
 		if (s[i] != ' ')
-			return (i + 1);
-	return (0);
+			return i + 1;
+	return 0;
 }
 
 #endif				/* SCROLLCODE */
@@ -1009,7 +1009,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 		vp1->v_fcolor = vp1->v_rfcolor;
 		vp1->v_bcolor = vp1->v_rbcolor;
 #endif
-		return (TRUE);
+		return TRUE;
 	}
 #endif
 
@@ -1028,7 +1028,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 	/* if both lines are the same, no update needs to be done */
 	if (cp1 == &vp1->v_text[term.t_ncol]) {
 		vp1->v_flag &= ~VFCHG;	/* flag this line is changed */
-		return (TRUE);
+		return TRUE;
 	}
 
 	/* find out if there is a match on the right */
@@ -1074,7 +1074,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 	TTrev(FALSE);
 #endif
 	vp1->v_flag &= ~VFCHG;	/* flag this line as updated */
-	return (TRUE);
+	return TRUE;
 #endif
 }
 #endif

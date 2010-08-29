@@ -370,7 +370,7 @@ ttgetc()
 			nibuf = (iosb[0] >> 16) + (iosb[1] >> 16);
 		}
 	}
-	return (ibuf[ibufi++] & 0xFF);	/* Allow multinational  */
+	return ibuf[ibufi++] & 0xFF;	/* Allow multinational  */
 #endif
 
 #if	MSDOS & (MSC | TURBO)
@@ -380,18 +380,18 @@ ttgetc()
 	if (nxtchar >= 0) {
 		c = nxtchar;
 		nxtchar = -1;
-		return (c);
+		return c;
 	}
 
 	/* call the dos to get a char */
 	rg.h.ah = 7;		/* dos Direct Console Input call */
 	intdos(&rg, &rg);
 	c = rg.h.al;		/* grab the char */
-	return (c & 255);
+	return c & 255;
 #endif
 
 #if     V7 | BSD
-	return (255 & fgetc(stdin));	/* 8BIT P.K. */
+	return 255 & fgetc(stdin);	/* 8BIT P.K. */
 #endif
 
 #if	USG
@@ -403,7 +403,7 @@ ttgetc()
 		kbdpoll = FALSE;
 		while (read(0, &kbdq, 1) != 1);
 	}
-	return (kbdq & 255);
+	return kbdq & 255;
 #endif
 }
 
@@ -416,35 +416,35 @@ typahead()
 {
 #if	MSDOS & (MSC | TURBO)
 	if (kbhit() != 0)
-		return (TRUE);
+		return TRUE;
 	else
-		return (FALSE);
+		return FALSE;
 #endif
 
 #if	BSD
 	int x;			/* holds # of pending chars */
 
-	return ((ioctl(0, FIONREAD, &x) < 0) ? 0 : x);
+	return (ioctl(0, FIONREAD, &x) < 0) ? 0 : x;
 #endif
 
 #if	PKCODE & VMS
-	return (ibufi < nibuf);
+	return ibufi < nibuf;
 #endif
 
 #if	USG
 	if (!kbdqp) {
 		if (!kbdpoll && fcntl(0, F_SETFL, kbdflgs | O_NDELAY) < 0)
-			return (FALSE);
+			return FALSE;
 #if	PKCODE
 		kbdpoll = 1;
 #endif
 		kbdqp = (1 == read(0, &kbdq, 1));
 	}
-	return (kbdqp);
+	return kbdqp;
 #endif
 
 #if !UNIX & !VMS & !MSDOS
-	return (FALSE);
+	return FALSE;
 #endif
 }
 #endif

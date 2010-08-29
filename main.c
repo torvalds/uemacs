@@ -313,7 +313,7 @@ int main(int argc, char **argv)
 #if	CALLED
 	/* if we were called as a subroutine and want to leave, do so */
 	if (eexitflag)
-		return (eexitval);
+		return eexitval;
 #endif
 
 	/* execute the "command" macro...normally null */
@@ -494,7 +494,7 @@ int execute(int c, int f, int n)
 		thisflag = 0;
 		status = (*execfunc) (f, n);
 		lastflag = thisflag;
-		return (status);
+		return status;
 	}
 
 	/*
@@ -523,7 +523,7 @@ int execute(int c, int f, int n)
 #endif
 		if (n <= 0) {	/* Fenceposts.          */
 			lastflag = 0;
-			return (n < 0 ? FALSE : TRUE);
+			return n < 0 ? FALSE : TRUE;
 		}
 		thisflag = 0;	/* For the future.      */
 
@@ -561,12 +561,12 @@ int execute(int c, int f, int n)
 			}
 
 		lastflag = thisflag;
-		return (status);
+		return status;
 	}
 	TTbeep();
 	mlwrite("(Key not bound)");	/* complain             */
 	lastflag = 0;		/* Fake last flags.     */
-	return (FALSE);
+	return FALSE;
 }
 
 /*
@@ -594,13 +594,13 @@ int quickexit(int f, int n)
 #endif
 			if ((status = filesave(f, n)) != TRUE) {
 				curbp = oldcb;	/* restore curbp */
-				return (status);
+				return status;
 			}
 		}
 		bp = bp->b_bufp;	/* on to the next buffer */
 	}
 	quit(f, n);		/* conditionally quit   */
-	return (TRUE);
+	return TRUE;
 }
 
 static void emergencyexit(int signr)
@@ -638,7 +638,7 @@ int quit(int f, int n)
 			exit(GOOD);
 	}
 	mlwrite("");
-	return (s);
+	return s;
 }
 
 /*
@@ -650,13 +650,13 @@ int ctlxlp(int f, int n)
 {
 	if (kbdmode != STOP) {
 		mlwrite("%%Macro already active");
-		return (FALSE);
+		return FALSE;
 	}
 	mlwrite("(Start macro)");
 	kbdptr = &kbdm[0];
 	kbdend = kbdptr;
 	kbdmode = RECORD;
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -667,13 +667,13 @@ int ctlxrp(int f, int n)
 {
 	if (kbdmode == STOP) {
 		mlwrite("%%Macro not active");
-		return (FALSE);
+		return FALSE;
 	}
 	if (kbdmode == RECORD) {
 		mlwrite("(End macro)");
 		kbdmode = STOP;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -685,14 +685,14 @@ int ctlxe(int f, int n)
 {
 	if (kbdmode != STOP) {
 		mlwrite("%%Macro already active");
-		return (FALSE);
+		return FALSE;
 	}
 	if (n <= 0)
-		return (TRUE);
+		return TRUE;
 	kbdrep = n;		/* remember how many times to execute */
 	kbdmode = PLAY;		/* start us in play mode */
 	kbdptr = &kbdm[0];	/*    at the beginning */
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -705,7 +705,7 @@ int ctrlg(int f, int n)
 	TTbeep();
 	kbdmode = STOP;
 	mlwrite("(Aborted)");
-	return (ABORT);
+	return ABORT;
 }
 
 /*
@@ -716,38 +716,38 @@ int rdonly(void)
 {
 	TTbeep();
 	mlwrite("(Key illegal in VIEW mode)");
-	return (FALSE);
+	return FALSE;
 }
 
 int resterr(void)
 {
 	TTbeep();
 	mlwrite("(That command is RESTRICTED)");
-	return (FALSE);
+	return FALSE;
 }
 
 /* user function that does NOTHING */
 int nullproc(int f, int n)
 {
-	return (TRUE);
+	return TRUE;
 }
 
 /* dummy function for binding to meta prefix */
 int metafn(int f, int n)
 {
-	return (TRUE);
+	return TRUE;
 }
 
 /* dummy function for binding to control-x prefix */
 int cex(int f, int n)
 {
-	return (TRUE);
+	return TRUE;
 }
 
 /* dummy function for binding to universal-argument */
 int unarg(int f, int n)
 {
-	return (TRUE);
+	return TRUE;
 }
 
 /*****		Compiler specific Library functions	****/
@@ -781,7 +781,7 @@ unsigned nbytes;		/* # of bytes to allocate */
 #endif
 	}
 
-	return (mp);
+	return mp;
 }
 
 release(mp)
@@ -869,7 +869,7 @@ int cexit(int status)
 #if	CALLED
 	eexitflag = TRUE;	/* flag a program exit */
 	eexitval = status;
-	return (status);
+	return status;
 #else
 #undef	exit
 	exit(status);

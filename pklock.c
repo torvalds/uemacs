@@ -28,7 +28,7 @@
 
 int gethostname(char *name, int namelen)
 {
-	return (sysinfo(SI_HOSTNAME, name, namelen));
+	return sysinfo(SI_HOSTNAME, name, namelen);
 }
 #endif
 

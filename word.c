@@ -30,7 +30,7 @@ int wrapword(int f, int n)
 
 	/* backup from the <NL> 1 char */
 	if (!backchar(0, 1))
-		return (FALSE);
+		return FALSE;
 
 	/* back up until we aren't in a word,
 	   make sure there is a break in the line */
@@ -39,28 +39,28 @@ int wrapword(int f, int n)
 	       && (c != '\t')) {
 		cnt++;
 		if (!backchar(0, 1))
-			return (FALSE);
+			return FALSE;
 		/* if we make it to the beginning, start a new line */
 		if (curwp->w_doto == 0) {
 			gotoeol(FALSE, 0);
-			return (lnewline());
+			return lnewline();
 		}
 	}
 
 	/* delete the forward white space */
 	if (!forwdel(0, 1))
-		return (FALSE);
+		return FALSE;
 
 	/* put in a end of line */
 	if (!lnewline())
-		return (FALSE);
+		return FALSE;
 
 	/* and past the first word */
 	while (cnt-- > 0) {
 		if (forwchar(FALSE, 1) == FALSE)
-			return (FALSE);
+			return FALSE;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -71,20 +71,20 @@ int wrapword(int f, int n)
 int backword(int f, int n)
 {
 	if (n < 0)
-		return (forwword(f, -n));
+		return forwword(f, -n);
 	if (backchar(FALSE, 1) == FALSE)
-		return (FALSE);
+		return FALSE;
 	while (n--) {
 		while (inword() == FALSE) {
 			if (backchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 		while (inword() != FALSE) {
 			if (backchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 	}
-	return (forwchar(FALSE, 1));
+	return forwchar(FALSE, 1);
 }
 
 /*
@@ -94,19 +94,19 @@ int backword(int f, int n)
 int forwword(int f, int n)
 {
 	if (n < 0)
-		return (backword(f, -n));
+		return backword(f, -n);
 	while (n--) {
 		while (inword() == TRUE) {
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 
 		while (inword() == FALSE) {
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -119,13 +119,13 @@ int upperword(int f, int n)
 	int c;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return (rdonly());	/* we are in read only mode     */
+		return rdonly();	/* we are in read only mode     */
 	if (n < 0)
-		return (FALSE);
+		return FALSE;
 	while (n--) {
 		while (inword() == FALSE) {
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 		while (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -139,10 +139,10 @@ int upperword(int f, int n)
 				lchange(WFHARD);
 			}
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -155,13 +155,13 @@ int lowerword(int f, int n)
 	int c;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return (rdonly());	/* we are in read only mode     */
+		return rdonly();	/* we are in read only mode     */
 	if (n < 0)
-		return (FALSE);
+		return FALSE;
 	while (n--) {
 		while (inword() == FALSE) {
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 		while (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -175,10 +175,10 @@ int lowerword(int f, int n)
 				lchange(WFHARD);
 			}
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -192,13 +192,13 @@ int capword(int f, int n)
 	int c;
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return (rdonly());	/* we are in read only mode     */
+		return rdonly();	/* we are in read only mode     */
 	if (n < 0)
-		return (FALSE);
+		return FALSE;
 	while (n--) {
 		while (inword() == FALSE) {
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 		}
 		if (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -212,7 +212,7 @@ int capword(int f, int n)
 				lchange(WFHARD);
 			}
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 			while (inword() != FALSE) {
 				c = lgetc(curwp->w_dotp, curwp->w_doto);
 #if	PKCODE
@@ -226,11 +226,11 @@ int capword(int f, int n)
 					lchange(WFHARD);
 				}
 				if (forwchar(FALSE, 1) == FALSE)
-					return (FALSE);
+					return FALSE;
 			}
 		}
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -248,11 +248,11 @@ int delfword(int f, int n)
 
 	/* don't allow this command if we are in read only mode */
 	if (curbp->b_mode & MDVIEW)
-		return (rdonly());
+		return rdonly();
 
 	/* ignore the command if there is a negative argument */
 	if (n < 0)
-		return (FALSE);
+		return FALSE;
 
 	/* Clear the kill buffer if last command wasn't a kill */
 	if ((lastflag & CFKILL) == 0)
@@ -269,7 +269,7 @@ int delfword(int f, int n)
 	/* get us into a word.... */
 	while (inword() == FALSE) {
 		if (forwchar(FALSE, 1) == FALSE)
-			return (FALSE);
+			return FALSE;
 		++size;
 	}
 
@@ -277,7 +277,7 @@ int delfword(int f, int n)
 		/* skip one word, no whitespace! */
 		while (inword() == TRUE) {
 			if (forwchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 			++size;
 		}
 	} else {
@@ -287,14 +287,14 @@ int delfword(int f, int n)
 			/* if we are at EOL; skip to the beginning of the next */
 			while (curwp->w_doto == llength(curwp->w_dotp)) {
 				if (forwchar(FALSE, 1) == FALSE)
-					return (FALSE);
+					return FALSE;
 				++size;
 			}
 
 			/* move forward till we are at the end of the word */
 			while (inword() == TRUE) {
 				if (forwchar(FALSE, 1) == FALSE)
-					return (FALSE);
+					return FALSE;
 				++size;
 			}
 
@@ -302,7 +302,7 @@ int delfword(int f, int n)
 			if (n != 0)
 				while (inword() == FALSE) {
 					if (forwchar(FALSE, 1) == FALSE)
-						return (FALSE);
+						return FALSE;
 					++size;
 				}
 		}
@@ -320,7 +320,7 @@ int delfword(int f, int n)
 	/* restore the original position and delete the words */
 	curwp->w_dotp = dotp;
 	curwp->w_doto = doto;
-	return (ldelete(size, TRUE));
+	return ldelete(size, TRUE);
 }
 
 /*
@@ -334,11 +334,11 @@ int delbword(int f, int n)
 
 	/* don't allow this command if we are in read only mode */
 	if (curbp->b_mode & MDVIEW)
-		return (rdonly());
+		return rdonly();
 
 	/* ignore the command if there is a nonpositive argument */
 	if (n <= 0)
-		return (FALSE);
+		return FALSE;
 
 	/* Clear the kill buffer if last command wasn't a kill */
 	if ((lastflag & CFKILL) == 0)
@@ -346,12 +346,12 @@ int delbword(int f, int n)
 	thisflag |= CFKILL;	/* this command is a kill */
 
 	if (backchar(FALSE, 1) == FALSE)
-		return (FALSE);
+		return FALSE;
 	size = 0;
 	while (n--) {
 		while (inword() == FALSE) {
 			if (backchar(FALSE, 1) == FALSE)
-				return (FALSE);
+				return FALSE;
 			++size;
 		}
 		while (inword() != FALSE) {
@@ -361,8 +361,8 @@ int delbword(int f, int n)
 		}
 	}
 	if (forwchar(FALSE, 1) == FALSE)
-		return (FALSE);
-      bckdel:return (ldelete(size, TRUE));
+		return FALSE;
+      bckdel:return ldelete(size, TRUE);
 }
 
 /*
@@ -374,19 +374,19 @@ int inword(void)
 	int c;
 
 	if (curwp->w_doto == llength(curwp->w_dotp))
-		return (FALSE);
+		return FALSE;
 	c = lgetc(curwp->w_dotp, curwp->w_doto);
 #if	PKCODE
 	if (isletter(c))
 #else
 	if (c >= 'a' && c <= 'z')
-		return (TRUE);
+		return TRUE;
 	if (c >= 'A' && c <= 'Z')
 #endif
-		return (TRUE);
+		return TRUE;
 	if (c >= '0' && c <= '9')
-		return (TRUE);
-	return (FALSE);
+		return TRUE;
+	return FALSE;
 }
 
 #if	WORDPRO
@@ -410,10 +410,10 @@ int fillpara(int f, int n)
 	char wbuf[NSTRING];	/* buffer for current word      */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return (rdonly());	/* we are in read only mode     */
+		return rdonly();	/* we are in read only mode     */
 	if (fillcol == 0) {	/* no fill column set */
 		mlwrite("No fill column set");
-		return (FALSE);
+		return FALSE;
 	}
 #if	PKCODE
 	justflag = FALSE;
@@ -484,7 +484,7 @@ int fillpara(int f, int n)
 	}
 	/* and add a last newline for the end of our new paragraph */
 	lnewline();
-	return (TRUE);
+	return TRUE;
 }
 
 #if	PKCODE
@@ -507,17 +507,17 @@ int justpara(int f, int n)
 	int leftmarg;		/* left marginal */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return (rdonly());	/* we are in read only mode     */
+		return rdonly();	/* we are in read only mode     */
 	if (fillcol == 0) {	/* no fill column set */
 		mlwrite("No fill column set");
-		return (FALSE);
+		return FALSE;
 	}
 	justflag = TRUE;
 	leftmarg = curwp->w_doto;
 	if (leftmarg + 10 > fillcol) {
 		leftmarg = 0;
 		mlwrite("Column too narrow");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* record the pointer to the line just past the EOP */
@@ -593,7 +593,7 @@ int justpara(int f, int n)
 		curwp->w_doto = llength(curwp->w_dotp);
 
 	justflag = FALSE;
-	return (TRUE);
+	return TRUE;
 }
 #endif
 
@@ -622,12 +622,12 @@ int killpara(int f, int n)
 
 		/* and delete it */
 		if ((status = killregion(FALSE, 1)) != TRUE)
-			return (status);
+			return status;
 
 		/* and clean up the 2 extra lines */
 		ldelete(2L, TRUE);
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -655,7 +655,7 @@ int wordcount(int f, int n)
 
 	/* make sure we have a region to count */
 	if ((status = getregion(&region)) != TRUE)
-		return (status);
+		return status;
 	lp = region.r_linep;
 	offset = region.r_offset;
 	size = region.r_size;
@@ -701,6 +701,6 @@ int wordcount(int f, int n)
 
 	mlwrite("Words %D Chars %D Lines %d Avg chars/word %f",
 		nwords, nchars, nlines + 1, avgch);
-	return (TRUE);
+	return TRUE;
 }
 #endif

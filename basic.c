@@ -68,7 +68,7 @@ int backchar(int f, int n)
 	while (n--) {
 		if (curwp->w_doto == 0) {
 			if ((lp = lback(curwp->w_dotp)) == curbp->b_linep)
-				return (FALSE);
+				return FALSE;
 			curwp->w_dotp = lp;
 			curwp->w_doto = llength(lp);
 			curwp->w_flag |= WFMOVE;
@@ -100,7 +100,7 @@ int forwchar(int f, int n)
 	while (n--) {
 		if (curwp->w_doto == llength(curwp->w_dotp)) {
 			if (curwp->w_dotp == curbp->b_linep)
-				return (FALSE);
+				return FALSE;
 			curwp->w_dotp = lforw(curwp->w_dotp);
 			curwp->w_doto = 0;
 			curwp->w_flag |= WFMOVE;
@@ -125,7 +125,7 @@ int gotoline(int f, int n)
 		if ((status =
 		     mlreply("Line to GOTO: ", arg, NSTRING)) != TRUE) {
 			mlwrite("(Aborted)");
-			return (status);
+			return status;
 		}
 		n = atoi(arg);
 	}

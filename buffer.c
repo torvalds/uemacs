@@ -27,10 +27,10 @@ int usebuffer(int f, int n)
 	char bufn[NBUFN];
 
 	if ((s = mlreply("Use buffer: ", bufn, NBUFN)) != TRUE)
-		return (s);
+		return s;
 	if ((bp = bfind(bufn, TRUE, 0)) == NULL)
-		return (FALSE);
-	return (swbuffer(bp));
+		return FALSE;
+	return swbuffer(bp);
 }
 
 /*
@@ -47,7 +47,7 @@ int nextbuffer(int f, int n)
 	if (f == FALSE)
 		n = 1;
 	if (n < 1)
-		return (FALSE);
+		return FALSE;
 
 	bbp = curbp;
 	while (n-- > 0) {
@@ -63,14 +63,14 @@ int nextbuffer(int f, int n)
 
 			/* don't get caught in an infinite loop! */
 			if (bp == bbp)
-				return (FALSE);
+				return FALSE;
 
 		}
 
 		bbp = bp;
 	}
 
-	return (swbuffer(bp));
+	return swbuffer(bp);
 }
 
 /*
@@ -104,7 +104,7 @@ int swbuffer(struct buffer *bp)
 		curwp->w_markp = bp->b_markp;
 		curwp->w_marko = bp->b_marko;
 		cknewwindow();
-		return (TRUE);
+		return TRUE;
 	}
 	wp = wheadp;		/* Look for old.        */
 	while (wp != NULL) {
@@ -118,7 +118,7 @@ int swbuffer(struct buffer *bp)
 		wp = wp->w_wndp;
 	}
 	cknewwindow();
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -136,12 +136,12 @@ int killbuffer(int f, int n)
 	char bufn[NBUFN];
 
 	if ((s = mlreply("Kill buffer: ", bufn, NBUFN)) != TRUE)
-		return (s);
+		return s;
 	if ((bp = bfind(bufn, FALSE, 0)) == NULL)	/* Easy if unknown.     */
-		return (TRUE);
+		return TRUE;
 	if (bp->b_flag & BFINVS)	/* Deal with special buffers        */
-		return (TRUE);	/* by doing nothing.    */
-	return (zotbuf(bp));
+		return TRUE;	/* by doing nothing.    */
+	return zotbuf(bp);
 }
 
 /*
@@ -155,10 +155,10 @@ int zotbuf(struct buffer *bp)
 
 	if (bp->b_nwnd != 0) {	/* Error if on screen.  */
 		mlwrite("Buffer is being displayed");
-		return (FALSE);
+		return FALSE;
 	}
 	if ((s = bclear(bp)) != TRUE)	/* Blow text away.      */
-		return (s);
+		return s;
 	free((char *) bp->b_linep);	/* Release header line. */
 	bp1 = NULL;		/* Find the header.     */
 	bp2 = bheadp;
@@ -172,7 +172,7 @@ int zotbuf(struct buffer *bp)
 	else
 		bp1->b_bufp = bp2;
 	free((char *) bp);	/* Release buffer block */
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -188,7 +188,7 @@ int namebuffer(int f, int n)
 	/* prompt for and get the new buffer name */
       ask:if (mlreply("Change buffer name to: ", bufn, NBUFN) !=
 	    TRUE)
-		return (FALSE);
+		return FALSE;
 
 	/* and check for duplicates */
 	bp = bheadp;
@@ -204,7 +204,7 @@ int namebuffer(int f, int n)
 	strcpy(curbp->b_bname, bufn);	/* copy buffer name to structure */
 	curwp->w_flag |= WFMODE;	/* make mode line replot */
 	mlerase();
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -224,10 +224,10 @@ int listbuffers(int f, int n)
 	int s;
 
 	if ((s = makelist(f)) != TRUE)
-		return (s);
+		return s;
 	if (blistp->b_nwnd == 0) {	/* Not on screen yet.   */
 		if ((wp = wpopup()) == NULL)
-			return (FALSE);
+			return FALSE;
 		bp = wp->w_bufp;
 		if (--bp->b_nwnd == 0) {
 			bp->b_dotp = wp->w_dotp;
@@ -250,7 +250,7 @@ int listbuffers(int f, int n)
 		}
 		wp = wp->w_wndp;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -280,12 +280,12 @@ int makelist(int iflag)
 
 	blistp->b_flag &= ~BFCHG;	/* Don't complain!      */
 	if ((s = bclear(blistp)) != TRUE)	/* Blow old text away   */
-		return (s);
+		return s;
 	strcpy(blistp->b_fname, "");
 	if (addline("ACT MODES        Size Buffer        File") == FALSE
 	    || addline("--- -----        ---- ------        ----") ==
 	    FALSE)
-		return (FALSE);
+		return FALSE;
 	bp = bheadp;		/* For all buffers      */
 
 	/* build line to report global mode settings */
@@ -303,7 +303,7 @@ int makelist(int iflag)
 			*cp1++ = '.';
 	strcpy(cp1, "         Global Modes");
 	if (addline(line) == FALSE)
-		return (FALSE);
+		return FALSE;
 
 	/* output the list of buffers */
 	while (bp != NULL) {
@@ -367,10 +367,10 @@ int makelist(int iflag)
 		}
 		*cp1 = 0;	/* Add to the buffer.   */
 		if (addline(line) == FALSE)
-			return (FALSE);
+			return FALSE;
 		bp = bp->b_bufp;
 	}
-	return (TRUE);		/* All done             */
+	return TRUE;		/* All done             */
 }
 
 void ltoa(char *buf, int width, long num)
@@ -400,7 +400,7 @@ int addline(char *text)
 
 	ntext = strlen(text);
 	if ((lp = lalloc(ntext)) == NULL)
-		return (FALSE);
+		return FALSE;
 	for (i = 0; i < ntext; ++i)
 		lputc(lp, i, text[i]);
 	blistp->b_linep->l_bp->l_fp = lp;	/* Hook onto the end    */
@@ -409,7 +409,7 @@ int addline(char *text)
 	lp->l_fp = blistp->b_linep;
 	if (blistp->b_dotp == blistp->b_linep)	/* If "." is at the end */
 		blistp->b_dotp = lp;	/* move it to new line  */
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -430,10 +430,10 @@ int anycb(void)
 	while (bp != NULL) {
 		if ((bp->b_flag & BFINVS) == 0
 		    && (bp->b_flag & BFCHG) != 0)
-			return (TRUE);
+			return TRUE;
 		bp = bp->b_bufp;
 	}
-	return (FALSE);
+	return FALSE;
 }
 
 /*
@@ -452,15 +452,15 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 	bp = bheadp;
 	while (bp != NULL) {
 		if (strcmp(bname, bp->b_bname) == 0)
-			return (bp);
+			return bp;
 		bp = bp->b_bufp;
 	}
 	if (cflag != FALSE) {
 		if ((bp = (struct buffer *)malloc(sizeof(struct buffer))) == NULL)
-			return (NULL);
+			return NULL;
 		if ((lp = lalloc(0)) == NULL) {
 			free((char *) bp);
-			return (NULL);
+			return NULL;
 		}
 		/* find the place in the list to insert this buffer */
 		if (bheadp == NULL || strcmp(bheadp->b_bname, bname) > 0) {
@@ -498,7 +498,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 		lp->l_fp = lp;
 		lp->l_bp = lp;
 	}
-	return (bp);
+	return bp;
 }
 
 /*
@@ -519,7 +519,7 @@ int bclear(struct buffer *bp)
 	if ((bp->b_flag & BFINVS) == 0	/* Not scratch buffer.  */
 	    && (bp->b_flag & BFCHG) != 0	/* Something changed    */
 	    && (s = mlyesno("Discard changes")) != TRUE)
-		return (s);
+		return s;
 	bp->b_flag &= ~BFCHG;	/* Not changed          */
 	while ((lp = lforw(bp->b_linep)) != bp->b_linep)
 		lfree(lp);
@@ -527,7 +527,7 @@ int bclear(struct buffer *bp)
 	bp->b_doto = 0;
 	bp->b_markp = NULL;	/* Invalidate "mark"    */
 	bp->b_marko = 0;
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -539,5 +539,5 @@ int unmark(int f, int n)
 {
 	curbp->b_flag &= ~BFCHG;
 	curwp->w_flag |= WFMODE;
-	return (TRUE);
+	return TRUE;
 }

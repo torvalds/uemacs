@@ -271,7 +271,7 @@ static void tcaprev(int state)
 
 static int tcapcres(char *res)
 {				/* change screen resolution */
-	return (TRUE);
+	return TRUE;
 }
 
 #if SCROLLCODE
@@ -362,7 +362,7 @@ static void putpad(char *str)
 static int fnclabel(int f, int n)
 {
 	/* on machines with no function keys...don't bother */
-	return (TRUE);
+	return TRUE;
 }
 #endif
 #else

@@ -29,7 +29,7 @@ int namedcmd(int f, int n)
 	kfunc = getname();
 	if (kfunc == NULL) {
 		mlwrite("(No such function)");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* and then execute the command */
@@ -50,10 +50,10 @@ int execcmd(int f, int n)
 
 	/* get the line wanted */
 	if ((status = mlreply(": ", cmdstr, NSTRING)) != TRUE)
-		return (status);
+		return status;
 
 	execlevel = 0;
-	return (docmd(cmdstr));
+	return docmd(cmdstr);
 }
 
 /*
@@ -81,7 +81,7 @@ int docmd(char *cline)
 
 	/* if we are scanning and not executing..go back here */
 	if (execlevel)
-		return (TRUE);
+		return TRUE;
 
 	oldestr = execstr;	/* save last ptr to string to execute */
 	execstr = cline;	/* and set this one as current */
@@ -94,7 +94,7 @@ int docmd(char *cline)
 
 	if ((status = macarg(tkn)) != TRUE) {	/* and grab the first token */
 		execstr = oldestr;
-		return (status);
+		return status;
 	}
 
 	/* process leadin argument */
@@ -106,7 +106,7 @@ int docmd(char *cline)
 		/* and now get the command to execute */
 		if ((status = macarg(tkn)) != TRUE) {
 			execstr = oldestr;
-			return (status);
+			return status;
 		}
 	}
 
@@ -114,7 +114,7 @@ int docmd(char *cline)
 	if ((fnc = fncmatch(tkn)) == NULL) {
 		mlwrite("(No such Function)");
 		execstr = oldestr;
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* save the arguments and go execute the command */
@@ -124,7 +124,7 @@ int docmd(char *cline)
 	cmdstatus = status;	/* save the status */
 	clexec = oldcle;	/* restore clexec flag */
 	execstr = oldestr;
-	return (status);
+	return status;
 }
 
 /*
@@ -199,7 +199,7 @@ char *token(char *src, char *tok, int size)
 	if (*src)
 		++src;
 	*tok = 0;
-	return (src);
+	return src;
 }
 
 /*
@@ -216,7 +216,7 @@ int macarg(char *tok)
 	clexec = TRUE;		/* get the argument */
 	status = nextarg("", tok, NSTRING, ctoec('\n'));
 	clexec = savcle;	/* restore execution mode */
-	return (status);
+	return status;
 }
 
 /*
@@ -232,14 +232,14 @@ int nextarg(char *prompt, char *buffer, int size, int terminator)
 {
 	/* if we are interactive, go get it! */
 	if (clexec == FALSE)
-		return (getstring(prompt, buffer, size, terminator));
+		return getstring(prompt, buffer, size, terminator);
 
 	/* grab token and advance past */
 	execstr = token(execstr, buffer, size);
 
 	/* evaluate it */
 	strcpy(buffer, getval(buffer));
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -258,13 +258,13 @@ int storemac(int f, int n)
 	/* must have a numeric argument to this function */
 	if (f == FALSE) {
 		mlwrite("No macro specified");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* range check the macro number */
 	if (n < 1 || n > 40) {
 		mlwrite("Macro number out of range");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* construct the macro buffer name */
@@ -275,7 +275,7 @@ int storemac(int f, int n)
 	/* set up the new macro buffer */
 	if ((bp = bfind(bname, TRUE, BFINVS)) == NULL) {
 		mlwrite("Can not create macro");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* and make sure it is empty */
@@ -284,7 +284,7 @@ int storemac(int f, int n)
 	/* and set the macro store pointers to it */
 	mstore = TRUE;
 	bstore = bp;
-	return (TRUE);
+	return TRUE;
 }
 
 #if	PROC
@@ -304,12 +304,12 @@ int storeproc(int f, int n)
 
 	/* a numeric argument means its a numbered macro */
 	if (f == TRUE)
-		return (storemac(f, n));
+		return storemac(f, n);
 
 	/* get the name of the procedure */
 	if ((status =
 	     mlreply("Procedure name: ", &bname[1], NBUFN - 2)) != TRUE)
-		return (status);
+		return status;
 
 	/* construct the macro buffer name */
 	bname[0] = '*';
@@ -318,7 +318,7 @@ int storeproc(int f, int n)
 	/* set up the new macro buffer */
 	if ((bp = bfind(bname, TRUE, BFINVS)) == NULL) {
 		mlwrite("Can not create macro");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* and make sure it is empty */
@@ -327,7 +327,7 @@ int storeproc(int f, int n)
 	/* and set the macro store pointers to it */
 	mstore = TRUE;
 	bstore = bp;
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -345,7 +345,7 @@ int execproc(int f, int n)
 	/* find out what buffer the user wants to execute */
 	if ((status =
 	     mlreply("Execute procedure: ", &bufn[1], NBUFN)) != TRUE)
-		return (status);
+		return status;
 
 	/* construct the buffer name */
 	bufn[0] = '*';
@@ -354,14 +354,14 @@ int execproc(int f, int n)
 	/* find the pointer to that buffer */
 	if ((bp = bfind(bufn, FALSE, 0)) == NULL) {
 		mlwrite("No such procedure");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* and now execute it as asked */
 	while (n-- > 0)
 		if ((status = dobuf(bp)) != TRUE)
-			return (status);
-	return (TRUE);
+			return status;
+	return TRUE;
 }
 #endif
 
@@ -379,19 +379,19 @@ int execbuf(int f, int n)
 
 	/* find out what buffer the user wants to execute */
 	if ((status = mlreply("Execute buffer: ", bufn, NBUFN)) != TRUE)
-		return (status);
+		return status;
 
 	/* find the pointer to that buffer */
 	if ((bp = bfind(bufn, FALSE, 0)) == NULL) {
 		mlwrite("No such buffer");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* and now execute it as asked */
 	while (n-- > 0)
 		if ((status = dobuf(bp)) != TRUE)
-			return (status);
-	return (TRUE);
+			return status;
+	return TRUE;
 }
 
 /*
@@ -472,7 +472,7 @@ int dobuf(struct buffer *bp)
 			      failexit:freewhile
 				    (scanner);
 				freewhile(whlist);
-				return (FALSE);
+				return FALSE;
 			}
 			whtemp->w_begin = lp;
 			whtemp->w_type = BTWHILE;
@@ -539,7 +539,7 @@ int dobuf(struct buffer *bp)
 		if ((einit = eline = malloc(linlen + 1)) == NULL) {
 			mlwrite("%%Out of Memory during macro execution");
 			freewhile(whlist);
-			return (FALSE);
+			return FALSE;
 		}
 		strncpy(eline, lp->l_text, linlen);
 		eline[linlen] = 0;	/* make sure it ends */
@@ -597,7 +597,7 @@ int dobuf(struct buffer *bp)
 			if ((c = get1key()) == abortc) {
 				mlforce("(Macro aborted)");
 				freewhile(whlist);
-				return (FALSE);
+				return FALSE;
 			}
 
 			if (c == metac)
@@ -619,7 +619,7 @@ int dobuf(struct buffer *bp)
 			if (dirnum == NUMDIRS) {
 				mlwrite("%%Unknown Directive");
 				freewhile(whlist);
-				return (FALSE);
+				return FALSE;
 			}
 
 			/* service only the !ENDM macro here */
@@ -640,7 +640,7 @@ int dobuf(struct buffer *bp)
 			if ((mp = lalloc(linlen)) == NULL) {
 				mlwrite
 				    ("Out of memory while storing macro");
-				return (FALSE);
+				return FALSE;
 			}
 
 			/* copy the text into the new line */
@@ -708,7 +708,7 @@ int dobuf(struct buffer *bp)
 					mlwrite
 					    ("%%Internal While loop error");
 					freewhile(whlist);
-					return (FALSE);
+					return FALSE;
 				}
 
 				/* reset the line pointer back.. */
@@ -749,7 +749,7 @@ int dobuf(struct buffer *bp)
 					}
 					mlwrite("%%No such label");
 					freewhile(whlist);
-					return (FALSE);
+					return FALSE;
 				}
 				goto onward;
 
@@ -777,7 +777,7 @@ int dobuf(struct buffer *bp)
 						mlwrite
 						    ("%%Internal While loop error");
 						freewhile(whlist);
-						return (FALSE);
+						return FALSE;
 					}
 
 					/* reset the line pointer back.. */
@@ -815,7 +815,7 @@ int dobuf(struct buffer *bp)
 			free(einit);
 			execlevel = 0;
 			freewhile(whlist);
-			return (status);
+			return status;
 		}
 
 	      onward:		/* on to the next line */
@@ -826,7 +826,7 @@ int dobuf(struct buffer *bp)
       eexec:			/* exit the current function */
 	execlevel = 0;
 	freewhile(whlist);
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -856,7 +856,7 @@ int execfile(int f, int n)
 
 	if ((status =
 	     mlreply("File to execute: ", fname, NSTRING - 1)) != TRUE)
-		return (status);
+		return status;
 
 #if	1
 	/* look up the path for the file */
@@ -864,15 +864,15 @@ int execfile(int f, int n)
 
 	/* if it isn't around */
 	if (fspec == NULL)
-		return (FALSE);
+		return FALSE;
 
 #endif
 	/* otherwise, execute it */
 	while (n-- > 0)
 		if ((status = dofile(fspec)) != TRUE)
-			return (status);
+			return status;
 
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -892,7 +892,7 @@ int dofile(char *fname)
 	makename(bname, fname);	/* derive the name of the buffer */
 	unqname(bname);		/* make sure we don't stomp things */
 	if ((bp = bfind(bname, TRUE, 0)) == NULL)	/* get the needed buffer */
-		return (FALSE);
+		return FALSE;
 
 	bp->b_mode = MDVIEW;	/* mark the buffer as read only */
 	cb = curbp;		/* save the old buffer */
@@ -900,18 +900,18 @@ int dofile(char *fname)
 	/* and try to read in the file to execute */
 	if ((status = readin(fname, FALSE)) != TRUE) {
 		curbp = cb;	/* restore the current buffer */
-		return (status);
+		return status;
 	}
 
 	/* go execute it! */
 	curbp = cb;		/* restore the current buffer */
 	if ((status = dobuf(bp)) != TRUE)
-		return (status);
+		return status;
 
 	/* if not displayed, remove the now unneeded buffer and exit */
 	if (bp->b_nwnd == 0)
 		zotbuf(bp);
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -934,14 +934,14 @@ int cbuf(int f, int n, int bufnum)
 	/* find the pointer to that buffer */
 	if ((bp = bfind(bufname, FALSE, 0)) == NULL) {
 		mlwrite("Macro not defined");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* and now execute it as asked */
 	while (n-- > 0)
 		if ((status = dobuf(bp)) != TRUE)
-			return (status);
-	return (TRUE);
+			return status;
+	return TRUE;
 }
 
 int cbuf1(int f, int n)

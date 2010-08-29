@@ -31,20 +31,20 @@ int lockchk(char *fname)
 	if (numlocks > 0)
 		for (i = 0; i < numlocks; ++i)
 			if (strcmp(fname, lname[i]) == 0)
-				return (TRUE);
+				return TRUE;
 
 	/* if we have a full locking table, bitch and leave */
 	if (numlocks == NLOCKS) {
 		mlwrite("LOCK ERROR: Lock table full");
-		return (ABORT);
+		return ABORT;
 	}
 
 	/* next, try to lock it */
 	status = lock(fname);
 	if (status == ABORT)	/* file is locked, no override */
-		return (ABORT);
+		return ABORT;
 	if (status == FALSE)	/* locked, overriden, dont add to table */
-		return (TRUE);
+		return TRUE;
 
 	/* we have now locked it, add it to our table */
 	lname[++numlocks - 1] = (char *) malloc(strlen(fname) + 1);
@@ -52,12 +52,12 @@ int lockchk(char *fname)
 		undolock(fname);	/* free the lock */
 		mlwrite("Cannot lock, out of memory");
 		--numlocks;
-		return (ABORT);
+		return ABORT;
 	}
 
 	/* everthing is cool, add it to the table */
 	strcpy(lname[numlocks - 1], fname);
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -78,7 +78,7 @@ int lockrel(void)
 			free(lname[i]);
 		}
 	numlocks = 0;
-	return (status);
+	return status;
 }
 
 /*
@@ -99,12 +99,12 @@ int lock(char *fname)
 	/* attempt to lock the file */
 	locker = dolock(fname);
 	if (locker == NULL)	/* we win */
-		return (TRUE);
+		return TRUE;
 
 	/* file failed...abort */
 	if (strncmp(locker, "LOCK", 4) == 0) {
 		lckerror(locker);
-		return (ABORT);
+		return ABORT;
 	}
 
 	/* someone else has it....override? */
@@ -113,9 +113,9 @@ int lock(char *fname)
 	strcat(msg, ", override?");
 	status = mlyesno(msg);	/* ask them */
 	if (status == TRUE)
-		return (FALSE);
+		return FALSE;
 	else
-		return (ABORT);
+		return ABORT;
 }
 
 /*
@@ -132,11 +132,11 @@ int unlock(char *fname)
 	/* unclock and return */
 	locker = undolock(fname);
 	if (locker == NULL)
-		return (TRUE);
+		return TRUE;
 
 	/* report the error and come back */
 	lckerror(locker);
-	return (FALSE);
+	return FALSE;
 }
 
 /*

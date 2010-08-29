@@ -34,7 +34,7 @@ int set_encryption_key(int f, int n)
 	status = mlreply("Encryption String: ", key, NPAT - 1);
 	disinp = odisinp;
 	if (status != TRUE)
-		return (status);
+		return status;
 
 	/* and encrypt it */
 	myencrypt((char *) NULL, 0);
@@ -43,7 +43,7 @@ int set_encryption_key(int f, int n)
 	/* and save it off */
 	strcpy(curbp->b_key, key);
 	mlwrite(" ");		/* clear it off the bottom line */
-	return (TRUE);
+	return TRUE;
 }
 
 /**********
@@ -214,7 +214,7 @@ static int mod95(int val)
 		val -= 95;
 	while (val < 0)
 		val += 95;
-	return (val);
+	return val;
 }
 #else
 static void myennocrypt(void)

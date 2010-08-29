@@ -348,11 +348,11 @@ static int scinit(int type)
 
 	/* if we have nothing to do....don't do it */
 	if (dtype == type)
-		return (TRUE);
+		return TRUE;
 
 	/* if we try to switch to EGA and there is none, don't */
 	if (type == CDEGA && egaexist != TRUE)
-		return (FALSE);
+		return FALSE;
 
 	/* if we had the EGA open... close it */
 	if (dtype == CDEGA)
@@ -395,7 +395,7 @@ static int scinit(int type)
 		addr.laddr = scadd + (long) (NCOL * i * 2);
 		scptr[i] = addr.paddr;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /* getboard:	Determine which type of display board is attached.
@@ -425,7 +425,7 @@ int getboard(void)
 	rg.x.bx = 0xff10;
 	int86(0x10, &rg, &rg);	/* If EGA, bh=0-1 and bl=0-3 */
 	egaexist = !(rg.x.bx & 0xfefc);	/* Yes, it's EGA */
-	return (type);
+	return type;
 }
 
 /* init the computer to work with the EGA */

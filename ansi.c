@@ -176,7 +176,7 @@ void ansirev(int state)
 /* Change screen resolution. */
 int ansicres()
 {
-	return (TRUE);
+	return TRUE;
 }
 
 /* Change pallette settings. */
@@ -252,7 +252,7 @@ void ansikclose(void)
 int fnclabel(int f, int n)
 {
 	/* On machines with no function keys...don't bother. */
-	return (TRUE);
+	return TRUE;
 }
 #endif
 #endif

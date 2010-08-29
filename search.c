@@ -89,7 +89,7 @@ int forwsearch(int f, int n)
 	 * Otherwise proceed by asking for the search string.
 	 */
 	if (n < 0)
-		return (backsearch(f, -n));
+		return backsearch(f, -n);
 
 	/* Ask the user for the text of a pattern.  If the
 	 * response is TRUE (responses other than FALSE are
@@ -117,7 +117,7 @@ int forwsearch(int f, int n)
 		else
 			mlwrite("Not found");
 	}
-	return (status);
+	return status;
 }
 
 /*
@@ -132,7 +132,7 @@ int forwhunt(int f, int n)
 	int status = TRUE;
 
 	if (n < 0)		/* search backwards */
-		return (backhunt(f, -n));
+		return backhunt(f, -n);
 
 	/* Make sure a pattern exists, or that we didn't switch
 	 * into MAGIC mode until after we entered the pattern.
@@ -170,7 +170,7 @@ int forwhunt(int f, int n)
 	else
 		mlwrite("Not found");
 
-	return (status);
+	return status;
 }
 
 /*
@@ -189,7 +189,7 @@ int backsearch(int f, int n)
 	 * Otherwise proceed by asking for the search string.
 	 */
 	if (n < 0)
-		return (forwsearch(f, -n));
+		return forwsearch(f, -n);
 
 	/* Ask the user for the text of a pattern.  If the
 	 * response is TRUE (responses other than FALSE are
@@ -218,7 +218,7 @@ int backsearch(int f, int n)
 		else
 			mlwrite("Not found");
 	}
-	return (status);
+	return status;
 }
 
 /*
@@ -234,7 +234,7 @@ int backhunt(int f, int n)
 	int status = TRUE;
 
 	if (n < 0)
-		return (forwhunt(f, -n));
+		return forwhunt(f, -n);
 
 	/* Make sure a pattern exists, or that we didn't switch
 	 * into MAGIC mode until after we entered the pattern.
@@ -272,7 +272,7 @@ int backhunt(int f, int n)
 	else
 		mlwrite("Not found");
 
-	return (status);
+	return status;
 }
 
 #if	MAGIC
@@ -579,7 +579,7 @@ int eq(unsigned char bc, unsigned char pc)
 			pc ^= DIFCASE;
 	}
 
-	return (bc == pc);
+	return bc == pc;
 }
 
 /*
@@ -631,7 +631,7 @@ static int readpattern(char *prompt, char *apat, int srch)
 	} else if (status == FALSE && apat[0] != 0)	/* Old one */
 		status = TRUE;
 
-	return (status);
+	return status;
 }
 
 /*
@@ -686,7 +686,7 @@ void rvstrcpy(char *rvstr, char *str)
  */
 int sreplace(int f, int n)
 {
-	return (replaces(FALSE, f, n));
+	return replaces(FALSE, f, n);
 }
 
 /*
@@ -697,7 +697,7 @@ int sreplace(int f, int n)
  */
 int qreplace(int f, int n)
 {
-	return (replaces(TRUE, f, n));
+	return replaces(TRUE, f, n);
 }
 
 /*
@@ -724,12 +724,12 @@ static int replaces(int kind, int f, int n)
 	int lastoff;		/* offset (for 'u' query option) */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return (rdonly());	/* we are in read only mode     */
+		return rdonly();	/* we are in read only mode     */
 
 	/* Check for negative repetitions.
 	 */
 	if (f && n < 0)
-		return (FALSE);
+		return FALSE;
 
 	/* Ask the user for the text of a pattern.
 	 */
@@ -737,12 +737,12 @@ static int replaces(int kind, int f, int n)
 				   FALSE ? "Replace" : "Query replace"),
 				  &pat[0], TRUE))
 	    != TRUE)
-		return (status);
+		return status;
 
 	/* Ask for the replacement string.
 	 */
 	if ((status = readpattern("with", &rpat[0], FALSE)) == ABORT)
-		return (status);
+		return status;
 
 	/* Find the length of the replacement string.
 	 */
@@ -860,7 +860,7 @@ static int replaces(int kind, int f, int n)
 #endif
 				status = delins(rlength, patmatch, FALSE);
 				if (status != TRUE)
-					return (status);
+					return status;
 
 				/* Record one less substitution,
 				 * backup, save our place, and
@@ -880,7 +880,7 @@ static int replaces(int kind, int f, int n)
 
 			case BELL:	/* abort! and stay */
 				mlwrite("Aborted!");
-				return (FALSE);
+				return FALSE;
 
 			default:	/* bitch and beep */
 				TTbeep();
@@ -900,7 +900,7 @@ static int replaces(int kind, int f, int n)
 		 */
 		status = delins(matchlen, &rpat[0], TRUE);
 		if (status != TRUE)
-			return (status);
+			return status;
 
 		/* Save our position, since we may
 		 * undo this.
@@ -916,7 +916,7 @@ static int replaces(int kind, int f, int n)
 	/* And report the results.
 	 */
 	mlwrite("%d substitutions", numsub);
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -952,7 +952,7 @@ int delins(int dlength, char *instr, int use_meta)
 #endif
 		status = linstr(instr);
 
-	return (status);
+	return status;
 }
 
 /*
@@ -999,11 +999,11 @@ int expandp(char *srcstr, char *deststr, int maxlength)
 		if (maxlength < 4) {
 			*deststr++ = '$';
 			*deststr = '\0';
-			return (FALSE);
+			return FALSE;
 		}
 	}
 	*deststr = '\0';
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -1024,7 +1024,7 @@ int boundry(struct line *curline, int curoff, int dir)
 		border = (curoff == 0) &&
 		    (lback(curline) == curbp->b_linep);
 	}
-	return (border);
+	return border;
 }
 
 /*
@@ -1064,7 +1064,7 @@ static int nextch(struct line **pcurline, int *pcuroff, int dir)
 	*pcurline = curline;
 	*pcuroff = curoff;
 
-	return (c);
+	return c;
 }
 
 #if	MAGIC
@@ -1187,7 +1187,7 @@ static int mcstr(void)
 		mcclear();
 	}
 
-	return (status);
+	return status;
 }
 
 /*
@@ -1365,7 +1365,7 @@ static int mceq(int bc, MC *mt)
 
 	}			/* End of switch. */
 
-	return (result);
+	return result;
 }
 
 extern BITMAP clearbits(void);
@@ -1403,7 +1403,7 @@ static int cclmake(char **ppatptr, MC *mcptr)
 
 	if ((ochr = *patptr) == MC_ECCL) {
 		mlwrite("%%No characters in character class");
-		return (FALSE);
+		return FALSE;
 	} else {
 		if (ochr == MC_ESC)
 			ochr = *++patptr;
@@ -1461,7 +1461,7 @@ static int biteq(int bc, BITMAP cclmap)
 	if (bc >= HICHAR)
 		return FALSE;
 
-	return ((*(cclmap + (bc >> 3)) & BIT(bc & 7)) ? TRUE : FALSE);
+	return (*(cclmap + (bc >> 3)) & BIT(bc & 7)) ? TRUE : FALSE;
 }
 
 /*
@@ -1476,7 +1476,7 @@ static BITMAP clearbits(void)
 		for (j = 0; j < HIBYTE; j++)
 			*cclmap++ = 0;
 
-	return (cclstart);
+	return cclstart;
 }
 
 /*

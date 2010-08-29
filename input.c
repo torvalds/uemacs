@@ -44,13 +44,13 @@ int mlyesno(char *prompt)
 		c = tgetc();
 
 		if (c == ectoc(abortc))	/* Bail out! */
-			return (ABORT);
+			return ABORT;
 
 		if (c == 'y' || c == 'Y')
-			return (TRUE);
+			return TRUE;
 
 		if (c == 'n' || c == 'N')
-			return (FALSE);
+			return FALSE;
 	}
 }
 
@@ -64,12 +64,12 @@ int mlyesno(char *prompt)
 
 int mlreply(char *prompt, char *buf, int nbuf)
 {
-	return (nextarg(prompt, buf, nbuf, ctoec('\n')));
+	return nextarg(prompt, buf, nbuf, ctoec('\n'));
 }
 
 int mlreplyt(char *prompt, char *buf, int nbuf, int eolchar)
 {
-	return (nextarg(prompt, buf, nbuf, eolchar));
+	return nextarg(prompt, buf, nbuf, eolchar);
 }
 
 /*
@@ -83,7 +83,7 @@ int ectoc(int c)
 		c = c & ~(CONTROL | 0x40);
 	if (c & SPEC)
 		c = c & 255;
-	return (c);
+	return c;
 }
 
 /*
@@ -95,7 +95,7 @@ int ctoec(int c)
 {
 	if (c >= 0x00 && c <= 0x1F)
 		c = CONTROL | (c + '@');
-	return (c);
+	return c;
 }
 
 /*
@@ -120,7 +120,7 @@ fn_t getname(void)
 	if (clexec) {
 		if (macarg(buf) != TRUE)
 			return NULL;
-		return (fncmatch(&buf[0]));
+		return fncmatch(&buf[0]);
 	}
 
 	/* build a name string from the keyboard */
@@ -132,7 +132,7 @@ fn_t getname(void)
 			buf[cpos] = 0;
 
 			/* and match it off */
-			return (fncmatch(&buf[0]));
+			return fncmatch(&buf[0]);
 
 		} else if (c == ectoc(abortc)) {	/* Bell, abort */
 			ctrlg(FALSE, 0);
@@ -178,7 +178,7 @@ fn_t getname(void)
 						while (*sp)
 							TTputc(*sp++);
 						TTflush();
-						return (ffp->n_func);
+						return ffp->n_func;
 					} else {
 /* << << << << << << << << << << << << << << << << << */
 						/* try for a partial match against the list */
@@ -258,7 +258,7 @@ int tgetc(void)
 
 		/* if there is some left... */
 		if (kbdptr < kbdend)
-			return ((int) *kbdptr++);
+			return (int) *kbdptr++;
 
 		/* at the end of last repitition? */
 		if (--kbdrep < 1) {
@@ -271,7 +271,7 @@ int tgetc(void)
 
 			/* reset the macro to the begining for the next rep */
 			kbdptr = &kbdm[0];
-			return ((int) *kbdptr++);
+			return (int) *kbdptr++;
 		}
 	}
 
@@ -294,7 +294,7 @@ int tgetc(void)
 	}
 
 	/* and finally give the char back */
-	return (c);
+	return c;
 }
 
 /*	GET1KEY:	Get one keystroke. The only prefixs legal here
@@ -313,13 +313,13 @@ int get1key(void)
 		c = tgetc();
 		if (c >= 0x00 && c <= 0x1F)	/* control key? */
 			c = CONTROL | (c + '@');
-		return (SPEC | c);
+		return SPEC | c;
 	}
 #endif
 
 	if (c >= 0x00 && c <= 0x1F)	/* C0 control -> C-     */
 		c = CONTROL | (c + '@');
-	return (c);
+	return c;
 }
 
 /*	GETCMD:	Get a command from the keyboard. Process all applicable
@@ -348,12 +348,12 @@ int getcmd(void)
 handle_CSI:
 			c = get1key();
 			if (c >= 'A' && c <= 'D')
-				return (SPEC | c | cmask);
+				return SPEC | c | cmask;
 			if (c >= 'E' && c <= 'z' && c != 'i' && c != 'c')
-				return (SPEC | c | cmask);
+				return SPEC | c | cmask;
 			d = get1key();
 			if (d == '~')	/* ESC [ n ~   P.K. */
-				return (SPEC | c | cmask);
+				return SPEC | c | cmask;
 			switch (c) {	/* ESC [ n n ~ P.K. */
 			case '1':
 				c = d + 32;
@@ -376,7 +376,7 @@ handle_CSI:
 			} else if (c == 'c')	/* ESC key   P.K. */
 				c = get1key();
 			else
-				return (SPEC | c | cmask);
+				return SPEC | c | cmask;
 		}
 #endif
 #if VT220
@@ -389,7 +389,7 @@ handle_CSI:
 			c ^= DIFCASE;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
 			c = CONTROL | (c + '@');
-		return (META | c);
+		return META | c;
 	}
 #if	PKCODE
 	else if (c == metac) {
@@ -404,7 +404,7 @@ handle_CSI:
 			c ^= DIFCASE;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
 			c = CONTROL | (c + '@');
-		return (META | c);
+		return META | c;
 	}
 #endif
 
@@ -425,11 +425,11 @@ handle_CSI:
 			c -= 0x20;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
 			c = CONTROL | (c + '@');
-		return (CTLX | c);
+		return CTLX | c;
 	}
 
 	/* otherwise, just return it */
-	return (c);
+	return c;
 }
 
 /*	A more generalized prompt/reply function allowing the caller
@@ -492,9 +492,9 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 
 			/* if we default the buffer, return FALSE */
 			if (buf[0] == 0)
-				return (FALSE);
+				return FALSE;
 
-			return (TRUE);
+			return TRUE;
 		}
 
 		/* change from command form back to character form */
@@ -504,7 +504,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			/* Abort the input? */
 			ctrlg(FALSE, 0);
 			TTflush();
-			return (ABORT);
+			return ABORT;
 		} else if ((c == 0x7F || c == 0x08) && quotef == FALSE) {
 			/* rubout/erase */
 			if (cpos != 0) {

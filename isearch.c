@@ -75,7 +75,7 @@ int risearch(int f, int n)
 #if	PKCODE
 	matchlen = strlen(pat);
 #endif
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -107,7 +107,7 @@ int fisearch(int f, int n)
 #if	PKCODE
 	matchlen = strlen(pat);
 #endif
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -193,11 +193,11 @@ int isearch(int f, int n)
 		/* Most cases here change the search */
 
 		if (expc == metac)	/* Want to quit searching?    */
-			return (TRUE);	/* Quit searching now         */
+			return TRUE;	/* Quit searching now         */
 
 		switch (c) {	/* dispatch on the input char */
 		case IS_ABORT:	/* If abort search request    */
-			return (FALSE);	/* Quit searching again       */
+			return FALSE;	/* Quit searching again       */
 
 		case IS_REVERSE:	/* If backward search         */
 		case IS_FORWARD:	/* If forward search          */
@@ -225,7 +225,7 @@ int isearch(int f, int n)
 		case IS_BACKSP:	/* If a backspace:            */
 		case IS_RUBOUT:	/*  or if a Rubout:           */
 			if (cmd_offset <= 1)	/* Anything to delete?            */
-				return (TRUE);	/* No, just exit              */
+				return TRUE;	/* No, just exit              */
 			--cmd_offset;	/* Back up over the Rubout    */
 			cmd_buff[--cmd_offset] = '\0';	/* Yes, delete last char   */
 			curwp->w_dotp = curline;	/* Reset the line pointer     */
@@ -240,7 +240,7 @@ int isearch(int f, int n)
 		default:	/* All other chars            */
 			if (c < ' ') {	/* Is it printable?             *//* Nope.                      */
 				reeat(c);	/* Re-eat the char            */
-				return (TRUE);	/* And return the last status */
+				return TRUE;	/* And return the last status */
 			}
 		}		/* Switch */
 
@@ -249,7 +249,7 @@ int isearch(int f, int n)
 		pat[cpos++] = c;	/* put the char in the buffer */
 		if (cpos >= NPAT) {	/* too many chars in string?  *//* Yup.  Complain about it    */
 			mlwrite("? Search string too long");
-			return (TRUE);	/* Return an error            */
+			return TRUE;	/* Return an error            */
 		}
 		pat[cpos] = 0;	/* null terminate the buffer  */
 		col = echo_char(c, col);	/* Echo the character         */
@@ -293,7 +293,7 @@ int checknext(char chr, char *patrn, int dir)	/* Check next character in search 
 		if (curoff == llength(curline)) {		/* If at end of line                    */
 			curline = lforw(curline);		/* Skip to the next line              */
 			if (curline == curbp->b_linep)
-				return (FALSE);			/* Abort if at end of buffer          */
+				return FALSE;			/* Abort if at end of buffer          */
 			curoff = 0;				/* Start at the beginning of the line */
 			buffchar = '\n';			/* And say the next char is NL        */
 		} else
@@ -303,9 +303,9 @@ int checknext(char chr, char *patrn, int dir)	/* Check next character in search 
 			curwp->w_doto = curoff;			/*  to the matched character          */
 			curwp->w_flag |= WFMOVE;		/* Say that we've moved               */
 		}
-		return (status);		/* And return the status              */
+		return status;		/* And return the status              */
 	} else					/* Else, if reverse search:       */
-		return (match_pat(patrn));	/* See if we're in the right place    */
+		return match_pat(patrn);	/* See if we're in the right place    */
 }
 
 /*
@@ -335,7 +335,7 @@ int scanmore(char *patrn, int dir)	/* search forward or back for a pattern      
 		TTflush();	/* see that the feep feeps    */
 	}
 
-	return (sts);		/* else, don't even try       */
+	return sts;		/* else, don't even try       */
 }
 
 /*
@@ -368,14 +368,14 @@ int match_pat(char *patrn)	/* See if the pattern string matches string at "."   
 			curline = lforw(curline);	/* Skip to the next line              */
 			curoff = 0;	/* Start at the beginning of the line */
 			if (curline == curbp->b_linep)
-				return (FALSE);	/* Abort if at end of buffer          */
+				return FALSE;	/* Abort if at end of buffer          */
 			buffchar = '\n';	/* And say the next char is NL        */
 		} else
 			buffchar = lgetc(curline, curoff++);	/* Get the next char         */
 		if (!eq(buffchar, patrn[i]))	/* Is it what we're looking for?      */
-			return (FALSE);	/* Nope, just punt it then            */
+			return FALSE;	/* Nope, just punt it then            */
 	}
-	return (TRUE);		/* Everything matched? Let's celebrate */
+	return TRUE;		/* Everything matched? Let's celebrate */
 }
 
 /*
@@ -394,7 +394,7 @@ int promptpattern(char *prompt)
 	if (!clexec) {
 		mlwrite(tpat);
 	}
-	return (strlen(tpat));
+	return strlen(tpat);
 }
 
 /*
@@ -439,7 +439,7 @@ static int echo_char(int c, int col)
 	} else
 		TTputc(c);	/* Otherwise, output raw char */
 	TTflush();		/* Flush the output           */
-	return (++col);		/* return the new column no   */
+	return ++col;		/* return the new column no   */
 }
 
 /*
@@ -456,7 +456,7 @@ int get_char(void)
 
 	if (cmd_reexecute >= 0)	/* Is there an offset?                    */
 		if ((c = cmd_buff[cmd_reexecute++]) != 0)
-			return (c);	/* Yes, return any character          */
+			return c;	/* Yes, return any character          */
 
 	/* We're not re-executing (or aren't any more).  Try for a real char      */
 
@@ -464,12 +464,12 @@ int get_char(void)
 	update(FALSE);		/* Pretty up the screen               */
 	if (cmd_offset >= CMDBUFLEN - 1) {	/* If we're getting too big ...         */
 		mlwrite("? command too long");	/* Complain loudly and bitterly       */
-		return (metac);	/* And force a quit                   */
+		return metac;	/* And force a quit                   */
 	}
 	c = get1key();		/* Get the next character             */
 	cmd_buff[cmd_offset++] = c;	/* Save the char for next time        */
 	cmd_buff[cmd_offset] = '\0';	/* And terminate the buffer           */
-	return (c);		/* Return the character               */
+	return c;		/* Return the character               */
 }
 
 /*
@@ -486,7 +486,7 @@ int uneat(void)
 	term.t_getchar = saved_get_char;	/* restore the routine address        */
 	c = eaten_char;		/* Get the re-eaten char              */
 	eaten_char = -1;	/* Clear the old char                 */
-	return (c);		/* and return the last char           */
+	return c;		/* and return the last char           */
 }
 
 void reeat(int c)

@@ -46,22 +46,22 @@ char *gtfun(char *fname)
 
 	/* return errorm on a bad reference */
 	if (fnum == ARRAY_SIZE(funcs))
-		return (errorm);
+		return errorm;
 
 	/* if needed, retrieve the first argument */
 	if (funcs[fnum].f_type >= MONAMIC) {
 		if ((status = macarg(arg1)) != TRUE)
-			return (errorm);
+			return errorm;
 
 		/* if needed, retrieve the second argument */
 		if (funcs[fnum].f_type >= DYNAMIC) {
 			if ((status = macarg(arg2)) != TRUE)
-				return (errorm);
+				return errorm;
 
 			/* if needed, retrieve the third argument */
 			if (funcs[fnum].f_type >= TRINAMIC)
 				if ((status = macarg(arg3)) != TRUE)
-					return (errorm);
+					return errorm;
 		}
 	}
 
@@ -69,22 +69,22 @@ char *gtfun(char *fname)
 	/* and now evaluate it! */
 	switch (fnum) {
 	case UFADD:
-		return (itoa(atoi(arg1) + atoi(arg2)));
+		return itoa(atoi(arg1) + atoi(arg2));
 	case UFSUB:
-		return (itoa(atoi(arg1) - atoi(arg2)));
+		return itoa(atoi(arg1) - atoi(arg2));
 	case UFTIMES:
-		return (itoa(atoi(arg1) * atoi(arg2)));
+		return itoa(atoi(arg1) * atoi(arg2));
 	case UFDIV:
-		return (itoa(atoi(arg1) / atoi(arg2)));
+		return itoa(atoi(arg1) / atoi(arg2));
 	case UFMOD:
-		return (itoa(atoi(arg1) % atoi(arg2)));
+		return itoa(atoi(arg1) % atoi(arg2));
 	case UFNEG:
-		return (itoa(-atoi(arg1)));
+		return itoa(-atoi(arg1));
 	case UFCAT:
 		strcpy(result, arg1);
-		return (strcat(result, arg2));
+		return strcat(result, arg2);
 	case UFLEFT:
-		return (strncpy(result, arg1, atoi(arg2)));
+		return strncpy(result, arg1, atoi(arg2));
 	case UFRIGHT:
 		return (strcpy(result,
 			       &arg1[(strlen(arg1) - atoi(arg2))]));
@@ -92,73 +92,73 @@ char *gtfun(char *fname)
 		return (strncpy(result, &arg1[atoi(arg2) - 1],
 				atoi(arg3)));
 	case UFNOT:
-		return (ltos(stol(arg1) == FALSE));
+		return ltos(stol(arg1) == FALSE);
 	case UFEQUAL:
-		return (ltos(atoi(arg1) == atoi(arg2)));
+		return ltos(atoi(arg1) == atoi(arg2));
 	case UFLESS:
-		return (ltos(atoi(arg1) < atoi(arg2)));
+		return ltos(atoi(arg1) < atoi(arg2));
 	case UFGREATER:
-		return (ltos(atoi(arg1) > atoi(arg2)));
+		return ltos(atoi(arg1) > atoi(arg2));
 	case UFSEQUAL:
-		return (ltos(strcmp(arg1, arg2) == 0));
+		return ltos(strcmp(arg1, arg2) == 0);
 	case UFSLESS:
-		return (ltos(strcmp(arg1, arg2) < 0));
+		return ltos(strcmp(arg1, arg2) < 0);
 	case UFSGREAT:
-		return (ltos(strcmp(arg1, arg2) > 0));
+		return ltos(strcmp(arg1, arg2) > 0);
 	case UFIND:
-		return (strcpy(result, getval(arg1)));
+		return strcpy(result, getval(arg1));
 	case UFAND:
-		return (ltos(stol(arg1) && stol(arg2)));
+		return ltos(stol(arg1) && stol(arg2));
 	case UFOR:
-		return (ltos(stol(arg1) || stol(arg2)));
+		return ltos(stol(arg1) || stol(arg2));
 	case UFLENGTH:
-		return (itoa(strlen(arg1)));
+		return itoa(strlen(arg1));
 	case UFUPPER:
-		return (mkupper(arg1));
+		return mkupper(arg1);
 	case UFLOWER:
-		return (mklower(arg1));
+		return mklower(arg1);
 	case UFTRUTH:
-		return (ltos(atoi(arg1) == 42));
+		return ltos(atoi(arg1) == 42);
 	case UFASCII:
-		return (itoa((int) arg1[0]));
+		return itoa((int) arg1[0]);
 	case UFCHR:
 		result[0] = atoi(arg1);
 		result[1] = 0;
-		return (result);
+		return result;
 	case UFGTKEY:
 		result[0] = tgetc();
 		result[1] = 0;
-		return (result);
+		return result;
 	case UFRND:
-		return (itoa((ernd() % abs(atoi(arg1))) + 1));
+		return itoa((ernd() % abs(atoi(arg1))) + 1);
 	case UFABS:
-		return (itoa(abs(atoi(arg1))));
+		return itoa(abs(atoi(arg1)));
 	case UFSINDEX:
-		return (itoa(sindex(arg1, arg2)));
+		return itoa(sindex(arg1, arg2));
 	case UFENV:
 #if	ENVFUNC
 		tsp = getenv(arg1);
-		return (tsp == NULL ? "" : tsp);
+		return tsp == NULL ? "" : tsp;
 #else
-		return ("");
+		return "";
 #endif
 	case UFBIND:
-		return (transbind(arg1));
+		return transbind(arg1);
 	case UFEXIST:
-		return (ltos(fexist(arg1)));
+		return ltos(fexist(arg1));
 	case UFFIND:
 		tsp = flook(arg1, TRUE);
-		return (tsp == NULL ? "" : tsp);
+		return tsp == NULL ? "" : tsp;
 	case UFBAND:
-		return (itoa(atoi(arg1) & atoi(arg2)));
+		return itoa(atoi(arg1) & atoi(arg2));
 	case UFBOR:
-		return (itoa(atoi(arg1) | atoi(arg2)));
+		return itoa(atoi(arg1) | atoi(arg2));
 	case UFBXOR:
-		return (itoa(atoi(arg1) ^ atoi(arg2)));
+		return itoa(atoi(arg1) ^ atoi(arg2));
 	case UFBNOT:
-		return (itoa(~atoi(arg1)));
+		return itoa(~atoi(arg1));
 	case UFXLATE:
-		return (xlat(arg1, arg2, arg3));
+		return xlat(arg1, arg2, arg3);
 	}
 
 	exit(-11);		/* never should get here */
@@ -177,13 +177,13 @@ char *gtusr(char *vname)
 	/* scan the list looking for the user var name */
 	for (vnum = 0; vnum < MAXVARS; vnum++) {
 		if (uv[vnum].u_name[0] == 0)
-			return (errorm);
+			return errorm;
 		if (strcmp(vname, uv[vnum].u_name) == 0)
-			return (uv[vnum].u_value);
+			return uv[vnum].u_value;
 	}
 
 	/* return errorm if we run off the end */
-	return (errorm);
+	return errorm;
 }
 
 extern char *getkill(void);
@@ -209,109 +209,109 @@ char *gtenv(char *vname)
 		char *ename = getenv(vname);
 
 		if (ename != NULL)
-			return (ename);
+			return ename;
 		else
-			return (errorm);
+			return errorm;
 	}
 #else
-		return (errorm);
+		return errorm;
 #endif
 
 	/* otherwise, fetch the appropriate value */
 	switch (vnum) {
 	case EVFILLCOL:
-		return (itoa(fillcol));
+		return itoa(fillcol);
 	case EVPAGELEN:
-		return (itoa(term.t_nrow + 1));
+		return itoa(term.t_nrow + 1);
 	case EVCURCOL:
-		return (itoa(getccol(FALSE)));
+		return itoa(getccol(FALSE));
 	case EVCURLINE:
-		return (itoa(getcline()));
+		return itoa(getcline());
 	case EVRAM:
-		return (itoa((int) (envram / 1024l)));
+		return itoa((int) (envram / 1024l));
 	case EVFLICKER:
-		return (ltos(flickcode));
+		return ltos(flickcode);
 	case EVCURWIDTH:
-		return (itoa(term.t_ncol));
+		return itoa(term.t_ncol);
 	case EVCBUFNAME:
-		return (curbp->b_bname);
+		return curbp->b_bname;
 	case EVCFNAME:
-		return (curbp->b_fname);
+		return curbp->b_fname;
 	case EVSRES:
-		return (sres);
+		return sres;
 	case EVDEBUG:
-		return (ltos(macbug));
+		return ltos(macbug);
 	case EVSTATUS:
-		return (ltos(cmdstatus));
+		return ltos(cmdstatus);
 	case EVPALETTE:
-		return (palstr);
+		return palstr;
 	case EVASAVE:
-		return (itoa(gasave));
+		return itoa(gasave);
 	case EVACOUNT:
-		return (itoa(gacount));
+		return itoa(gacount);
 	case EVLASTKEY:
-		return (itoa(lastkey));
+		return itoa(lastkey);
 	case EVCURCHAR:
 		return (curwp->w_dotp->l_used ==
 			curwp->w_doto ? itoa('\n') :
 			itoa(lgetc(curwp->w_dotp, curwp->w_doto)));
 	case EVDISCMD:
-		return (ltos(discmd));
+		return ltos(discmd);
 	case EVVERSION:
-		return (VERSION);
+		return VERSION;
 	case EVPROGNAME:
-		return (PROGRAM_NAME_LONG);
+		return PROGRAM_NAME_LONG;
 	case EVSEED:
-		return (itoa(seed));
+		return itoa(seed);
 	case EVDISINP:
-		return (ltos(disinp));
+		return ltos(disinp);
 	case EVWLINE:
-		return (itoa(curwp->w_ntrows));
+		return itoa(curwp->w_ntrows);
 	case EVCWLINE:
-		return (itoa(getwpos()));
+		return itoa(getwpos());
 	case EVTARGET:
 		saveflag = lastflag;
-		return (itoa(curgoal));
+		return itoa(curgoal);
 	case EVSEARCH:
-		return (pat);
+		return pat;
 	case EVREPLACE:
-		return (rpat);
+		return rpat;
 	case EVMATCH:
-		return ((patmatch == NULL) ? "" : patmatch);
+		return (patmatch == NULL) ? "" : patmatch;
 	case EVKILL:
-		return (getkill());
+		return getkill();
 	case EVCMODE:
-		return (itoa(curbp->b_mode));
+		return itoa(curbp->b_mode);
 	case EVGMODE:
-		return (itoa(gmode));
+		return itoa(gmode);
 	case EVTPAUSE:
-		return (itoa(term.t_pause));
+		return itoa(term.t_pause);
 	case EVPENDING:
 #if	TYPEAH
-		return (ltos(typahead()));
+		return ltos(typahead());
 #else
-		return (falsem);
+		return falsem;
 #endif
 	case EVLWIDTH:
-		return (itoa(llength(curwp->w_dotp)));
+		return itoa(llength(curwp->w_dotp));
 	case EVLINE:
-		return (getctext());
+		return getctext();
 	case EVGFLAGS:
-		return (itoa(gflags));
+		return itoa(gflags);
 	case EVRVAL:
-		return (itoa(rval));
+		return itoa(rval);
 	case EVTAB:
-		return (itoa(tabmask + 1));
+		return itoa(tabmask + 1);
 	case EVOVERLAP:
-		return (itoa(overlap));
+		return itoa(overlap);
 	case EVSCROLLCOUNT:
-		return (itoa(scrollcount));
+		return itoa(scrollcount);
 #if SCROLLCODE
 	case EVSCROLL:
-		return (ltos(term.t_scroll != NULL));
+		return ltos(term.t_scroll != NULL);
 #else
 	case EVSCROLL:
-		return (ltos(0));
+		return ltos(0);
 #endif
 	}
 	exit(-12);		/* again, we should never get here */
@@ -338,7 +338,7 @@ char *getkill(void)
 	}
 
 	/* and return the constructed value */
-	return (value);
+	return value;
 }
 
 /*
@@ -362,7 +362,7 @@ int setvar(int f, int n)
 	if (clexec == FALSE) {
 		status = mlreply("Variable to set: ", &var[0], NVSIZE);
 		if (status != TRUE)
-			return (status);
+			return status;
 	} else {		/* macro line argument */
 		/* grab token and skip it */
 		execstr = token(execstr, var, NVSIZE + 1);
@@ -374,7 +374,7 @@ int setvar(int f, int n)
 	/* if its not legal....bitch */
 	if (vd.v_type == -1) {
 		mlwrite("%%No such variable as '%s'", var);
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* get the value for that variable */
@@ -383,7 +383,7 @@ int setvar(int f, int n)
 	else {
 		status = mlreply("Value: ", &value[0], NSTRING);
 		if (status != TRUE)
-			return (status);
+			return status;
 	}
 
 	/* and set the appropriate value */
@@ -438,7 +438,7 @@ int setvar(int f, int n)
 #endif
 
 	/* and return it */
-	return (status);
+	return status;
 }
 
 /*
@@ -526,7 +526,7 @@ int svar(VDESC *var, char *value)
 			free(uv[vnum].u_value);
 		sp = malloc(strlen(value) + 1);
 		if (sp == NULL)
-			return (FALSE);
+			return FALSE;
 		strcpy(sp, value);
 		uv[vnum].u_value = sp;
 		break;
@@ -672,7 +672,7 @@ int svar(VDESC *var, char *value)
 		}
 		break;
 	}
-	return (status);
+	return status;
 }
 
 /*
@@ -710,7 +710,7 @@ char *itoa(int i)
 		*(--sp) = '-';	/* and install the minus sign */
 	}
 
-	return (sp);
+	return sp;
 }
 
 /*
@@ -727,33 +727,33 @@ int gettyp(char *token)
 
 	/* no blanks!!! */
 	if (c == 0)
-		return (TKNUL);
+		return TKNUL;
 
 	/* a numeric literal? */
 	if (c >= '0' && c <= '9')
-		return (TKLIT);
+		return TKLIT;
 
 	switch (c) {
 	case '"':
-		return (TKSTR);
+		return TKSTR;
 
 	case '!':
-		return (TKDIR);
+		return TKDIR;
 	case '@':
-		return (TKARG);
+		return TKARG;
 	case '#':
-		return (TKBUF);
+		return TKBUF;
 	case '$':
-		return (TKENV);
+		return TKENV;
 	case '%':
-		return (TKVAR);
+		return TKVAR;
 	case '&':
-		return (TKFUN);
+		return TKFUN;
 	case '*':
-		return (TKLBL);
+		return TKLBL;
 
 	default:
-		return (TKCMD);
+		return TKCMD;
 	}
 }
 
@@ -772,7 +772,7 @@ char *getval(char *token)
 
 	switch (gettyp(token)) {
 	case TKNUL:
-		return ("");
+		return "";
 
 	case TKARG:		/* interactive argument */
 		strcpy(token, getval(&token[1]));
@@ -781,8 +781,8 @@ char *getval(char *token)
 		status = getstring(token, buf, NSTRING, ctoec('\n'));
 		discmd = distmp;
 		if (status == ABORT)
-			return (errorm);
-		return (buf);
+			return errorm;
+		return buf;
 
 	case TKBUF:		/* buffer contents fetch */
 
@@ -790,7 +790,7 @@ char *getval(char *token)
 		strcpy(token, getval(&token[1]));
 		bp = bfind(token, FALSE, 0);
 		if (bp == NULL)
-			return (errorm);
+			return errorm;
 
 		/* if the buffer is displayed, get the window
 		   vars instead of the buffer vars */
@@ -801,7 +801,7 @@ char *getval(char *token)
 
 		/* make sure we are not at the end */
 		if (bp->b_linep == bp->b_dotp)
-			return (errorm);
+			return errorm;
 
 		/* grab the line as an argument */
 		blen = bp->b_dotp->l_used - bp->b_doto;
@@ -822,26 +822,26 @@ char *getval(char *token)
 		}
 
 		/* and return the spoils */
-		return (buf);
+		return buf;
 
 	case TKVAR:
-		return (gtusr(token + 1));
+		return gtusr(token + 1);
 	case TKENV:
-		return (gtenv(token + 1));
+		return gtenv(token + 1);
 	case TKFUN:
-		return (gtfun(token + 1));
+		return gtfun(token + 1);
 	case TKDIR:
-		return (errorm);
+		return errorm;
 	case TKLBL:
-		return (errorm);
+		return errorm;
 	case TKLIT:
-		return (token);
+		return token;
 	case TKSTR:
-		return (token + 1);
+		return token + 1;
 	case TKCMD:
-		return (token);
+		return token;
 	}
-	return (errorm);
+	return errorm;
 }
 
 /*
@@ -853,12 +853,12 @@ int stol(char *val)
 {
 	/* check for logical values */
 	if (val[0] == 'F')
-		return (FALSE);
+		return FALSE;
 	if (val[0] == 'T')
-		return (TRUE);
+		return TRUE;
 
 	/* check for numeric truth (!= 0) */
-	return ((atoi(val) != 0));
+	return (atoi(val) != 0);
 }
 
 /*
@@ -869,9 +869,9 @@ int stol(char *val)
 char *ltos(int val)
 {
 	if (val)
-		return (truem);
+		return truem;
 	else
-		return (falsem);
+		return falsem;
 }
 
 /*
@@ -889,7 +889,7 @@ char *mkupper(char *str)
 			*sp += 'A' - 'a';
 		++sp;
 	}
-	return (str);
+	return str;
 }
 
 /*
@@ -907,7 +907,7 @@ char *mklower(char *str)
 			*sp += 'a' - 'A';
 		++sp;
 	}
-	return (str);
+	return str;
 }
 
 /*
@@ -915,7 +915,7 @@ char *mklower(char *str)
  */
 int abs(int x)
 {
-	return (x < 0 ? -x : x);
+	return x < 0 ? -x : x;
 }
 
 /*
@@ -924,7 +924,7 @@ int abs(int x)
 int ernd(void)
 {
 	seed = abs(seed * 1721 + 10007);
-	return (seed);
+	return seed;
 }
 
 /*
@@ -954,12 +954,12 @@ int sindex(char *source, char *pattern)
 
 		/* was it a match? */
 		if (*cp == 0)
-			return ((int) (sp - source) + 1);
+			return (int) (sp - source) + 1;
 		++sp;
 	}
 
 	/* no match at all.. */
-	return (0);
+	return 0;
 }
 
 /*
@@ -998,5 +998,5 @@ char *xlat(char *source, char *lookup, char *trans)
 
 	/* terminate and return the result */
 	*rp = 0;
-	return (result);
+	return result;
 }

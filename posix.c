@@ -130,7 +130,7 @@ int ttputc(int c)
 		}
 	}
 	fputc(c, stdout);
-	return (TRUE);
+	return TRUE;
 }
 
 /*

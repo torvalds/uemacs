@@ -112,7 +112,7 @@ int status;			/* TRUE = reverse video, FALSE = normal video */
 
 vt52cres()
 {				/* change screen resolution - (not here though) */
-	return (TRUE);
+	return TRUE;
 }
 
 spal()
@@ -172,7 +172,7 @@ int f, n;			/* default flag, numeric argument [unused] */
 
 {
 	/* on machines with no function keys...don't bother */
-	return (TRUE);
+	return TRUE;
 }
 #endif
 #endif

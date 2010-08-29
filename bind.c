@@ -29,18 +29,18 @@ int help(int f, int n)
 		fname = flook(pathname[1], FALSE);
 		if (fname == NULL) {
 			mlwrite("(Help file is not online)");
-			return (FALSE);
+			return FALSE;
 		}
 	}
 
 	/* split the current window to make room for the help stuff */
 	if (splitwind(FALSE, 1) == FALSE)
-		return (FALSE);
+		return FALSE;
 
 	if (bp == NULL) {
 		/* and read the stuff in */
 		if (getfile(fname, FALSE) == FALSE)
-			return (FALSE);
+			return FALSE;
 	} else
 		swbuffer(bp);
 
@@ -52,7 +52,7 @@ int help(int f, int n)
 		wp->w_flag |= WFMODE;
 		wp = wp->w_wndp;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 int deskey(int f, int n)
@@ -78,7 +78,7 @@ int deskey(int f, int n)
 
 	/* output the command sequence */
 	ostring(ptr);
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -102,7 +102,7 @@ int bindtokey(int f, int n)
 	kfunc = getname();
 	if (kfunc == NULL) {
 		mlwrite("(No such function)");
-		return (FALSE);
+		return FALSE;
 	}
 	ostring(" ");
 
@@ -157,7 +157,7 @@ int bindtokey(int f, int n)
 		/* if we run out of binding room, bitch */
 		if (ktp >= &keytab[NBINDS]) {
 			mlwrite("Binding table FULL!");
-			return (FALSE);
+			return FALSE;
 		}
 
 		ktp->k_code = c;	/* add keycode */
@@ -166,7 +166,7 @@ int bindtokey(int f, int n)
 		ktp->k_code = 0;
 		ktp->k_fp = NULL;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 /*
@@ -195,9 +195,9 @@ int unbindkey(int f, int n)
 	/* if it isn't bound, bitch */
 	if (unbindchar(c) == FALSE) {
 		mlwrite("(Key not bound)");
-		return (FALSE);
+		return FALSE;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -225,7 +225,7 @@ int unbindchar(int c)
 
 	/* if it isn't bound, bitch */
 	if (!found)
-		return (FALSE);
+		return FALSE;
 
 	/* save the pointer and scan to the end of the table */
 	sktp = ktp;
@@ -240,7 +240,7 @@ int unbindchar(int c)
 	/* null out the last one */
 	ktp->k_code = 0;
 	ktp->k_fp = NULL;
-	return (TRUE);
+	return TRUE;
 }
 
 /* describe bindings
@@ -251,7 +251,7 @@ int desbind(int f, int n)
 #if	APROP
 {
 	buildlist(TRUE, "");
-	return (TRUE);
+	return TRUE;
 }
 
 int apro(int f, int n)
@@ -261,9 +261,9 @@ int apro(int f, int n)
 
 	status = mlreply("Apropos string: ", mstring, NSTRING - 1);
 	if (status != TRUE)
-		return (status);
+		return status;
 
-	return (buildlist(FALSE, mstring));
+	return buildlist(FALSE, mstring);
 }
 
 /*
@@ -284,13 +284,13 @@ int buildlist(int type, char *mstring)
 
 	/* split the current window to make room for the binding list */
 	if (splitwind(FALSE, 1) == FALSE)
-		return (FALSE);
+		return FALSE;
 
 	/* and get a buffer for it */
 	bp = bfind("*Binding list*", TRUE, 0);
 	if (bp == NULL || bclear(bp) == FALSE) {
 		mlwrite("Can not display binding list");
-		return (FALSE);
+		return FALSE;
 	}
 
 	/* let us know this is in progress */
@@ -346,7 +346,7 @@ int buildlist(int type, char *mstring)
 
 				/* and add it as a line into the buffer */
 				if (linstr(outseq) != TRUE)
-					return (FALSE);
+					return FALSE;
 
 				cpos = 0;	/* and clear the line */
 			}
@@ -358,7 +358,7 @@ int buildlist(int type, char *mstring)
 			outseq[cpos++] = '\n';
 			outseq[cpos] = 0;
 			if (linstr(outseq) != TRUE)
-				return (FALSE);
+				return FALSE;
 		}
 
 	      fail:		/* and on to the next name */
@@ -375,7 +375,7 @@ int buildlist(int type, char *mstring)
 		wp = wp->w_wndp;
 	}
 	mlwrite("");		/* clear the mode line */
-	return (TRUE);
+	return TRUE;
 }
 
 #if	APROP
@@ -408,12 +408,12 @@ int strinc(char *source, char *sub)
 
 		/* yes, return a success */
 		if (*tp == 0)
-			return (TRUE);
+			return TRUE;
 
 		/* no, onward */
 		sp++;
 	}
-	return (FALSE);
+	return FALSE;
 }
 #endif
 
@@ -430,7 +430,7 @@ unsigned int getckey(int mflag)
 	/* check to see if we are executing a command line */
 	if (clexec) {
 		macarg(tok);	/* get the next token */
-		return (stock(tok));
+		return stock(tok);
 	}
 
 	/* or the normal way */
@@ -438,7 +438,7 @@ unsigned int getckey(int mflag)
 		c = get1key();
 	else
 		c = getcmd();
-	return (c);
+	return c;
 }
 
 /*
@@ -458,10 +458,10 @@ int startup(char *sfname)
 
 	/* if it isn't around, don't sweat it */
 	if (fname == NULL)
-		return (TRUE);
+		return TRUE;
 
 	/* otherwise, execute the sucker */
-	return (dofile(fname));
+	return dofile(fname);
 }
 
 /*
@@ -493,7 +493,7 @@ char *flook(char *fname, int hflag)
 			/* and try it out */
 			if (ffropen(fspec) == FIOSUC) {
 				ffclose();
-				return (fspec);
+				return fspec;
 			}
 		}
 	}
@@ -502,7 +502,7 @@ char *flook(char *fname, int hflag)
 	/* always try the current directory first */
 	if (ffropen(fname) == FIOSUC) {
 		ffclose();
-		return (fname);
+		return fname;
 	}
 #if	ENVFUNC
 	/* get the PATH variable */
@@ -524,7 +524,7 @@ char *flook(char *fname, int hflag)
 			/* and try it out */
 			if (ffropen(fspec) == FIOSUC) {
 				ffclose();
-				return (fspec);
+				return fspec;
 			}
 
 			if (*path == PATHCHR)
@@ -540,11 +540,11 @@ char *flook(char *fname, int hflag)
 		/* and try it out */
 		if (ffropen(fspec) == FIOSUC) {
 			ffclose();
-			return (fspec);
+			return fspec;
 		}
 	}
 
-	return (NULL);		/* no such luck */
+	return NULL;		/* no such luck */
 }
 
 /*
@@ -601,12 +601,12 @@ int (*getbind(int c))(int, int)
 	ktp = &keytab[0];  /* Look in key table. */
 	while (ktp->k_fp != NULL) {
 		if (ktp->k_code == c)
-			return (ktp->k_fp);
+			return ktp->k_fp;
 		++ktp;
 	}
 
 	/* no such binding */
-	return (NULL);
+	return NULL;
 }
 
 /*
@@ -622,10 +622,10 @@ char *getfname(fn_t func)
 	nptr = &names[0];
 	while (nptr->n_func != NULL) {
 		if (nptr->n_func == func)
-			return (nptr->n_name);
+			return nptr->n_name;
 		++nptr;
 	}
-	return (NULL);
+	return NULL;
 }
 
 /*
@@ -642,10 +642,10 @@ int (*fncmatch(char *fname)) (int, int)
 	ffp = &names[0];
 	while (ffp->n_func != NULL) {
 		if (strcmp(fname, ffp->n_name) == 0)
-			return (ffp->n_func);
+			return ffp->n_func;
 		++ffp;
 	}
-	return (NULL);
+	return NULL;
 }
 
 /*
@@ -696,7 +696,7 @@ unsigned int stock(char *keyname)
 
 	/* the final sequence... */
 	c |= *keyname;
-	return (c);
+	return c;
 }
 
 /*
@@ -712,5 +712,5 @@ char *transbind(char *skey)
 	if (bindname == NULL)
 		bindname = "ERROR";
 
-	return (bindname);
+	return bindname;
 }

@@ -20,9 +20,9 @@ static int eofflag;			/* end-of-file flag */
 int ffropen(char *fn)
 {
 	if ((ffp = fopen(fn, "r")) == NULL)
-		return (FIOFNF);
+		return FIOFNF;
 	eofflag = FALSE;
-	return (FIOSUC);
+	return FIOSUC;
 }
 
 /*
@@ -40,9 +40,9 @@ int ffwopen(char *fn)
 	if ((ffp = fopen(fn, "w")) == NULL) {
 #endif
 		mlwrite("Cannot open file for writing");
-		return (FIOERR);
+		return FIOERR;
 	}
-	return (FIOSUC);
+	return FIOSUC;
 }
 
 /*
@@ -64,12 +64,12 @@ int ffclose(void)
 #if     V7 | USG | BSD | (MSDOS & (MSC | TURBO))
 	if (fclose(ffp) != FALSE) {
 		mlwrite("Error closing file");
-		return (FIOERR);
+		return FIOERR;
 	}
-	return (FIOSUC);
+	return FIOSUC;
 #else
 	fclose(ffp);
-	return (FIOSUC);
+	return FIOSUC;
 #endif
 }
 
@@ -102,10 +102,10 @@ int ffputline(char *buf, int nbuf)
 
 	if (ferror(ffp)) {
 		mlwrite("Write I/O error");
-		return (FIOERR);
+		return FIOERR;
 	}
 
-	return (FIOSUC);
+	return FIOSUC;
 }
 
 /*
@@ -122,7 +122,7 @@ int ffgetline(void)
 
 	/* if we are at the end...return it */
 	if (eofflag)
-		return (FIOEOF);
+		return FIOEOF;
 
 	/* dump fline if it ended up too big */
 	if (flen > NSTRING) {
@@ -133,7 +133,7 @@ int ffgetline(void)
 	/* if we don't have an fline, allocate one */
 	if (fline == NULL)
 		if ((fline = malloc(flen = NSTRING)) == NULL)
-			return (FIOMEM);
+			return FIOMEM;
 
 	/* read the line in */
 #if	PKCODE
@@ -166,7 +166,7 @@ int ffgetline(void)
 			if (i >= flen) {
 				if ((tmpline =
 				     malloc(flen + NSTRING)) == NULL)
-					return (FIOMEM);
+					return FIOMEM;
 				strncpy(tmpline, fline, flen);
 				flen += NSTRING;
 				free(fline);
@@ -182,13 +182,13 @@ int ffgetline(void)
 	if (c == EOF) {
 		if (ferror(ffp)) {
 			mlwrite("File read error");
-			return (FIOERR);
+			return FIOERR;
 		}
 
 		if (i != 0)
 			eofflag = TRUE;
 		else
-			return (FIOEOF);
+			return FIOEOF;
 	}
 
 	/* terminate and decrypt the string */
@@ -197,7 +197,7 @@ int ffgetline(void)
 	if (cryptflag)
 		myencrypt(fline, strlen(fline));
 #endif
-	return (FIOSUC);
+	return FIOSUC;
 }
 
 /*
@@ -214,9 +214,9 @@ int fexist(char *fname)
 
 	/* if it fails, just return false! */
 	if (fp == NULL)
-		return (FALSE);
+		return FALSE;
 
 	/* otherwise, close it and report true */
 	fclose(fp);
-	return (TRUE);
+	return TRUE;
 }
