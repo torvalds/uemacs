@@ -10,7 +10,6 @@
 #include "edef.h"
 #include "efunc.h"
 
-#if	FILOCK
 #if	BSD | SVR4
 #include <sys/errno.h>
 
@@ -153,10 +152,5 @@ void lckerror(char *errstr)
 	strcat(obuf, " - ");
 	strcat(obuf, strerror(errno));
 	mlwrite(obuf);
-}
-#endif
-#else
-static void lckhello(void )
-{				/* dummy function */
 }
 #endif
