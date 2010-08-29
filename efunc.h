@@ -372,9 +372,6 @@ extern int lock(char *fname);
 extern int unlock(char *fname);
 extern void lckerror(char *errstr);
 
-/* names.c */
-extern struct name_bind names[];
-
 /* pklock.c */
 extern char *dolock(char *fname);
 extern char *undolock(char *fname);
