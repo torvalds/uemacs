@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 			usage(EXIT_FAILURE);
 		}
 		if (strcmp(argv[1], "--version") == 0) {
-			printf("%s version %s\n", PROGRAM_NAME_LONG, VERSION);
+			version();
 			exit(EXIT_SUCCESS);
 		}
 	}
