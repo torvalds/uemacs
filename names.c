@@ -139,9 +139,6 @@ struct name_bind names[] = {
 #endif
 	{"kill-region", killregion},
 	{"kill-to-end-of-line", killtext},
-#if	FNLABEL
-	{"label-function-key", fnclabel},
-#endif
 	{"list-buffers", listbuffers},
 	{"meta-prefix", metafn},
 	{"move-window-down", mvdnwind},

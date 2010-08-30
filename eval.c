@@ -571,10 +571,6 @@ int svar(VDESC *var, char *value)
 		case EVSTATUS:
 			cmdstatus = stol(value);
 			break;
-		case EVPALETTE:
-			strncpy(palstr, value, 48);
-			spal(palstr);
-			break;
 		case EVASAVE:
 			gasave = atoi(value);
 			break;

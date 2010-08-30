@@ -179,12 +179,6 @@ int ansicres()
 	return TRUE;
 }
 
-/* Change pallette settings. */
-void spal(void)
-{
-	/* none for now */
-}
-
 void ansibeep(void)
 {
 	ttputc(BEL);
@@ -244,15 +238,4 @@ void ansikclose(void)
 {
 }
 
-#if	FNLABEL
-/* Label a function key.
- * f: default flag
- * n: numeric argument [unused]
- */
-int fnclabel(int f, int n)
-{
-	/* On machines with no function keys...don't bother. */
-	return TRUE;
-}
-#endif
 #endif

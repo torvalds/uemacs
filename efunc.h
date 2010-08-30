@@ -375,6 +375,3 @@ extern void lckerror(char *errstr);
 /* pklock.c */
 extern char *dolock(char *fname);
 extern char *undolock(char *fname);
-
-/* tcap.c */
-extern void spal(char *dummy);

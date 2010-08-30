@@ -285,12 +285,6 @@ void ibmscroll_reg(from, to, howmany)
 
 #endif
 
-/* Reset the pallette registers. */
-void spal(void)
-{
-	/* nothin here now..... */
-}
-
 void ibmbeep(void)
 {
 	bdos(6, BEL, 0);
@@ -498,16 +492,4 @@ void scwrite(int row, char *outstr, int forg, int bacg)
 	movmem(&sline[0], scptr[row], term.t_ncol * 2);
 }
 
-#if	FNLABEL
-/* Label a function key.
- *
- * @f: default flag
- * @n: numeric argument [unused].
- */
-int fnclabel(int f, int n)
-{
-	/* on machines with no function keys...don't bother */
-	return TRUE;
-}
-#endif
 #endif

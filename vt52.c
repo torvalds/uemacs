@@ -115,11 +115,6 @@ vt52cres()
 	return TRUE;
 }
 
-spal()
-{				/* change palette string */
-	/*      Does nothing here       */
-}
-
 #if	COLOR
 vt52fcol()
 {				/* set the forground color [NOT IMPLIMENTED] */
@@ -164,15 +159,4 @@ vt52kclose()
 {
 }
 
-
-#if	FNLABEL
-fnclabel(f, n)
-    /* label a function key */
-int f, n;			/* default flag, numeric argument [unused] */
-
-{
-	/* on machines with no function keys...don't bother */
-	return TRUE;
-}
-#endif
 #endif

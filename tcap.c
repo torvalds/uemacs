@@ -1,4 +1,4 @@
-/*	TCAP.C
+/*	tcap.c
  *
  *	Unix V7 SysV and BS4 Termcap video driver
  *
@@ -6,21 +6,20 @@
  */
 
 /*
- * defining this to 1 breaks tcapopen() - it doesn't check if the
+ * Defining this to 1 breaks tcapopen() - it doesn't check if the
  * sceen size has changed.
  *	-lbt
  */
 #define USE_BROKEN_OPTIMIZATION 0
-#define	termdef	1		/* don't define "term" external */
+#define	termdef	1 /* Don't define "term" external. */
 
-#include <stdio.h>
 #include <curses.h>
+#include <stdio.h>
 #include <term.h>
 
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
-
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
 
 #if TERMCAP
 
@@ -30,7 +29,7 @@
 
 #define	MARGIN	8
 #define	SCRSIZ	64
-#define	NPAUSE	10		/* # times thru update to pause */
+#define	NPAUSE	10    /* # times thru update to pause. */
 #define BEL     0x07
 #define ESC     0x1B
 
@@ -46,32 +45,31 @@ static void tcapscrollregion(int top, int bot);
 static void putpad(char *str);
 
 static void tcapopen(void);
-#if	PKCODE
+#if PKCODE
 static void tcapclose(void);
 #endif
 
-#if	COLOR
+#if COLOR
 static void tcapfcol(void);
 static void tcapbcol(void);
 #endif
-#if     SCROLLCODE
+#if SCROLLCODE
 static void tcapscroll_reg(int from, int to, int linestoscroll);
 static void tcapscroll_delins(int from, int to, int linestoscroll);
 #endif
-
 
 #define TCAPSLEN 315
 static char tcapbuf[TCAPSLEN];
 static char *UP, PC, *CM, *CE, *CL, *SO, *SE;
 
-#if	PKCODE
+#if PKCODE
 static char *TI, *TE;
 #if USE_BROKEN_OPTIMIZATION
 static int term_init_ok = 0;
 #endif
 #endif
 
-#if     SCROLLCODE
+#if SCROLLCODE
 static char *CS, *DL, *AL, *SF, *SR;
 #endif
 
@@ -217,7 +215,6 @@ static void tcapopen(void)
 }
 
 #if	PKCODE
-
 static void tcapclose(void)
 {
 	putpad(tgoto(CM, 0, term.t_nrow));
@@ -256,9 +253,9 @@ static void tcapeeop(void)
 }
 
 /*
- * change reverse video status
+ * Change reverse video status
  *
- * int state;		FALSE = normal video, TRUE = reverse video
+ * @state: FALSE = normal video, TRUE = reverse video.
  */
 static void tcaprev(int state)
 {
@@ -269,8 +266,9 @@ static void tcaprev(int state)
 		putpad(SE);
 }
 
+/* Change screen resolution. */
 static int tcapcres(char *res)
-{				/* change screen resolution */
+{
 	return TRUE;
 }
 
@@ -328,18 +326,14 @@ static void tcapscrollregion(int top, int bot)
 
 #endif
 
-void spal(char *dummy)
-{				/* change palette string */
-	/*      Does nothing here       */
-}
-
-#if	COLOR
+#if COLOR
+/* No colors here, ignore this. */
 static void tcapfcol(void)
-{				/* no colors here, ignore this */
+{
 }
-
+/* No colors here, ignore this. */
 static void tcapbcol(void)
-{				/* no colors here, ignore this */
+{
 }
 #endif
 
@@ -352,23 +346,4 @@ static void putpad(char *str)
 {
 	tputs(str, 1, ttputc);
 }
-
-#if	FNLABEL
-/*
- * label a function key
- *
- * int f, n;		default flag, numeric argument [unused]
- */
-static int fnclabel(int f, int n)
-{
-	/* on machines with no function keys...don't bother */
-	return TRUE;
-}
-#endif
-#else
-
-static void hello(void)
-{
-}
-
-#endif
+#endif /* TERMCAP */
