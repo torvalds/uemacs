@@ -100,11 +100,7 @@ void usage(int status)
   exit(status);
 }
 
-#if CALLED
-int emacs(int argc, char **argv)
-#else
 int main(int argc, char **argv)
-#endif
 {
 	int c = -1;	/* command character */
 	int f;		/* default flag */
@@ -165,9 +161,6 @@ int main(int argc, char **argv)
 	errflag = FALSE;	/* not doing C error parsing */
 #if	CRYPT
 	cryptflag = FALSE;	/* no encryption by default */
-#endif
-#if	CALLED
-	eexitflag = FALSE;	/* not time to exit yet */
 #endif
 
 	/* Parse the command line */
@@ -305,23 +298,16 @@ int main(int argc, char **argv)
 			update(FALSE);
 	}
 
-	/* setup to process commands */
-	lastflag = 0;		/* Fake last flags.     */
+	/* Setup to process commands. */
+	lastflag = 0;  /* Fake last flags. */
 
       loop:
-
-#if	CALLED
-	/* if we were called as a subroutine and want to leave, do so */
-	if (eexitflag)
-		return eexitval;
-#endif
-
-	/* execute the "command" macro...normally null */
-	saveflag = lastflag;	/* preserve lastflag through this */
+	/* Execute the "command" macro...normally null. */
+	saveflag = lastflag;  /* Preserve lastflag through this. */
 	execute(META | SPEC | 'C', FALSE, 1);
 	lastflag = saveflag;
 
-#if 	TYPEAH && PKCODE
+#if TYPEAH && PKCODE
 	if (typahead()) {
 		newc = getcmd();
 		update(FALSE);
@@ -865,14 +851,7 @@ int cexit(int status)
 	/* and the video buffers */
 	vtfree();
 
-	/* and now.. we leave [pick the return if we are a subprogram] */
-#if	CALLED
-	eexitflag = TRUE;	/* flag a program exit */
-	eexitval = status;
-	return status;
-#else
 #undef	exit
 	exit(status);
-#endif
 }
 #endif

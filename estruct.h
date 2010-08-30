@@ -156,7 +156,6 @@
 #define	AEDIT	1  /* advanced editing options: en/detabbing       */
 #define	PROC	1  /* named procedures                             */
 #define	CLEAN	0  /* de-alloc memory on exit                      */
-#define	CALLED	0  /* is emacs a called subroutine? or stand alone */
 
 #define ASCII	1  /* always using ASCII char sequences for now    */
 #define EBCDIC	0  /* later IBM mainfraim versions will use EBCDIC */

@@ -81,10 +81,6 @@ int saveflag = 0;		/* Flags, saved with the $target var */
 char *fline = NULL;		/* dynamic return line */
 int flen = 0;			/* current length of fline */
 int rval = 0;			/* return value of a subprocess */
-#if	CALLED
-int eexitflag = FALSE;		/* EMACS exit flag */
-int eexitval = 0;		/* and the exit return value */
-#endif
 #if	PKCODE
 int nullflag = FALSE;		/* accept null characters */
 int justflag = FALSE;		/* justify, don't fill */
