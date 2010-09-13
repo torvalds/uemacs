@@ -7,7 +7,7 @@
  *
  *	MicroEMACS 3.9
  *	Written by Dave G. Conroy.
- *	Substatially modified by Daniel M. Lawrence
+ *	Substantially modified by Daniel M. Lawrence
  *	Modified by Petri Kutvonen
  *
  *	MicroEMACS 3.9 (c) Copyright 1987 by Daniel M. Lawrence
