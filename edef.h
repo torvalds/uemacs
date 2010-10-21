@@ -106,10 +106,6 @@ extern struct window *wheadp;                /* Head of list of windows      */
 extern struct buffer *bheadp;		/* Head of list of buffers      */
 extern struct buffer *blistp;		/* Buffer for C-X C-B           */
 
-/* Lookup a buffer by name. */
-extern struct buffer *bfind(char *bname, int cflag, int bflag);
-extern struct window *wpopup(void);	        /* Pop up window creation.      */
-extern struct line *lalloc(int);	/* Allocate a line.             */
 extern char sres[NBUFN];	        /* Current screen resolution.   */
 extern char pat[];		        /* Search pattern.              */
 extern char tap[];		        /* Reversed pattern array.      */

@@ -42,6 +42,7 @@ extern int ldelnewline(void);
 extern void kdelete(void);
 extern int kinsert(int c);
 extern int yank(int f, int n);
+extern struct line *lalloc(int);  /* Allocate a line. */
 
 /* window.c */
 extern int reposition(int f, int n);
@@ -64,6 +65,8 @@ extern int newsize(int f, int n);
 extern int newwidth(int f, int n);
 extern int getwpos(void);
 extern void cknewwindow(void);
+extern struct window *wpopup(void);  /* Pop up window creation. */
+
 
 /* basic.c */
 extern int gotobol(int f, int n);
@@ -217,6 +220,8 @@ extern int addline(char *text);
 extern int anycb(void);
 extern int bclear(struct buffer *bp);
 extern int unmark(int f, int n);
+/* Lookup a buffer by name. */
+extern struct buffer *bfind(char *bname, int cflag, int bflag);
 
 /* file.c */
 extern int fileread(int f, int n);
