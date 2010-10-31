@@ -430,9 +430,9 @@ int dobuf(struct buffer *bp)
 	int c;			/* temp character */
 	int force;		/* force TRUE result? */
 	struct window *wp;		/* ptr to windows to scan */
-	WHBLOCK *whlist;	/* ptr to !WHILE list */
-	WHBLOCK *scanner;	/* ptr during scan */
-	WHBLOCK *whtemp;	/* temporary ptr to a WHBLOCK */
+	struct while_block *whlist;	/* ptr to !WHILE list */
+	struct while_block *scanner;	/* ptr during scan */
+	struct while_block *whtemp;	/* temporary ptr to a struct while_block */
 	char *einit;		/* initial value of eline */
 	char *eline;		/* text of line to execute */
 	char tkn[NSTRING];	/* buffer to evaluate an expresion in */
@@ -465,7 +465,7 @@ int dobuf(struct buffer *bp)
 
 		/* if is a while directive, make a block... */
 		if (eline[0] == '!' && eline[1] == 'w' && eline[2] == 'h') {
-			whtemp = (WHBLOCK *) malloc(sizeof(WHBLOCK));
+			whtemp = (struct while_block *)malloc(sizeof(struct while_block));
 			if (whtemp == NULL) {
 			      noram:mlwrite
 				    ("%%Out of memory during while scan");
@@ -487,7 +487,7 @@ int dobuf(struct buffer *bp)
 				    ("%%!BREAK outside of any !WHILE loop");
 				goto failexit;
 			}
-			whtemp = (WHBLOCK *) malloc(sizeof(WHBLOCK));
+			whtemp = (struct while_block *)malloc(sizeof(struct while_block));
 			if (whtemp == NULL)
 				goto noram;
 			whtemp->w_begin = lp;
@@ -832,9 +832,9 @@ int dobuf(struct buffer *bp)
 /*
  * free a list of while block pointers
  *
- * WHBLOCK *wp;		head of structure to free
+ * struct while_block *wp;		head of structure to free
  */
-void freewhile(WHBLOCK *wp)
+void freewhile(struct while_block *wp)
 {
 	if (wp == NULL)
 		return;
