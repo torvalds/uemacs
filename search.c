@@ -70,9 +70,9 @@ static int mcstr(void);
 static int rmcstr(void);
 static int mceq(int bc, MC *mt);
 static int cclmake(char **ppatptr, MC *mcptr);
-static int biteq(int bc, BITMAP cclmap);
-static BITMAP clearbits(void);
-static void setbit(int bc, BITMAP cclmap);
+static int biteq(int bc, char *cclmap);
+static char *clearbits(void);
+static void setbit(int bc, char *cclmap);
 
 /*
  * forwsearch -- Search forward.  Get a search string from the user, and
@@ -1368,7 +1368,7 @@ static int mceq(int bc, MC *mt)
 	return result;
 }
 
-extern BITMAP clearbits(void);
+extern char *clearbits(void);
 
 /*
  * cclmake -- create the bitmap for the character class.
@@ -1377,7 +1377,7 @@ extern BITMAP clearbits(void);
  */
 static int cclmake(char **ppatptr, MC *mcptr)
 {
-	BITMAP bmap;
+	char *bmap;
 	char *patptr;
 	int pchr, ochr;
 
@@ -1453,7 +1453,7 @@ static int cclmake(char **ppatptr, MC *mcptr)
 /*
  * biteq -- is the character in the bitmap?
  */
-static int biteq(int bc, BITMAP cclmap)
+static int biteq(int bc, char *cclmap)
 {
 #if	PKCODE
 	bc = bc & 0xFF;
@@ -1467,22 +1467,23 @@ static int biteq(int bc, BITMAP cclmap)
 /*
  * clearbits -- Allocate and zero out a CCL bitmap.
  */
-static BITMAP clearbits(void)
+static char *clearbits(void)
 {
-	BITMAP cclstart, cclmap;
-	int j;
+	char *cclstart;
+        char *cclmap;
+	int i;
 
-	if ((cclmap = cclstart = (BITMAP) malloc(HIBYTE)) != NULL)
-		for (j = 0; j < HIBYTE; j++)
+	if ((cclmap = cclstart = (char *)malloc(HIBYTE)) != NULL) {
+		for (i = 0; i < HIBYTE; i++)
 			*cclmap++ = 0;
-
+	}
 	return cclstart;
 }
 
 /*
  * setbit -- Set a bit (ON only) in the bitmap.
  */
-static void setbit(int bc, BITMAP cclmap)
+static void setbit(int bc, char *cclmap)
 {
 #if	PKCODE
 	bc = bc & 0xFF;

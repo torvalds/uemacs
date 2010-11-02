@@ -692,17 +692,14 @@ typedef struct WHBLOCK {
 #define	HICHAR		256
 #define	HIBYTE		HICHAR >> 3
 
-/* Typedefs that define the bitmap type for searching (BITMAP),
- * the meta-character structure for MAGIC mode searching (MC),
- * and the meta-character structure for MAGIC mode replacment (RMC).
+/* Typedefs that define the meta-character structure for MAGIC mode searching
+ * (MC), and the meta-character structure for MAGIC mode replacment (RMC).
  */
-typedef char *BITMAP;
-
 typedef struct {
 	short int mc_type;
 	union {
 		int lchar;
-		BITMAP cclmap;
+		char *cclmap;
 	} u;
 } MC;
 
