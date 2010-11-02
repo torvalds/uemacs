@@ -258,7 +258,7 @@ extern int storeproc(int f, int n);
 extern int execproc(int f, int n);
 extern int execbuf(int f, int n);
 extern int dobuf(struct buffer *bp);
-extern void freewhile(WHBLOCK *wp);
+extern void freewhile(struct while_block *wp);
 extern int execfile(int f, int n);
 extern int dofile(char *fname);
 extern int cbuf(int f, int n, int bufnum);

@@ -623,12 +623,12 @@ typedef struct VDESC {
 	the following structure
 */
 
-typedef struct WHBLOCK {
-	struct line *w_begin;		/* ptr to !while statement */
-	struct line *w_end;		/* ptr to the !endwhile statement */
-	int w_type;		/* block type */
-	struct WHBLOCK *w_next;	/* next while */
-} WHBLOCK;
+struct while_block {
+	struct line *w_begin;        /* ptr to !while statement */
+	struct line *w_end;          /* ptr to the !endwhile statement */
+	int w_type;		     /* block type */
+	struct while_block *w_next;  /* next while */
+};
 
 #define	BTWHILE		1
 #define	BTBREAK		2
