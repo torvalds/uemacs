@@ -16,8 +16,6 @@
 /* Some global fuction declarations. */
 typedef int (*fn_t)(int, int);
 
-struct video;
-
 /* Initialized global external declarations. */
 
 extern int fillcol;		/* Fill column                  */
