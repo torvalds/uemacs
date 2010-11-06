@@ -354,7 +354,7 @@ int setvar(int f, int n)
 	char *sp;	/* temp string pointer */
 	char *ep;	/* ptr to end of outline */
 #endif
-	VDESC vd;		/* variable num/type */
+	struct variable_description vd;		/* variable num/type */
 	char var[NVSIZE + 1];	/* name of variable to fetch */
 	char value[NSTRING];	/* value to set variable to */
 
@@ -442,13 +442,13 @@ int setvar(int f, int n)
 }
 
 /*
- * find a variables type and name
+ * Find a variables type and name.
  *
- * char *var;		name of var to get
- * VDESC *vd;		structure to hold type and ptr
- * int size;		size of var array
+ * @var: name of variable to get.
+ * @vd: structure to hold type and pointer.
+ * @size: size of variable array.
  */
-void findvar(char *var, VDESC *vd, int size)
+void findvar(char *var, struct variable_description *vd, int size)
 {
 	int vnum;	/* subscript in variable arrays */
 	int vtype;	/* type to return */
@@ -501,12 +501,12 @@ fvar:
 }
 
 /*
- * set a variable
+ * Set a variable.
  *
- * VDESC *var;		variable to set
- * char *value;		value to set to
+ * @var: variable to set.
+ * @value: value to set to.
  */
-int svar(VDESC *var, char *value)
+int svar(struct variable_description *var, char *value)
 {
 	int vnum;	/* ordinal number of var refrenced */
 	int vtype;	/* type of variable to set */

@@ -594,35 +594,31 @@ struct name_bind {
 	int (*n_func)(int, int); /* function name is bound to */
 };
 
-/*	The editor holds deleted text chunks in the struct kill buffer. The
-	kill buffer is logically a stream of ascii characters, however
-	due to its unpredicatable size, it gets implemented as a linked
-	list of chunks. (The d_ prefix is for "deleted" text, as k_
-	was taken up by the keycode structure)
-*/
-
+/* The editor holds deleted text chunks in the struct kill buffer. The
+ * kill buffer is logically a stream of ascii characters, however
+ * due to its unpredicatable size, it gets implemented as a linked
+ * list of chunks. (The d_ prefix is for "deleted" text, as k_
+ * was taken up by the keycode structure).
+ */
 struct kill {
-	struct kill *d_next;	/* link to next chunk, NULL if last */
-	char d_chunk[KBLOCK];	/* deleted text */
+	struct kill *d_next;   /* Link to next chunk, NULL if last. */
+	char d_chunk[KBLOCK];  /* Deleted text. */
 };
 
-/*	When emacs' command interpetor needs to get a variable's name,
-	rather than it's value, it is passed back as a VDESC variable
-	description structure. The v_num field is a index into the
-	appropriate variable table.
+/* When emacs' command interpetor needs to get a variable's name,
+ * rather than it's value, it is passed back as a variable description
+ * structure. The v_num field is a index into the appropriate variable table.
+ */
+struct variable_description {
+	int v_type;  /* Type of variable. */
+	int v_num;   /* Ordinal pointer to variable in list. */
+};
+
+/* The !WHILE directive in the execution language needs to
+ * stack references to pending whiles. These are stored linked
+ * to each currently open procedure via a linked list of
+ * the following structure.
 */
-
-typedef struct VDESC {
-	int v_type;		/* type of variable */
-	int v_num;		/* ordinal pointer to variable in list */
-} VDESC;
-
-/*	The !WHILE directive in the execution language needs to
-	stack references to pending whiles. These are stored linked
-	to each currently open procedure via a linked list of
-	the following structure
-*/
-
 struct while_block {
 	struct line *w_begin;        /* ptr to !while statement */
 	struct line *w_end;          /* ptr to the !endwhile statement */
