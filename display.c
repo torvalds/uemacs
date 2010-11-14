@@ -763,16 +763,6 @@ static int scrolls(int inserts)
 			from = match;
 			to = target;
 		}
-#if 0
-		{
-			char line[NLINE];
-			sprintf(line,
-				"scrolls: move the %d lines starting at %d to %d, first %d, scrolls %d",
-				count, from, to, first,
-				2 * count >= abs(from - to));
-			mlwrite(line);
-		}
-#endif
 		if (2 * count < abs(from - to))
 			return FALSE;
 		scrscroll(from, to, count);
@@ -1172,18 +1162,6 @@ static void modeline(struct window *wp)
 		vtputc(c);
 		++n;
 	}
-
-#if 0
-	vtputc(lchar);
-	vtputc((wp->w_flag & WFCOLR) != 0 ? 'C' : lchar);
-	vtputc((wp->w_flag & WFMODE) != 0 ? 'M' : lchar);
-	vtputc((wp->w_flag & WFHARD) != 0 ? 'H' : lchar);
-	vtputc((wp->w_flag & WFEDIT) != 0 ? 'E' : lchar);
-	vtputc((wp->w_flag & WFMOVE) != 0 ? 'V' : lchar);
-	vtputc((wp->w_flag & WFFORCE) != 0 ? 'F' : lchar);
-	vtputc(lchar);
-	n += 8;
-#endif
 
 #if	PKCODE
 	if (bp->b_fname[0] != 0 && strcmp(bp->b_bname, bp->b_fname) != 0)

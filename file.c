@@ -311,10 +311,6 @@ int readin(char *fname, int lockfl)
 	}
 	if (s == FIOERR || s == FIOFNF)	/* False if error.      */
 		return FALSE;
-#if 0
-	if (s == ABORT)
-		return ABORT;
-#endif
 	return TRUE;
 }
 
