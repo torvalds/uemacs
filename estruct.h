@@ -236,7 +236,6 @@
 #define	NLOCKS	100		/* max # of file locks active   */
 #define	NCOLORS	8		/* number of supported colors   */
 #define	KBLOCK	250		/* sizeof kill buffer chunks    */
-#define	NBLOCK	16		/* line block chunk size        */
 
 #define CONTROL 0x0100		/* Control flag, or'ed in       */
 #define META    0x0200		/* Meta flag, or'ed in          */

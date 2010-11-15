@@ -21,6 +21,8 @@
 #include "edef.h"
 #include "efunc.h"
 
+#define	BLOCK_SIZE 16 /* Line block chunk size. */
+
 /*
  * This routine allocates a block of memory large enough to hold a struct line
  * containing "used" characters. The block is always rounded up a bit. Return
@@ -32,9 +34,9 @@ struct line *lalloc(int used)
 	struct line *lp;
 	int size;
 
-	size = (used + NBLOCK - 1) & ~(NBLOCK - 1);
-	if (size == 0)		/* Assume that an empty */
-		size = NBLOCK;	/* line is for type-in. */
+	size = (used + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
+	if (size == 0)	/* Assume that is an empty. */
+		size = BLOCK_SIZE;  /* Line is for type-in. */
 	if ((lp = (struct line *)malloc(sizeof(struct line) + size)) == NULL) {
 		mlwrite("(OUT OF MEMORY)");
 		return NULL;
