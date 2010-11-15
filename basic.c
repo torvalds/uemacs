@@ -10,9 +10,11 @@
  */
 
 #include <stdio.h>
+
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
+#include "line.h"
 
 /*
  * This routine, given a pointer to a struct line, and the current cursor goal

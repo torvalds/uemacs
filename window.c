@@ -1,14 +1,16 @@
-/*	WINDOW.C
+/*	window.c
  *
- * Window management. Some of the functions are internal, and some are
- * attached to keys that the user actually types.
+ *      Window management. Some of the functions are internal, and some are
+ *      attached to keys that the user actually types.
  *
  */
 
-#include        <stdio.h>
-#include        "estruct.h"
-#include	"edef.h"
-#include	"efunc.h"
+#include <stdio.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
 
 /*
  * Reposition dot in the current window to line "n". If the argument is

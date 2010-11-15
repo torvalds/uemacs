@@ -1,4 +1,4 @@
-/*	EBIND.H
+/*	ebind.h
  *
  *	Initial default key to function bindings
  *
@@ -7,6 +7,8 @@
 
 #ifndef EBIND_H_
 #define EBIND_H_
+
+#include "line.h"
 
 /*
  * Command table.

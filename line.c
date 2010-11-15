@@ -13,10 +13,13 @@
  *
  */
 
-#include	<stdio.h>
-#include	"estruct.h"
-#include	"edef.h"
-#include	"efunc.h"
+#include "line.h"
+
+#include <stdio.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
 
 /*
  * This routine allocates a block of memory large enough to hold a struct line

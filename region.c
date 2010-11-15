@@ -1,18 +1,18 @@
 /*	region.c
  *
- * The routines in this file
- * deal with the region, that magic space
- * between "." and mark. Some functions are
- * commands. Some functions are just for
- * internal use.
+ *      The routines in this file deal with the region, that magic space
+ *      between "." and mark. Some functions are commands. Some functions are
+ *      just for internal use.
  *
- *	modified by Petri Kutvonen
+ *	Modified by Petri Kutvonen
  */
 
-#include        <stdio.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
+#include <stdio.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
 
 /*
  * Kill the region. Ask "getregion"

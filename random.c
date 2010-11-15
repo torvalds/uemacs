@@ -1,17 +1,19 @@
-/*	RANDOM.C
+/*	random.c
  *
- * This file contains the command processing functions for a number of random
- * commands. There is no functional grouping here, for sure.
+ *      This file contains the command processing functions for a number of
+ *      random commands. There is no functional grouping here, for sure.
  *
- *	modified by Petri Kutvonen
+ *	Modified by Petri Kutvonen
  */
 
-#include        <stdio.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
+#include <stdio.h>
 
-int tabsize;			/* Tab size (0: use real tabs)  */
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
+
+int tabsize; /* Tab size (0: use real tabs) */
 
 /*
  * Set fill column to n.

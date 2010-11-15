@@ -26,24 +26,6 @@ extern int justpara(int f, int n);
 extern int killpara(int f, int n);
 extern int wordcount(int f, int n);
 
-/* line.c */
-extern void lfree(struct line *lp);
-extern void lchange(int flag);
-extern int insspace(int f, int n);
-extern int linstr(char *instr);
-extern int linsert(int n, int c);
-extern int lowrite(int c);
-extern int lover(char *ostr);
-extern int lnewline(void);
-extern int ldelete(long n, int kflag);
-extern char *getctext(void);
-extern int putctext(char *iline);
-extern int ldelnewline(void);
-extern void kdelete(void);
-extern int kinsert(int c);
-extern int yank(int f, int n);
-extern struct line *lalloc(int);  /* Allocate a line. */
-
 /* window.c */
 extern int reposition(int f, int n);
 extern int redraw(int f, int n);

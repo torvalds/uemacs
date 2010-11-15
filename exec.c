@@ -1,22 +1,21 @@
-/*	EXEC.C
+/*	exec.c
  *
  *	This file is for functions dealing with execution of
- *	commands, command lines, buffers, files and startup files
+ *	commands, command lines, buffers, files and startup files.
  *
  *	written 1986 by Daniel Lawrence
  *	modified by Petri Kutvonen
  */
 
-#include	<stdio.h>
-#include	"estruct.h"
-#include	"edef.h"
-#include	"efunc.h"
+#include <stdio.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
 
 /*
- * namedcmd:
- *	execute a named command even if it is not bound
- *
- * int f, n;		command arguments [passed through to command executed]
+ * Execute a named command even if it is not bound.
  */
 int namedcmd(int f, int n)
 {

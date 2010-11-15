@@ -10,9 +10,11 @@
  */
 
 #include        <stdio.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
 
 /*
  * Attach a buffer to a window. The

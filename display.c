@@ -1,20 +1,22 @@
 /*	display.c
  *
- * The functions in this file handle redisplay. There are two halves, the
- * ones that update the virtual display screen, and the ones that make the
- * physical display screen the same as the virtual display screen. These
- * functions use hints that are left in the windows by the commands.
+ *      The functions in this file handle redisplay. There are two halves, the
+ *      ones that update the virtual display screen, and the ones that make the
+ *      physical display screen the same as the virtual display screen. These
+ *      functions use hints that are left in the windows by the commands.
  *
- *	modified by Petri Kutvonen
+ *	Modified by Petri Kutvonen
  */
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
+
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
+#include "line.h"
 #include "version.h"
 
 struct video {

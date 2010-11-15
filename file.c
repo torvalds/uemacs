@@ -1,4 +1,4 @@
-/*	FILE.C
+/*	file.c
  *
  *	The routines in this file handle the reading, writing
  *	and lookup of disk files.  All of details about the
@@ -7,11 +7,13 @@
  *	modified by Petri Kutvonen
  */
 
-#include        <stdio.h>
-#include        <unistd.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
+#include <stdio.h>
+#include <unistd.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
 
 /*
  * Read a file into the current

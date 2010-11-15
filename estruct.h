@@ -501,28 +501,6 @@ struct region {
 };
 
 /*
- * All text is kept in circularly linked lists of "struct line" structures. These
- * begin at the header line (which is the blank line beyond the end of the
- * buffer). This line is pointed to by the "struct buffer". Each line contains a the
- * number of bytes in the line (the "used" size), the size of the text array,
- * and the text. The end of line is not stored as a byte; it's implied. Future
- * additions will include update hints, and a list of marks into the line.
- */
-struct line {
-	struct line *l_fp;	/* Link to the next line        */
-	struct line *l_bp;	/* Link to the previous line    */
-	short l_size;		/* Allocated size               */
-	short l_used;		/* Used size                    */
-	char l_text[1];		/* A bunch of characters.       */
-};
-
-#define lforw(lp)       ((lp)->l_fp)
-#define lback(lp)       ((lp)->l_bp)
-#define lgetc(lp, n)    ((lp)->l_text[(n)]&0xFF)
-#define lputc(lp, n, c) ((lp)->l_text[(n)]=(c))
-#define llength(lp)     ((lp)->l_used)
-
-/*
  * The editor communicates with the display using a high level interface. A
  * "TERM" structure holds useful variables, and indirect pointers to routines
  * that do useful operations. The low level get and put routines are here too.

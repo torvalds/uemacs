@@ -1,17 +1,19 @@
-/*	BIND.C
+/*	bind.c
  *
  *	This file is for functions having to do with key bindings,
  *	descriptions, help commands and startup file.
  *
- *	written 11-feb-86 by Daniel Lawrence
- *	modified by Petri Kutvonen
+ *	Written 11-feb-86 by Daniel Lawrence
+ *	Modified by Petri Kutvonen
  */
 
 #include <stdio.h>
+
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
 #include "epath.h"
+#include "line.h"
 #include "util.h"
 
 int help(int f, int n)

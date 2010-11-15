@@ -1,14 +1,16 @@
-/*	SPAWN.C
- *	various operating system access commands
+/*	spaw.c
  *
- *	modified by Petri Kutvonen
+ *	Various operating system access commands.
+ *
+ *	<odified by Petri Kutvonen
  */
 
-#include        <stdio.h>
-#include        <unistd.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
+#include <stdio.h>
+#include <unistd.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
 
 #if     VMS
 #define EFN     0		/* Event flag.          */

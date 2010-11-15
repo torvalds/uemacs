@@ -1,4 +1,4 @@
-/*	SEARCH.C
+/*	search.c
  *
  * The functions in this file implement commands that search in the forward
  * and backward directions.  There are no special characters in the search
@@ -54,13 +54,15 @@
  *	whether or not to make use of the array.  And, put in the
  *	appropriate new structures and variables.
  *
- *	modified by Petri Kutvonen
+ *	Modified by Petri Kutvonen
  */
 
-#include        <stdio.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include        "efunc.h"
+#include <stdio.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
 
 static int amatch(MC *mcptr, int direct, struct line **pcwline, int *pcwoff);
 static int readpattern(char *prompt, char *apat, int srch);

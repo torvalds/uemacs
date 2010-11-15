@@ -1,16 +1,18 @@
-/*	WORD.C
+/*	word.c
  *
- * The routines in this file implement commands that work word or a
- * paragraph at a time.  There are all sorts of word mode commands.  If I
- * do any sentence mode commands, they are likely to be put in this file.
+ *      The routines in this file implement commands that work word or a
+ *      paragraph at a time.  There are all sorts of word mode commands.  If I
+ *      do any sentence mode commands, they are likely to be put in this file.
  *
- *	modified by Petri Kutvonen
+ *	Modified by Petri Kutvonen
  */
 
-#include	<stdio.h>
-#include	"estruct.h"
-#include	"edef.h"
-#include	"efunc.h"
+#include <stdio.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
 
 /* Word wrap on n-spaces. Back-over whatever precedes the point on the current
  * line and stop on the first word-break or the beginning of the line. If we
@@ -19,9 +21,8 @@
  * back to the end of the word.
  * Returns TRUE on success, FALSE on errors.
  *
- * int f;		default flag
- * int n;		numeric argument
- * 
+ * @f: default flag.
+ * @n: numeric argument.
  */
 int wrapword(int f, int n)
 {

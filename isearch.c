@@ -1,4 +1,4 @@
-/*	ISEARCH.C
+/*	isearch.c
  *
  * The functions in this file implement commands that perform incremental
  * searches in the forward and backward directions.  This "ISearch" command
@@ -19,13 +19,15 @@
  *	  checknext(), since there were no circumstances where
  *	  it ever equalled FALSE.
  *
- *	modified by Petri Kutvonen
+ *	Modified by Petri Kutvonen
  */
 
-#include        <stdio.h>
-#include	"estruct.h"
-#include        "edef.h"
-#include	"efunc.h"
+#include <stdio.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "line.h"
 
 #if	ISRCH
 
