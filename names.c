@@ -8,6 +8,7 @@
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
+#include "line.h"
 
 struct name_bind names[] = {
 	{"abort-command", ctrlg},
