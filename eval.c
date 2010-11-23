@@ -16,6 +16,11 @@
 #include "util.h"
 #include "version.h"
 
+#define	MAXVARS	255
+
+/* User variables */
+static struct user_variable uv[MAXVARS + 1];
+
 /* Initialize the user variable list. */
 void varinit(void)
 {

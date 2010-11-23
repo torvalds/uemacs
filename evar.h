@@ -17,11 +17,6 @@ struct user_variable {
 	char *u_value;		 /* value (string) */
 };
 
-#define	MAXVARS	255
-
-/* User variables */
-static struct user_variable uv[MAXVARS + 1];
-
 /* List of recognized environment variables. */
 
 static char *envars[] = {
