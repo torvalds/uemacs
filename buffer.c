@@ -42,8 +42,8 @@ int usebuffer(int f, int n)
  */
 int nextbuffer(int f, int n)
 {
-	struct buffer *bp;	/* eligable buffer to switch to */
-	struct buffer *bbp;	/* eligable buffer to switch to */
+	struct buffer *bp = NULL;  /* eligable buffer to switch to */
+	struct buffer *bbp;        /* eligable buffer to switch to */
 
 	/* make sure the arg is legit */
 	if (f == FALSE)
