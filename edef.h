@@ -118,8 +118,8 @@ extern int matchoff;
 #if	MAGIC
 extern short int magical;
 extern short int rmagical;
-extern MC mcpat[NPAT];		/* The magic pattern.           */
-extern MC tapcm[NPAT];		/* The reversed magic patterni. */
+extern struct magic mcpat[NPAT];		/* The magic pattern.           */
+extern struct magic tapcm[NPAT];		/* The reversed magic patterni. */
 extern RMC rmcpat[NPAT];	/* The replacement magic array. */
 #endif
 

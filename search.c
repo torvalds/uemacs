@@ -64,14 +64,14 @@
 #include "efunc.h"
 #include "line.h"
 
-static int amatch(MC *mcptr, int direct, struct line **pcwline, int *pcwoff);
+static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *pcwoff);
 static int readpattern(char *prompt, char *apat, int srch);
 static int replaces(int kind, int f, int n);
 static int nextch(struct line **pcurline, int *pcuroff, int dir);
 static int mcstr(void);
 static int rmcstr(void);
-static int mceq(int bc, MC *mt);
-static int cclmake(char **ppatptr, MC *mcptr);
+static int mceq(int bc, struct magic *mt);
+static int cclmake(char **ppatptr, struct magic *mcptr);
 static int biteq(int bc, char *cclmap);
 static char *clearbits(void);
 static void setbit(int bc, char *cclmap);
@@ -283,11 +283,11 @@ int backhunt(int f, int n)
  *	reset the "." to be at the start or just after the match string,
  *	and (perhaps) repaint the display.
  *
- * MC *mcpatrn;			pointer into pattern
+ * struct magic *mcpatrn;			pointer into pattern
  * int direct;			which way to go.
  * int beg_or_end;		put point at beginning or end of pattern.
  */
-int mcscanner(MC *mcpatrn, int direct, int beg_or_end)
+int mcscanner(struct magic *mcpatrn, int direct, int beg_or_end)
 {
 	struct line *curline;		/* current line during scan */
 	int curoff;		/* position within current line */
@@ -351,12 +351,12 @@ int mcscanner(MC *mcpatrn, int direct, int beg_or_end)
  *	recursive routine amatch() (for "anchored match") in
  *	Kernighan & Plauger's "Software Tools".
  *
- * MC *mcptr;		string to scan for
+ * struct magic *mcptr;		string to scan for
  * int direct;		which way to go.
  * struct line **pcwline;	current line during scan
  * int *pcwoff;		position within current line
  */
-static int amatch(MC *mcptr, int direct, struct line **pcwline, int *pcwoff)
+static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *pcwoff)
 {
 	int c;		/* character at current position */
 	struct line *curline;		/* current line during scan */
@@ -1085,14 +1085,14 @@ static int nextch(struct line **pcurline, int *pcuroff, int dir)
  */
 static int mcstr(void)
 {
-	MC *mcptr, *rtpcm;
+	struct magic *mcptr, *rtpcm;
 	char *patptr;
 	int mj;
 	int pchr;
 	int status = TRUE;
 	int does_closure = FALSE;
 
-	/* If we had metacharacters in the MC array previously,
+	/* If we had metacharacters in the struct magic array previously,
 	 * free up any bitmaps that may have been allocated.
 	 */
 	if (magical)
@@ -1286,11 +1286,11 @@ static int rmcstr(void)
 }
 
 /*
- * mcclear -- Free up any CCL bitmaps, and MCNIL the MC search arrays.
+ * mcclear -- Free up any CCL bitmaps, and MCNIL the struct magic search arrays.
  */
 void mcclear(void)
 {
-	MC *mcptr;
+	struct magic *mcptr;
 
 	mcptr = &mcpat[0];
 
@@ -1326,7 +1326,7 @@ void rmcclear(void)
  *	Software Tools, this is the function omatch(), but i felt there
  *	were too many functions with the 'match' name already.
  */
-static int mceq(int bc, MC *mt)
+static int mceq(int bc, struct magic *mt)
 {
 	int result;
 
@@ -1377,7 +1377,7 @@ extern char *clearbits(void);
  *	ppatptr is left pointing to the end-of-character-class character,
  *	so that a loop may automatically increment with safety.
  */
-static int cclmake(char **ppatptr, MC *mcptr)
+static int cclmake(char **ppatptr, struct magic *mcptr)
 {
 	char *bmap;
 	char *patptr;

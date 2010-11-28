@@ -128,8 +128,8 @@ int matchoff = 0;
  */
 short int magical = FALSE;
 short int rmagical = FALSE;
-MC mcpat[NPAT];			/* the magic pattern            */
-MC tapcm[NPAT];			/* the reversed magic pattern   */
+struct magic mcpat[NPAT];			/* the magic pattern            */
+struct magic tapcm[NPAT];			/* the reversed magic pattern   */
 RMC rmcpat[NPAT];		/* the replacement magic array  */
 
 #endif

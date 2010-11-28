@@ -666,15 +666,15 @@ struct while_block {
 #define	HIBYTE		HICHAR >> 3
 
 /* Typedefs that define the meta-character structure for MAGIC mode searching
- * (MC), and the meta-character structure for MAGIC mode replacment (RMC).
+ * (struct magic), and the meta-character structure for MAGIC mode replacment (RMC).
  */
-typedef struct {
+struct magic {
 	short int mc_type;
 	union {
 		int lchar;
 		char *cclmap;
 	} u;
-} MC;
+};
 
 typedef struct {
 	short int mc_type;

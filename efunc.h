@@ -302,7 +302,7 @@ extern int forwsearch(int f, int n);
 extern int forwhunt(int f, int n);
 extern int backsearch(int f, int n);
 extern int backhunt(int f, int n);
-extern int mcscanner(MC *mcpatrn, int direct, int beg_or_end);
+extern int mcscanner(struct magic *mcpatrn, int direct, int beg_or_end);
 extern int scanner(const char *patrn, int direct, int beg_or_end);
 extern int eq(unsigned char bc, unsigned char pc);
 extern void savematch(void);
