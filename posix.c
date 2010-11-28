@@ -1,8 +1,8 @@
-/*	POSIX.C
+/*	posix.c
  *
- * The functions in this file negotiate with the operating system for
- * characters, and write characters in a barely buffered fashion on the display.
- * All operating systems.
+ *      The functions in this file negotiate with the operating system for
+ *      characters, and write characters in a barely buffered fashion on the
+ *      display. All operating systems.
  *
  *	modified by Petri Kutvonen
  *
@@ -12,16 +12,23 @@
 
 #ifdef POSIX
 
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
+#include <termios.h>
 #include <unistd.h>
+
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
 
-#include <signal.h>
-#include <termios.h>
-#include <fcntl.h>
-#include <errno.h>
+/* Since Mac OS X's termios.h doesn't have the following 2 macros, define them.
+ */
+#if defined(SYSV) && defined(_DARWIN_C_SOURCE)
+#define OLCUC 0000002
+#define XCASE 0000004
+#endif
 
 /*
  * NOTE NOTE NOTE!
