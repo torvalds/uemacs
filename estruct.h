@@ -242,10 +242,6 @@
 #define CTLX    0x0400		/* ^X flag, or'ed in            */
 #define	SPEC	0x0800		/* special key (function keys)  */
 
-#if	PKCODE
-#define	MAXNLINE	10000000	/* max lines from one file */
-#endif
-
 #ifdef	FALSE
 #undef	FALSE
 #endif
