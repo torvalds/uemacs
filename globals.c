@@ -130,7 +130,7 @@ short int magical = FALSE;
 short int rmagical = FALSE;
 struct magic mcpat[NPAT];			/* the magic pattern            */
 struct magic tapcm[NPAT];			/* the reversed magic pattern   */
-RMC rmcpat[NPAT];		/* the replacement magic array  */
+struct magic_replacement rmcpat[NPAT];		/* the replacement magic array  */
 
 #endif
 

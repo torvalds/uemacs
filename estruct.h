@@ -625,7 +625,7 @@ struct while_block {
 
 #endif
 
-#if	MAGIC
+#if defined(MAGIC)
 /*
  * Defines for the metacharacters in the regular expression
  * search routines.
@@ -662,7 +662,8 @@ struct while_block {
 #define	HIBYTE		HICHAR >> 3
 
 /* Typedefs that define the meta-character structure for MAGIC mode searching
- * (struct magic), and the meta-character structure for MAGIC mode replacment (RMC).
+ * (struct magic), and the meta-character structure for MAGIC mode replacement
+ * (struct magic_replacement).
  */
 struct magic {
 	short int mc_type;
@@ -672,9 +673,9 @@ struct magic {
 	} u;
 };
 
-typedef struct {
+struct magic_replacement {
 	short int mc_type;
 	char *rstr;
-} RMC;
-#endif
+};
 
+#endif  /* MAGIC */

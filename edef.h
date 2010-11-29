@@ -120,7 +120,7 @@ extern short int magical;
 extern short int rmagical;
 extern struct magic mcpat[NPAT];		/* The magic pattern.           */
 extern struct magic tapcm[NPAT];		/* The reversed magic patterni. */
-extern RMC rmcpat[NPAT];	/* The replacement magic array. */
+extern struct magic_replacement rmcpat[NPAT];	/* The replacement magic array. */
 #endif
 
 extern char *dname[];		/* Directive name table.        */

@@ -930,7 +930,7 @@ int delins(int dlength, char *instr, int use_meta)
 {
 	int status;
 #if	MAGIC
-	RMC *rmcptr;
+	struct magic_replacement *rmcptr;
 #endif
 
 	/* Zap what we gotta,
@@ -1200,7 +1200,7 @@ static int mcstr(void)
  */
 static int rmcstr(void)
 {
-	RMC *rmcptr;
+	struct magic_replacement *rmcptr;
 	char *patptr;
 	int status = TRUE;
 	int mj;
@@ -1304,11 +1304,11 @@ void mcclear(void)
 }
 
 /*
- * rmcclear -- Free up any strings, and MCNIL the RMC array.
+ * rmcclear -- Free up any strings, and MCNIL the struct magic_replacement array.
  */
 void rmcclear(void)
 {
-	RMC *rmcptr;
+	struct magic_replacement *rmcptr;
 
 	rmcptr = &rmcpat[0];
 
