@@ -1,4 +1,4 @@
-/*	INPUT.C
+/*	input.c
  *
  *	Various input routines
  *
@@ -6,11 +6,13 @@
  *	modified by Petri Kutvonen
  */
 
-#include	<stdio.h>
-#include	<unistd.h>
-#include	"estruct.h"
-#include	"edef.h"
-#include	"efunc.h"
+#include <stdio.h>
+#include <unistd.h>
+
+#include "estruct.h"
+#include "edef.h"
+#include "efunc.h"
+#include "wrapper.h"
 
 #if	PKCODE
 #if     MSDOS && TURBO
@@ -587,7 +589,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 				if (!iswild)
 					strcat(ffbuf, "*");
 				strcat(ffbuf, " >");
-				mkstemp(tmp);
+				xmkstemp(tmp);
 				strcat(ffbuf, tmp);
 				strcat(ffbuf, " 2>&1");
 				system(ffbuf);
