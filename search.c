@@ -64,6 +64,20 @@
 #include "efunc.h"
 #include "line.h"
 
+#if defined(MAGIC)
+/*
+ * The variables magical and rmagical determine if there
+ * were actual metacharacters in the search and replace strings -
+ * if not, then we don't have to use the slower MAGIC mode
+ * search functions.
+ */
+static short int magical;
+static short int rmagical;
+static struct magic mcpat[NPAT]; /* The magic pattern. */
+static struct magic tapcm[NPAT]; /* The reversed magic patterni. */
+static struct magic_replacement rmcpat[NPAT]; /* The replacement magic array. */
+#endif
+
 static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *pcwoff);
 static int readpattern(char *prompt, char *apat, int srch);
 static int replaces(int kind, int f, int n);

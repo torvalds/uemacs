@@ -119,21 +119,6 @@ char *patmatch = NULL;
 struct line *matchline = NULL;
 int matchoff = 0;
 
-#if	MAGIC
-/*
- * The variables magical and rmagical determine if there
- * were actual metacharacters in the search and replace strings -
- * if not, then we don't have to use the slower MAGIC mode
- * search functions.
- */
-short int magical = FALSE;
-short int rmagical = FALSE;
-struct magic mcpat[NPAT];			/* the magic pattern            */
-struct magic tapcm[NPAT];			/* the reversed magic pattern   */
-struct magic_replacement rmcpat[NPAT];		/* the replacement magic array  */
-
-#endif
-
 /* directive name table:
 	This holds the names of all the directives....	*/
 
@@ -148,5 +133,3 @@ char *dname[] = {
 /*	vars needed for macro debugging output	*/
 char outline[NSTRING];		/* global string to hold debug line text */
 #endif
-
-
