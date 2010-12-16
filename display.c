@@ -18,6 +18,7 @@
 #include "efunc.h"
 #include "line.h"
 #include "version.h"
+#include "wrapper.h"
 
 struct video {
 	int v_flag;		/* Flags */
@@ -85,24 +86,13 @@ void vtinit(void)
 	TTopen();		/* open the screen */
 	TTkopen();		/* open the keyboard */
 	TTrev(FALSE);
-	vscreen = (struct video **) malloc(term.t_mrow * sizeof(struct video *));
-
-	if (vscreen == NULL)
-		exit(1);
+	vscreen = xmalloc(term.t_mrow * sizeof(struct video *));
 
 #if	MEMMAP == 0 || SCROLLCODE
-	pscreen = (struct video **) malloc(term.t_mrow * sizeof(struct video *));
-
-	if (pscreen == NULL)
-		exit(1);
+	pscreen = xmalloc(term.t_mrow * sizeof(struct video *));
 #endif
-
 	for (i = 0; i < term.t_mrow; ++i) {
-		vp = (struct video *)malloc(sizeof(struct video) + term.t_mcol);
-
-		if (vp == NULL)
-			exit(1);
-
+		vp = xmalloc(sizeof(struct video) + term.t_mcol);
 		vp->v_flag = 0;
 #if	COLOR
 		vp->v_rfcolor = 7;
@@ -110,11 +100,7 @@ void vtinit(void)
 #endif
 		vscreen[i] = vp;
 #if	MEMMAP == 0 || SCROLLCODE
-		vp = (struct video *)malloc(sizeof(struct video) + term.t_mcol);
-
-		if (vp == NULL)
-			exit(1);
-
+		vp = xmalloc(sizeof(struct video) + term.t_mcol);
 		vp->v_flag = 0;
 		pscreen[i] = vp;
 #endif
