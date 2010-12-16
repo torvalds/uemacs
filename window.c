@@ -11,6 +11,7 @@
 #include "edef.h"
 #include "efunc.h"
 #include "line.h"
+#include "wrapper.h"
 
 /*
  * Reposition dot in the current window to line "n". If the argument is
@@ -323,10 +324,7 @@ int splitwind(int f, int n)
 		mlwrite("Cannot split a %d line window", curwp->w_ntrows);
 		return FALSE;
 	}
-	if ((wp = (struct window *)malloc(sizeof(struct window))) == NULL) {
-		mlwrite("(OUT OF MEMORY)");
-		return FALSE;
-	}
+	wp = xmalloc(sizeof(struct window));
 	++curbp->b_nwnd;	/* Displayed twice.     */
 	wp->w_bufp = curbp;
 	wp->w_dotp = curwp->w_dotp;

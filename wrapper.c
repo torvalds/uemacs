@@ -12,3 +12,11 @@ int xmkstemp(char *template)
 		die("Unable to create temporary file");
 	return fd;
 }
+
+void *xmalloc(size_t size)
+{
+	void *ret = malloc(size);
+	if (!ret)
+		die("Out of memory");
+	return ret;
+}
