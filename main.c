@@ -92,8 +92,9 @@ void usage(int status)
 {
   printf("Usage: %s filename\n", PROGRAM_NAME);
   printf("   or: %s [options]\n\n", PROGRAM_NAME);
-  fputs("      +          go to end of buffer n\n", stdout);
-  fputs("      +<n>       go to line n\n", stdout);
+  fputs("      +          start at the end of file\n", stdout);
+  fputs("      +<n>       start at line <n>\n", stdout);
+  fputs("      -g[G]<n>   go to line <n>\n", stdout);
   fputs("      --help     display this help and exit\n", stdout);
   fputs("      --version  output version information and exit\n", stdout);
 
