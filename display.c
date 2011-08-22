@@ -194,7 +194,7 @@ static void vtputc(unsigned char c)
 		return;
 	}
 
-	if (c >= 0x80 && c < 0xA0) {
+	if (c >= 0x80 && c <= 0xA0) {
 		static const char hex[] = "0123456789abcdef";
 		vtputc('\\');
 		vtputc(hex[c >> 4]);
