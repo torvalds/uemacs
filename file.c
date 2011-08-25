@@ -252,9 +252,6 @@ int readin(char *fname, int lockfl)
 	/* let a user macro get hold of things...if he wants */
 	execute(META | SPEC | 'R', FALSE, 1);
 
-	/* turn off ALL keyboard translation in case we get a dos error */
-	TTkclose();
-
 	if ((s = ffropen(fname)) == FIOERR)	/* Hard file open.      */
 		goto out;
 
@@ -305,7 +302,6 @@ int readin(char *fname, int lockfl)
 	mlwrite(mesg);
 
       out:
-	TTkopen();		/* open the keyboard again */
 	for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
 		if (wp->w_bufp == curbp) {
 			wp->w_linep = lforw(curbp->b_linep);
@@ -478,11 +474,8 @@ int writeout(char *fn)
 	if (s != TRUE)
 		return s;
 #endif
-	/* turn off ALL keyboard translation in case we get a dos error */
-	TTkclose();
 
 	if ((s = ffwopen(fn)) != FIOSUC) {	/* Open writes message. */
-		TTkopen();
 		return FALSE;
 	}
 	mlwrite("(Writing...)");	/* tell us were writing */
@@ -504,7 +497,6 @@ int writeout(char *fn)
 		}
 	} else			/* Ignore close error   */
 		ffclose();	/* if a write error.    */
-	TTkopen();
 	if (s != FIOSUC)	/* Some sort of error.  */
 		return FALSE;
 	return TRUE;
