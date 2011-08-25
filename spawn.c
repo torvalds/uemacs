@@ -78,6 +78,7 @@ int spawncli(int f, int n)
 	movecursor(term.t_nrow, 0);	/* Seek to last line.   */
 	TTflush();
 	TTclose();		/* stty to old settings */
+	TTkclose();		/* Close "keyboard" */
 	if ((cp = getenv("SHELL")) != NULL && *cp != '\0')
 		system(cp);
 	else
@@ -241,6 +242,7 @@ int execprg(int f, int n)
 	TTputc('\n');		/* Already have '\r'    */
 	TTflush();
 	TTclose();		/* stty to old modes    */
+	TTkclose();
 	system(line);
 	fflush(stdout);		/* to be sure P.K.      */
 	TTopen();
@@ -341,10 +343,12 @@ int pipecmd(int f, int n)
 #if     V7 | USG | BSD
 	TTflush();
 	TTclose();		/* stty to old modes    */
+	TTkclose();
 	strcat(line, ">");
 	strcat(line, filnam);
 	system(line);
 	TTopen();
+	TTkopen();
 	TTflush();
 	sgarbf = TRUE;
 	s = TRUE;
@@ -430,9 +434,11 @@ int filter_buffer(int f, int n)
 	TTputc('\n');		/* Already have '\r'    */
 	TTflush();
 	TTclose();		/* stty to old modes    */
+	TTkclose();
 	strcat(line, " <fltinp >fltout");
 	system(line);
 	TTopen();
+	TTkopen();
 	TTflush();
 	sgarbf = TRUE;
 	s = TRUE;
