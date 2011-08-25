@@ -229,12 +229,19 @@ static void tcapkopen(void)
 #if	PKCODE
 	putpad(TI);
 	ttflush();
+	ttrow = 999;
+	ttcol = 999;
+	sgarbf = TRUE;
 #endif
 	strcpy(sres, "NORMAL");
 }
 
 static void tcapkclose(void)
 {
+#if	PKCODE
+	putpad(TE);
+	ttflush();
+#endif
 }
 
 static void tcapmove(int row, int col)
