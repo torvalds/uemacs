@@ -120,24 +120,25 @@ void ttclose(void)
  */
 int ttputc(int c)
 {
-	/*
-	 * We always represent things in 1 byte, but if we output
-	 * in UTF-8, we may need to expand that into 2 bytes..
-	 *
-	 * Some day we might even be able to handle UTF-8 _content_.
-	 *
-	 * That day is not today.
-	 */
-	if (utf8_mode()) {
-		c &= 0xff;
-		if (c >= 0x80) {
-			unsigned char first = (c >> 6) | 0xc0;
-			fputc(first, stdout);
-			c = (c & 0x3f) | 0x80;
-		}
+	unsigned char utf8[6], *p = utf8+5;
+	int bytes = 1;
+
+	if (c < 0)
+		return 0;
+	*p = c;
+	if (c > 0x7f) {
+		int prefix = 0x40;
+		do {
+			*p = 0x80 + (c & 0x3f);
+			--p;
+			bytes++;
+			prefix >>= 1;
+			c >>= 6;
+		} while (c > prefix);
+		*p = c - 2*prefix;
 	}
-	fputc(c, stdout);
-	return TRUE;
+	fwrite(p, 1, bytes, stdout);
+	return 0;
 }
 
 /*

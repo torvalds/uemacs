@@ -20,6 +20,8 @@
 #include "version.h"
 #include "wrapper.h"
 
+typedef unsigned int unicode_t;
+
 struct video {
 	int v_flag;		/* Flags */
 #if	COLOR
@@ -28,7 +30,7 @@ struct video {
 	int v_rfcolor;		/* requested forground color */
 	int v_rbcolor;		/* requested background color */
 #endif
-	char v_text[1];		/* Screen data. */
+	unicode_t v_text[1];	/* Screen data. */
 };
 
 #define VFCHG   0x0001		/* Changed flag                 */
@@ -58,7 +60,7 @@ static void updall(struct window *wp);
 static int scrolls(int inserts);
 static void scrscroll(int from, int to, int count);
 static int texttest(int vrow, int prow);
-static int endofline(char *s, int n);
+static int endofline(unicode_t *s, int n);
 static void updext(void);
 static int updateline(int row, struct video *vp1, struct video *vp2);
 static void modeline(struct window *wp);
@@ -92,7 +94,7 @@ void vtinit(void)
 	pscreen = xmalloc(term.t_mrow * sizeof(struct video *));
 #endif
 	for (i = 0; i < term.t_mrow; ++i) {
-		vp = xmalloc(sizeof(struct video) + term.t_mcol);
+		vp = xmalloc(sizeof(struct video) + term.t_mcol*4);
 		vp->v_flag = 0;
 #if	COLOR
 		vp->v_rfcolor = 7;
@@ -100,7 +102,7 @@ void vtinit(void)
 #endif
 		vscreen[i] = vp;
 #if	MEMMAP == 0 || SCROLLCODE
-		vp = xmalloc(sizeof(struct video) + term.t_mcol);
+		vp = xmalloc(sizeof(struct video) + term.t_mcol*4);
 		vp->v_flag = 0;
 		pscreen[i] = vp;
 #endif
@@ -214,7 +216,7 @@ static void vtputc(unsigned char c)
 static void vteeol(void)
 {
 /*  struct video *vp;	*/
-	char *vcp = vscreen[vtrow]->v_text;
+	unicode_t *vcp = vscreen[vtrow]->v_text;
 
 /*  vp = vscreen[vtrow];	*/
 	while (vtcol < term.t_ncol)
@@ -593,7 +595,7 @@ void upddex(void)
  */
 void updgar(void)
 {
-	char *txt;
+	unicode_t *txt;
 	int i, j;
 
 	for (i = 0; i < term.t_nrow; ++i) {
@@ -700,7 +702,7 @@ static int scrolls(int inserts)
 		end = endofline(vpv->v_text, cols);
 		if (end == 0)
 			target = first;	/* newlines */
-		else if (strncmp(vpp->v_text, vpv->v_text, end) == 0)
+		else if (memcmp(vpp->v_text, vpv->v_text, 4*end) == 0)
 			target = first + 1;	/* broken line newlines */
 		else
 			target = first;
@@ -759,7 +761,7 @@ static int scrolls(int inserts)
 		for (i = 0; i < count; i++) {
 			vpp = pscreen[to + i];
 			vpv = vscreen[to + i];
-			strncpy(vpp->v_text, vpv->v_text, cols);
+			memcpy(vpp->v_text, vpv->v_text, 4*cols);
 			vpp->v_flag = vpv->v_flag;	/* XXX */
 			if (vpp->v_flag & VFREV) {
 				vpp->v_flag &= ~VFREV;
@@ -778,7 +780,7 @@ static int scrolls(int inserts)
 		}
 #if	MEMMAP == 0
 		for (i = from; i < to; i++) {
-			char *txt;
+			unicode_t *txt;
 			txt = pscreen[i]->v_text;
 			for (j = 0; j < term.t_ncol; ++j)
 				txt[j] = ' ';
@@ -807,13 +809,13 @@ static int texttest(int vrow, int prow)
 	struct video *vpv = vscreen[vrow];	/* virtual screen image */
 	struct video *vpp = pscreen[prow];	/* physical screen image */
 
-	return !memcmp(vpv->v_text, vpp->v_text, term.t_ncol);
+	return !memcmp(vpv->v_text, vpp->v_text, 4*term.t_ncol);
 }
 
 /*
  * return the index of the first blank of trailing whitespace
  */
-static int endofline(char *s, int n)
+static int endofline(unicode_t *s, int n)
 {
 	int i;
 	for (i = n - 1; i >= 0; i--)
@@ -866,8 +868,8 @@ static void updext(void)
 static int updateline(int row, struct video *vp1, struct video *vp2)
 {
 #if	SCROLLCODE
-	char *cp1;
-	char *cp2;
+	unicode_t *cp1;
+	unicode_t *cp2;
 	int nch;
 
 	cp1 = &vp1->v_text[0];
@@ -908,8 +910,8 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 #if RAINBOW
 /*	UPDATELINE specific code for the DEC rainbow 100 micro	*/
 
-	char *cp1;
-	char *cp2;
+	unicode_t *cp1;
+	unicode_t *cp2;
 	int nch;
 
 	/* since we don't know how to make the rainbow do this, turn it off */
@@ -930,11 +932,11 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 #else
 /*	UPDATELINE code for all other versions		*/
 
-	char *cp1;
-	char *cp2;
-	char *cp3;
-	char *cp4;
-	char *cp5;
+	unicode_t *cp1;
+	unicode_t *cp2;
+	unicode_t *cp3;
+	unicode_t *cp4;
+	unicode_t *cp5;
 	int nbflag;	/* non-blanks to the right flag? */
 	int rev;		/* reverse video flag */
 	int req;		/* reverse video request flag */
