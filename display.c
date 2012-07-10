@@ -432,6 +432,13 @@ static int reframe(struct window *wp)
 	return TRUE;
 }
 
+static void show_line(struct line *lp)
+{
+	int i;
+	for (i = 0; i < llength(lp); ++i)
+		vtputc(lgetc(lp, i));
+}
+
 /*
  * updone:
  *	update the current line	to the virtual screen
@@ -442,7 +449,6 @@ static void updone(struct window *wp)
 {
 	struct line *lp;	/* line to update */
 	int sline;	/* physical screen line to update */
-	int i;
 
 	/* search down the line we want */
 	lp = wp->w_linep;
@@ -456,8 +462,7 @@ static void updone(struct window *wp)
 	vscreen[sline]->v_flag |= VFCHG;
 	vscreen[sline]->v_flag &= ~VFREQ;
 	vtmove(sline, 0);
-	for (i = 0; i < llength(lp); ++i)
-		vtputc(lgetc(lp, i));
+	show_line(lp);
 #if	COLOR
 	vscreen[sline]->v_rfcolor = wp->w_fcolor;
 	vscreen[sline]->v_rbcolor = wp->w_bcolor;
@@ -475,7 +480,6 @@ static void updall(struct window *wp)
 {
 	struct line *lp;	/* line to update */
 	int sline;	/* physical screen line to update */
-	int i;
 
 	/* search down the lines, updating them */
 	lp = wp->w_linep;
@@ -488,8 +492,7 @@ static void updall(struct window *wp)
 		vtmove(sline, 0);
 		if (lp != wp->w_bufp->b_linep) {
 			/* if we are not at the end */
-			for (i = 0; i < llength(lp); ++i)
-				vtputc(lgetc(lp, i));
+			show_line(lp);
 			lp = lforw(lp);
 		}
 
@@ -554,7 +557,7 @@ void upddex(void)
 {
 	struct window *wp;
 	struct line *lp;
-	int i, j;
+	int i;
 
 	wp = wheadp;
 
@@ -567,8 +570,7 @@ void upddex(void)
 				if ((wp != curwp) || (lp != wp->w_dotp) ||
 				    (curcol < term.t_ncol - 1)) {
 					vtmove(i, 0);
-					for (j = 0; j < llength(lp); ++j)
-						vtputc(lgetc(lp, j));
+					show_line(lp);
 					vteeol();
 
 					/* this line no longer is extended */
@@ -833,7 +835,6 @@ static void updext(void)
 {
 	int rcursor;	/* real cursor location */
 	struct line *lp;	/* pointer to current line */
-	int j;		/* index into line */
 
 	/* calculate what column the real cursor will end up in */
 	rcursor = ((curcol - term.t_ncol) % term.t_scrsiz) + term.t_margin;
@@ -843,8 +844,7 @@ static void updext(void)
 	/* once we reach the left edge                                  */
 	vtmove(currow, -lbound);	/* start scanning offscreen */
 	lp = curwp->w_dotp;	/* line to output */
-	for (j = 0; j < llength(lp); ++j)	/* until the end-of-line */
-		vtputc(lgetc(lp, j));
+	show_line(lp);
 
 	/* truncate the virtual line, restore tab offset */
 	vteeol();

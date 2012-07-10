@@ -286,4 +286,9 @@ bind-to-key	newline	^J
 	add-global-mode "utf-8"
 !endif
 
+!if &gre &sin $LANG "utf8" 0
+	add-global-mode "utf-8"
+!endif
+add-global-mode "utf-8"
+
 set $discmd "TRUE"
