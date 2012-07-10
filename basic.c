@@ -15,6 +15,7 @@
 #include "edef.h"
 #include "efunc.h"
 #include "line.h"
+#include "utf8.h"
 
 /*
  * This routine, given a pointer to a struct line, and the current cursor goal
@@ -74,8 +75,15 @@ int backchar(int f, int n)
 			curwp->w_dotp = lp;
 			curwp->w_doto = llength(lp);
 			curwp->w_flag |= WFMOVE;
-		} else
-			curwp->w_doto--;
+		} else {
+			do {
+				unsigned char c;
+				curwp->w_doto--;
+				c = lgetc(curwp->w_dotp, curwp->w_doto);
+				if (is_beginning_utf8(c))
+					break;
+			} while (curwp->w_doto);
+		}
 	}
 	return TRUE;
 }
@@ -100,14 +108,22 @@ int forwchar(int f, int n)
 	if (n < 0)
 		return backchar(f, -n);
 	while (n--) {
-		if (curwp->w_doto == llength(curwp->w_dotp)) {
+		int len = llength(curwp->w_dotp);
+		if (curwp->w_doto == len) {
 			if (curwp->w_dotp == curbp->b_linep)
 				return FALSE;
 			curwp->w_dotp = lforw(curwp->w_dotp);
 			curwp->w_doto = 0;
 			curwp->w_flag |= WFMOVE;
-		} else
-			curwp->w_doto++;
+		} else {
+			do {
+				unsigned char c;
+				curwp->w_doto++;
+				c = lgetc(curwp->w_dotp, curwp->w_doto);
+				if (is_beginning_utf8(c))
+					break;
+			} while (curwp->w_doto < len);
+		}
 	}
 	return TRUE;
 }

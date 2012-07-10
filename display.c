@@ -528,7 +528,6 @@ static void updall(struct window *wp)
 void updpos(void)
 {
 	struct line *lp;
-	int c;
 	int i;
 
 	/* find the current row */
@@ -543,13 +542,13 @@ void updpos(void)
 	curcol = 0;
 	i = 0;
 	while (i < curwp->w_doto) {
-		c = lgetc(lp, i++);
+		unicode_t c;
+		int bytes;
+
+		bytes = utf8_to_unicode(lp->l_text, i, curwp->w_doto, &c);
+		i += bytes;
 		if (c == '\t')
 			curcol |= tabmask;
-		else if (c < 0x20 || c == 0x7f)
-			++curcol;
-		else if (c >= 0x80 && c <= 0xa0)
-			curcol+=2;
 
 		++curcol;
 	}
