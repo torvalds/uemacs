@@ -19,8 +19,7 @@
 #include "line.h"
 #include "version.h"
 #include "wrapper.h"
-
-typedef unsigned int unicode_t;
+#include "utf8.h"
 
 struct video {
 	int v_flag;		/* Flags */
@@ -432,50 +431,6 @@ static int reframe(struct window *wp)
 	wp->w_flag |= WFHARD;
 	wp->w_flag &= ~WFFORCE;
 	return TRUE;
-}
-
-static unsigned utf8_to_unicode(char *line, unsigned index, unsigned len, unicode_t *res)
-{
-	unsigned value;
-	unsigned char c = line[index];
-	unsigned bytes, mask, i;
-
-	*res = c;
-	line += index;
-	len -= index;
-
-	/*
-	 * 0xxxxxxx is valid utf8
-	 * 10xxxxxx is invalid UTF-8, we assume it is Latin1
-	 */
-	if (c < 0xc0)
-		return 1;
-
-	/* Ok, it's 11xxxxxx, do a stupid decode */
-	mask = 0x20;
-	bytes = 2;
-	while (c & mask) {
-		bytes++;
-		mask >>= 1;
-	}
-
-	/* Invalid? Do it as a single byte Latin1 */
-	if (bytes > 6)
-		return 1;
-
-	value = c & (mask-1);
-
-	/* Ok, do the bytes */
-	for (i = 1; i < bytes; i++) {
-		if (i > len)
-			return 1;
-		c = line[i];
-		if ((c & 0xc0) != 0x80)
-			return 1;
-		value = (value << 6) | (c & 0x3f);
-	}
-	*res = value;
-	return bytes;
 }
 
 static void show_line(struct line *lp)

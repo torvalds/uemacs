@@ -22,6 +22,7 @@
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
+#include "utf8.h"
 
 /* Since Mac OS X's termios.h doesn't have the following 2 macros, define them.
  */
@@ -106,24 +107,11 @@ void ttclose(void)
  */
 int ttputc(int c)
 {
-	unsigned char utf8[6], *p = utf8+5;
-	int bytes = 1;
+	char utf8[6];
+	int bytes;
 
-	if (c < 0)
-		return 0;
-	*p = c;
-	if (c > 0x7f) {
-		int prefix = 0x40;
-		do {
-			*p = 0x80 + (c & 0x3f);
-			--p;
-			bytes++;
-			prefix >>= 1;
-			c >>= 6;
-		} while (c > prefix);
-		*p = c - 2*prefix;
-	}
-	fwrite(p, 1, bytes, stdout);
+	bytes = unicode_to_utf8(c, utf8);
+	fwrite(utf8, 1, bytes, stdout);
 	return 0;
 }
 

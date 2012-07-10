@@ -20,13 +20,13 @@ SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c \
 	file.c fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c \
 	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
 	termio.c vmsvt.c vt52.c window.c word.c names.c globals.c version.c \
-	usage.c wrapper.c
+	usage.c wrapper.c utf8.c
 
 OBJ=ansi.o basic.o bind.o buffer.o crypt.o display.o eval.o exec.o \
 	file.o fileio.o ibmpc.o input.o isearch.o line.o lock.o main.o \
 	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
 	termio.o vmsvt.o vt52.o window.o word.o names.o globals.o version.o \
-	usage.o wrapper.o
+	usage.o wrapper.o utf8.o
 
 HDR=ebind.h edef.h efunc.h epath.h estruct.h evar.h util.h version.h
 
@@ -132,7 +132,7 @@ basic.o: basic.c estruct.h edef.h
 bind.o: bind.c estruct.h edef.h epath.h
 buffer.o: buffer.c estruct.h edef.h
 crypt.o: crypt.c estruct.h edef.h
-display.o: display.c estruct.h edef.h
+display.o: display.c estruct.h edef.h utf8.h
 eval.o: eval.c estruct.h edef.h evar.h
 exec.o: exec.c estruct.h edef.h
 file.o: file.c estruct.h edef.h
@@ -144,12 +144,14 @@ line.o: line.c estruct.h edef.h
 lock.o: lock.c estruct.h edef.h
 main.o: main.c estruct.h efunc.h edef.h ebind.h
 pklock.o: pklock.c estruct.h
+posix.o: posix.c estruct.h utf8.h
 random.o: random.c estruct.h edef.h
 region.o: region.c estruct.h edef.h
 search.o: search.c estruct.h edef.h
 spawn.o: spawn.c estruct.h edef.h
 tcap.o: tcap.c estruct.h edef.h
 termio.o: termio.c estruct.h edef.h
+utf8.o: utf8.c utf8.h
 vmsvt.o: vmsvt.c estruct.h edef.h
 vt52.o: vt52.c estruct.h edef.h
 window.o: window.c estruct.h edef.h
