@@ -483,7 +483,6 @@ struct buffer {
 #define MDMAGIC	0x0040		/* regular expresions in search */
 #define	MDCRYPT	0x0080		/* encrytion mode active        */
 #define	MDASAVE	0x0100		/* auto-save mode               */
-#define MDUTF8  0x0200		/* UTF-8 input/output mode      */
 
 /*
  * The starting position of a region, and the size of the region in

@@ -30,20 +30,6 @@
 #define XCASE 0000004
 #endif
 
-/*
- * NOTE NOTE NOTE!
- *
- * Uemacs is currently very much byte-oriented, and not at all UTF8-aware
- * interally. However, this allows it to understand a _terminal_ that is
- * in utf-8 mode, and will turn input into the 8-bit subset, and will turn
- * things back into UTF8 on output.
- *
- * Do _not_ confuse this with the notion of actually being able to edit
- * UTF-8 file _contents_. That's a totally different thing.
- */
-#define utf8_mode() \
-	(curwp && curwp->w_bufp && (curwp->w_bufp->b_mode & MDUTF8))
-
 static int kbdflgs;			/* saved keyboard fd flags      */
 static int kbdpoll;			/* in O_NDELAY mode             */
 
@@ -219,9 +205,6 @@ int ttgetc(void)
 		memmove(buffer, buffer+2, pending);
 		return 128+27;
 	}
-
-	if (!utf8_mode())
-		goto done;
 
 	/* Normal 7-bit? */
 	if (!(c & 0x80))
