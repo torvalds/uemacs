@@ -500,7 +500,7 @@ int execute(int c, int f, int n)
 	    || (c >= 0x80 && c <= 0xFE)) {
 #else
 #if	VMS || BSD || USG	/* 8BIT P.K. */
-	    || (c >= 0xA0 && c <= 0xFE)) {
+	    || (c >= 0xA0 && c <= 0xFFFF)) {
 #else
 	    ) {
 #endif
