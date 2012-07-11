@@ -442,13 +442,26 @@ static void show_line(struct line *lp)
 
 	while (i < len) {
 		unicode_t c;
+		int n;
 
-		i += utf8_to_unicode(lp->l_text, i, len, &c);
-		if (vtcol >= term.t_ncol)
+		if (vtcol >= term.t_ncol) {
 			vp->v_text[term.t_ncol - 1] = '$';
-		else if (vtcol >= 0)
-			vp->v_text[vtcol] = c;
+			return;
+		}
+		n = utf8_to_unicode(lp->l_text, i, len, &c);
+		/*
+		 * Change tabs into spaces, and don't increment
+		 * the text source until we hit tabmask
+		 */
 		++vtcol;
+		if (c == '\t') {
+			c = ' ';
+			if (vtcol & tabmask)
+				n = 0;
+		}
+		if (vtcol > 0)
+			vp->v_text[vtcol-1] = c;
+		i += n;
 	}
 }
 
