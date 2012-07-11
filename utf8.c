@@ -41,13 +41,13 @@ unsigned utf8_to_unicode(char *line, unsigned index, unsigned len, unicode_t *re
 	/* Invalid? Do it as a single byte Latin1 */
 	if (bytes > 6)
 		return 1;
+	if (bytes > len)
+		return 1;
 
 	value = c & (mask-1);
 
 	/* Ok, do the bytes */
 	for (i = 1; i < bytes; i++) {
-		if (i > len)
-			return 1;
 		c = line[i];
 		if ((c & 0xc0) != 0x80)
 			return 1;
