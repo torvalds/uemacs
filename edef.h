@@ -19,7 +19,7 @@ typedef int (*fn_t)(int, int);
 /* Initialized global external declarations. */
 
 extern int fillcol;		/* Fill column                  */
-extern short kbdm[];		/* Holds kayboard macro data    */
+extern int kbdm[];		/* Holds kayboard macro data    */
 extern char pat[];		/* Search pattern               */
 extern char rpat[];		/* Replacement pattern          */
 extern char *execstr;		/* pointer to string to execute */
@@ -66,8 +66,8 @@ extern struct kill *kbufh;		/* kill buffer header pointer   */
 extern int kused;		/* # of bytes used in KB        */
 extern struct window *swindow;	/* saved window pointer         */
 extern int cryptflag;		/* currently encrypting?        */
-extern short *kbdptr;		/* current position in keyboard buf */
-extern short *kbdend;		/* ptr to end of the keyboard */
+extern int *kbdptr;		/* current position in keyboard buf */
+extern int *kbdend;		/* ptr to end of the keyboard */
 extern int kbdmode;		/* current keyboard macro mode  */
 extern int kbdrep;		/* number of repetitions        */
 extern int restflag;		/* restricted use?              */
