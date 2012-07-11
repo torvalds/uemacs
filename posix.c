@@ -153,7 +153,7 @@ int ttgetc(void)
 	static char buffer[32];
 	static int pending;
 	unicode_t c;
-	int count, bytes = 1;
+	int count, bytes = 1, expected;
 
 	count = pending;
 	if (!count) {
@@ -167,8 +167,25 @@ int ttgetc(void)
 	if (c >= 32 && c < 128)
 		goto done;
 
+	/*
+	 * Lazy. We don't bother calculating the exact
+	 * expected length. We want at least two characters
+	 * for the special character case (ESC+[) and for
+	 * the normal short UTF8 sequence that starts with
+	 * the 110xxxxx pattern.
+	 *
+	 * But if we have any of the other patterns, just
+	 * try to get more characters. At worst, that will
+	 * just result in a barely perceptible 0.1 second
+	 * delay for some *very* unusual utf8 character
+	 * input.
+	 */
+	expected = 2;
+	if ((c & 0xe0) == 0xe0)
+		expected = 6;
+
 	/* Special character - try to fill buffer */
-	if (count == 1) {
+	if (count < expected) {
 		int n;
 		ntermios.c_cc[VMIN] = 0;
 		ntermios.c_cc[VTIME] = 1;		/* A .1 second lag */
