@@ -237,10 +237,10 @@
 #define	NCOLORS	8		/* number of supported colors   */
 #define	KBLOCK	250		/* sizeof kill buffer chunks    */
 
-#define CONTROL 0x0100		/* Control flag, or'ed in       */
-#define META    0x0200		/* Meta flag, or'ed in          */
-#define CTLX    0x0400		/* ^X flag, or'ed in            */
-#define	SPEC	0x0800		/* special key (function keys)  */
+#define CONTROL 0x10000000	/* Control flag, or'ed in       */
+#define META    0x20000000	/* Meta flag, or'ed in          */
+#define CTLX    0x40000000	/* ^X flag, or'ed in            */
+#define	SPEC	0x80000000	/* special key (function keys)  */
 
 #ifdef	FALSE
 #undef	FALSE
@@ -556,7 +556,7 @@ struct terminal {
 
 /* Structure for the table of initial key bindings. */
 struct key_tab {
-	short k_code;		 /* Key code */
+	int k_code;		 /* Key code */
 	int (*k_fp)(int, int);	 /* Routine to handle it */
 };
 
