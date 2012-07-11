@@ -588,7 +588,7 @@ int svar(struct variable_description *var, char *value)
 			lastkey = atoi(value);
 			break;
 		case EVCURCHAR:
-			ldelete(1L, FALSE);	/* delete 1 char */
+			ldelchar(1, FALSE);	/* delete 1 char */
 			c = atoi(value);
 			if (c == '\n')
 				lnewline();

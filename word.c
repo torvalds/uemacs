@@ -363,7 +363,7 @@ int delbword(int f, int n)
 	}
 	if (forwchar(FALSE, 1) == FALSE)
 		return FALSE;
-      bckdel:return ldelete(size, TRUE);
+      bckdel:return ldelchar(size, TRUE);
 }
 
 /*
@@ -399,7 +399,8 @@ int inword(void)
  */
 int fillpara(int f, int n)
 {
-	int c;		/* current char durring scan    */
+	unicode_t c;		/* current char during scan    */
+	unicode_t wbuf[NSTRING];/* buffer for current word      */
 	int wordlen;	/* length of current word       */
 	int clength;	/* position on line during fill */
 	int i;		/* index during word copy       */
@@ -408,7 +409,6 @@ int fillpara(int f, int n)
 	int firstflag;	/* first word? (needs no space) */
 	struct line *eopline;	/* pointer to line just past EOP */
 	int dotflag;	/* was the last char a period?  */
-	char wbuf[NSTRING];	/* buffer for current word      */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
 		return rdonly();	/* we are in read only mode     */
@@ -438,16 +438,18 @@ int fillpara(int f, int n)
 	firstflag = TRUE;
 	eopflag = FALSE;
 	while (!eopflag) {
+		int bytes = 1;
+
 		/* get the next character in the paragraph */
 		if (curwp->w_doto == llength(curwp->w_dotp)) {
 			c = ' ';
 			if (lforw(curwp->w_dotp) == eopline)
 				eopflag = TRUE;
 		} else
-			c = lgetc(curwp->w_dotp, curwp->w_doto);
+			bytes = lgetchar(&c);
 
 		/* and then delete it */
-		ldelete(1L, FALSE);
+		ldelete(bytes, FALSE);
 
 		/* if not a separator, just add it in */
 		if (c != ' ' && c != '\t') {
@@ -496,7 +498,8 @@ int fillpara(int f, int n)
  */
 int justpara(int f, int n)
 {
-	int c;		/* current char durring scan    */
+	unicode_t c;		/* current char durring scan    */
+	unicode_t wbuf[NSTRING];/* buffer for current word      */
 	int wordlen;	/* length of current word       */
 	int clength;	/* position on line during fill */
 	int i;		/* index during word copy       */
@@ -504,7 +507,6 @@ int justpara(int f, int n)
 	int eopflag;	/* Are we at the End-Of-Paragraph? */
 	int firstflag;	/* first word? (needs no space) */
 	struct line *eopline;	/* pointer to line just past EOP */
-	char wbuf[NSTRING];	/* buffer for current word      */
 	int leftmarg;		/* left marginal */
 
 	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
@@ -542,16 +544,18 @@ int justpara(int f, int n)
 	firstflag = TRUE;
 	eopflag = FALSE;
 	while (!eopflag) {
+		int bytes = 1;
+
 		/* get the next character in the paragraph */
 		if (curwp->w_doto == llength(curwp->w_dotp)) {
 			c = ' ';
 			if (lforw(curwp->w_dotp) == eopline)
 				eopflag = TRUE;
 		} else
-			c = lgetc(curwp->w_dotp, curwp->w_doto);
+			bytes = lgetchar(&c);
 
 		/* and then delete it */
-		ldelete(1L, FALSE);
+		ldelete(bytes, FALSE);
 
 		/* if not a separator, just add it in */
 		if (c != ' ' && c != '\t') {

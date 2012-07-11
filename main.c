@@ -521,7 +521,7 @@ int execute(int c, int f, int n)
 		    curwp->w_doto < curwp->w_dotp->l_used &&
 		    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' ||
 		     (curwp->w_doto) % 8 == 7))
-			ldelete(1L, FALSE);
+			ldelchar(1, FALSE);
 
 		/* do the appropriate insertion */
 		if (c == '}' && (curbp->b_mode & MDCMOD) != 0)

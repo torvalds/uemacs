@@ -278,7 +278,7 @@ int detab(int f, int n)
 		while (curwp->w_doto < llength(curwp->w_dotp)) {
 			/* if we have a tab */
 			if (lgetc(curwp->w_dotp, curwp->w_doto) == '\t') {
-				ldelete(1L, FALSE);
+				ldelchar(1, FALSE);
 				insspace(TRUE,
 					 (tabmask + 1) -
 					 (curwp->w_doto & tabmask));
@@ -758,7 +758,7 @@ int forwdel(int f, int n)
 			kdelete();
 		thisflag |= CFKILL;
 	}
-	return ldelete((long) n, f);
+	return ldelchar((long) n, f);
 }
 
 /*
@@ -781,7 +781,7 @@ int backdel(int f, int n)
 		thisflag |= CFKILL;
 	}
 	if ((s = backchar(f, n)) == TRUE)
-		s = ldelete((long) n, f);
+		s = ldelchar(n, f);
 	return s;
 }
 
