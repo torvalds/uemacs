@@ -164,9 +164,16 @@ void vtmove(int row, int col)
  * This routine only puts printing characters into the virtual
  * terminal buffers. Only column overflow is checked.
  */
-static void vtputc(unsigned char c)
+static void vtputc(int c)
 {
 	struct video *vp;	/* ptr to line being updated */
+
+	/* In case somebody passes us a signed char.. */
+	if (c < 0) {
+		c += 256;
+		if (c < 0)
+			return;
+	}
 
 	vp = vscreen[vtrow];
 
@@ -436,32 +443,11 @@ static int reframe(struct window *wp)
 static void show_line(struct line *lp)
 {
 	unsigned i = 0, len = llength(lp);
-	struct video *vp;
-
-	vp = vscreen[vtrow];
 
 	while (i < len) {
 		unicode_t c;
-		int n;
-
-		if (vtcol >= term.t_ncol) {
-			vp->v_text[term.t_ncol - 1] = '$';
-			return;
-		}
-		n = utf8_to_unicode(lp->l_text, i, len, &c);
-		/*
-		 * Change tabs into spaces, and don't increment
-		 * the text source until we hit tabmask
-		 */
-		++vtcol;
-		if (c == '\t') {
-			c = ' ';
-			if (vtcol & tabmask)
-				n = 0;
-		}
-		if (vtcol > 0)
-			vp->v_text[vtcol-1] = c;
-		i += n;
+		i += utf8_to_unicode(lp->l_text, i, len, &c);
+		vtputc(c);
 	}
 }
 
