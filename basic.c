@@ -24,25 +24,31 @@
  */
 static int getgoal(struct line *dlp)
 {
-	int c;
 	int col;
 	int newcol;
 	int dbo;
+	int len = llength(dlp);
 
 	col = 0;
 	dbo = 0;
-	while (dbo != llength(dlp)) {
-		c = lgetc(dlp, dbo);
+	while (dbo != len) {
+		unicode_t c;
+		int width = utf8_to_unicode(dlp->l_text, dbo, len, &c);
 		newcol = col;
+
+		/* Take tabs, ^X and \xx hex characters into account */
 		if (c == '\t')
 			newcol |= tabmask;
 		else if (c < 0x20 || c == 0x7F)
 			++newcol;
+		else if (c >= 0x80 && c <= 0xa0)
+			newcol += 2;
+
 		++newcol;
 		if (newcol > curgoal)
 			break;
 		col = newcol;
-		++dbo;
+		dbo += width;
 	}
 	return dbo;
 }
