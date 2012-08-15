@@ -222,7 +222,6 @@ int readin(char *fname, int lockfl)
 	int s;
 	int nbytes;
 	int nline;
-	int lflag;		/* any lines longer than allowed? */
 	char mesg[NSTRING];
 
 #if	(FILOCK && BSD) || SVR4
@@ -263,7 +262,6 @@ int readin(char *fname, int lockfl)
 	/* read the file in */
 	mlwrite("(Reading file)");
 	nline = 0;
-	lflag = FALSE;
 	while ((s = ffgetline()) == FIOSUC) {
 		nbytes = strlen(fline);
 		if ((lp1 = lalloc(nbytes)) == NULL) {
@@ -550,7 +548,6 @@ int ifile(char *fname)
 	int s;
 	int nbytes;
 	int nline;
-	int lflag;		/* any lines longer than allowed? */
 	char mesg[NSTRING];
 
 	bp = curbp;		/* Cheap.               */
@@ -576,7 +573,6 @@ int ifile(char *fname)
 	curwp->w_marko = 0;
 
 	nline = 0;
-	lflag = FALSE;
 	while ((s = ffgetline()) == FIOSUC) {
 		nbytes = strlen(fline);
 		if ((lp1 = lalloc(nbytes)) == NULL) {
