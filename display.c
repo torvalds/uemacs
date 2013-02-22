@@ -442,7 +442,7 @@ static int reframe(struct window *wp)
 
 static void show_line(struct line *lp)
 {
-	unsigned i = 0, len = llength(lp);
+	int i = 0, len = llength(lp);
 
 	while (i < len) {
 		unicode_t c;
