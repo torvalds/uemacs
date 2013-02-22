@@ -412,9 +412,9 @@ struct window {
 	struct buffer *w_bufp;	/* Buffer displayed in window   */
 	struct line *w_linep;	/* Top line in the window       */
 	struct line *w_dotp;	/* Line containing "."          */
-	short w_doto;		/* Byte offset for "."          */
 	struct line *w_markp;	/* Line containing "mark"       */
-	short w_marko;		/* Byte offset for "mark"       */
+	int w_doto;		/* Byte offset for "."          */
+	int w_marko;		/* Byte offset for "mark"       */
 	char w_toprow;		/* Origin 0 top row of window   */
 	char w_ntrows;		/* # of rows of text in window  */
 	char w_force;		/* If NZ, forcing row.          */
@@ -452,14 +452,14 @@ struct window {
 struct buffer {
         struct buffer *b_bufp;	/* Link to next struct buffer   */
 	struct line *b_dotp;	/* Link to "." struct line structure   */
-	short b_doto;		/* Offset of "." in above struct line  */
 	struct line *b_markp;	/* The same as the above two,   */
-	short b_marko;		/* but for the "mark"           */
 	struct line *b_linep;	/* Link to the header struct line      */
+	int b_doto;		/* Offset of "." in above struct line  */
+	int b_marko;		/* but for the "mark"           */
+	int b_mode;		/* editor mode of this buffer   */
 	char b_active;		/* window activated flag        */
 	char b_nwnd;		/* Count of windows on buffer   */
 	char b_flag;		/* Flags                        */
-	int b_mode;		/* editor mode of this buffer   */
 	char b_fname[NFILEN];	/* File name                    */
 	char b_bname[NBUFN];	/* Buffer name                  */
 #if	CRYPT
@@ -490,7 +490,7 @@ struct buffer {
  */
 struct region {
 	struct line *r_linep;	/* Origin struct line address.         */
-	short r_offset;		/* Origin struct line offset.          */
+	int r_offset;		/* Origin struct line offset.          */
 	long r_size;		/* Length in characters.        */
 };
 
