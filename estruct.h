@@ -415,8 +415,8 @@ struct window {
 	struct line *w_markp;	/* Line containing "mark"       */
 	int w_doto;		/* Byte offset for "."          */
 	int w_marko;		/* Byte offset for "mark"       */
-	char w_toprow;		/* Origin 0 top row of window   */
-	char w_ntrows;		/* # of rows of text in window  */
+	int w_toprow;		/* Origin 0 top row of window   */
+	int w_ntrows;		/* # of rows of text in window  */
 	char w_force;		/* If NZ, forcing row.          */
 	char w_flag;		/* Flags.                       */
 #if	COLOR
