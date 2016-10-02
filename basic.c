@@ -272,20 +272,24 @@ int backline(int f, int n)
 #if	WORDPRO
 static int is_new_para(void)
 {
-	int c;
+	int i, len;
 
-	/* Empty line? Always a new paragraph */
-	if (!llength(curwp->w_dotp))
-		return 1;
+	len = llength(curwp->w_dotp);
 
+	for (i = 0; i < len; i++) {
+		int c = lgetc(curwp->w_dotp, i);
+		if (c == ' ' || c == TAB) {
 #if PKCODE
-	/* "Justification" only stops at empty lines */
-	if (justflag == TRUE)
-		return 0;
+			if (justflag)
+				continue;
 #endif
-
-	c = lgetc(curwp->w_dotp, curwp->w_doto);
-	return c == TAB || c == ' ';
+			return 1;
+		}
+		if (!isletter(c))
+			return 1;
+		return 0;
+	}
+	return 1;
 }
 
 /*
