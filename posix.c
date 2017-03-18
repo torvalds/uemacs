@@ -213,6 +213,9 @@ int ttgetc(void)
 	}
 	bytes = utf8_to_unicode(buffer, 0, pending, &c);
 
+	/* Hackety hack! Turn no-break space into regular space */
+	if (c == 0xa0)
+		c = ' ';
 done:
 	pending -= bytes;
 	memmove(buffer, buffer+bytes, pending);
