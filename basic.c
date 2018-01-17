@@ -270,6 +270,28 @@ int backline(int f, int n)
 }
 
 #if	WORDPRO
+static int is_new_para(void)
+{
+	int i, len;
+
+	len = llength(curwp->w_dotp);
+
+	for (i = 0; i < len; i++) {
+		int c = lgetc(curwp->w_dotp, i);
+		if (c == ' ' || c == TAB) {
+#if PKCODE
+			if (justflag)
+				continue;
+#endif
+			return 1;
+		}
+		if (!isletter(c))
+			return 1;
+		return 0;
+	}
+	return 1;
+}
+
 /*
  * go back to the beginning of the current paragraph
  * here we look for a <NL><NL> or <NL><TAB> or <NL><SPACE>
@@ -294,19 +316,11 @@ int gotobop(int f, int n)
 
 		/* and scan back until we hit a <NL><NL> or <NL><TAB>
 		   or a <NL><SPACE>                                     */
-		while (lback(curwp->w_dotp) != curbp->b_linep)
-			if (llength(curwp->w_dotp) != 0 &&
-#if	PKCODE
-			    ((justflag == TRUE) ||
-#endif
-			     (lgetc(curwp->w_dotp, curwp->w_doto) != TAB &&
-			      lgetc(curwp->w_dotp, curwp->w_doto) != ' '))
-#if	PKCODE
-			    )
-#endif
-				curwp->w_dotp = lback(curwp->w_dotp);
-			else
+		while (lback(curwp->w_dotp) != curbp->b_linep) {
+			if (is_new_para())
 				break;
+			curwp->w_dotp = lback(curwp->w_dotp);
+		}
 
 		/* and then forward until we are in a word */
 		suc = forwchar(FALSE, 1);
@@ -343,18 +357,9 @@ int gotoeop(int f, int n)
 		/* and scan forword until we hit a <NL><NL> or <NL><TAB>
 		   or a <NL><SPACE>                                     */
 		while (curwp->w_dotp != curbp->b_linep) {
-			if (llength(curwp->w_dotp) != 0 &&
-#if	PKCODE
-			    ((justflag == TRUE) ||
-#endif
-			     (lgetc(curwp->w_dotp, curwp->w_doto) != TAB &&
-			      lgetc(curwp->w_dotp, curwp->w_doto) != ' '))
-#if	PKCODE
-			    )
-#endif
-				curwp->w_dotp = lforw(curwp->w_dotp);
-			else
+			if (is_new_para())
 				break;
+			curwp->w_dotp = lforw(curwp->w_dotp);
 		}
 
 		/* and then backward until we are in a word */
