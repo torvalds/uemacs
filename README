@@ -42,7 +42,7 @@ does not sacrifice the best things (small size and portability).
 
 WHAT IS NEW - COMPARED TO MicroEMACS 3.9e?
 
-Enhachements:
+Enhancements:
 
 o  advisory file locking on BSD-derived systems
 o  new screen update algorithm, borrowed largely form "vile" by
