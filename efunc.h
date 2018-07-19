@@ -338,7 +338,7 @@ extern void findvar(char *var, struct variable_description *vd, int size);
 extern int svar(struct variable_description *var, char *value);
 extern char *itoa(int i);
 extern int gettyp(char *token);
-extern char *getval(char *token);
+extern char *getval(char *token, char *result, int size);
 extern int stol(char *val);
 extern char *ltos(int val);
 extern char *mkupper(char *str);

@@ -113,7 +113,7 @@ char *gtfun(char *fname)
 	case UFSGREAT:
 		return ltos(strcmp(arg1, arg2) > 0);
 	case UFIND:
-		return strcpy(result, getval(arg1));
+		return getval(arg1, result, sizeof(result));
 	case UFAND:
 		return ltos(stol(arg1) && stol(arg2));
 	case UFOR:
@@ -496,7 +496,7 @@ fvar:
 		if (strcmp(&var[1], "ind") == 0) {
 			/* grab token, and eval it */
 			execstr = token(execstr, var, size);
-			strcpy(var, getval(var));
+			getval(var, var, size);
 			goto fvar;
 		}
 	}
@@ -765,7 +765,7 @@ int gettyp(char *token)
  *
  * char *token;		token to evaluate
  */
-char *getval(char *token)
+static char *internal_getval(char *token)
 {
 	int status;	/* error return */
 	struct buffer *bp;	/* temp buffer pointer */
@@ -778,7 +778,7 @@ char *getval(char *token)
 		return "";
 
 	case TKARG:		/* interactive argument */
-		strcpy(token, getval(&token[1]));
+		getval(token+1, token, -1);
 		distmp = discmd;	/* echo it always! */
 		discmd = TRUE;
 		status = getstring(token, buf, NSTRING, ctoec('\n'));
@@ -790,7 +790,7 @@ char *getval(char *token)
 	case TKBUF:		/* buffer contents fetch */
 
 		/* grab the right buffer */
-		strcpy(token, getval(&token[1]));
+		getval(token+1, token, -1);
 		bp = bfind(token, FALSE, 0);
 		if (bp == NULL)
 			return errorm;
@@ -845,6 +845,13 @@ char *getval(char *token)
 		return token;
 	}
 	return errorm;
+}
+
+char *getval(char *token, char *dst, int size)
+{
+	char *res = internal_getval(token);
+	mystrscpy(dst, res, size);
+	return dst;
 }
 
 /*
