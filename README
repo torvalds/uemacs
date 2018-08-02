@@ -45,7 +45,7 @@ WHAT IS NEW - COMPARED TO MicroEMACS 3.9e?
 Enhachements:
 
 o  advisory file locking on BSD-derived systems
-o  new screen update algorithm, borrowed largely form "vile" by
+o  new screen update algorithm, borrowed largely from "vile" by
    Paul G. Fox <pgf@cayman.com>, uEmacs can now be used on slow (1200 bps)
    connections because it uses terminal scrolling capabilities
 o  new variables $scroll, $jump, and $overlap to control scrolling
