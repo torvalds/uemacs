@@ -61,6 +61,7 @@
 #include "efunc.h"   /* Function declarations and name table. */
 #include "ebind.h"   /* Default key bindings. */
 #include "version.h"
+#include "util.h"
 
 /* For MSDOS, increase the default stack space. */
 #if MSDOS & TURBO
@@ -237,7 +238,7 @@ int main(int argc, char **argv)
 
 			/* set this to inactive */
 			bp = bfind(bname, TRUE, 0);
-			strcpy(bp->b_fname, argv[carg]);
+ 			mystrscpy(bp->b_fname, argv[carg], sizeof bp->b_fname);
 			bp->b_active = FALSE;
 			if (firstfile) {
 				firstbp = bp;
