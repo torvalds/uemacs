@@ -141,7 +141,7 @@ input.o: input.c estruct.h edef.h
 isearch.o: isearch.c estruct.h edef.h
 line.o: line.c estruct.h edef.h
 lock.o: lock.c estruct.h edef.h
-main.o: main.c estruct.h efunc.h edef.h ebind.h
+main.o: main.c estruct.h efunc.h edef.h ebind.h util.h
 pklock.o: pklock.c estruct.h
 posix.o: posix.c estruct.h utf8.h
 random.o: random.c estruct.h edef.h
