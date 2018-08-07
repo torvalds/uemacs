@@ -357,16 +357,19 @@
 #define isletter(c)	(('a' <= c && LASTLL >= c) || ('A' <= c && LASTUL >= c) || (128<=c && c<=167))
 #define islower(c)	(('a' <= c && LASTLL >= c))
 #define isupper(c)	(('A' <= c && LASTUL >= c))
+#define isnumber(c)	(('0' <= c && '9' >= c))
 
 #else
 
 #define isletter(c)	isxletter((0xFF & (c)))
 #define islower(c)	isxlower((0xFF & (c)))
 #define isupper(c)	isxupper((0xFF & (c)))
+#define isnumber(c)	isxnumber((0xFF & (c)))
 
 #define isxletter(c)	(('a' <= c && LASTLL >= c) || ('A' <= c && LASTUL >= c) || (192<=c && c<=255))
 #define isxlower(c)	(('a' <= c && LASTLL >= c) || (224 <= c && 252 >= c))
 #define isxupper(c)	(('A' <= c && LASTUL >= c) || (192 <= c && 220 >= c))
+#define isxnumber(c)	(('0' <= c && '9' >= c))
 
 #endif
 
