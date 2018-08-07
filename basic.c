@@ -285,7 +285,7 @@ static int is_new_para(void)
 #endif
 			return 1;
 		}
-		if (!isletter(c))
+		if (!isletter(c) && !isnumber(c))
 			return 1;
 		return 0;
 	}
