@@ -23,7 +23,7 @@
 
 /*
  * Read a file into the current
- * buffer. This is really easy; all you do it
+ * buffer. This is really easy; all you do is
  * find the name of the file, and call the standard
  * "read a file into the current buffer" code.
  * Bound to "C-X C-R".
