@@ -90,7 +90,7 @@ unsigned unicode_to_utf8(unsigned int c, char *utf8)
 			bytes++;
 			prefix >>= 1;
 			c >>= 6;
-		} while (c > prefix);
+		} while (c >= prefix);
 		*p = c - 2*prefix;
 		reverse_string(utf8, p);
 	}
