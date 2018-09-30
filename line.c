@@ -613,7 +613,7 @@ void kdelete(void)
 
 		/* and reset all the kill buffer pointers */
 		kbufh = kbufp = NULL;
-		kused = KBLOCK;
+		kused = 0;
 	}
 }
 
