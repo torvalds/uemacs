@@ -549,7 +549,7 @@ void updpos(void)
 		if (c == '\t')
 			curcol |= tabmask;
 
-		++curcol;
+		curcol += char_width(c);
 	}
 
 	/* if extended, flag so and update the virtual line image */
@@ -949,6 +949,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 	int nbflag;	/* non-blanks to the right flag? */
 	int rev;		/* reverse video flag */
 	int req;		/* reverse video request flag */
+	int ncol = 0;
 
 
 	/* set up pointers to virtual and physical lines */
@@ -981,7 +982,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 		cp3 = &vp1->v_text[term.t_ncol];
 		while (cp1 < cp3) {
 			TTputc(*cp1);
-			++ttcol;
+			ttcol += char_width(*cp1);
 			*cp2++ = *cp1++;
 		}
 		/* turn rev video off */
@@ -1004,6 +1005,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 
 	/* advance past any common chars at the left */
 	while (cp1 != &vp1->v_text[term.t_ncol] && cp1[0] == cp2[0]) {
+		ncol += char_width(cp1[0]);
 		++cp1;
 		++cp2;
 	}
@@ -1043,14 +1045,14 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 			cp5 = cp3;	/* fewer characters. */
 	}
 
-	movecursor(row, cp1 - &vp1->v_text[0]);	/* Go to start of line. */
+	movecursor(row, ncol);	/* Go to start of line. */
 #if	REVSTA
 	TTrev(rev);
 #endif
 
 	while (cp1 != cp5) {	/* Ordinary. */
 		TTputc(*cp1);
-		++ttcol;
+		ttcol += char_width(*cp1);
 		*cp2++ = *cp1++;
 	}
 

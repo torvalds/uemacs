@@ -11,4 +11,6 @@ static inline int is_beginning_utf8(unsigned char c)
 	return (c & 0xc0) != 0x80;
 }
 
+int char_width(unsigned int c);
+
 #endif

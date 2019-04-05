@@ -198,7 +198,7 @@ Compact font selection example text:
 
 Greetings in various languages:
 
-  Hello world, Καλημέρα κόσμε, コンニチハ
+  Hello world, Καλημέρα κόσμε, コンニチハ, 你好
 
 Box drawing alignment tests:                                          █
                                                                       ▉
