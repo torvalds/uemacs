@@ -1,4 +1,4 @@
-;	EMACS.RC / .emascrc
+;	EMACS.RC / .emacsrc
 ;
 ;	Startup file for MicroEMACS 3.9 and uEmacs/PK 4.0
 ;	This file is executed every time the editor is entered.
@@ -217,22 +217,22 @@ bind-to-key execute-macro-36	M-FNR
 ;	Setup for ASCII {|}[\] to ISO Latin-1 translation
 
 21	store-macro
-	insert-string "ä"
+	insert-string "Ã¤"
 !endm
 22	store-macro
-	insert-string "ö"
+	insert-string "Ã¶"
 !endm
 23	store-macro
-	insert-string "å"
+	insert-string "Ã¥"
 !endm
 24	store-macro
-	insert-string "Ä"
+	insert-string "Ã„"
 !endm
 25	store-macro
-	insert-string "Ö"
+	insert-string "Ã–"
 !endm
 26	store-macro
-	insert-string "Å"
+	insert-string "Ã…"
 !endm
 
 27	store-macro
@@ -242,7 +242,7 @@ bind-to-key execute-macro-36	M-FNR
 	bind-to-key execute-macro-24 [
 	bind-to-key execute-macro-25 \
 	bind-to-key execute-macro-26 ]
-	write-message "ISO Latin-1 äöåÄÖÅ"
+	write-message "ISO Latin-1 Ã¤Ã¶Ã¥Ã„Ã–Ã…"
 !endm
 
 28	store-macro
