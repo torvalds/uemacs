@@ -11,13 +11,11 @@
 
         MicroEMACS 3.9 (c) Copyright 1987 Daniel M. Lawrence.
         Reference Manual Copyright 1987 by Brian Straight and
-        Daniel M. Lawrence. No copyright claimed for modifications
-        made by Petri H. Kutvonen.
+        Daniel M. Lawrence. No copyright was claimed for modifications made by Petri H. Kutvonen.
 
-        Original statement of copying policy:
+        The original statement of copying policy:
 
-        MicroEMACS 3.9 can be copied and distributed freely for any
-        non-commercial purposes. MicroEMACS 3.9 can only be incorporated
+        MicroEMACS 3.9 can be copied and distributed freely for any non-commercial purposes. MicroEMACS 3.9 can only be incorporated
         into commercial software with the permission of the current author
         [Daniel M. Lawrence].
 
@@ -31,10 +29,10 @@ Finland <kutvonen@cs.Helsinki.FI>.
 
 WHY IS IT BASED ON AN OLD VERSION OF MicroEMACS?
 
-In my opinion 3.9e was the best of all MicroEMACSes. Creeping
+In my opinion, 3.9e was the best of all MicroEMACSes. Creeping
 featurism, growing size, and reduced portability made versions 3.10 and
 3.11 less attractive. MicroEMACS 3.9e was one of the few editors that
-were truly portable between different flavours of UNIX, PC/MS-DOS, and
+were truly portable between different flavors of UNIX, PC/MS-DOS, and
 VAX/VMS. It was pretty robust - although not flawless. uEmacs/PK 4.0
 includes numerous bug fixes, adds some new functionality and comfort but
 does not sacrifice the best things (small size and portability).
@@ -146,7 +144,7 @@ o  VMS:  To compile use '@VMSMAKE', install manually, uEmacs/PK uses a
 CONTACT INFORMATION
 
 There will probably not be many new versions of uEmacs/PK, maybe just
-some bug fixes. I have no intention to develope the code any further.
+some bug fixes. I have no intention to develop the code any further.
 However, if you have some comments or good suggestions, you may find
 the email address below useful.
 
@@ -163,10 +161,10 @@ fax:   +358 9 70844441
 ACKNOWLEDGEMENTS AND STATUS
 
 I would like to thank Linus Torvalds and Jyrki Havia for their work on
-some bugs. uEmacs/PK 4.0.10 included fixes for a number of bugs and it
+some bugs. uEmacs/PK 4.0.10 included fixes for several bugs and it
 was assumed to be the final release for the UNIX platform. However,
 there has been a couple of maintenance releases, so the final version is
-4.0.13. On other platforms there has been no new releases since 4.0.3 in
+4.0.13. On other platforms, there has been no new releases since 4.0.3 in
 1991.
 
 April 23, 1995
