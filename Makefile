@@ -50,7 +50,7 @@ ifeq ($(uname_S),Darwin)
 endif
 #DEFINES=-DAUTOCONF
 #LIBS=-ltermcap			# BSD
-LIBS=-lcurses			# SYSV
+LIBS=-lcurses -ltinfo		# SYSV
 #LIBS=-ltermlib
 #LIBS=-L/usr/lib/termcap -ltermcap
 LFLAGS=-hbx
