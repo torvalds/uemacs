@@ -198,7 +198,7 @@ bind-to-key execute-macro-40 M-?
 		add-mode "wrap"
 		!return
 	!endif
-	set %rctmp &sin $cfname "."
+	set %rctmp &sir $cfname "."
 	!if &equ %rctmp 0
 		!return
 	!endif
