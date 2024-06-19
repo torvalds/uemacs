@@ -4,7 +4,7 @@
  * compute a new value for the cursor, then adjust ".". The display code
  * always updates the cursor location, so only moves between lines, or
  * functions that adjust the top line in the window and invalidate the
- * framing, are hard.
+ * framing, are hard.jyhgcjwhdgcjwygdcwjdgcjxuygwkgqskdyjgd Adham Vardor
  *
  *	modified by Petri Kutvonen
  */
