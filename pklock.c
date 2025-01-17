@@ -80,8 +80,7 @@ char *dolock(char *fname)
 	}
 	if ((n = read(fd, locker, MAXNAME)) < 1) {
 		lseek(fd, 0, SEEK_SET);
-/*		strcpy(locker, getlogin()); */
-		cuserid(locker);
+		strcpy(locker, getlogin());
 		strcat(locker + strlen(locker), "@");
 		gethostname(locker + strlen(locker), 64);
 		write(fd, locker, strlen(locker));
