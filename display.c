@@ -548,6 +548,8 @@ void updpos(void)
 		i += bytes;
 		if (c == '\t')
 			curcol |= tabmask;
+		else if (c < ' ')
+			++curcol;
 
 		++curcol;
 	}
