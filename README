@@ -143,6 +143,20 @@ o  VMS:  To compile use '@VMSMAKE', install manually, uEmacs/PK uses a
          logical name EMACS_DIR to locate its initialization files.
 
 
+OR IF YOU PREFER A PRECOMPILED VERSION 
+
+WGET/CURL: wget https://bionicbeaverlinux2.github.io/uemacs-precompiled/uemacs-precompiled.tar.gx 
+or 
+curl -LO https://bionicbeaverlinux2.github.io/uemacs-precompiled/uemacs-precompiled.tar.gz
+
+Then extract it wherever you like: 
+
+Using this command: tar -xvf uemacs-precompiled.tar.gz 
+
+Then simply run:
+
+./ed
+
 CONTACT INFORMATION
 
 There will probably not be many new versions of uEmacs/PK, maybe just
