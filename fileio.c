@@ -81,22 +81,9 @@ int ffclose(void)
 int ffputline(char *buf, int nbuf)
 {
 	int i;
-#if	CRYPT
-	char c;			/* character to translate */
 
-	if (cryptflag) {
-		for (i = 0; i < nbuf; ++i) {
-			c = buf[i] & 0xff;
-			myencrypt(&c, 1);
-			fputc(c, ffp);
-		}
-	} else
-		for (i = 0; i < nbuf; ++i)
-			fputc(buf[i] & 0xFF, ffp);
-#else
 	for (i = 0; i < nbuf; ++i)
 		fputc(buf[i] & 0xFF, ffp);
-#endif
 
 	fputc('\n', ffp);
 
@@ -136,7 +123,6 @@ int ffgetline(void)
 			return FIOMEM;
 
 	/* read the line in */
-#if	PKCODE
 	if (!nullflag) {
 		if (fgets(fline, NSTRING, ffp) == (char *) NULL) {	/* EOF ? */
 			i = 0;
@@ -154,13 +140,7 @@ int ffgetline(void)
 		c = fgetc(ffp);
 	}
 	while (c != EOF && c != '\n') {
-#else
-	i = 0;
-	while ((c = fgetc(ffp)) != EOF && c != '\n') {
-#endif
-#if	PKCODE
 		if (c) {
-#endif
 			fline[i++] = c;
 			/* if it's longer, get more room */
 			if (i >= flen) {
@@ -172,10 +152,8 @@ int ffgetline(void)
 				free(fline);
 				fline = tmpline;
 			}
-#if	PKCODE
 		}
 		c = fgetc(ffp);
-#endif
 	}
 
 	/* test for any errors that may have occured */
@@ -193,10 +171,6 @@ int ffgetline(void)
 
 	/* terminate and decrypt the string */
 	fline[i] = 0;
-#if	CRYPT
-	if (cryptflag)
-		myencrypt(fline, strlen(fline));
-#endif
 	return FIOSUC;
 }
 

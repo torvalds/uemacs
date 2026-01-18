@@ -10,7 +10,6 @@
  * sceen size has changed.
  *	-lbt
  */
-#define USE_BROKEN_OPTIMIZATION 0
 #define	termdef	1 /* Don't define "term" external. */
 
 #include <curses.h>
@@ -45,29 +44,16 @@ static void tcapscrollregion(int top, int bot);
 static void putpad(char *str);
 
 static void tcapopen(void);
-#if PKCODE
 static void tcapclose(void);
-#endif
 
-#if COLOR
-static void tcapfcol(void);
-static void tcapbcol(void);
-#endif
-#if SCROLLCODE
 static void tcapscroll_reg(int from, int to, int linestoscroll);
 static void tcapscroll_delins(int from, int to, int linestoscroll);
-#endif
 
 #define TCAPSLEN 315
 static char tcapbuf[TCAPSLEN];
 static char *UP, PC, *CM, *CE, *CL, *SO, *SE;
 
-#if PKCODE
 static char *TI, *TE;
-#if USE_BROKEN_OPTIMIZATION
-static int term_init_ok = 0;
-#endif
-#endif
 
 #if SCROLLCODE
 static char *CS, *DL, *AL, *SF, *SR;
@@ -82,11 +68,7 @@ struct terminal term = {
 	SCRSIZ,
 	NPAUSE,
 	tcapopen,
-#if	PKCODE
 	tcapclose,
-#else
-	ttclose,
-#endif
 	tcapkopen,
 	tcapkclose,
 	ttgetc,
@@ -97,14 +79,8 @@ struct terminal term = {
 	tcapeeop,
 	tcapbeep,
 	tcaprev,
-	tcapcres
-#if	COLOR
-	    , tcapfcol,
-	tcapbcol
-#endif
-#if     SCROLLCODE
-	    , NULL		/* set dynamically at open time */
-#endif
+	tcapcres,
+	NULL		/* set dynamically at open time */
 };
 
 static void tcapopen(void)
@@ -115,9 +91,6 @@ static void tcapopen(void)
 	char err_str[72];
 	int int_col, int_row;
 
-#if PKCODE && USE_BROKEN_OPTIMIZATION
-	if (!term_init_ok) {
-#endif
 		if ((tv_stype = getenv("TERM")) == NULL) {
 			puts("Environment variable TERM not defined!");
 			exit(1);
@@ -146,13 +119,8 @@ static void tcapopen(void)
 			puts("Termcap entry incomplete (columns)");
 			exit(1);
 		}
-#ifdef SIGWINCH
 		term.t_mrow = MAXROW;
 		term.t_mcol = MAXCOL;
-#else
-		term.t_mrow = term.t_nrow > MAXROW ? MAXROW : term.t_nrow;
-		term.t_mcol = term.t_ncol > MAXCOL ? MAXCOL : term.t_ncol;
-#endif
 		p = tcapbuf;
 		t = tgetstr("pc", &p);
 		if (t)
@@ -168,7 +136,7 @@ static void tcapopen(void)
 		SO = tgetstr("so", &p);
 		if (SO != NULL)
 			revexist = TRUE;
-#if	PKCODE
+
 		if (tgetnum("sg") > 0) {	/* can reverse be used? P.K. */
 			revexist = FALSE;
 			SE = NULL;
@@ -176,7 +144,6 @@ static void tcapopen(void)
 		}
 		TI = tgetstr("ti", &p);	/* terminal init and exit */
 		TE = tgetstr("te", &p);
-#endif
 
 		if (CL == NULL || CM == NULL || UP == NULL) {
 			puts("Incomplete termcap entry\n");
@@ -207,14 +174,9 @@ static void tcapopen(void)
 			puts("Terminal description too big!\n");
 			exit(1);
 		}
-#if PKCODE && USE_BROKEN_OPTIMIZATION
-		term_init_ok = 1;
-	}
-#endif
 	ttopen();
 }
 
-#if	PKCODE
 static void tcapclose(void)
 {
 	putpad(tgoto(CM, 0, term.t_nrow));
@@ -222,26 +184,21 @@ static void tcapclose(void)
 	ttflush();
 	ttclose();
 }
-#endif
 
 static void tcapkopen(void)
 {
-#if	PKCODE
 	putpad(TI);
 	ttflush();
 	ttrow = 999;
 	ttcol = 999;
 	sgarbf = TRUE;
-#endif
 	strcpy(sres, "NORMAL");
 }
 
 static void tcapkclose(void)
 {
-#if	PKCODE
 	putpad(TE);
 	ttflush();
-#endif
 }
 
 static void tcapmove(int row, int col)
@@ -331,17 +288,6 @@ static void tcapscrollregion(int top, int bot)
 	putpad(tgoto(CS, bot, top));
 }
 
-#endif
-
-#if COLOR
-/* No colors here, ignore this. */
-static void tcapfcol(void)
-{
-}
-/* No colors here, ignore this. */
-static void tcapbcol(void)
-{
-}
 #endif
 
 static void tcapbeep(void)

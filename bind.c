@@ -482,31 +482,31 @@ char *flook(char *fname, int hflag)
 	int i;		/* index */
 	static char fspec[NSTRING];	/* full path spec to search */
 
-#if	ENVFUNC
-
 	if (hflag) {
 		home = getenv("HOME");
 		if (home != NULL) {
-			/* build home dir file spec */
-			strcpy(fspec, home);
-			strcat(fspec, "/");
-			strcat(fspec, fname);
+			snprintf(fspec, sizeof(fspec), "%s/%s", home, fname);
 
 			/* and try it out */
 			if (ffropen(fspec) == FIOSUC) {
 				ffclose();
 				return fspec;
 			}
+
+			snprintf(fspec, sizeof(fspec), "%s/lib/%s", home, fname);
+			if (ffropen(fspec) == FIOSUC) {
+				ffclose();
+				return fspec;
+			}
 		}
 	}
-#endif
 
 	/* always try the current directory first */
 	if (ffropen(fname) == FIOSUC) {
 		ffclose();
 		return fname;
 	}
-#if	ENVFUNC
+
 	/* get the PATH variable */
 	path = getenv("PATH");
 	if (path != NULL)
@@ -532,7 +532,6 @@ char *flook(char *fname, int hflag)
 			if (*path == PATHCHR)
 				++path;
 		}
-#endif
 
 	/* look it up via the old table method */
 	for (i = 2; i < ARRAY_SIZE(pathname); i++) {

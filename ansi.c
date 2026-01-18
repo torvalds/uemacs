@@ -18,9 +18,7 @@
 #define NROW    25		/* Screen size.                 */
 #define NCOL    80		/* Edit if you want to.         */
 
-#if	PKCODE
 #define	MROW	64
-#endif
 #define	NPAUSE	100		/* # times thru update to pause */
 #define	MARGIN	8		/* size of minimim margin and   */
 #define	SCRSIZ	64		/* scroll size for extended lines */
@@ -43,25 +41,12 @@ extern int ansikopen();
 extern int ansikclose();
 extern int ansicres();
 
-#if	COLOR
-extern int ansifcol();
-extern int ansibcol();
-
-int cfcolor = -1;		/* current forground color */
-int cbcolor = -1;		/* current background color */
-
-#endif
-
 /*
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
 struct terminal term = {
-#if	PKCODE
 	MROW - 1,
-#else
-	NROW - 1,
-#endif
 	NROW - 1,
 	NCOL,
 	NCOL,
@@ -80,45 +65,9 @@ struct terminal term = {
 	ansieeop,
 	ansibeep,
 	ansirev,
-	ansicres
-#if	COLOR
-	    , ansifcol,
-	ansibcol
-#endif
-#if	SCROLLCODE
-	    , NULL
-#endif
+	ansicres,
+	NULL
 };
-
-#if	COLOR
-ansifcol(color)
-    /* set the current output color */
-int color;			/* color to set */
-
-{
-	if (color == cfcolor)
-		return;
-	ttputc(ESC);
-	ttputc('[');
-	ansiparm(color + 30);
-	ttputc('m');
-	cfcolor = color;
-}
-
-/* Set the current background color.
- * color: color to set.
- */
-void ansibcol(int color)
-{
-	if (color == cbcolor)
-		return;
-	ttputc(ESC);
-	ttputc('[');
-	ansiparm(color + 40);
-	ttputc('m');
-	cbcolor = color;
-}
-#endif
 
 ansimove(row, col)
 {
@@ -139,10 +88,6 @@ void ansieeol(void)
 
 void ansieeop(void)
 {
-#if	COLOR
-	ansifcol(gfcolor);
-	ansibcol(gbcolor);
-#endif
 	ttputc(ESC);
 	ttputc('[');
 	ttputc('J');
@@ -153,24 +98,10 @@ void ansieeop(void)
  */
 void ansirev(int state)
 {
-#if	COLOR
-	int ftmp, btmp;		/* temporaries for colors */
-#endif
-
 	ttputc(ESC);
 	ttputc('[');
 	ttputc(state ? '7' : '0');
 	ttputc('m');
-#if	COLOR
-	if (state == FALSE) {
-		ftmp = cfcolor;
-		btmp = cbcolor;
-		cfcolor = -1;
-		cbcolor = -1;
-		ansifcol(ftmp);
-		ansibcol(btmp);
-	}
-#endif
 }
 
 /* Change screen resolution. */
@@ -221,10 +152,6 @@ void ansiopen(void)
 
 void ansiclose(void)
 {
-#if	COLOR
-	ansifcol(7);
-	ansibcol(0);
-#endif
 	ttclose();
 }
 

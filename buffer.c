@@ -494,9 +494,6 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 		bp->b_linep = lp;
 		strcpy(bp->b_fname, "");
 		strcpy(bp->b_bname, bname);
-#if	CRYPT
-		bp->b_key[0] = 0;
-#endif
 		lp->l_fp = lp;
 		lp->l_bp = lp;
 	}

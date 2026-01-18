@@ -130,11 +130,7 @@ int upperword(int f, int n)
 		}
 		while (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
-#if	PKCODE
 			if (islower(c)) {
-#else
-			if (c >= 'a' && c <= 'z') {
-#endif
 				c -= 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
@@ -166,11 +162,7 @@ int lowerword(int f, int n)
 		}
 		while (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
-#if	PKCODE
 			if (isupper(c)) {
-#else
-			if (c >= 'A' && c <= 'Z') {
-#endif
 				c += 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
@@ -203,11 +195,7 @@ int capword(int f, int n)
 		}
 		if (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
-#if	PKCODE
 			if (islower(c)) {
-#else
-			if (c >= 'a' && c <= 'z') {
-#endif
 				c -= 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
@@ -216,11 +204,7 @@ int capword(int f, int n)
 				return FALSE;
 			while (inword() != FALSE) {
 				c = lgetc(curwp->w_dotp, curwp->w_doto);
-#if	PKCODE
 				if (isupper(c)) {
-#else
-				if (c >= 'A' && c <= 'Z') {
-#endif
 					c += 'a' - 'A';
 					lputc(curwp->w_dotp, curwp->w_doto,
 					      c);
@@ -377,13 +361,7 @@ int inword(void)
 	if (curwp->w_doto == llength(curwp->w_dotp))
 		return FALSE;
 	c = lgetc(curwp->w_dotp, curwp->w_doto);
-#if	PKCODE
 	if (isletter(c))
-#else
-	if (c >= 'a' && c <= 'z')
-		return TRUE;
-	if (c >= 'A' && c <= 'Z')
-#endif
 		return TRUE;
 	if (c >= '0' && c <= '9')
 		return TRUE;
@@ -416,9 +394,7 @@ int fillpara(int f, int n)
 		mlwrite("No fill column set");
 		return FALSE;
 	}
-#if	PKCODE
 	justflag = FALSE;
-#endif
 
 	/* record the pointer to the line just past the EOP */
 	gotoeop(FALSE, 1);
@@ -490,7 +466,6 @@ int fillpara(int f, int n)
 	return TRUE;
 }
 
-#if	PKCODE
 /* Fill the current paragraph according to the current
  * fill column and cursor position
  *
@@ -600,7 +575,6 @@ int justpara(int f, int n)
 	justflag = FALSE;
 	return TRUE;
 }
-#endif
 
 /*
  * delete n paragraphs starting with the current one
@@ -685,12 +659,7 @@ int wordcount(int f, int n)
 
 		/* and tabulate it */
 		wordflag = (
-#if	PKCODE
 				   (isletter(ch)) ||
-#else
-				   (ch >= 'a' && ch <= 'z') ||
-				   (ch >= 'A' && ch <= 'Z') ||
-#endif
 				   (ch >= '0' && ch <= '9'));
 		if (wordflag == TRUE && lastword == FALSE)
 			++nwords;

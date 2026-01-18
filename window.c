@@ -333,11 +333,6 @@ int splitwind(int f, int n)
 	wp->w_marko = curwp->w_marko;
 	wp->w_flag = 0;
 	wp->w_force = 0;
-#if	COLOR
-	/* set the colors of the new window */
-	wp->w_fcolor = gfcolor;
-	wp->w_bcolor = gbcolor;
-#endif
 	ntru = (curwp->w_ntrows - 1) / 2;	/* Upper size           */
 	ntrl = (curwp->w_ntrows - 1) - ntru;	/* Lower size           */
 	lp = curwp->w_linep;

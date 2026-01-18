@@ -16,10 +16,8 @@
 #include "line.h"
 #include "util.h"
 
-#if defined(PKCODE)
 /* Max number of lines from one file. */
 #define	MAXNLINE 10000000
-#endif
 
 /*
  * Read a file into the current
@@ -108,39 +106,6 @@ int viewfile(int f, int n)
 	return s;
 }
 
-#if	CRYPT
-static int resetkey(void)
-{				/* reset the encryption key if needed */
-	int s;		/* return status */
-
-	/* turn off the encryption flag */
-	cryptflag = FALSE;
-
-	/* if we are in crypt mode */
-	if (curbp->b_mode & MDCRYPT) {
-		if (curbp->b_key[0] == 0) {
-			s = set_encryption_key(FALSE, 0);
-			if (s != TRUE)
-				return s;
-		}
-
-		/* let others know... */
-		cryptflag = TRUE;
-
-		/* and set up the key to be used! */
-		/* de-encrypt it */
-		myencrypt((char *) NULL, 0);
-		myencrypt(curbp->b_key, strlen(curbp->b_key));
-
-		/* re-encrypt it...seeding it to start */
-		myencrypt((char *) NULL, 0);
-		myencrypt(curbp->b_key, strlen(curbp->b_key));
-	}
-
-	return TRUE;
-}
-#endif
-
 /*
  * getfile()
  *
@@ -225,24 +190,13 @@ int readin(char *fname, int lockfl)
 	int nline;
 	char mesg[NSTRING];
 
-#if	(FILOCK && BSD) || SVR4
 	if (lockfl && lockchk(fname) == ABORT)
-#if PKCODE
 	{
 		s = FIOFNF;
 		bp = curbp;
 		strcpy(bp->b_fname, "");
 		goto out;
 	}
-#else
-		return ABORT;
-#endif
-#endif
-#if	CRYPT
-	s = resetkey();
-	if (s != TRUE)
-		return s;
-#endif
 	bp = curbp;		/* Cheap.               */
 	if ((s = bclear(bp)) != TRUE)	/* Might be old.        */
 		return s;
@@ -269,12 +223,10 @@ int readin(char *fname, int lockfl)
 			s = FIOMEM;	/* Keep message on the  */
 			break;	/* display.             */
 		}
-#if	PKCODE
 		if (nline > MAXNLINE) {
 			s = FIOMEM;
 			break;
 		}
-#endif
 		lp2 = lback(curbp->b_linep);
 		lp2->l_fp = lp1;
 		lp1->l_fp = curbp->b_linep;
@@ -332,24 +284,8 @@ void makename(char *bname, char *fname)
 	while (*cp1 != 0)
 		++cp1;
 
-#if     VMS
-#if	PKCODE
-	while (cp1 != &fname[0] && cp1[-1] != ':' && cp1[-1] != ']'
-	       && cp1[-1] != '>')
-#else
-	while (cp1 != &fname[0] && cp1[-1] != ':' && cp1[-1] != ']')
-#endif
-		--cp1;
-#endif
-#if     MSDOS
-	while (cp1 != &fname[0] && cp1[-1] != ':' && cp1[-1] != '\\'
-	       && cp1[-1] != '/')
-		--cp1;
-#endif
-#if     V7 | USG | BSD
 	while (cp1 != &fname[0] && cp1[-1] != '/')
 		--cp1;
-#endif
 	cp2 = &bname[0];
 	while (cp2 != &bname[NBUFN - 1] && *cp1 != 0 && *cp1 != ';')
 		*cp2++ = *cp1++;
@@ -468,12 +404,6 @@ int writeout(char *fn)
 	struct line *lp;
 	int nline;
 
-#if	CRYPT
-	s = resetkey();
-	if (s != TRUE)
-		return s;
-#endif
-
 	if ((s = ffwopen(fn)) != FIOSUC) {	/* Open writes message. */
 		return FALSE;
 	}
@@ -562,11 +492,6 @@ int ifile(char *fname)
 	}
 	mlwrite("(Inserting file)");
 
-#if	CRYPT
-	s = resetkey();
-	if (s != TRUE)
-		return s;
-#endif
 	/* back up a line and save the mark here */
 	curwp->w_dotp = lback(curwp->w_dotp);
 	curwp->w_doto = 0;

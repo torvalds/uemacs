@@ -75,19 +75,10 @@ struct key_tab keytab[NBINDS] = {
 	,
 	{CTLX | CONTROL | 'C', quit}
 	,			/* Hard quit.           */
-#if	PKCODE & AEDIT
 	{CTLX | CONTROL | 'A', detab}
 	,
-#endif
-#if	PKCODE
 	{CTLX | CONTROL | 'D', filesave}
 	,			/* alternative          */
-#else
-#if	AEDIT
-	{CTLX | CONTROL | 'D', detab}
-	,
-#endif
-#endif
 #if	AEDIT
 	{CTLX | CONTROL | 'E', entab}
 	,
@@ -172,10 +163,8 @@ struct key_tab keytab[NBINDS] = {
 	,
 	{CTLX | 'P', prevwind}
 	,
-#if	PKCODE
 	{CTLX | 'Q', quote}
 	,			/* alternative  */
-#endif
 #if	ISRCH
 	{CTLX | 'R', risearch}
 	,
@@ -192,10 +181,8 @@ struct key_tab keytab[NBINDS] = {
 	{META | CONTROL | 'C', wordcount}
 	,
 #endif
-#if	PKCODE
 	{META | CONTROL | 'D', newsize}
 	,
-#endif
 #if	PROC
 	{META | CONTROL | 'E', execproc}
 	,
@@ -252,19 +239,13 @@ struct key_tab keytab[NBINDS] = {
 	,
 	{META | 'D', delfword}
 	,
-#if	CRYPT
-	{META | 'E', set_encryption_key}
-	,
-#endif
 	{META | 'F', forwword}
 	,
 	{META | 'G', gotoline}
 	,
-#if	PKCODE
 #if	WORDPRO
 	{META | 'J', justpara}
 	,
-#endif
 #endif
 	{META | 'K', bindtokey}
 	,
@@ -282,15 +263,8 @@ struct key_tab keytab[NBINDS] = {
 #endif
 	{META | 'R', sreplace}
 	,
-#if	PKCODE
 	{META | 'S', forwsearch}
 	,			/* alternative P.K.     */
-#else
-#if	BSD
-	{META | 'S', bktoshell}
-	,
-#endif
-#endif
 	{META | 'U', upperword}
 	,
 	{META | 'V', backpage}
@@ -359,7 +333,6 @@ struct key_tab keytab[NBINDS] = {
 	,
 	{SPEC | 93, cbuf10}
 	,
-#if PKCODE
 	{SPEC | 117, gotoeob}
 	,
 	{SPEC | 119, gotobob}
@@ -372,7 +345,6 @@ struct key_tab keytab[NBINDS] = {
 	,
 	{SPEC | 147, killregion}
 	,
-#endif
 #endif
 
 #if	VT220

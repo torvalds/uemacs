@@ -62,31 +62,13 @@
 #include "ebind.h"   /* Default key bindings. */
 #include "version.h"
 
-/* For MSDOS, increase the default stack space. */
-#if MSDOS & TURBO
-#if PKCODE
-extern unsigned _stklen = 20000;
-#else
-extern unsigned _stklen = 32766;
-#endif
-#endif
-
-#if VMS
-#include <ssdef.h>
-#define GOOD    (SS$_NORMAL)
-#endif
-
 #ifndef GOOD
 #define GOOD    0
 #endif
 
-#if UNIX
 #include <signal.h>
 static void emergencyexit(int);
-#ifdef SIGWINCH
 extern void sizesignal(int);
-#endif
-#endif
 
 void usage(int status)
 {
@@ -120,25 +102,9 @@ int main(int argc, char **argv)
 	int saveflag;		/* temp store for lastflag */
 	int errflag;		/* C error processing? */
 	char bname[NBUFN];	/* buffer name of file to read */
-#if	CRYPT
-	int cryptflag;		/* encrypting on the way in? */
-	char ekey[NPAT];	/* startup encryption key */
-#endif
 	int newc;
 
-#if	PKCODE & VMS
-	(void) umask(-1); /* Use old protection (this is at wrong place). */
-#endif
-
-#if	PKCODE & BSD
-	sleep(1); /* Time for window manager. */
-#endif
-
-#if	UNIX
-#ifdef SIGWINCH
 	signal(SIGWINCH, sizesignal);
-#endif
-#endif
 	if (argc == 2) {
 		if (strcmp(argv[1], "--help") == 0) {
 			usage(EXIT_FAILURE);
@@ -160,19 +126,14 @@ int main(int argc, char **argv)
 	firstfile = TRUE;	/* no file to edit yet */
 	startflag = FALSE;	/* startup file not executed yet */
 	errflag = FALSE;	/* not doing C error parsing */
-#if	CRYPT
-	cryptflag = FALSE;	/* no encryption by default */
-#endif
 
 	/* Parse the command line */
 	for (carg = 1; carg < argc; ++carg) {
 		/* Process Switches */
-#if	PKCODE
 		if (argv[carg][0] == '+') {
 			gotoflag = TRUE;
 			gline = atoi(&argv[carg][1]);
 		} else
-#endif
 		if (argv[carg][0] == '-') {
 			switch (argv[carg][1]) {
 				/* Process Startup macroes */
@@ -189,19 +150,10 @@ int main(int argc, char **argv)
 				gotoflag = TRUE;
 				gline = atoi(&argv[carg][2]);
 				break;
-#if	CRYPT
-			case 'k':	/* -k<key> for code key */
-			case 'K':
-				cryptflag = TRUE;
-				strcpy(ekey, &argv[carg][2]);
-				break;
-#endif
-#if	PKCODE
 			case 'n':	/* -n accept null chars */
 			case 'N':
 				nullflag = TRUE;
 				break;
-#endif
 			case 'r':	/* -r restrictive use */
 			case 'R':
 				restflag = TRUE;
@@ -247,21 +199,11 @@ int main(int argc, char **argv)
 			/* set the modes appropriatly */
 			if (viewflag)
 				bp->b_mode |= MDVIEW;
-#if	CRYPT
-			if (cryptflag) {
-				bp->b_mode |= MDCRYPT;
-				myencrypt((char *) NULL, 0);
-				myencrypt(ekey, strlen(ekey));
-				strncpy(bp->b_key, ekey, NPAT);
-			}
-#endif
 		}
 	}
 
-#if	UNIX
 	signal(SIGHUP, emergencyexit);
 	signal(SIGTERM, emergencyexit);
-#endif
 
 	/* if we are C error parsing... run it! */
 	if (errflag) {
@@ -308,7 +250,6 @@ int main(int argc, char **argv)
 	execute(META | SPEC | 'C', FALSE, 1);
 	lastflag = saveflag;
 
-#if TYPEAH && PKCODE
 	if (typahead()) {
 		newc = getcmd();
 		update(FALSE);
@@ -327,13 +268,6 @@ int main(int argc, char **argv)
 		update(FALSE);
 		c = getcmd();
 	}
-#else
-	/* Fix up the screen    */
-	update(FALSE);
-
-	/* get the next command from the keyboard */
-	c = getcmd();
-#endif
 	/* if there is something on the command line, clear it */
 	if (mpresf != FALSE) {
 		mlerase();
@@ -454,11 +388,6 @@ void edinit(char *bname)
 	wp->w_markp = NULL;
 	wp->w_marko = 0;
 	wp->w_toprow = 0;
-#if	COLOR
-	/* initalize colors to global defaults */
-	wp->w_fcolor = gfcolor;
-	wp->w_bcolor = gbcolor;
-#endif
 	wp->w_ntrows = term.t_nrow - 1;	/* "-1" for mode line.  */
 	wp->w_force = 0;
 	wp->w_flag = WFMODE | WFHARD;	/* Full.                */
@@ -494,20 +423,8 @@ int execute(int c, int f, int n)
 	    (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
 		execute(META | SPEC | 'W', FALSE, 1);
 
-#if	PKCODE
 	if ((c >= 0x20 && c <= 0x7E)	/* Self inserting.      */
-#if	IBMPC
-	    || (c >= 0x80 && c <= 0xFE)) {
-#else
-#if	VMS || BSD || USG	/* 8BIT P.K. */
 	    || (c >= 0xA0 && c <= 0x10FFFF)) {
-#else
-	    ) {
-#endif
-#endif
-#else
-	if ((c >= 0x20 && c <= 0xFF)) {	/* Self inserting.      */
-#endif
 		if (n <= 0) {	/* Fenceposts.          */
 			lastflag = 0;
 			return n < 0 ? FALSE : TRUE;
@@ -575,10 +492,6 @@ int quickexit(int f, int n)
 		    && (bp->b_flag & BFINVS) == 0) {	/* Real.                */
 			curbp = bp;	/* make that buffer cur */
 			mlwrite("(Saving %s)", bp->b_fname);
-#if	PKCODE
-#else
-			mlwrite("\n");
-#endif
 			if ((status = filesave(f, n)) != TRUE) {
 				curbp = oldcb;	/* restore curbp */
 				return status;
@@ -796,10 +709,6 @@ dspram()
 	char *sp;
 
 	TTmove(term.t_nrow - 1, 70);
-#if	COLOR
-	TTforg(7);
-	TTbacg(0);
-#endif
 	sprintf(mbuf, "[%lu]", envram);
 	sp = &mbuf[0];
 	while (*sp)

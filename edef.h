@@ -60,7 +60,6 @@ extern int abortc;		/* current abort command char   */
 
 extern int quotec;		/* quote char during mlreply() */
 extern int tabmask;
-extern char *cname[];		/* names of colors              */
 extern struct kill *kbufp;		/* current kill buffer chunk pointer */
 extern struct kill *kbufh;		/* kill buffer header pointer   */
 extern int kused;		/* # of bytes used in KB        */
@@ -84,10 +83,8 @@ extern int saveflag;		/* Flags, saved with the $target var */
 extern char *fline;		/* dynamic return line */
 extern int flen;		/* current length of fline */
 extern int rval;		/* return value of a subprocess */
-#if	PKCODE
 extern int nullflag;
 extern int justflag;		/* justify, don't fill */
-#endif
 extern int overlap;		/* line overlap in forw/back page */
 extern int scrollcount;		/* number of lines to scroll */
 

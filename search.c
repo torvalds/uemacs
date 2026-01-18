@@ -830,17 +830,13 @@ static int replaces(int kind, int f, int n)
 			/* And respond appropriately.
 			 */
 			switch (c) {
-#if	PKCODE
 			case 'Y':
-#endif
 			case 'y':	/* yes, substitute */
 			case ' ':
 				savematch();
 				break;
 
-#if	PKCODE
 			case 'N':
-#endif
 			case 'n':	/* no, onword */
 				forwchar(FALSE, 1);
 				continue;
@@ -849,9 +845,7 @@ static int replaces(int kind, int f, int n)
 				kind = FALSE;
 				break;
 
-#if	PKCODE
 			case 'U':
-#endif
 			case 'u':	/* undo last and re-prompt */
 
 				/* Restore old position.
@@ -870,10 +864,8 @@ static int replaces(int kind, int f, int n)
 				/* Delete the new string.
 				 */
 				backchar(FALSE, rlength);
-#if	PKCODE
 				matchline = curwp->w_dotp;
 				matchoff = curwp->w_doto;
-#endif
 				status = delins(rlength, patmatch, FALSE);
 				if (status != TRUE)
 					return status;
@@ -992,11 +984,7 @@ int expandp(char *srcstr, char *deststr, int maxlength)
 			*deststr++ = '>';
 			maxlength -= 4;
 		}
-#if	PKCODE
 		else if ((c > 0 && c < 0x20) || c == 0x7f)	/* control character */
-#else
-		else if (c < 0x20 || c == 0x7f)	/* control character */
-#endif
 		{
 			*deststr++ = '^';
 			*deststr++ = c ^ 0x40;
@@ -1344,9 +1332,7 @@ static int mceq(int bc, struct magic *mt)
 {
 	int result;
 
-#if	PKCODE
 	bc = bc & 0xFF;
-#endif
 	switch (mt->mc_type & MASKCL) {
 	case LITCHAR:
 		result = eq(bc, mt->u.lchar);
@@ -1471,9 +1457,7 @@ static int cclmake(char **ppatptr, struct magic *mcptr)
  */
 static int biteq(int bc, char *cclmap)
 {
-#if	PKCODE
 	bc = bc & 0xFF;
-#endif
 	if (bc >= HICHAR)
 		return FALSE;
 
@@ -1501,9 +1485,7 @@ static char *clearbits(void)
  */
 static void setbit(int bc, char *cclmap)
 {
-#if	PKCODE
 	bc = bc & 0xFF;
-#endif
 	if (bc < HICHAR)
 		*(cclmap + (bc >> 3)) |= BIT(bc & 7);
 }

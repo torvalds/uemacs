@@ -279,10 +279,8 @@ static int is_new_para(void)
 	for (i = 0; i < len; i++) {
 		int c = lgetc(curwp->w_dotp, i);
 		if (c == ' ' || c == TAB) {
-#if PKCODE
 			if (justflag)
 				continue;
-#endif
 			return 1;
 		}
 		if (!isletter(c))
