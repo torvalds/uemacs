@@ -178,6 +178,7 @@ bind-to-key execute-macro-40 M-?
 ;	Set up auto CMODE
 
 36	store-macro
+	add-mode "spell"
 	!if &seq &mid $cfname 1 7 "/tmp/Re"
 		add-mode "wrap"
 		!return

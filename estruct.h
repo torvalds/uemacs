@@ -218,11 +218,11 @@ struct buffer {
 
 #define	MDWRAP	0x0001		/* word wrap                    */
 #define	MDCMOD	0x0002		/* C indentation and fence match */
-#define	MDSPELL	0x0004		/* spell error parcing          */
+#define	MDSPELL	0x0004		/* spell error parsing          */
 #define	MDEXACT	0x0008		/* Exact matching for searches  */
 #define	MDVIEW	0x0010		/* read-only buffer             */
 #define MDOVER	0x0020		/* overwrite mode               */
-#define MDMAGIC	0x0040		/* regular expresions in search */
+#define MDMAGIC	0x0040		/* regular expressions in search */
 #define	MDASAVE	0x0800		/* auto-save mode               */
 
 /*

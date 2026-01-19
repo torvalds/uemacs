@@ -585,11 +585,14 @@ static int find_not_letter(unicode_t *line, size_t len, int pos)
 #define BAD_WORD_BEGIN 1
 #define BAD_WORD_END 2
 
-static void findwords(unicode_t *line, size_t len, unsigned char *result, size_t size)
+static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size_t size)
 {
 	int pos = 0;
 
+	if (len < size)
+		size = len;
 	memset(result, 0, size);
+
 	while ((pos = find_letter(line, len, pos)) >= 0) {
 		int start = pos;
 		int end = find_not_letter(line, len, pos+1);
@@ -610,7 +613,7 @@ static void findwords(unicode_t *line, size_t len, unsigned char *result, size_t
 		// We found something that may be a real word.
 		// Check it, and mark it in the result
 		if (end > size)
-			return;
+			break;
 
 		char word_buffer[80];
 		int word_len = end - start;
@@ -626,7 +629,7 @@ static void findwords(unicode_t *line, size_t len, unsigned char *result, size_t
 		result[start] = BAD_WORD_BEGIN;
 		result[end-1] |= BAD_WORD_END;
 	}
-	return;
+	return size;
 }
 
 /*
@@ -644,8 +647,9 @@ static void findwords(unicode_t *line, size_t len, unsigned char *result, size_t
  */
 static int updateline(int row, struct video *vp1, struct video *vp2)
 {
-	int maxchar = 0;
-	unsigned char analyze[256];
+	int maxchar = 0, analyzed = 0;
+	unsigned char array[256];
+	bool spellcheck = curwp->w_bufp->b_mode & MDSPELL;
 
 	movecursor(row, 0);	/* Go to start of line. */
 
@@ -658,25 +662,27 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 			maxchar = i+1;
 	}
 
-	findwords(vp1->v_text, maxchar, analyze, sizeof(analyze));
-
 	/* set rev video if needed, and fill all the way */
 	if (vp1->v_flag & VFREQ) {
 		maxchar = term.t_ncol;
 		TTrev(TRUE);
+		spellcheck = false;
 	}
+
+	if (spellcheck)
+		analyzed = findwords(vp1->v_text, maxchar, array, sizeof(array));
 
 #define SPELLSTART "\033[1m"
 #define SPELLSTOP "\033[22m"
 
 	int started = 0;
 	for (int i = 0; i < maxchar; i++) {
-		if (i < sizeof(analyze) && (analyze[i] & BAD_WORD_BEGIN)) {
+		if (i < analyzed && (array[i] & BAD_WORD_BEGIN)) {
 			started = 1;
 			TTputs(SPELLSTART);
 		}
 		TTputc(vp1->v_text[i]);
-		if (i < sizeof(analyze) && (analyze[i] & BAD_WORD_END)) {
+		if (i < analyzed && (array[i] & BAD_WORD_END)) {
 			TTputs(SPELLSTOP);
 			started = 0;
 		}
