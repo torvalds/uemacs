@@ -114,8 +114,3 @@ char *dname[] = {
 	"while", "endwhile", "break",
 	"force"
 };
-
-#if	DEBUGM
-/*	vars needed for macro debugging output	*/
-char outline[NSTRING];		/* global string to hold debug line text */
-#endif

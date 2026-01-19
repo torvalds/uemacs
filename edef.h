@@ -114,11 +114,6 @@ extern int matchoff;
 
 extern char *dname[];		/* Directive name table.        */
 
-#if	DEBUGM
-/* Vars needed for macro debugging output. */
-extern char outline[];		/* Global string to hold debug line text. */
-#endif
-
 /* Terminal table defined only in term.c */
 extern struct terminal term;
 

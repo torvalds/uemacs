@@ -16,13 +16,13 @@ uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 PROGRAM=em
 
-SRC=ansi.c basic.c bind.c buffer.c display.c eval.c exec.c \
+SRC=basic.c bind.c buffer.c display.c eval.c exec.c \
 	file.c fileio.c input.c isearch.c line.c lock.c main.c \
 	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
 	window.c word.c names.c globals.c version.c \
 	usage.c wrapper.c utf8.c util.c
 
-OBJ=ansi.o basic.o bind.o buffer.o display.o eval.o exec.o \
+OBJ=basic.o bind.o buffer.o display.o eval.o exec.o \
 	file.o fileio.o input.o isearch.o line.o lock.o main.o \
 	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
 	window.o word.o names.o globals.o version.o \
@@ -111,7 +111,6 @@ depend: ${SRC}
 
 # DO NOT DELETE THIS LINE -- make depend uses it
 
-ansi.o: ansi.c estruct.h edef.h
 basic.o: basic.c estruct.h edef.h
 bind.o: bind.c estruct.h edef.h epath.h
 buffer.o: buffer.c estruct.h edef.h

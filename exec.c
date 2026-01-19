@@ -426,7 +426,6 @@ int dobuf(struct buffer *bp)
 	int dirnum;		/* directive index */
 	int linlen;		/* length of line to execute */
 	int i;			/* index */
-	int c;			/* temp character */
 	int force;		/* force TRUE result? */
 	struct window *wp;		/* ptr to windows to scan */
 	struct while_block *whlist;	/* ptr to !WHILE list */
@@ -435,11 +434,6 @@ int dobuf(struct buffer *bp)
 	char *einit;		/* initial value of eline */
 	char *eline;		/* text of line to execute */
 	char tkn[NSTRING];	/* buffer to evaluate an expresion in */
-
-#if	DEBUGM
-	char *sp;		/* temp for building debug string */
-	char *ep;	/* ptr to end of outline */
-#endif
 
 	/* clear IF level flags/while ptr */
 	execlevel = 0;
@@ -550,59 +544,6 @@ int dobuf(struct buffer *bp)
 		/* dump comments and blank lines */
 		if (*eline == ';' || *eline == 0)
 			goto onward;
-
-#if	DEBUGM
-		/* if $debug == TRUE, every line to execute
-		   gets echoed and a key needs to be pressed to continue
-		   ^G will abort the command */
-
-		if (macbug) {
-			strcpy(outline, "<<<");
-
-			/* debug macro name */
-			strcat(outline, bp->b_bname);
-			strcat(outline, ":");
-
-			/* debug if levels */
-			strcat(outline, itoa(execlevel));
-			strcat(outline, ":");
-
-			/* and lastly the line */
-			strcat(outline, eline);
-			strcat(outline, ">>>");
-
-			/* change all '%' to ':' so mlwrite won't expect arguments */
-			sp = outline;
-			while (*sp)
-				if (*sp++ == '%') {
-					/* advance to the end */
-					ep = --sp;
-					while (*ep++);
-					/* null terminate the string one out */
-					*(ep + 1) = 0;
-					/* copy backwards */
-					while (ep-- > sp)
-						*(ep + 1) = *ep;
-
-					/* and advance sp past the new % */
-					sp += 2;
-				}
-
-			/* write out the debug line */
-			mlforce(outline);
-			update(TRUE);
-
-			/* and get the keystroke */
-			if ((c = get1key()) == abortc) {
-				mlforce("(Macro aborted)");
-				freewhile(whlist);
-				return FALSE;
-			}
-
-			if (c == metac)
-				macbug = FALSE;
-		}
-#endif
 
 		/* Parse directives here.... */
 		dirnum = -1;

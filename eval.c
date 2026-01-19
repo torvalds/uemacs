@@ -46,7 +46,7 @@ char *gtfun(char *fname)
 
 	/* look the function up in the function table */
 	fname[3] = 0;		/* only first 3 chars significant */
-	mklower(fname);		/* and let it be upper or lower case */
+	mklower(fname, fname);	/* and let it be upper or lower case */
 	for (fnum = 0; fnum < ARRAY_SIZE(funcs); fnum++)
 		if (strcmp(fname, funcs[fnum].f_name) == 0)
 			break;
@@ -93,11 +93,9 @@ char *gtfun(char *fname)
 	case UFLEFT:
 		return strncpy(result, arg1, atoi(arg2));
 	case UFRIGHT:
-		return (strcpy(result,
-			       &arg1[(strlen(arg1) - atoi(arg2))]));
+		return (strcpy(result, &arg1[(strlen(arg1) - atoi(arg2))]));
 	case UFMID:
-		return (strncpy(result, &arg1[atoi(arg2) - 1],
-				atoi(arg3)));
+		return (strncpy(result, &arg1[atoi(arg2) - 1], atoi(arg3)));
 	case UFNOT:
 		return ltos(stol(arg1) == FALSE);
 	case UFEQUAL:
@@ -121,9 +119,9 @@ char *gtfun(char *fname)
 	case UFLENGTH:
 		return itoa(strlen(arg1));
 	case UFUPPER:
-		return mkupper(arg1);
+		return mkupper(arg1, result);
 	case UFLOWER:
-		return mklower(arg1);
+		return mklower(arg1, result);
 	case UFTRUTH:
 		return ltos(atoi(arg1) == 42);
 	case UFASCII:
@@ -339,10 +337,6 @@ char *getkill(void)
 int setvar(int f, int n)
 {
 	int status;	/* status return */
-#if	DEBUGM
-	char *sp;	/* temp string pointer */
-	char *ep;	/* ptr to end of outline */
-#endif
 	struct variable_description vd;		/* variable num/type */
 	char var[NVSIZE + 1];	/* name of variable to fetch */
 	char value[NSTRING];	/* value to set variable to */
@@ -377,54 +371,6 @@ int setvar(int f, int n)
 
 	/* and set the appropriate value */
 	status = svar(&vd, value);
-
-#if	DEBUGM
-	/* if $debug == TRUE, every assignment will echo a statment to
-	   that effect here. */
-
-	if (macbug) {
-		strcpy(outline, "(((");
-
-		/* assignment status */
-		strcat(outline, ltos(status));
-		strcat(outline, ":");
-
-		/* variable name */
-		strcat(outline, var);
-		strcat(outline, ":");
-
-		/* and lastly the value we tried to assign */
-		strcat(outline, value);
-		strcat(outline, ")))");
-
-		/* expand '%' to "%%" so mlwrite wont bitch */
-		sp = outline;
-		while (*sp)
-			if (*sp++ == '%') {
-				/* advance to the end */
-				ep = --sp;
-				while (*ep++);
-				/* null terminate the string one out */
-				*(ep + 1) = 0;
-				/* copy backwards */
-				while (ep-- > sp)
-					*(ep + 1) = *ep;
-
-				/* and advance sp past the new % */
-				sp += 2;
-			}
-
-		/* write out the debug line */
-		mlforce(outline);
-		update(TRUE);
-
-		/* and get the keystroke to hold the output */
-		if (get1key() == abortc) {
-			mlforce("(Macro aborted)");
-			status = FALSE;
-		}
-	}
-#endif
 
 	/* and return it */
 	return status;
@@ -604,9 +550,7 @@ int svar(struct variable_description *var, char *value)
 		case EVSEARCH:
 			strcpy(pat, value);
 			rvstrcpy(tap, pat);
-#if	MAGIC
 			mcclear();
-#endif
 			break;
 		case EVREPLACE:
 			strcpy(rpat, value);
@@ -867,17 +811,17 @@ char *ltos(int val)
  *
  * char *str;		string to upper case
  */
-char *mkupper(char *str)
+char *mkupper(const char *str, char *res)
 {
-	char *sp;
+	char *out = res, c;
 
-	sp = str;
-	while (*sp) {
-		if ('a' <= *sp && *sp <= 'z')
-			*sp += 'A' - 'a';
-		++sp;
-	}
-	return str;
+	do {
+		c = *str++;
+		if ('a' <= c && c <= 'z')
+			c += 'A' - 'a';
+		*out++ = c;
+	} while (c);
+	return res;
 }
 
 /*
@@ -885,17 +829,18 @@ char *mkupper(char *str)
  *
  * char *str;		string to lower case
  */
-char *mklower(char *str)
+char *mklower(const char *str, char *res)
 {
-	char *sp;
+	char *out = res, c;
 
-	sp = str;
-	while (*sp) {
-		if ('A' <= *sp && *sp <= 'Z')
-			*sp += 'a' - 'A';
-		++sp;
-	}
-	return str;
+	out = res;
+	do {
+		c = *str++;
+		if ('A' <= c && c <= 'Z')
+			c += 'a' - 'A';
+		*out++ = c;
+	} while (c);
+	return res;
 }
 
 /*

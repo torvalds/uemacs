@@ -64,7 +64,6 @@
 #include "efunc.h"
 #include "line.h"
 
-#if defined(MAGIC)
 /*
  * The variables magical and rmagical determine if there
  * were actual metacharacters in the search and replace strings -
@@ -76,7 +75,6 @@ static short int rmagical;
 static struct magic mcpat[NPAT]; /* The magic pattern. */
 static struct magic tapcm[NPAT]; /* The reversed magic patterni. */
 static struct magic_replacement rmcpat[NPAT]; /* The replacement magic array. */
-#endif
 
 static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *pcwoff);
 static int readpattern(char *prompt, char *apat, int srch);
@@ -115,13 +113,11 @@ int forwsearch(int f, int n)
 	 */
 	if ((status = readpattern("Search", &pat[0], TRUE)) == TRUE) {
 		do {
-#if	MAGIC
 			if ((magical
 			     && curwp->w_bufp->b_mode & MDMAGIC) != 0)
 				status =
 				    mcscanner(&mcpat[0], FORWARD, PTEND);
 			else
-#endif
 				status = scanner(&pat[0], FORWARD, PTEND);
 		} while ((--n > 0) && status);
 
@@ -157,24 +153,20 @@ int forwhunt(int f, int n)
 		mlwrite("No pattern set");
 		return FALSE;
 	}
-#if	MAGIC
 	if ((curwp->w_bufp->b_mode & MDMAGIC) != 0 &&
 	    mcpat[0].mc_type == MCNIL) {
 		if (!mcstr())
 			return FALSE;
 	}
-#endif
 
 	/* Search for the pattern for as long as
 	 * n is positive (n == 0 will go through once, which
 	 * is just fine).
 	 */
 	do {
-#if	MAGIC
 		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
 			status = mcscanner(&mcpat[0], FORWARD, PTEND);
 		else
-#endif
 			status = scanner(&pat[0], FORWARD, PTEND);
 	} while ((--n > 0) && status);
 
@@ -216,13 +208,11 @@ int backsearch(int f, int n)
 	if ((status =
 	     readpattern("Reverse search", &pat[0], TRUE)) == TRUE) {
 		do {
-#if	MAGIC
 			if ((magical
 			     && curwp->w_bufp->b_mode & MDMAGIC) != 0)
 				status =
 				    mcscanner(&tapcm[0], REVERSE, PTBEG);
 			else
-#endif
 				status = scanner(&tap[0], REVERSE, PTBEG);
 		} while ((--n > 0) && status);
 
@@ -259,24 +249,21 @@ int backhunt(int f, int n)
 		mlwrite("No pattern set");
 		return FALSE;
 	}
-#if	MAGIC
+
 	if ((curwp->w_bufp->b_mode & MDMAGIC) != 0 &&
 	    tapcm[0].mc_type == MCNIL) {
 		if (!mcstr())
 			return FALSE;
 	}
-#endif
 
 	/* Go search for it for as long as
 	 * n is positive (n == 0 will go through once, which
 	 * is just fine).
 	 */
 	do {
-#if	MAGIC
 		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
 			status = mcscanner(&tapcm[0], REVERSE, PTBEG);
 		else
-#endif
 			status = scanner(&tap[0], REVERSE, PTBEG);
 	} while ((--n > 0) && status);
 
@@ -291,7 +278,6 @@ int backhunt(int f, int n)
 	return status;
 }
 
-#if	MAGIC
 /*
  * mcscanner -- Search for a meta-pattern in either direction.  If found,
  *	reset the "." to be at the start or just after the match string,
@@ -499,7 +485,6 @@ static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *p
 
 	return TRUE;
 }
-#endif
 
 /*
  * scanner -- Search for a pattern in either direction.  If found,
@@ -633,7 +618,6 @@ static int readpattern(char *prompt, char *apat, int srch)
 			rvstrcpy(tap, apat);
 			mlenold = matchlen = strlen(apat);
 		}
-#if	MAGIC
 		/* Only make the meta-pattern if in magic mode,
 		 * since the pattern in question might have an
 		 * invalid meta combination.
@@ -643,7 +627,6 @@ static int readpattern(char *prompt, char *apat, int srch)
 			rmcclear();
 		} else
 			status = srch ? mcstr() : rmcstr();
-#endif
 	} else if (status == FALSE && apat[0] != 0)	/* Old one */
 		status = TRUE;
 
@@ -800,12 +783,10 @@ static int replaces(int kind, int f, int n)
 		 * matchlen is reset to the true length of
 		 * the matched string.
 		 */
-#if	MAGIC
 		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0) {
 			if (!mcscanner(&mcpat[0], FORWARD, PTBEG))
 				break;
 		} else
-#endif
 		if (!scanner(&pat[0], FORWARD, PTBEG))
 			break;	/* all done */
 
@@ -935,18 +916,14 @@ static int replaces(int kind, int f, int n)
 int delins(int dlength, char *instr, int use_meta)
 {
 	int status;
-#if	MAGIC
 	struct magic_replacement *rmcptr;
-#endif
 
 	/* Zap what we gotta,
 	 * and insert its replacement.
 	 */
 	if ((status = ldelete((long) dlength, FALSE)) != TRUE)
 		mlwrite("%%ERROR while deleting");
-	else
-#if	MAGIC
-	if ((rmagical && use_meta) &&
+	else if ((rmagical && use_meta) &&
 		    (curwp->w_bufp->b_mode & MDMAGIC) != 0) {
 		rmcptr = &rmcpat[0];
 		while (rmcptr->mc_type != MCNIL && status == TRUE) {
@@ -957,7 +934,6 @@ int delins(int dlength, char *instr, int use_meta)
 			rmcptr++;
 		}
 	} else
-#endif
 		status = linstr(instr);
 
 	return status;
@@ -1071,7 +1047,6 @@ static int nextch(struct line **pcurline, int *pcuroff, int dir)
 	return c;
 }
 
-#if	MAGIC
 /*
  * mcstr -- Set up the 'magic' array.  The closure symbol is taken as
  *	a literal character when (1) it is the first character in the
@@ -1487,4 +1462,3 @@ static void setbit(int bc, char *cclmap)
 	if (bc < HICHAR)
 		*(cclmap + (bc >> 3)) |= BIT(bc & 7);
 }
-#endif

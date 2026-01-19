@@ -120,9 +120,6 @@ int getfile(char *fname, int lockfl)
 	int s;
 	char bname[NBUFN];	/* buffer name to put file */
 
-#if	MSDOS
-	mklower(fname);		/* msdos isn't case sensitive */
-#endif
 	for (bp = bheadp; bp != NULL; bp = bp->b_bufp) {
 		if ((bp->b_flag & BFINVS) == 0
 		    && strcmp(bp->b_fname, fname) == 0) {

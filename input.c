@@ -253,10 +253,8 @@ int tgetc(void)
 		/* at the end of last repitition? */
 		if (--kbdrep < 1) {
 			kbdmode = STOP;
-#if	VISMAC == 0
 			/* force a screen update after all is done */
 			update(FALSE);
-#endif
 		} else {
 
 			/* reset the macro to the begining for the next rep */
@@ -309,22 +307,17 @@ int get1key(void)
 int getcmd(void)
 {
 	int c;			/* fetched keystroke */
-#if VT220
 	int d;			/* second character P.K. */
 	int cmask = 0;
-#endif
 	/* get initial character */
 	c = get1key();
 
-#if VT220
       proc_metac:
-#endif
 	if (c == 128+27)		/* CSI */
 		goto handle_CSI;
 	/* process META prefix */
 	if (c == (CONTROL | '[')) {
 		c = get1key();
-#if VT220
 		if (c == '[' || c == 'O') {	/* CSI P.K. */
 handle_CSI:
 			c = get1key();
@@ -359,13 +352,10 @@ handle_CSI:
 			else
 				return SPEC | c | cmask;
 		}
-#endif
-#if VT220
 		if (c == (CONTROL | '[')) {
 			cmask = META;
 			goto proc_metac;
 		}
-#endif
 		if (islower(c))	/* Force to upper */
 			c ^= DIFCASE;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */

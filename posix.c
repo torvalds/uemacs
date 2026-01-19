@@ -10,14 +10,13 @@
  *	fixed for termios rather than the old termio.. Linus Torvalds
  */
 
-#ifdef POSIX
-
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #include "estruct.h"
 #include "edef.h"
@@ -223,13 +222,7 @@ int typahead(void)
 {
 	int x;			/* holds # of pending chars */
 
-#ifdef FIONREAD
 	if (ioctl(0, FIONREAD, &x) < 0)
 		x = 0;
-#else
-	x = 0;
-#endif
 	return x;
 }
-
-#endif				/* POSIX */

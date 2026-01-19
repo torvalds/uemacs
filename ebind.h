@@ -275,77 +275,6 @@ struct key_tab keytab[NBINDS] = {
 	,
 	{META | 0x7F, delbword}
 	,
-
-#if	MSDOS
-	{SPEC | CONTROL | '_', forwhunt}
-	,
-	{SPEC | CONTROL | 'S', backhunt}
-	,
-	{SPEC | 71, gotobol}
-	,
-	{SPEC | 72, backline}
-	,
-	{SPEC | 73, backpage}
-	,
-	{SPEC | 75, backchar}
-	,
-	{SPEC | 77, forwchar}
-	,
-	{SPEC | 79, gotoeol}
-	,
-	{SPEC | 80, forwline}
-	,
-	{SPEC | 81, forwpage}
-	,
-	{SPEC | 82, insspace}
-	,
-	{SPEC | 83, forwdel}
-	,
-	{SPEC | 115, backword}
-	,
-	{SPEC | 116, forwword}
-	,
-#if	WORDPRO
-	{SPEC | 132, gotobop}
-	,
-	{SPEC | 118, gotoeop}
-	,
-#endif
-	{SPEC | 84, cbuf1}
-	,
-	{SPEC | 85, cbuf2}
-	,
-	{SPEC | 86, cbuf3}
-	,
-	{SPEC | 87, cbuf4}
-	,
-	{SPEC | 88, cbuf5}
-	,
-	{SPEC | 89, cbuf6}
-	,
-	{SPEC | 90, cbuf7}
-	,
-	{SPEC | 91, cbuf8}
-	,
-	{SPEC | 92, cbuf9}
-	,
-	{SPEC | 93, cbuf10}
-	,
-	{SPEC | 117, gotoeob}
-	,
-	{SPEC | 119, gotobob}
-	,
-	{SPEC | 141, gotobop}
-	,
-	{SPEC | 145, gotoeop}
-	,
-	{SPEC | 146, yank}
-	,
-	{SPEC | 147, killregion}
-	,
-#endif
-
-#if	VT220
 	{SPEC | '1', fisearch}
 	,			/* VT220 keys   */
 	{SPEC | '2', yank}
@@ -378,7 +307,6 @@ struct key_tab keytab[NBINDS] = {
 	,
 	{SPEC | 'i', cex}
 	,
-#endif
 
 	{0x7F, backdel}
 	,

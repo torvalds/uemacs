@@ -268,10 +268,6 @@ int main(int argc, char **argv)
 	if (mpresf != FALSE) {
 		mlerase();
 		update(FALSE);
-#if	CLRMSG
-		if (c == ' ')	/* ITS EMACS does this  */
-			goto loop;
-#endif
 	}
 	f = FALSE;
 	n = 1;
@@ -643,72 +639,3 @@ int unarg(int f, int n)
 {
 	return TRUE;
 }
-
-/*****		Compiler specific Library functions	****/
-
-#if	RAMSIZE
-/*	These routines will allow me to track memory usage by placing
-	a layer on top of the standard system malloc() and free() calls.
-	with this code defined, the environment variable, $RAM, will
-	report on the number of bytes allocated via malloc.
-
-	with SHOWRAM defined, the number is also posted on the
-	end of the bottom mode line and is updated whenever it is changed.
-*/
-
-#undef	malloc
-#undef	free
-
-char *allocate(nbytes)
-			    /* allocate nbytes and track */
-unsigned nbytes;		/* # of bytes to allocate */
-
-{
-	char *mp;		/* ptr returned from malloc */
-	char *malloc();
-
-	mp = malloc(nbytes);
-	if (mp) {
-		envram += nbytes;
-#if	RAMSHOW
-		dspram();
-#endif
-	}
-
-	return mp;
-}
-
-release(mp)
-    /* release malloced memory and track */
-char *mp;			/* chunk of RAM to release */
-
-{
-	unsigned *lp;		/* ptr to the long containing the block size */
-
-	if (mp) {
-		/* update amount of ram currently malloced */
-		lp = ((unsigned *) mp) - 1;
-		envram -= (long) *lp - 2;
-		free(mp);
-#if	RAMSHOW
-		dspram();
-#endif
-	}
-}
-
-#if	RAMSHOW
-dspram()
-{				/* display the amount of RAM currently malloced */
-	char mbuf[20];
-	char *sp;
-
-	TTmove(term.t_nrow - 1, 70);
-	sprintf(mbuf, "[%lu]", envram);
-	sp = &mbuf[0];
-	while (*sp)
-		TTputc(*sp++);
-	TTmove(term.t_nrow, 0);
-	movecursor(term.t_nrow, 0);
-}
-#endif
-#endif

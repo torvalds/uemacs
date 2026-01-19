@@ -11,49 +11,17 @@
 #define MAXCOL	500
 #define MAXROW	500
 
-#ifdef	MSDOS
-#undef	MSDOS
-#endif
-#ifdef	EGA
-#undef	EGA
-#endif
-#ifdef	CTRLZ
-#undef	CTRLZ
-#endif
-
-/* Machine/OS definitions. */
-
-/* Make an intelligent guess about the target system. */
-
-#define	UNIX 1
-
-#define	VT220 1
-
-#define	TERMCAP	1
-
-
 /*	Configuration options	*/
 
 #define CVMVAS  1  /* arguments to page forward/back in pages      */
-#define	CLRMSG	0  /* space clears the message line with no insert */
 #define	CFENCE	1  /* fench matching in CMODE                      */
-#define DEBUGM	1  /* $debug triggers macro debugging              */
-#define	VISMAC	0  /* update display during keyboard macros        */
-#define	CTRLZ	0  /* add a ^Z at end of files under MSDOS only    */
-#define ADDCR	0  /* ajout d'un CR en fin de chaque ligne (ST520) */
 #define	NBRACE	1  /* new style brace matching command             */
-#define	REVSTA	1  /* Status line appears in reverse video         */
 
 #define	ISRCH	1  /* Incremental searches like ITS EMACS          */
 #define	WORDPRO	1  /* Advanced word processing features            */
 #define	APROP	1  /* Add code for Apropos command                 */
-#define MAGIC	1  /* include regular expression matching?         */
 #define	AEDIT	1  /* advanced editing options: en/detabbing       */
 #define	PROC	1  /* named procedures                             */
-
-#define ASCII	1  /* always using ASCII char sequences for now    */
-
-#define	XONXOFF	1
 
 /* System dependant library redefinitions, structures and includes. */
 
@@ -384,7 +352,6 @@ struct while_block {
 
 #endif
 
-#if defined(MAGIC)
 /*
  * Defines for the metacharacters in the regular expression
  * search routines.
@@ -436,5 +403,3 @@ struct magic_replacement {
 	short int mc_type;
 	char *rstr;
 };
-
-#endif  /* MAGIC */

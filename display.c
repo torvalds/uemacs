@@ -172,12 +172,9 @@ static void vtputc(int c)
  */
 static void vteeol(void)
 {
-/*  struct video *vp;	*/
 	unicode_t *vcp = vscreen[vtrow]->v_text;
 
-/*  vp = vscreen[vtrow];	*/
 	while (vtcol < term.t_ncol)
-/*	vp->v_text[vtcol++] = ' ';	*/
 		vcp[vtcol++] = ' ';
 }
 
@@ -205,10 +202,8 @@ int update(int force)
 {
 	struct window *wp;
 
-#if	VISMAC == 0
 	if (force == FALSE && kbdmode == PLAY)
 		return TRUE;
-#endif
 
 	displaying = TRUE;
 
@@ -248,10 +243,8 @@ int update(int force)
 	movecursor(currow, curcol - lbound);
 	TTflush();
 	displaying = FALSE;
-#if SIGWINCH
 	while (chg_width || chg_height)
 		newscreensize(chg_height, chg_width);
-#endif
 	return TRUE;
 }
 
@@ -490,9 +483,7 @@ void updgar(void)
 
 	for (i = 0; i < term.t_nrow; ++i) {
 		vscreen[i]->v_flag |= VFCHG;
-#if	REVSTA
 		vscreen[i]->v_flag &= ~VFREV;
-#endif
 		txt = pscreen[i]->v_text;
 		for (j = 0; j < term.t_ncol; ++j)
 			txt[j] = ' ';
@@ -587,7 +578,6 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 	cp1 = &vp1->v_text[0];
 	cp2 = &vp2->v_text[0];
 
-#if	REVSTA
 	/* if we need to change the reverse video status of the
 	   current line, we need to re-write the entire line     */
 	rev = (vp1->v_flag & VFREV) == VFREV;
@@ -618,7 +608,6 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 			vp1->v_flag &= ~VFREV;
 		return TRUE;
 	}
-#endif
 
 	/* advance past any common chars at the left */
 	while (cp1 != &vp1->v_text[term.t_ncol] && cp1[0] == cp2[0]) {
@@ -662,9 +651,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 	}
 
 	movecursor(row, cp1 - &vp1->v_text[0]);	/* Go to start of line. */
-#if	REVSTA
 	TTrev(rev);
-#endif
 
 	while (cp1 != cp5) {	/* Ordinary. */
 		TTputc(*cp1);
@@ -677,9 +664,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 		while (cp1 != cp3)
 			*cp2++ = *cp1++;
 	}
-#if	REVSTA
 	TTrev(FALSE);
-#endif
 	vp1->v_flag &= ~VFCHG;	/* flag this line as updated */
 	return TRUE;
 }
@@ -707,11 +692,9 @@ static void modeline(struct window *wp)
 	if (wp == curwp)	/* mark the current buffer */
 		lchar = '-';
 	else
-#if	REVSTA
 	if (revexist)
 		lchar = ' ';
 	else
-#endif
 		lchar = '-';
 
 	bp = wp->w_bufp;
@@ -1071,7 +1054,6 @@ static void mlputf(int s)
 
 void getscreensize(int *widthp, int *heightp)
 {
-#ifdef TIOCGWINSZ
 	struct winsize size;
 	*widthp = 0;
 	*heightp = 0;
@@ -1079,13 +1061,8 @@ void getscreensize(int *widthp, int *heightp)
 		return;
 	*widthp = size.ws_col;
 	*heightp = size.ws_row;
-#else
-	*widthp = 0;
-	*heightp = 0;
-#endif
 }
 
-#ifdef SIGWINCH
 void sizesignal(int signr)
 {
 	int w, h;
@@ -1117,5 +1094,3 @@ static int newscreensize(int h, int w)
 	update(TRUE);
 	return TRUE;
 }
-
-#endif
