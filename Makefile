@@ -16,41 +16,41 @@ uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 PROGRAM=em
 
-SRC=basic.c bind.c buffer.c display.c eval.c exec.c \
-	file.c fileio.c input.c isearch.c line.c lock.c main.c \
+SRC=	basic.c bind.c buffer.c display.c eval.c exec.c file.c fileio.c \
+	globals.c input.c isearch.c line.c lock.c main.c names.c \
 	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
-	window.c word.c names.c globals.c version.c \
-	usage.c wrapper.c utf8.c util.c
+	usage.c utf8.c util.c version.c window.c word.c wrapper.c
 
-OBJ=basic.o bind.o buffer.o display.o eval.o exec.o \
-	file.o fileio.o input.o isearch.o line.o lock.o main.o \
+OBJ=	basic.o bind.o buffer.o display.o eval.o exec.o file.o fileio.o \
+	globals.o input.o isearch.o line.o lock.o main.o names.o \
 	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
-	window.o word.o names.o globals.o version.o \
-	usage.o wrapper.o utf8.o util.o
+	usage.o utf8.o util.o version.o window.o word.o wrapper.o
 
-HDR=ebind.h edef.h efunc.h epath.h estruct.h evar.h util.h version.h
+HDR=	ebind.h edef.h efunc.h epath.h estruct.h evar.h line.h usage.h \
+	utf8.h util.h version.h wrapper.h
 
 # DO NOT ADD OR MODIFY ANY LINES ABOVE THIS -- make source creates them
 
 CC=gcc
 WARNINGS=-Wall -Wstrict-prototypes
-CFLAGS=-O2 $(WARNINGS) -g
+DEFINES=-DPOSIX -D_GNU_SOURCE
 
- DEFINES=-DPOSIX -D_XOPEN_SOURCE=600 -D_GNU_SOURCE
- LIBS=-lcurses -lhunspell-1.7
-LFLAGS=-hbx
+CFLAGS=-O2 $(WARNINGS) $(DEFINES)
+
+LIBS=ncurses hunspell
 BINDIR=$(HOME)/bin
 LIBDIR=$(HOME)/lib
 
+CFLAGS += $(shell pkg-config --cflags $(LIBS))
+LDLIBS += $(shell pkg-config --libs $(LIBS))
+
 $(PROGRAM): $(OBJ)
 	$(E) "  LINK    " $@
-	$(Q) $(CC) $(LDFLAGS) $(DEFINES) -o $@ $(OBJ) $(LIBS)
+	$(Q) $(CC) $(LDFLAGS) $(DEFINES) -o $@ $(OBJ) $(LDLIBS)
 
-SPARSE=sparse
-SPARSE_FLAGS=-D__LITTLE_ENDIAN__ -D__x86_64__ -D__linux__ -D__unix__
-
-sparse:
-	$(SPARSE) $(SPARSE_FLAGS) $(DEFINES) $(SRC)
+.c.o:
+	$(E) "  CC      " $@
+	$(Q) ${CC} ${CFLAGS} -c $<
 
 clean:
 	$(E) "  CLEAN"
@@ -63,19 +63,6 @@ install: $(PROGRAM)
 	chmod 755 ${BINDIR}/em
 	chmod 644 ${LIBDIR}/emacs.hlp ${LIBDIR}/.emacsrc
 
-lint:	${SRC}
-	@rm -f lintout
-	lint ${LFLAGS} ${SRC} >lintout
-	cat lintout
-
-errs:
-	@rm -f makeout
-	make em >makeout
-
-tags:	${SRC}
-	@rm -f tags
-	ctags ${SRC}
-
 source:
 	@mv makefile makefile.bak
 	@echo "# makefile for emacs, updated `date`" >makefile
@@ -87,13 +74,7 @@ source:
 	@sed -n -e '/^# DO NOT ADD OR MODIFY/,$$p' <makefile.bak >>makefile
 
 depend: ${SRC}
-	@for i in ${SRC}; do\
-	    cc ${DEFINES} -M $$i | sed -e 's, \./, ,' | grep -v '/usr/include' | \
-	    awk '{ if ($$1 != prev) { if (rec != "") print rec; \
-		rec = $$0; prev = $$1; } \
-		else { if (length(rec $$2) > 78) { print rec; rec = $$0; } \
-		else rec = rec " " $$2 } } \
-		END { print rec }'; done >makedep
+	@for i in ${SRC}; do $(CC) ${DEFINES} -MM $$i; done >makedep
 	@echo '/^# DO NOT DELETE THIS LINE/+2,$$d' >eddep
 	@echo '$$r ./makedep' >>eddep
 	@echo 'w' >>eddep
@@ -105,36 +86,37 @@ depend: ${SRC}
 	@echo '# IF YOU PUT STUFF HERE IT WILL GO AWAY' >>makefile
 	@echo '# see make depend above' >>makefile
 
-.c.o:
-	$(E) "  CC      " $@
-	$(Q) ${CC} ${CFLAGS} ${DEFINES} -c $*.c
-
 # DO NOT DELETE THIS LINE -- make depend uses it
 
-basic.o: basic.c estruct.h edef.h
-bind.o: bind.c estruct.h edef.h epath.h
-buffer.o: buffer.c estruct.h edef.h
-display.o: display.c estruct.h edef.h utf8.h
-eval.o: eval.c estruct.h edef.h evar.h
-exec.o: exec.c estruct.h edef.h
-file.o: file.c estruct.h edef.h
-fileio.o: fileio.c estruct.h edef.h
-input.o: input.c estruct.h edef.h
-isearch.o: isearch.c estruct.h edef.h
-line.o: line.c estruct.h edef.h
-lock.o: lock.c estruct.h edef.h
-main.o: main.c estruct.h efunc.h edef.h ebind.h
-pklock.o: pklock.c estruct.h
-posix.o: posix.c estruct.h utf8.h
-random.o: random.c estruct.h edef.h
-region.o: region.c estruct.h edef.h
-search.o: search.c estruct.h edef.h
-spawn.o: spawn.c estruct.h edef.h
-tcap.o: tcap.c estruct.h edef.h
-termio.o: termio.c estruct.h edef.h
+basic.o: basic.c estruct.h edef.h efunc.h line.h utf8.h
+bind.o: bind.c estruct.h edef.h efunc.h epath.h line.h utf8.h util.h
+buffer.o: buffer.c estruct.h edef.h efunc.h line.h utf8.h
+display.o: display.c estruct.h edef.h efunc.h line.h utf8.h version.h wrapper.h
+eval.o: eval.c estruct.h edef.h efunc.h evar.h line.h utf8.h util.h version.h
+exec.o: exec.c estruct.h edef.h efunc.h line.h utf8.h
+file.o: file.c estruct.h edef.h efunc.h line.h utf8.h util.h
+fileio.o: fileio.c estruct.h edef.h efunc.h
+input.o: input.c estruct.h edef.h efunc.h wrapper.h
+isearch.o: isearch.c estruct.h edef.h efunc.h line.h utf8.h
+line.o: line.c line.h utf8.h estruct.h edef.h efunc.h
+lock.o: lock.c estruct.h edef.h efunc.h
+main.o: main.c estruct.h edef.h efunc.h ebind.h line.h utf8.h version.h
+pklock.o: pklock.c estruct.h edef.h efunc.h
+posix.o: posix.c estruct.h edef.h efunc.h utf8.h
+random.o: random.c estruct.h edef.h efunc.h line.h utf8.h
+region.o: region.c estruct.h edef.h efunc.h line.h utf8.h
+search.o: search.c estruct.h edef.h efunc.h line.h utf8.h
+spawn.o: spawn.c estruct.h edef.h efunc.h
+tcap.o: tcap.c estruct.h edef.h efunc.h
+window.o: window.c estruct.h edef.h efunc.h line.h utf8.h wrapper.h
+word.o: word.c estruct.h edef.h efunc.h line.h utf8.h
+names.o: names.c estruct.h edef.h efunc.h line.h utf8.h
+globals.o: globals.c estruct.h edef.h
+version.o: version.c version.h
+usage.o: usage.c usage.h
+wrapper.o: wrapper.c usage.h
 utf8.o: utf8.c utf8.h
-window.o: window.c estruct.h edef.h
-word.o: word.c estruct.h edef.h
+util.o: util.c util.h
 
 # DEPENDENCIES MUST END AT END OF FILE
 # IF YOU PUT STUFF HERE IT WILL GO AWAY

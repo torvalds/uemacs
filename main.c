@@ -52,7 +52,7 @@
  */
 
 #include <stdio.h>
-#include <hunspell/hunspell.h>
+#include <hunspell.h>
 
 /* Make global definitions not external. */
 #define	maindef
