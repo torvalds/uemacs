@@ -28,7 +28,6 @@ struct video {
 
 #define VFCHG   0x0001		/* Changed flag                 */
 #define	VFEXT	0x0002		/* extended (beyond column 80)  */
-#define	VFREV	0x0004		/* reverse video status         */
 #define	VFREQ	0x0008		/* reverse video request        */
 #define	VFCOL	0x0010		/* color change requested       */
 
@@ -483,7 +482,6 @@ void updgar(void)
 
 	for (i = 0; i < term.t_nrow; ++i) {
 		vscreen[i]->v_flag |= VFCHG;
-		vscreen[i]->v_flag &= ~VFREV;
 		txt = pscreen[i]->v_text;
 		for (j = 0; j < term.t_ncol; ++j)
 			txt[j] = ' ';
@@ -562,15 +560,9 @@ static void updext(void)
  */
 static int updateline(int row, struct video *vp1, struct video *vp2)
 {
-/*	UPDATELINE code for all other versions		*/
-
 	unicode_t *cp1;
 	unicode_t *cp2;
 	unicode_t *cp3;
-	unicode_t *cp4;
-	unicode_t *cp5;
-	int nbflag;	/* non-blanks to the right flag? */
-	int rev;		/* reverse video flag */
 	int req;		/* reverse video request flag */
 
 
@@ -580,92 +572,25 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 
 	/* if we need to change the reverse video status of the
 	   current line, we need to re-write the entire line     */
-	rev = (vp1->v_flag & VFREV) == VFREV;
 	req = (vp1->v_flag & VFREQ) == VFREQ;
-	if ((rev != req)) {
-		movecursor(row, 0);	/* Go to start of line. */
-		/* set rev video if needed */
-		if (rev != req)
-			(*term.t_rev) (req);
 
-		/* scan through the line and dump it to the screen and
-		   the virtual screen array                             */
-		cp3 = &vp1->v_text[term.t_ncol];
-		while (cp1 < cp3) {
-			TTputc(*cp1);
-			++ttcol;
-			*cp2++ = *cp1++;
-		}
-		/* turn rev video off */
-		if (rev != req)
-			(*term.t_rev) (FALSE);
+	movecursor(row, 0);	/* Go to start of line. */
+	/* set rev video if needed */
+	TTrev(req);
 
-		/* update the needed flags */
-		vp1->v_flag &= ~VFCHG;
-		if (req)
-			vp1->v_flag |= VFREV;
-		else
-			vp1->v_flag &= ~VFREV;
-		return TRUE;
-	}
-
-	/* advance past any common chars at the left */
-	while (cp1 != &vp1->v_text[term.t_ncol] && cp1[0] == cp2[0]) {
-		++cp1;
-		++cp2;
-	}
-
-/* This can still happen, even though we only call this routine on changed
- * lines. A hard update is always done when a line splits, a massive
- * change is done, or a buffer is displayed twice. This optimizes out most
- * of the excess updating. A lot of computes are used, but these tend to
- * be hard operations that do a lot of update, so I don't really care.
- */
-	/* if both lines are the same, no update needs to be done */
-	if (cp1 == &vp1->v_text[term.t_ncol]) {
-		vp1->v_flag &= ~VFCHG;	/* flag this line is changed */
-		return TRUE;
-	}
-
-	/* find out if there is a match on the right */
-	nbflag = FALSE;
+	/* scan through the line and dump it to the screen and
+	   the virtual screen array                             */
 	cp3 = &vp1->v_text[term.t_ncol];
-	cp4 = &vp2->v_text[term.t_ncol];
-
-	while (cp3[-1] == cp4[-1]) {
-		--cp3;
-		--cp4;
-		if (cp3[0] != ' ')	/* Note if any nonblank */
-			nbflag = TRUE;	/* in right match. */
-	}
-
-	cp5 = cp3;
-
-	/* Erase to EOL ? */
-	if (nbflag == FALSE && eolexist == TRUE && (req != TRUE)) {
-		while (cp5 != cp1 && cp5[-1] == ' ')
-			--cp5;
-
-		if (cp3 - cp5 <= 3)	/* Use only if erase is */
-			cp5 = cp3;	/* fewer characters. */
-	}
-
-	movecursor(row, cp1 - &vp1->v_text[0]);	/* Go to start of line. */
-	TTrev(rev);
-
-	while (cp1 != cp5) {	/* Ordinary. */
+	while (cp1 < cp3) {
 		TTputc(*cp1);
 		++ttcol;
 		*cp2++ = *cp1++;
 	}
-
-	if (cp5 != cp3) {	/* Erase. */
-		TTeeol();
-		while (cp1 != cp3)
-			*cp2++ = *cp1++;
-	}
+	/* turn rev video off */
 	TTrev(FALSE);
-	vp1->v_flag &= ~VFCHG;	/* flag this line as updated */
+
+	/* update the needed flags */
+	vp1->v_flag &= ~VFCHG;
 	return TRUE;
 }
 
