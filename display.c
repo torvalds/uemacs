@@ -44,10 +44,6 @@ int chg_width, chg_height;
 static int reframe(struct window *wp);
 static void updone(struct window *wp);
 static void updall(struct window *wp);
-static int scrolls(int inserts);
-static void scrscroll(int from, int to, int count);
-static int texttest(int vrow, int prow);
-static int endofline(unicode_t *s, int n);
 static void updext(void);
 static int updateline(int row, struct video *vp1, struct video *vp2);
 static void modeline(struct window *wp);
@@ -196,10 +192,6 @@ int upscreen(int f, int n)
 	return TRUE;
 }
 
-#if SCROLLCODE
-static int scrflags;
-#endif
-
 /*
  * Make sure that the display is right. This is a three part process. First,
  * scan through all of the windows looking for dirty ones. Check the framing,
@@ -220,51 +212,17 @@ int update(int force)
 
 	displaying = TRUE;
 
-#if SCROLLCODE
-
-	/* first, propagate mode line changes to all instances of
-	   a buffer displayed in more than one window */
-	wp = wheadp;
-	while (wp != NULL) {
-		if (wp->w_flag & WFMODE) {
-			if (wp->w_bufp->b_nwnd > 1) {
-				/* make sure all previous windows have this */
-				struct window *owp;
-				owp = wheadp;
-				while (owp != NULL) {
-					if (owp->w_bufp == wp->w_bufp)
-						owp->w_flag |= WFMODE;
-					owp = owp->w_wndp;
-				}
-			}
-		}
-		wp = wp->w_wndp;
-	}
-
-#endif
-
 	/* update any windows that need refreshing */
 	wp = wheadp;
 	while (wp != NULL) {
 		if (wp->w_flag) {
 			/* if the window has changed, service it */
 			reframe(wp);	/* check the framing */
-#if SCROLLCODE
-			if (wp->w_flag & (WFKILLS | WFINS)) {
-				scrflags |=
-				    (wp->w_flag & (WFINS | WFKILLS));
-				wp->w_flag &= ~(WFKILLS | WFINS);
-			}
-#endif
 			if ((wp->w_flag & ~WFMODE) == WFEDIT)
 				updone(wp);	/* update EDITed line */
 			else if (wp->w_flag & ~WFMOVE)
 				updall(wp);	/* update all lines */
-#if SCROLLCODE
-			if (scrflags || (wp->w_flag & WFMODE))
-#else
 			if (wp->w_flag & WFMODE)
-#endif
 				modeline(wp);	/* update modeline */
 			wp->w_flag = 0;
 			wp->w_force = 0;
@@ -309,7 +267,6 @@ static int reframe(struct window *wp)
 
 	/* if not a requested reframe, check for a needed one */
 	if ((wp->w_flag & WFFORCE) == 0) {
-#if SCROLLCODE
 		/* loop from one line above the window to one line after */
 		lp = wp->w_linep;
 		lp0 = lback(lp);
@@ -320,23 +277,13 @@ static int reframe(struct window *wp)
 			lp = lp0;
 		}
 		for (; i <= (int) (wp->w_ntrows); i++)
-#else
-		lp = wp->w_linep;
-		for (i = 0; i < wp->w_ntrows; i++)
-#endif
 		{
 			/* if the line is in the window, no reframe */
 			if (lp == wp->w_dotp) {
-#if SCROLLCODE
 				/* if not _quite_ in, we'll reframe gently */
 				if (i < 0 || i == wp->w_ntrows) {
-					/* if the terminal can't help, then
-					   we're simply outside */
-					if (term.t_scroll == NULL)
-						i = wp->w_force;
 					break;
 				}
-#endif
 				return TRUE;
 			}
 
@@ -348,15 +295,11 @@ static int reframe(struct window *wp)
 			lp = lforw(lp);
 		}
 	}
-#if SCROLLCODE
 	if (i == -1) {		/* we're just above the window */
 		i = scrollcount;	/* put dot at first line */
-		scrflags |= WFINS;
 	} else if (i == wp->w_ntrows) {	/* we're just below the window */
 		i = -scrollcount;	/* put dot at last line */
-		scrflags |= WFKILLS;
 	} else			/* put dot where requested */
-#endif
 		i = wp->w_force;	/* (is 0, unless reposition() was called) */
 
 	wp->w_flag |= WFMODE;
@@ -572,14 +515,6 @@ int updupd(int force)
 	struct video *vp1;
 	int i;
 
-#if SCROLLCODE
-	if (scrflags & WFKILLS)
-		scrolls(FALSE);
-	if (scrflags & WFINS)
-		scrolls(TRUE);
-	scrflags = 0;
-#endif
-
 	for (i = 0; i < term.t_nrow; ++i) {
 		vp1 = vscreen[i];
 
@@ -590,166 +525,6 @@ int updupd(int force)
 	}
 	return TRUE;
 }
-
-#if SCROLLCODE
-
-/*
- * optimize out scrolls (line breaks, and newlines)
- * arg. chooses between looking for inserts or deletes
- */
-static int scrolls(int inserts)
-{				/* returns true if it does something */
-	struct video *vpv;	/* virtual screen image */
-	struct video *vpp;	/* physical screen image */
-	int i, j, k;
-	int rows, cols;
-	int first, match, count, target, end;
-	int longmatch, longcount;
-	int from, to;
-
-	if (!term.t_scroll)	/* no way to scroll */
-		return FALSE;
-
-	rows = term.t_nrow;
-	cols = term.t_ncol;
-
-	first = -1;
-	for (i = 0; i < rows; i++) {	/* find first wrong line */
-		if (!texttest(i, i)) {
-			first = i;
-			break;
-		}
-	}
-
-	if (first < 0)
-		return FALSE;	/* no text changes */
-
-	vpv = vscreen[first];
-	vpp = pscreen[first];
-
-	if (inserts) {
-		/* determine types of potential scrolls */
-		end = endofline(vpv->v_text, cols);
-		if (end == 0)
-			target = first;	/* newlines */
-		else if (memcmp(vpp->v_text, vpv->v_text, 4*end) == 0)
-			target = first + 1;	/* broken line newlines */
-		else
-			target = first;
-	} else {
-		target = first + 1;
-	}
-
-	/* find the matching shifted area */
-	match = -1;
-	longmatch = -1;
-	longcount = 0;
-	from = target;
-	for (i = from + 1; i < rows - longcount /* P.K. */ ; i++) {
-		if (inserts ? texttest(i, from) : texttest(from, i)) {
-			match = i;
-			count = 1;
-			for (j = match + 1, k = from + 1;
-			     j < rows && k < rows; j++, k++) {
-				if (inserts ? texttest(j, k) :
-				    texttest(k, j))
-					count++;
-				else
-					break;
-			}
-			if (longcount < count) {
-				longcount = count;
-				longmatch = match;
-			}
-		}
-	}
-	match = longmatch;
-	count = longcount;
-
-	if (!inserts) {
-		/* full kill case? */
-		if (match > 0 && texttest(first, match - 1)) {
-			target--;
-			match--;
-			count++;
-		}
-	}
-
-	/* do the scroll */
-	if (match > 0 && count > 2) {	/* got a scroll */
-		/* move the count lines starting at target to match */
-		if (inserts) {
-			from = target;
-			to = match;
-		} else {
-			from = match;
-			to = target;
-		}
-		if (2 * count < abs(from - to))
-			return FALSE;
-		scrscroll(from, to, count);
-		for (i = 0; i < count; i++) {
-			vpp = pscreen[to + i];
-			vpv = vscreen[to + i];
-			memcpy(vpp->v_text, vpv->v_text, 4*cols);
-			vpp->v_flag = vpv->v_flag;	/* XXX */
-			if (vpp->v_flag & VFREV) {
-				vpp->v_flag &= ~VFREV;
-				vpp->v_flag |= ~VFREQ;
-			}
-		}
-		if (inserts) {
-			from = target;
-			to = match;
-		} else {
-			from = target + count;
-			to = match + count;
-		}
-		for (i = from; i < to; i++) {
-			unicode_t *txt;
-			txt = pscreen[i]->v_text;
-			for (j = 0; j < term.t_ncol; ++j)
-				txt[j] = ' ';
-			vscreen[i]->v_flag |= VFCHG;
-		}
-		return TRUE;
-	}
-	return FALSE;
-}
-
-/* move the "count" lines starting at "from" to "to" */
-static void scrscroll(int from, int to, int count)
-{
-	ttrow = ttcol = -1;
-	(*term.t_scroll) (from, to, count);
-}
-
-/*
- * return TRUE on text match
- *
- * int vrow, prow;		virtual, physical rows
- */
-static int texttest(int vrow, int prow)
-{
-	struct video *vpv = vscreen[vrow];	/* virtual screen image */
-	struct video *vpp = pscreen[prow];	/* physical screen image */
-
-	return !memcmp(vpv->v_text, vpp->v_text, 4*term.t_ncol);
-}
-
-/*
- * return the index of the first blank of trailing whitespace
- */
-static int endofline(unicode_t *s, int n)
-{
-	int i;
-	for (i = n - 1; i >= 0; i--)
-		if (s[i] != ' ')
-			return i + 1;
-	return 0;
-}
-
-#endif				/* SCROLLCODE */
 
 /*
  * updext:

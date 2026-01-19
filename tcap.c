@@ -36,24 +36,16 @@ static void tcapeeop(void);
 static void tcapbeep(void);
 static void tcaprev(int);
 static int tcapcres(char *);
-static void tcapscrollregion(int top, int bot);
 static void putpad(char *str);
 
 static void tcapopen(void);
 static void tcapclose(void);
-
-static void tcapscroll_reg(int from, int to, int linestoscroll);
-static void tcapscroll_delins(int from, int to, int linestoscroll);
 
 #define TCAPSLEN 315
 static char tcapbuf[TCAPSLEN];
 static char *UP, PC, *CM, *CE, *CL, *SO, *SE;
 
 static char *TI, *TE;
-
-#if SCROLLCODE
-static char *CS, *DL, *AL, *SF, *SR;
-#endif
 
 struct terminal term = {
 	0, /* These four values are set dynamically at open time. */
@@ -76,7 +68,6 @@ struct terminal term = {
 	tcapbeep,
 	tcaprev,
 	tcapcres,
-	NULL		/* set dynamically at open time */
 };
 
 static void tcapopen(void)
@@ -148,23 +139,6 @@ static void tcapopen(void)
 
 		if (CE == NULL)	/* will we be able to use clear to EOL? */
 			eolexist = FALSE;
-#if SCROLLCODE
-		CS = tgetstr("cs", &p);
-		SF = tgetstr("sf", &p);
-		SR = tgetstr("sr", &p);
-		DL = tgetstr("dl", &p);
-		AL = tgetstr("al", &p);
-
-		if (CS && SR) {
-			if (SF == NULL)	/* assume '\n' scrolls forward */
-				SF = "\n";
-			term.t_scroll = tcapscroll_reg;
-		} else if (DL && AL) {
-			term.t_scroll = tcapscroll_delins;
-		} else {
-			term.t_scroll = NULL;
-		}
-#endif
 
 		if (p >= &tcapbuf[TCAPSLEN]) {
 			puts("Terminal description too big!\n");
@@ -232,59 +206,6 @@ static int tcapcres(char *res)
 	return TRUE;
 }
 
-#if SCROLLCODE
-
-/* move howmanylines lines starting at from to to */
-static void tcapscroll_reg(int from, int to, int howmanylines)
-{
-	int i;
-	if (to == from)
-		return;
-	if (to < from) {
-		tcapscrollregion(to, from + howmanylines - 1);
-		tcapmove(from + howmanylines - 1, 0);
-		for (i = from - to; i > 0; i--)
-			putpad(SF);
-	} else {		/* from < to */
-		tcapscrollregion(from, to + howmanylines - 1);
-		tcapmove(from, 0);
-		for (i = to - from; i > 0; i--)
-			putpad(SR);
-	}
-	tcapscrollregion(0, term.t_nrow);
-}
-
-/* move howmanylines lines starting at from to to */
-static void tcapscroll_delins(int from, int to, int howmanylines)
-{
-	int i;
-	if (to == from)
-		return;
-	if (to < from) {
-		tcapmove(to, 0);
-		for (i = from - to; i > 0; i--)
-			putpad(DL);
-		tcapmove(to + howmanylines, 0);
-		for (i = from - to; i > 0; i--)
-			putpad(AL);
-	} else {
-		tcapmove(from + howmanylines, 0);
-		for (i = to - from; i > 0; i--)
-			putpad(DL);
-		tcapmove(from, 0);
-		for (i = to - from; i > 0; i--)
-			putpad(AL);
-	}
-}
-
-/* cs is set up just like cm, so we use tgoto... */
-static void tcapscrollregion(int top, int bot)
-{
-	ttputc(PC);
-	putpad(tgoto(CS, bot, top));
-}
-
-#endif
 
 static void tcapbeep(void)
 {

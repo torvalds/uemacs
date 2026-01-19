@@ -55,8 +55,6 @@
 
 #define	XONXOFF	1
 
-#define SCROLLCODE 1   /* scrolling code P.K.                          */
-
 /* System dependant library redefinitions, structures and includes. */
 
 /* Define some ability flags. */
@@ -216,11 +214,6 @@ struct window {
 #define WFMODE  0x10		/* Update mode line.            */
 #define	WFCOLR	0x20		/* Needs a color change         */
 
-#if SCROLLCODE
-#define WFKILLS 0x40		/* something was deleted        */
-#define WFINS   0x80		/* something was inserted       */
-#endif
-
 
 /*
  * Text is kept in buffers. A buffer header, described below, exists for every
@@ -304,9 +297,6 @@ struct terminal {
 	void (*t_beep)(void);	/* Beep.                        */
 	void (*t_rev)(int);	/* set reverse video state      */
 	int (*t_rez)(char *);	/* change screen resolution     */
-#if     SCROLLCODE
-	void (*t_scroll)(int, int,int);	/* scroll a region of the screen */
-#endif
 };
 
 /*	TEMPORARY macros for terminal I/O  (to be placed in a machine

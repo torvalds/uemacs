@@ -60,9 +60,6 @@ static char *envars[] = {
 	"tab",			/* tab 4 or 8 */
 	"overlap",
 	"jump",
-#if SCROLLCODE
-	"scroll",		/* scroll enabled */
-#endif
 };
 
 /* And its preprocesor definitions. */

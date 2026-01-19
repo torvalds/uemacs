@@ -420,13 +420,8 @@ int enlargewind(int f, int n)
 	}
 	curwp->w_ntrows += n;
 	adjwp->w_ntrows -= n;
-#if	SCROLLCODE
-	curwp->w_flag |= WFMODE | WFHARD | WFINS;
-	adjwp->w_flag |= WFMODE | WFHARD | WFKILLS;
-#else
 	curwp->w_flag |= WFMODE | WFHARD;
 	adjwp->w_flag |= WFMODE | WFHARD;
-#endif
 	return TRUE;
 }
 
@@ -472,13 +467,8 @@ int shrinkwind(int f, int n)
 	}
 	curwp->w_ntrows -= n;
 	adjwp->w_ntrows += n;
-#if	SCROLLCODE
-	curwp->w_flag |= WFMODE | WFHARD | WFKILLS;
-	adjwp->w_flag |= WFMODE | WFHARD | WFINS;
-#else
 	curwp->w_flag |= WFMODE | WFHARD;
 	adjwp->w_flag |= WFMODE | WFHARD;
-#endif
 	return TRUE;
 }
 

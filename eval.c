@@ -300,13 +300,8 @@ char *gtenv(char *vname)
 		return itoa(overlap);
 	case EVSCROLLCOUNT:
 		return itoa(scrollcount);
-#if SCROLLCODE
-	case EVSCROLL:
-		return ltos(term.t_scroll != NULL);
-#else
 	case EVSCROLL:
 		return ltos(0);
-#endif
 	}
 	exit(-12);		/* again, we should never get here */
 }
@@ -654,10 +649,6 @@ int svar(struct variable_description *var, char *value)
 			scrollcount = atoi(value);
 			break;
 		case EVSCROLL:
-#if SCROLLCODE
-			if (!stol(value))
-				term.t_scroll = NULL;
-#endif
 			break;
 		}
 		break;

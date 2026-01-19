@@ -477,9 +477,6 @@ int insert_newline(int f, int n)
 	while (n--) {
 		if ((s = lnewline()) != TRUE)
 			return s;
-#if SCROLLCODE
-		curwp->w_flag |= WFINS;
-#endif
 	}
 	return TRUE;
 }
@@ -519,9 +516,6 @@ int cinsert(void)
 	if (bracef)
 		insert_tab(FALSE, 1);
 
-#if SCROLLCODE
-	curwp->w_flag |= WFINS;
-#endif
 	return TRUE;
 }
 
