@@ -119,6 +119,10 @@ int getcline(void)
 
 /*
  * Return current column.  Stop at first non-blank given TRUE argument.
+ *
+ * See vtputc() for rough formatting of unicode characters. We show
+ * control characters as multiple characters, the rest are given one
+ * unicode slot each and assumed to show as a single fixed size char.
  */
 int getccol(int bflg)
 {
@@ -136,9 +140,9 @@ int getccol(int bflg)
 			break;
 		if (c == '\t')
 			col |= tabmask;
-		else if (c < 0x20 || c == 0x7F)
+		else if (c < 0x20 || c == 0x7F)		// "^X": 2 columns
 			++col;
-		else if (c >= 0xc0 && c <= 0xa0)
+		else if (c >= 0x80 && c <= 0xa0)	// "\xx": 3 columns
 			col += 2;
 		++col;
 	}

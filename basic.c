@@ -36,12 +36,12 @@ static int getgoal(struct line *dlp)
 		int width = utf8_to_unicode(dlp->l_text, dbo, len, &c);
 		newcol = col;
 
-		/* Take tabs, ^X and \xx hex characters into account */
+		/* Take tabs, ^X and \xx hex characters into account: see vtputc */
 		if (c == '\t')
 			newcol |= tabmask;
-		else if (c < 0x20 || c == 0x7F)
+		else if (c < 0x20 || c == 0x7F)		// "^X": 2 columns
 			++newcol;
-		else if (c >= 0x80 && c <= 0xa0)
+		else if (c >= 0x80 && c <= 0xa0)	// "\xx": 3 columns
 			newcol += 2;
 
 		++newcol;
