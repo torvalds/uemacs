@@ -57,7 +57,7 @@ clean:
 	$(Q) rm -f $(PROGRAM) core lintout makeout tags makefile.bak *.o
 
 install: $(PROGRAM)
-	cp em ${BINDIR}
+	install em ${BINDIR}
 	cp emacs.hlp ${LIBDIR}
 	cp emacs.rc ${LIBDIR}/.emacsrc
 	chmod 755 ${BINDIR}/em
