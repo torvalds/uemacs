@@ -62,10 +62,6 @@
 #include "ebind.h"   /* Default key bindings. */
 #include "version.h"
 
-#ifndef GOOD
-#define GOOD    0
-#endif
-
 #include <signal.h>
 static void emergencyexit(int);
 extern void sizesignal(int);
@@ -522,7 +518,6 @@ int quit(int f, int n)
 	    /* User says it's OK.   */
 	    || (s =
 		mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
-#if	(FILOCK && BSD) || SVR4
 		if (lockrel() != TRUE) {
 			TTputc('\n');
 			TTputc('\r');
@@ -530,12 +525,11 @@ int quit(int f, int n)
 			TTkclose();
 			exit(1);
 		}
-#endif
 		vttidy();
 		if (f)
 			exit(n);
 		else
-			exit(GOOD);
+			exit(0);
 	}
 	mlwrite("");
 	return s;
@@ -717,51 +711,4 @@ dspram()
 	movecursor(term.t_nrow, 0);
 }
 #endif
-#endif
-
-/*	On some primitave operation systems, and when emacs is used as
-	a subprogram to a larger project, emacs needs to de-alloc its
-	own used memory
-*/
-
-#if	CLEAN
-
-/*
- * cexit()
- *
- * int status;		return status of emacs
- */
-int cexit(int status)
-{
-	struct buffer *bp;	/* buffer list pointer */
-	struct window *wp;	/* window list pointer */
-	struct window *tp;	/* temporary window pointer */
-
-	/* first clean up the windows */
-	wp = wheadp;
-	while (wp) {
-		tp = wp->w_wndp;
-		free(wp);
-		wp = tp;
-	}
-	wheadp = NULL;
-
-	/* then the buffers */
-	bp = bheadp;
-	while (bp) {
-		bp->b_nwnd = 0;
-		bp->b_flag = 0;	/* don't say anything about a changed buffer! */
-		zotbuf(bp);
-		bp = bheadp;
-	}
-
-	/* and the kill buffer */
-	kdelete();
-
-	/* and the video buffers */
-	vtfree();
-
-#undef	exit
-	exit(status);
-}
 #endif

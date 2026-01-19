@@ -36,14 +36,10 @@ static struct video **vscreen;		/* Virtual screen. */
 static struct video **pscreen;		/* Physical screen. */
 
 static int displaying = TRUE;
-#if UNIX
 #include <signal.h>
-#endif
-#ifdef SIGWINCH
 #include <sys/ioctl.h>
 /* for window size changes */
 int chg_width, chg_height;
-#endif
 
 static int reframe(struct window *wp);
 static void updone(struct window *wp);
@@ -87,21 +83,6 @@ void vtinit(void)
 		pscreen[i] = vp;
 	}
 }
-
-#if	CLEAN
-/* free up all the dynamically allocated video structures */
-
-void vtfree(void)
-{
-	int i;
-	for (i = 0; i < term.t_mrow; ++i) {
-		free(vscreen[i]);
-		free(pscreen[i]);
-	}
-	free(vscreen);
-	free(pscreen);
-}
-#endif
 
 /*
  * Clean up the virtual terminal system, in anticipation for a return to the

@@ -25,15 +25,11 @@
 
 /* Make an intelligent guess about the target system. */
 
-#define SVR4 1
-#define SYSV 1
-#define	USG  1 /* System V UNIX */
 #define	UNIX 1
 
 #define	VT220 1
 
 #define	TERMCAP	1
-#define FILOCK  1
 
 
 /*	Configuration options	*/
@@ -54,7 +50,6 @@
 #define MAGIC	1  /* include regular expression matching?         */
 #define	AEDIT	1  /* advanced editing options: en/detabbing       */
 #define	PROC	1  /* named procedures                             */
-#define	CLEAN	0  /* de-alloc memory on exit                      */
 
 #define ASCII	1  /* always using ASCII char sequences for now    */
 
@@ -392,8 +387,6 @@ struct while_block {
 #define	IS_QUOTE	0x11	/* Quote next character */
 #define IS_REVERSE	0x12	/* Search backward */
 #define	IS_FORWARD	0x13	/* Search forward */
-#define	IS_VMSQUOTE	0x16	/* VMS quote character */
-#define	IS_VMSFORW	0x18	/* Search forward for VMS */
 #define	IS_QUIT		0x1B	/* Exit the search */
 #define	IS_RUBOUT	0x7F	/* Delete previous character */
 

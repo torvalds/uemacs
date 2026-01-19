@@ -7,31 +7,16 @@
 #include "edef.h"
 #include "efunc.h"
 
-#if (FILOCK && BSD) || SVR4
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
-#ifdef SVR4
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 #include <errno.h>
 
 #define MAXLOCK 512
 #define MAXNAME 128
-
-#if defined(SVR4) && ! defined(__linux__)
-#include <sys/systeminfo.h>
-
-int gethostname(char *name, int namelen)
-{
-	return sysinfo(SI_HOSTNAME, name, namelen);
-}
-#endif
-
 
 
 /**********************
@@ -54,16 +39,8 @@ char *dolock(char *fname)
 	/* a regular file - even this code leaves a small window of     */
 	/* vulnerability but it is rather hard to exploit it            */
 
-#if defined(S_IFLNK)
 	if (lstat(lname, &sbuf) == 0)
-#else
-	if (stat(lname, &sbuf) == 0)
-#endif
-#if defined(S_ISREG)
 		if (!S_ISREG(sbuf.st_mode))
-#else
-		if (!(((sbuf.st_mode) & 070000) == 0))	/* SysV R2 */
-#endif
 			return "LOCK ERROR: not a regular file";
 
 	mask = umask(0);
@@ -72,10 +49,8 @@ char *dolock(char *fname)
 	if (fd < 0) {
 		if (errno == EACCES)
 			return NULL;
-#ifdef EROFS
 		if (errno == EROFS)
 			return NULL;
-#endif
 		return "LOCK ERROR: cannot access lock file";
 	}
 	if ((n = read(fd, locker, MAXNAME)) < 1) {
@@ -110,12 +85,9 @@ char *undolock(char *fname)
 	if (unlink(lname) != 0) {
 		if (errno == EACCES || errno == ENOENT)
 			return NULL;
-#ifdef EROFS
 		if (errno == EROFS)
 			return NULL;
-#endif
 		return "LOCK ERROR: cannot remove lock file";
 	}
 	return NULL;
 }
-#endif

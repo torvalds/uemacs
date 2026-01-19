@@ -10,7 +10,6 @@
 #include "edef.h"
 #include "efunc.h"
 
-#if	BSD | SVR4
 #include <sys/errno.h>
 
 static char *lname[NLOCKS];		/* names of all locked files */
@@ -153,4 +152,3 @@ void lckerror(char *errstr)
 	strcat(obuf, strerror(errno));
 	mlwrite(obuf);
 }
-#endif

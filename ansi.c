@@ -133,7 +133,6 @@ void ansiparm(int n)
 
 void ansiopen(void)
 {
-#if     V7 | USG | BSD
 	char *cp;
 
 	if ((cp = getenv("TERM")) == NULL) {
@@ -144,7 +143,6 @@ void ansiopen(void)
 		puts("Terminal type not 'vt100'!");
 		exit(1);
 	}
-#endif
 	strcpy(sres, "NORMAL");
 	revexist = TRUE;
 	ttopen();

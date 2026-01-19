@@ -168,7 +168,7 @@ int isearch(int f, int n)
 	 */
 
 	c = ectoc(expc = get_char());	/* Get the first character    */
-	if ((c == IS_FORWARD) || (c == IS_REVERSE) || (c == IS_VMSFORW)) {	/* Reuse old search string?   */
+	if ((c == IS_FORWARD) || (c == IS_REVERSE)) {	/* Reuse old search string?   */
 		for (cpos = 0; pat[cpos] != 0; cpos++)	/* Yup, find the length           */
 			col = echo_char(pat[cpos], col);	/*  and re-echo the string    */
 		if (c == IS_REVERSE) {	/* forward search?            */
@@ -195,7 +195,6 @@ int isearch(int f, int n)
 
 		case IS_REVERSE:	/* If backward search         */
 		case IS_FORWARD:	/* If forward search          */
-		case IS_VMSFORW:	/*  of either flavor          */
 			if (c == IS_REVERSE)	/* If reverse search              */
 				n = -1;	/* Set the reverse direction  */
 			else	/* Otherwise,                     */
@@ -209,7 +208,6 @@ int isearch(int f, int n)
 			break;	/* Make sure we use it        */
 
 		case IS_QUOTE:	/* Quote character            */
-		case IS_VMSQUOTE:	/*  of either variety         */
 			c = ectoc(expc = get_char());	/* Get the next char          */
 
 		case IS_TAB:	/* Generically allowed        */

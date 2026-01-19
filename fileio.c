@@ -31,14 +31,7 @@ int ffropen(char *fn)
  */
 int ffwopen(char *fn)
 {
-#if     VMS
-	int fd;
-
-	if ((fd = creat(fn, 0666, "rfm=var", "rat=cr")) < 0
-	    || (ffp = fdopen(fd, "w")) == NULL) {
-#else
 	if ((ffp = fopen(fn, "w")) == NULL) {
-#endif
 		mlwrite("Cannot open file for writing");
 		return FIOERR;
 	}
@@ -57,20 +50,11 @@ int ffclose(void)
 	}
 	eofflag = FALSE;
 
-#if	MSDOS & CTRLZ
-	fputc(26, ffp);		/* add a ^Z at the end of the file */
-#endif
-
-#if     V7 | USG | BSD | (MSDOS & (MSC | TURBO))
 	if (fclose(ffp) != FALSE) {
 		mlwrite("Error closing file");
 		return FIOERR;
 	}
 	return FIOSUC;
-#else
-	fclose(ffp);
-	return FIOSUC;
-#endif
 }
 
 /*

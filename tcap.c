@@ -20,11 +20,7 @@
 #include "edef.h"
 #include "efunc.h"
 
-#if TERMCAP
-
-#if UNIX
 #include <signal.h>
-#endif
 
 #define	MARGIN	8
 #define	SCRSIZ	64
@@ -299,4 +295,3 @@ static void putpad(char *str)
 {
 	tputs(str, 1, ttputc);
 }
-#endif /* TERMCAP */
