@@ -37,7 +37,7 @@ WARNINGS=-Wall -Wstrict-prototypes
 CFLAGS=-O2 $(WARNINGS) -g
 
  DEFINES=-DPOSIX -D_XOPEN_SOURCE=600 -D_GNU_SOURCE
- LIBS=-lcurses
+ LIBS=-lcurses -lhunspell-1.7
 LFLAGS=-hbx
 BINDIR=$(HOME)/bin
 LIBDIR=$(HOME)/lib

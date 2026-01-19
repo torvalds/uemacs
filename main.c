@@ -52,6 +52,7 @@
  */
 
 #include <stdio.h>
+#include <hunspell/hunspell.h>
 
 /* Make global definitions not external. */
 #define	maindef
@@ -79,6 +80,15 @@ void usage(int status)
   exit(status);
 }
 
+static Hunhandle *hunhandle;
+
+int spellcheck(const char *word)
+{
+	if (!hunhandle)
+		return 1;
+	return Hunspell_spell(hunhandle, word);
+}
+
 int main(int argc, char **argv)
 {
 	int c = -1;	/* command character */
@@ -99,6 +109,10 @@ int main(int argc, char **argv)
 	int errflag;		/* C error processing? */
 	char bname[NBUFN];	/* buffer name of file to read */
 	int newc;
+
+	const char *aff_path = "/usr/share/hunspell/en_US.aff";
+	const char *dic_path = "/usr/share/hunspell/en_US.dic";
+	hunhandle = Hunspell_create(aff_path, dic_path);
 
 	signal(SIGWINCH, sizesignal);
 	if (argc == 2) {

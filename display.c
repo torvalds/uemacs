@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include "estruct.h"
 #include "edef.h"
@@ -545,6 +546,89 @@ static void updext(void)
 	vscreen[currow]->v_text[0] = '$';
 }
 
+static void TTputs(const char *s)
+{
+	for (char c; (c = *s) != 0; s++)
+		TTputc(c);
+}
+
+static bool is_letter(unicode_t ch)
+{
+	return ch > 128 || isalpha(ch);
+}
+
+static bool is_notaword(unicode_t ch)
+{
+	return ch == '_' || (ch >= '0' && ch <= '9');
+}
+
+static int find_letter(unicode_t *line, size_t len, int pos)
+{
+	while (pos < len) {
+		if (is_letter(line[pos]))
+			return pos;
+		pos++;
+	}
+	return -1;
+}
+
+static int find_not_letter(unicode_t *line, size_t len, int pos)
+{
+	while (pos < len) {
+		if (!is_letter(line[pos]))
+			return pos;
+		pos++;
+	}
+	return len;
+}
+
+#define BAD_WORD_BEGIN 1
+#define BAD_WORD_END 2
+
+static void findwords(unicode_t *line, size_t len, unsigned char *result, size_t size)
+{
+	int pos = 0;
+
+	memset(result, 0, size);
+	while ((pos = find_letter(line, len, pos)) >= 0) {
+		int start = pos;
+		int end = find_not_letter(line, len, pos+1);
+
+		// Special case: allow (one) apostrophe for abbreviations
+		if (end+1 < len && line[end] == '\'' && is_letter(line[end+1]))
+			end = find_not_letter(line, len, end+2);
+
+		pos = end+1;
+
+		// A word with adjacent numbers or underscores is
+		// not a word, it's a hex number or a variable name
+		if (start && is_notaword(line[start - 1]))
+			continue;
+		if (end < len && is_notaword(line[end]))
+			continue;
+
+		// We found something that may be a real word.
+		// Check it, and mark it in the result
+		if (end > size)
+			return;
+
+		char word_buffer[80];
+		int word_len = end - start;
+		if (word_len >= sizeof(word_buffer)-1)
+			continue;
+		for (int i = 0; i < word_len; i++)
+			word_buffer[i] = line[start + i];
+		word_buffer[word_len] = 0;
+		if (spellcheck(word_buffer))
+			continue;
+
+		// We found something that hunspell doesn't like
+		result[start] = BAD_WORD_BEGIN;
+		result[end-1] |= BAD_WORD_END;
+	}
+	return;
+}
+
 /*
  * Update a single line. This does not know how to use insert or delete
  * character sequences; we are using VT52 functionality. Update the physical
@@ -560,32 +644,48 @@ static void updext(void)
  */
 static int updateline(int row, struct video *vp1, struct video *vp2)
 {
-	unicode_t *cp1;
-	unicode_t *cp2;
-	unicode_t *cp3;
-	int req;		/* reverse video request flag */
-
-
-	/* set up pointers to virtual and physical lines */
-	cp1 = &vp1->v_text[0];
-	cp2 = &vp2->v_text[0];
-
-	/* if we need to change the reverse video status of the
-	   current line, we need to re-write the entire line     */
-	req = (vp1->v_flag & VFREQ) == VFREQ;
+	int maxchar = 0;
+	unsigned char analyze[256];
 
 	movecursor(row, 0);	/* Go to start of line. */
-	/* set rev video if needed */
-	TTrev(req);
 
-	/* scan through the line and dump it to the screen and
-	   the virtual screen array                             */
-	cp3 = &vp1->v_text[term.t_ncol];
-	while (cp1 < cp3) {
-		TTputc(*cp1);
-		++ttcol;
-		*cp2++ = *cp1++;
+	/* scan through the line and dump it to the the
+	    virtual screen array, finding where the last non-space is  */
+	for (int i = 0; i < term.t_ncol; i++) {
+		unicode_t ch = vp1->v_text[i];
+		vp2->v_text[i] = ch;
+		if (ch != ' ')
+			maxchar = i+1;
 	}
+
+	findwords(vp1->v_text, maxchar, analyze, sizeof(analyze));
+
+	/* set rev video if needed, and fill all the way */
+	if (vp1->v_flag & VFREQ) {
+		maxchar = term.t_ncol;
+		TTrev(TRUE);
+	}
+
+#define SPELLSTART "\033[1m"
+#define SPELLSTOP "\033[22m"
+
+	int started = 0;
+	for (int i = 0; i < maxchar; i++) {
+		if (i < sizeof(analyze) && (analyze[i] & BAD_WORD_BEGIN)) {
+			started = 1;
+			TTputs(SPELLSTART);
+		}
+		TTputc(vp1->v_text[i]);
+		if (i < sizeof(analyze) && (analyze[i] & BAD_WORD_END)) {
+			TTputs(SPELLSTOP);
+			started = 0;
+		}
+	}
+	if (started)
+		TTputs(SPELLSTOP);
+	ttcol = term.t_ncol;
+
+	TTeeol();
 	/* turn rev video off */
 	TTrev(FALSE);
 

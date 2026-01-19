@@ -103,6 +103,7 @@ extern int istring(int f, int n);
 extern int ovstring(int f, int n);
 
 /* main.c */
+extern int spellcheck(const char *word);
 extern void edinit(char *bname);
 extern int execute(int c, int f, int n);
 extern int quickexit(int f, int n);
