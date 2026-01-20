@@ -21,7 +21,7 @@
 #include "version.h"
 #include "wrapper.h"
 #include "utf8.h"
-#include "util.h"
+#include "syntax.h"
 
 struct video {
 	int v_flag;				/* Flags */
@@ -549,12 +549,12 @@ static void TTputs(const char *s)
 		TTputc(c);
 }
 
-static bool is_letter(unicode_t ch)
+static int is_letter(unicode_t ch)
 {
 	return ch > 128 || isalpha(ch);
 }
 
-static bool is_notaword(unicode_t ch)
+static int is_notaword(unicode_t ch)
 {
 	return ch == '_' || (ch >= '0' && ch <= '9');
 }
@@ -644,55 +644,89 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
  */
 static int updateline(int row, struct video *vp1, struct video *vp2)
 {
-	int maxchar = 0, analyzed = 0;
-	unsigned char array[256];
-	bool spellcheck = curwp->w_bufp->b_mode & MDSPELL;
+	struct syn_region synreg[MAX_SYN_REGIONS];
+	unsigned char spellbuf[256];
+	int maxchar = 0;
+	int nspell = 0;
+	int nsyn = 0;
+	int i;
 
-	movecursor(row, 0);			/* Go to start of line. */
+	movecursor(row, 0);
 
-	/* scan through the line and dump it to the the
-	   virtual screen array, finding where the last non-space is  */
-	for (int i = 0; i < term.t_ncol; i++) {
+	/* Copy to physical screen, find last non-space */
+	for (i = 0; i < term.t_ncol; i++) {
 		unicode_t ch = vp1->v_text[i];
 		vp2->v_text[i] = ch;
 		if (ch != ' ')
 			maxchar = i + 1;
 	}
 
-	/* set rev video if needed, and fill all the way */
+	/* Reverse video mode line */
 	if (vp1->v_flag & VFREQ) {
 		maxchar = term.t_ncol;
 		TTrev(TRUE);
-		spellcheck = false;
+	} else {
+		/* Spell check */
+		if (curwp->w_bufp->b_mode & MDSPELL)
+			nspell = findwords(vp1->v_text, maxchar,
+					   spellbuf, sizeof(spellbuf));
+		/* Syntax highlighting */
+		if ((curwp->w_bufp->b_mode & MDHILIT) && colorexist)
+			nsyn = syn_analyze(vp1->v_text, maxchar,
+					   synreg, MAX_SYN_REGIONS);
 	}
 
-	if (spellcheck)
-		analyzed = findwords(vp1->v_text, maxchar, array, sizeof(array));
+	/* Output characters with highlighting */
+	{
+		int synidx = 0;
+		int inword = 0;
+		int curcolor = -1;
 
-#define SPELLSTART "\033[1m"
-#define SPELLSTOP "\033[22m"
+		for (i = 0; i < maxchar; i++) {
+			/* Spell check: bold on bad word start */
+			if (i < nspell && (spellbuf[i] & BAD_WORD_BEGIN)) {
+				inword = 1;
+				TTputs("\033[1m");
+			}
 
-	int started = 0;
-	for (int i = 0; i < maxchar; i++) {
-		if (i < analyzed && (array[i] & BAD_WORD_BEGIN)) {
-			started = 1;
-			TTputs(SPELLSTART);
+			/* Syntax: advance region index, set color */
+			if (nsyn > 0) {
+				int newcolor = SYN_NORMAL;
+
+				/* Skip regions that ended */
+				while (synidx < nsyn && i >= synreg[synidx].end)
+					synidx++;
+
+				/* Check if inside current region */
+				if (synidx < nsyn && i >= synreg[synidx].start)
+					newcolor = synreg[synidx].type;
+
+				if (newcolor != curcolor) {
+					tcapreset();
+					if (newcolor != SYN_NORMAL)
+						tcapfgcolor(syn_getcolor(newcolor));
+					curcolor = newcolor;
+				}
+			}
+
+			TTputc(vp1->v_text[i]);
+
+			/* Spell check: unbold on bad word end */
+			if (i < nspell && (spellbuf[i] & BAD_WORD_END)) {
+				TTputs("\033[22m");
+				inword = 0;
+			}
 		}
-		TTputc(vp1->v_text[i]);
-		if (i < analyzed && (array[i] & BAD_WORD_END)) {
-			TTputs(SPELLSTOP);
-			started = 0;
-		}
+
+		if (inword)
+			TTputs("\033[22m");
+		if (curcolor != -1 && curcolor != SYN_NORMAL)
+			tcapreset();
 	}
-	if (started)
-		TTputs(SPELLSTOP);
+
 	ttcol = term.t_ncol;
-
 	TTeeol();
-	/* turn rev video off */
 	TTrev(FALSE);
-
-	/* update the needed flags */
 	vp1->v_flag &= ~VFCHG;
 	return TRUE;
 }
