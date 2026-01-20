@@ -29,8 +29,6 @@
 #include "efunc.h"
 #include "line.h"
 
-#if	ISRCH
-
 static int echo_char(int c, int col);
 
 /* A couple of "own" variables for re-eat */
@@ -487,8 +485,3 @@ void reeat(int c)
 	saved_get_char = term.t_getchar;	/* Save the char get routine          */
 	term.t_getchar = uneat;			/* Replace it with ours               */
 }
-#else
-int isearch(int f, int n)
-{
-}
-#endif

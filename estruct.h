@@ -11,12 +11,6 @@
 #define MAXCOL	500
 #define MAXROW	500
 
-/*	Configuration options	*/
-
-#define	ISRCH	1				/* Incremental searches like ITS EMACS          */
-#define	APROP	1				/* Add code for Apropos command                 */
-#define	PROC	1				/* named procedures                             */
-
 /* System dependant library redefinitions, structures and includes. */
 
 /* Define some ability flags. */
@@ -327,8 +321,6 @@ struct while_block {
 /*
  * Incremental search defines.
  */
-#if	ISRCH
-
 #define	CMDBUFLEN	256			/* Length of our command buffer */
 
 #define	IS_ABORT	0x07			/* Abort the isearch */
@@ -342,8 +334,6 @@ struct while_block {
 #define	IS_RUBOUT	0x7F			/* Delete previous character */
 
 /* IS_QUIT is no longer used, the variable metac is used instead */
-
-#endif
 
 /*
  * Defines for the metacharacters in the regular expression

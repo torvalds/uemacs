@@ -14,9 +14,7 @@ struct name_bind names[] = {
 	{ "abort-command", ctrlg },
 	{ "add-mode", setemode },
 	{ "add-global-mode", setgmode },
-#if	APROP
 	{ "apropos", apro },
-#endif
 	{ "backward-character", backchar },
 	{ "begin-macro", ctlxlp },
 	{ "beginning-of-file", gotobob },
@@ -99,9 +97,7 @@ struct name_bind names[] = {
 	{ "execute-macro-39", cbuf39 },
 	{ "execute-macro-40", cbuf40 },
 	{ "execute-named-command", namedcmd },
-#if	PROC
 	{ "execute-procedure", execproc },
-#endif
 	{ "execute-program", execprg },
 	{ "exit-emacs", quit },
 	{ "fill-paragraph", fillpara },
@@ -116,9 +112,7 @@ struct name_bind names[] = {
 	{ "hunt-backward", backhunt },
 	{ "help", help },
 	{ "i-shell", spawncli },
-#if	ISRCH
 	{ "incremental-search", fisearch },
-#endif
 	{ "insert-file", insfile },
 	{ "insert-space", insspace },
 	{ "insert-string", istring },
@@ -156,12 +150,8 @@ struct name_bind names[] = {
 	{ "resize-window", resize },
 	{ "restore-window", restwnd },
 	{ "replace-string", sreplace },
-#if	ISRCH
 	{ "reverse-incremental-search", risearch },
-#endif
-#if	PROC
 	{ "run", execproc },
-#endif
 	{ "save-file", filesave },
 	{ "save-window", savewnd },
 	{ "scroll-next-up", scrnextup },
@@ -176,9 +166,7 @@ struct name_bind names[] = {
 	{ "shrink-window", shrinkwind },
 	{ "split-current-window", splitwind },
 	{ "store-macro", storemac },
-#if	PROC
 	{ "store-procedure", storeproc },
-#endif
 	{ "suspend-emacs", bktoshell },
 	{ "transpose-characters", twiddle },
 	{ "trim-line", trim },

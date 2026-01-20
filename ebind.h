@@ -88,18 +88,14 @@ struct key_tab keytab[NBINDS] = {
 	{ CTLX | 'O', nextwind },
 	{ CTLX | 'P', prevwind },
 	{ CTLX | 'Q', quote },			/* alternative  */
-#if	ISRCH
 	{ CTLX | 'R', risearch },
 	{ CTLX | 'S', fisearch },
-#endif
 	{ CTLX | 'W', resize },
 	{ CTLX | 'X', nextbuffer },
 	{ CTLX | 'Z', enlargewind },
 	{ META | CONTROL | 'C', wordcount },
 	{ META | CONTROL | 'D', newsize },
-#if	PROC
 	{ META | CONTROL | 'E', execproc },
-#endif
 	{ META | CONTROL | 'F', getfence },
 	{ META | CONTROL | 'H', delbword },
 	{ META | CONTROL | 'K', unbindkey },
@@ -119,9 +115,7 @@ struct key_tab keytab[NBINDS] = {
 	{ META | '>', gotoeob },
 	{ META | '<', gotobob },
 	{ META | '~', unmark },
-#if	APROP
 	{ META | 'A', apro },
-#endif
 	{ META | 'B', backword },
 	{ META | 'C', capword },
 	{ META | 'D', delfword },

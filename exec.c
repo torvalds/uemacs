@@ -286,7 +286,6 @@ int storemac(int f, int n)
 	return TRUE;
 }
 
-#if	PROC
 /*
  * storeproc:
  *	Set up a procedure buffer and flag to store all
@@ -360,7 +359,6 @@ int execproc(int f, int n)
 			return status;
 	return TRUE;
 }
-#endif
 
 /*
  * execbuf:
@@ -783,7 +781,6 @@ int execfile(int f, int n)
 	if ((status = mlreply("File to execute: ", fname, NSTRING - 1)) != TRUE)
 		return status;
 
-#if	1
 	/* look up the path for the file */
 	fspec = flook(fname, FALSE);		/* used to by TRUE, P.K. */
 
@@ -791,7 +788,6 @@ int execfile(int f, int n)
 	if (fspec == NULL)
 		return FALSE;
 
-#endif
 	/* otherwise, execute it */
 	while (n-- > 0)
 		if ((status = dofile(fspec)) != TRUE)
