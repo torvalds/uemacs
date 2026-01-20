@@ -15,7 +15,6 @@
 
 #define	ISRCH	1				/* Incremental searches like ITS EMACS          */
 #define	APROP	1				/* Add code for Apropos command                 */
-#define	AEDIT	1				/* advanced editing options: en/detabbing       */
 #define	PROC	1				/* named procedures                             */
 
 /* System dependant library redefinitions, structures and includes. */

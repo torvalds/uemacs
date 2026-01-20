@@ -258,7 +258,6 @@ int insert_tab(int f, int n)
 	return linsert(tabsize - (getccol(FALSE) % tabsize), ' ');
 }
 
-#if	AEDIT
 /*
  * change tabs to spaces
  *
@@ -413,7 +412,6 @@ int trim(int f, int n)
 	thisflag &= ~CFCPCN;			/* flag that this resets the goal column */
 	return TRUE;
 }
-#endif
 
 /*
  * Open up some blank space. The basic plan is to insert a bunch of newlines,

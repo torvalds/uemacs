@@ -48,9 +48,7 @@ struct key_tab keytab[NBINDS] = {
 	{ CTLX | CONTROL | 'C', quit },		/* Hard quit.           */
 	{ CTLX | CONTROL | 'A', detab },
 	{ CTLX | CONTROL | 'D', filesave },	/* alternative          */
-#if	AEDIT
 	{ CTLX | CONTROL | 'E', entab },
-#endif
 	{ CTLX | CONTROL | 'F', filefind },
 	{ CTLX | CONTROL | 'I', insfile },
 	{ CTLX | CONTROL | 'L', lowerregion },
@@ -60,9 +58,7 @@ struct key_tab keytab[NBINDS] = {
 	{ CTLX | CONTROL | 'P', mvupwind },
 	{ CTLX | CONTROL | 'R', fileread },
 	{ CTLX | CONTROL | 'S', filesave },
-#if	AEDIT
 	{ CTLX | CONTROL | 'T', trim },
-#endif
 	{ CTLX | CONTROL | 'U', upperregion },
 	{ CTLX | CONTROL | 'V', viewfile },
 	{ CTLX | CONTROL | 'W', filewrite },

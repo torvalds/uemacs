@@ -48,15 +48,11 @@ struct name_bind names[] = {
 	{ "delete-window", delwind },
 	{ "describe-bindings", desbind },
 	{ "describe-key", deskey },
-#if	AEDIT
 	{ "detab-line", detab },
-#endif
 	{ "end-macro", ctlxrp },
 	{ "end-of-file", gotoeob },
 	{ "end-of-line", gotoeol },
-#if	AEDIT
 	{ "entab-line", entab },
-#endif
 	{ "exchange-point-and-mark", swapmark },
 	{ "execute-buffer", execbuf },
 	{ "execute-command-line", execcmd },
@@ -185,9 +181,7 @@ struct name_bind names[] = {
 #endif
 	{ "suspend-emacs", bktoshell },
 	{ "transpose-characters", twiddle },
-#if	AEDIT
 	{ "trim-line", trim },
-#endif
 	{ "unbind-key", unbindkey },
 	{ "universal-argument", unarg },
 	{ "unmark-buffer", unmark },
