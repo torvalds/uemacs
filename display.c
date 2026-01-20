@@ -21,6 +21,7 @@
 #include "version.h"
 #include "wrapper.h"
 #include "utf8.h"
+#include "util.h"
 #include "syntax.h"
 
 struct video {

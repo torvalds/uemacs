@@ -206,6 +206,7 @@ bind-to-key execute-macro-40 M-?
 	set %rctmp &mid $cfname &add %rctmp 1 5
 	!if &or &seq %rctmp "c" &seq %rctmp "h"
 		add-mode "cmode"
+		add-mode "hilit"
 	!endif
 	!if &or &seq %rctmp "txt" &or &seq %rctmp "doc" &or &seq %rctmp "tmp" &seq %rctmp "tex"
 		add-mode "wrap"
@@ -218,22 +219,22 @@ bind-to-key execute-macro-36	M-FNR
 ;	Setup for ASCII {|}[\] to ISO Latin-1 translation
 
 21	store-macro
-	insert-string "ä"
+	insert-string "ï¿½"
 !endm
 22	store-macro
-	insert-string "ö"
+	insert-string "ï¿½"
 !endm
 23	store-macro
-	insert-string "å"
+	insert-string "ï¿½"
 !endm
 24	store-macro
-	insert-string "Ä"
+	insert-string "ï¿½"
 !endm
 25	store-macro
-	insert-string "Ö"
+	insert-string "ï¿½"
 !endm
 26	store-macro
-	insert-string "Å"
+	insert-string "ï¿½"
 !endm
 
 27	store-macro
@@ -243,7 +244,7 @@ bind-to-key execute-macro-36	M-FNR
 	bind-to-key execute-macro-24 [
 	bind-to-key execute-macro-25 \
 	bind-to-key execute-macro-26 ]
-	write-message "ISO Latin-1 äöåÄÖÅ"
+	write-message "ISO Latin-1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
 !endm
 
 28	store-macro
