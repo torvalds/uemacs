@@ -10,18 +10,19 @@ char golabel[NPAT] = "";			/* current line to go to        */
 int execlevel = 0;				/* execution IF level           */
 int eolexist = TRUE;				/* does clear to EOL exist      */
 int revexist = FALSE;				/* does reverse video exist?    */
+int colorexist = FALSE;				/* do color capabilities exist? */
 int flickcode = FALSE;				/* do flicker supression?       */
 char *modename[] = {				/* name of modes                */
 	"WRAP", "CMODE", "SPELL", "EXACT", "VIEW", "OVER",
-	"MAGIC", "ASAVE", "UTF-8"
+	"MAGIC", "HILIT", "ASAVE", "UTF-8"
 };
 
 char *mode2name[] = {				/* name of modes                */
 	"Wrap", "Cmode", "Spell", "Exact", "View", "Over",
-	"Magic", "Asave", "utf-8"
+	"Magic", "Hilit", "Asave", "utf-8"
 };
 
-char modecode[] = "WCSEVOMYAU";			/* letters to represent modes   */
+char modecode[] = "WCSEVOMHAU";			/* letters to represent modes   */
 int gmode = 0;					/* global editor mode           */
 int gflags = GFREAD;				/* global control flag          */
 int gfcolor = 7;				/* global forgrnd color (white) */

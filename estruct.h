@@ -201,7 +201,7 @@ struct buffer {
 #define	BFTRUNC	0x04				/* buffer was truncated when read */
 
 /*	mode flags	*/
-#define	NUMMODES	10			/* # of defined modes           */
+#define	NUMMODES	11			/* # of defined modes           */
 
 #define	MDWRAP	0x0001				/* word wrap                    */
 #define	MDCMOD	0x0002				/* C indentation and fence match */
@@ -210,6 +210,7 @@ struct buffer {
 #define	MDVIEW	0x0010				/* read-only buffer             */
 #define MDOVER	0x0020				/* overwrite mode               */
 #define MDMAGIC	0x0040				/* regular expressions in search */
+#define	MDHILIT	0x0080				/* syntax highlighting          */
 #define	MDASAVE	0x0800				/* auto-save mode               */
 
 /*

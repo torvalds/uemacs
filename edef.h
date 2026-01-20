@@ -27,6 +27,7 @@ extern char golabel[];				/* current line to go to        */
 extern int execlevel;				/* execution IF level           */
 extern int eolexist;				/* does clear to EOL exist?     */
 extern int revexist;				/* does reverse video exist?    */
+extern int colorexist;				/* do color capabilities exist? */
 extern int flickcode;				/* do flicker supression?       */
 extern char *modename[];			/* text names of modes          */
 extern char *mode2name[];			/* text names of modes          */
