@@ -16,6 +16,7 @@
 #include "efunc.h"
 #include "line.h"
 #include "utf8.h"
+#include "util.h"
 
 /*
  * This routine, given a pointer to a struct line, and the current cursor goal
@@ -25,7 +26,6 @@
 static int getgoal(struct line *dlp)
 {
 	int col;
-	int newcol;
 	int dbo;
 	int len = llength(dlp);
 
@@ -34,20 +34,10 @@ static int getgoal(struct line *dlp)
 	while (dbo != len) {
 		unicode_t c;
 		int width = utf8_to_unicode(dlp->l_text, dbo, len, &c);
-		newcol = col;
 
-		/* Take tabs, ^X and \xx hex characters into account: see vtputc */
-		if (c == '\t')
-			newcol |= tabmask;
-		else if (c < 0x20 || c == 0x7F)		// "^X": 2 columns
-			++newcol;
-		else if (c >= 0x80 && c <= 0xa0)	// "\xx": 3 columns
-			newcol += 2;
-
-		++newcol;
-		if (newcol > curgoal)
+		col = next_column(col, c);
+		if (col > curgoal)
 			break;
-		col = newcol;
 		dbo += width;
 	}
 	return dbo;

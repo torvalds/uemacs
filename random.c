@@ -12,6 +12,8 @@
 #include "edef.h"
 #include "efunc.h"
 #include "line.h"
+#include "utf8.h"
+#include "util.h"
 
 int tabsize; /* Tab size (0: use real tabs) */
 
@@ -138,13 +140,7 @@ int getccol(int bflg)
 		i += utf8_to_unicode(dlp->l_text, i, len, &c);
 		if (c != ' ' && c != '\t' && bflg)
 			break;
-		if (c == '\t')
-			col |= tabmask;
-		else if (c < 0x20 || c == 0x7F)		// "^X": 2 columns
-			++col;
-		else if (c >= 0x80 && c <= 0xa0)	// "\xx": 3 columns
-			col += 2;
-		++col;
+		col = next_column(col, c);
 	}
 	return col;
 }

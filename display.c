@@ -21,6 +21,7 @@
 #include "version.h"
 #include "wrapper.h"
 #include "utf8.h"
+#include "util.h"
 
 struct video {
 	int v_flag;		/* Flags */
@@ -420,10 +421,7 @@ void updpos(void)
 
 		bytes = utf8_to_unicode(lp->l_text, i, curwp->w_doto, &c);
 		i += bytes;
-		if (c == '\t')
-			curcol |= tabmask;
-
-		++curcol;
+		curcol = next_column(curcol, c);
 	}
 
 	/* if extended, flag so and update the virtual line image */
