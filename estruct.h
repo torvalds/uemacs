@@ -14,7 +14,6 @@
 /*	Configuration options	*/
 
 #define	ISRCH	1				/* Incremental searches like ITS EMACS          */
-#define	WORDPRO	1				/* Advanced word processing features            */
 #define	APROP	1				/* Add code for Apropos command                 */
 #define	AEDIT	1				/* advanced editing options: en/detabbing       */
 #define	PROC	1				/* named procedures                             */

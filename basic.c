@@ -258,7 +258,6 @@ int backline(int f, int n)
 	return TRUE;
 }
 
-#if	WORDPRO
 static int is_new_para(void)
 {
 	int i, len;
@@ -359,7 +358,6 @@ int gotoeop(int f, int n)
 	curwp->w_flag |= WFMOVE;		/* force screen update */
 	return TRUE;
 }
-#endif
 
 /*
  * Scroll forward by a specified number of lines, or by a full page if no

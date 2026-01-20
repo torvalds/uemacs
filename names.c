@@ -34,9 +34,7 @@ struct name_bind names[] = {
 	{ "clear-and-redraw", redraw },
 	{ "clear-message-line", clrmes },
 	{ "copy-region", copyregion },
-#if	WORDPRO
 	{ "count-words", wordcount },
-#endif
 	{ "ctlx-prefix", cex },
 	{ "delete-blank-lines", deblank },
 	{ "delete-buffer", killbuffer },
@@ -110,9 +108,7 @@ struct name_bind names[] = {
 #endif
 	{ "execute-program", execprg },
 	{ "exit-emacs", quit },
-#if	WORDPRO
 	{ "fill-paragraph", fillpara },
-#endif
 	{ "filter-buffer", filter_buffer },
 	{ "find-file", filefind },
 	{ "forward-character", forwchar },
@@ -130,10 +126,8 @@ struct name_bind names[] = {
 	{ "insert-file", insfile },
 	{ "insert-space", insspace },
 	{ "insert-string", istring },
-#if	WORDPRO
 	{ "justify-paragraph", justpara },
 	{ "kill-paragraph", killpara },
-#endif
 	{ "kill-region", killregion },
 	{ "kill-to-end-of-line", killtext },
 	{ "list-buffers", listbuffers },
@@ -146,9 +140,7 @@ struct name_bind names[] = {
 	{ "next-buffer", nextbuffer },
 	{ "next-line", forwline },
 	{ "next-page", forwpage },
-#if	WORDPRO
 	{ "next-paragraph", gotoeop },
-#endif
 	{ "next-window", nextwind },
 	{ "next-word", forwword },
 	{ "nop", nullproc },
@@ -157,9 +149,7 @@ struct name_bind names[] = {
 	{ "pipe-command", pipecmd },
 	{ "previous-line", backline },
 	{ "previous-page", backpage },
-#if	WORDPRO
 	{ "previous-paragraph", gotobop },
-#endif
 	{ "previous-window", prevwind },
 	{ "previous-word", backword },
 	{ "query-replace-string", qreplace },

@@ -367,7 +367,6 @@ int inword(void)
 	return FALSE;
 }
 
-#if	WORDPRO
 /*
  * Fill the current paragraph according to the current
  * fill column
@@ -672,4 +671,3 @@ int wordcount(int f, int n)
 	mlwrite("Words %D Chars %D Lines %d Avg chars/word %f", nwords, nchars, nlines + 1, avgch);
 	return TRUE;
 }
-#endif
