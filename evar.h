@@ -159,6 +159,7 @@ static struct user_function funcs[] = {
 	{ "bxo", DYNAMIC },	/* bitwise xor   9-10-87  jwm */
 	{ "bno", MONAMIC },	/* bitwise not */
 	{ "xla", TRINAMIC },	/* XLATE character string translation */
+	{ "sir", DYNAMIC }	/* reverse find the index of one string in another */
 };
 
 /* And its preprocesor definitions. */
@@ -202,5 +203,6 @@ static struct user_function funcs[] = {
 #define UFBXOR		36
 #define	UFBNOT		37
 #define	UFXLATE		38
+#define UFRSINDEX	39
 
 #endif  /* EVAR_H_ */

@@ -160,6 +160,8 @@ char *gtfun(char *fname)
 		return itoa(~atoi(arg1));
 	case UFXLATE:
 		return xlat(arg1, arg2, arg3);
+	case UFRSINDEX:
+		return itoa(rsindex(arg1, arg2));
 	}
 
 	exit(-11);		/* never should get here */
@@ -889,6 +891,48 @@ int sindex(char *source, char *pattern)
 		if (*cp == 0)
 			return (int) (sp - source) + 1;
 		++sp;
+	}
+
+	/* no match at all.. */
+	return 0;
+}
+
+/*
+ * reverse find pattern within source
+ *
+ * char *source;	source string to search
+ * char *pattern;	string to look for
+ */
+int rsindex(char *source, char *pattern)
+{
+	char *sp;		/* ptr to current position to scan */
+	char *csp;		/* ptr to source string during comparison */
+	char *cp;		/* ptr to place to check for equality */
+	int lp;
+	int ls;
+
+	ls = strlen(source);
+	lp = strlen(pattern);
+	if (ls == 0 || lp == 0 || ls < lp)
+		return 0;
+
+	/* scanning through the source string */
+	sp = source + ls - lp;
+	while (sp >= source) {
+		/* scan through the pattern */
+		cp = pattern;
+		csp = sp;
+		while (*cp) {
+			if (!eq(*cp, *csp))
+				break;
+			++cp;
+			++csp;
+		}
+
+		/* was it a match? */
+		if (*cp == 0)
+			return (int) (sp - source) + 1;
+		--sp;
 	}
 
 	/* no match at all.. */
