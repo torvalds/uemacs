@@ -422,6 +422,16 @@ void updpos(void)
 		i += bytes;
 		if (c == '\t')
 			curcol |= tabmask;
+		else if (c < 0x20 || c == 0x7F)
+			++curcol;
+		/*
+		 * To support wide characters, we need complex range test.
+		 * e.g. Chinese characters are not in a continus range.
+		 */
+		/*
+		else if (c >= 0x4E00 && c <= 0x9FFF)
+			++curcol;
+		*/
 
 		++curcol;
 	}

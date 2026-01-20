@@ -222,6 +222,7 @@ int isearch(int f, int n)
 			cmd_buff[--cmd_offset] = '\0';	/* Yes, delete last char   */
 			curwp->w_dotp = curline;	/* Reset the line pointer     */
 			curwp->w_doto = curoff;	/*  and the offset            */
+			curwp->w_flag |= WFMOVE;
 			n = init_direction;	/* Reset the search direction */
 			strncpy(pat, pat_save, NPAT);	/* Restore the old search str */
 			cmd_reexecute = 0;	/* Start the whole mess over  */
