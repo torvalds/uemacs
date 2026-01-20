@@ -18,6 +18,14 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
+/* macOS compatibility: these flags don't exist on BSD systems */
+#ifndef OLCUC
+#define OLCUC 0
+#endif
+#ifndef XCASE
+#define XCASE 0
+#endif
+
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
