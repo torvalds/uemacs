@@ -154,6 +154,11 @@ extern void ttflush(void);
 extern int ttgetc(void);
 extern int typahead(void);
 
+/* tcap.c */
+extern void tcapfgcolor(int color);
+extern void tcapbold(void);
+extern void tcapreset(void);
+
 /* input.c */
 extern int mlyesno(char *prompt);
 extern int mlreply(char *prompt, char *buf, int nbuf);

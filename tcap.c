@@ -41,11 +41,18 @@ static void putpad(char *str);
 static void tcapopen(void);
 static void tcapclose(void);
 
-#define TCAPSLEN 315
+#define TCAPSLEN 512
 static char tcapbuf[TCAPSLEN];
 static char *UP, PC, *CM, *CE, *CL, *SO, *SE;
 
 static char *TI, *TE;
+
+/* Color capabilities */
+static char *AF;	/* ANSI foreground (setaf) */
+static char *OP;	/* original pair (reset colors) */
+static char *MD;	/* bold mode */
+static char *ME;	/* end all attributes */
+static int maxcolors;	/* number of colors supported */
 
 struct terminal term = {
 	0,					/* These four values are set dynamically at open time. */
@@ -131,6 +138,24 @@ static void tcapopen(void)
 	TI = tgetstr("ti", &p);			/* terminal init and exit */
 	TE = tgetstr("te", &p);
 
+	/* Query color capabilities using terminfo names */
+	AF = tigetstr("setaf");
+	if (AF == (char *)-1)
+		AF = NULL;
+	OP = tigetstr("op");
+	if (OP == (char *)-1)
+		OP = NULL;
+	MD = tigetstr("bold");
+	if (MD == (char *)-1)
+		MD = NULL;
+	ME = tigetstr("sgr0");
+	if (ME == (char *)-1)
+		ME = NULL;
+	maxcolors = tigetnum("colors");
+	if (maxcolors < 0)
+		maxcolors = 0;
+	colorexist = (maxcolors >= 8 && AF != NULL);
+
 	if (CL == NULL || CM == NULL || UP == NULL) {
 		puts("Incomplete termcap entry\n");
 		exit(1);
@@ -213,4 +238,37 @@ static void tcapbeep(void)
 static void putpad(char *str)
 {
 	tputs(str, 1, ttputc);
+}
+
+/*
+ * Set foreground color using termcap sequence.
+ * color: ANSI color index (0-7)
+ */
+void tcapfgcolor(int color)
+{
+	if (AF != NULL && color >= 0 && color < maxcolors) {
+		char *seq = tparm(AF, color);
+		if (seq)
+			tputs(seq, 1, ttputc);
+	}
+}
+
+/*
+ * Set bold mode using termcap sequence.
+ */
+void tcapbold(void)
+{
+	if (MD != NULL)
+		tputs(MD, 1, ttputc);
+}
+
+/*
+ * Reset all attributes using termcap sequence.
+ */
+void tcapreset(void)
+{
+	if (ME != NULL)
+		tputs(ME, 1, ttputc);
+	else if (OP != NULL)
+		tputs(OP, 1, ttputc);
 }
