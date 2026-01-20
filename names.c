@@ -117,9 +117,7 @@ struct name_bind names[] = {
 	{ "find-file", filefind },
 	{ "forward-character", forwchar },
 	{ "goto-line", gotoline },
-#if	CFENCE
 	{ "goto-matching-fence", getfence },
-#endif
 	{ "grow-window", enlargewind },
 	{ "handle-tab", insert_tab },
 	{ "hunt-forward", forwhunt },

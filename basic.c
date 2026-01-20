@@ -377,10 +377,8 @@ int forwpage(int f, int n)
 			n = 1;			/* If tiny window. */
 	} else if (n < 0)
 		return backpage(f, -n);
-#if     CVMVAS
 	else					/* Convert from pages. */
 		n *= curwp->w_ntrows;		/* To lines. */
-#endif
 	lp = curwp->w_linep;
 	while (n-- && lp != curbp->b_linep)
 		lp = lforw(lp);
@@ -407,10 +405,8 @@ int backpage(int f, int n)
 			n = 1;			/* Window is tiny. */
 	} else if (n < 0)
 		return forwpage(f, -n);
-#if     CVMVAS
 	else					/* Convert from pages. */
 		n *= curwp->w_ntrows;		/* To lines. */
-#endif
 	lp = curwp->w_linep;
 	while (n-- && lback(lp) != curbp->b_linep)
 		lp = lback(lp);

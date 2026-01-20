@@ -465,11 +465,9 @@ int execute(int c, int f, int n)
 		else
 			status = linsert(n, c);
 
-#if	CFENCE
 		/* check for CMODE fence matching */
 		if ((c == '}' || c == ')' || c == ']') && (curbp->b_mode & MDCMOD) != 0)
 			fmatch(c);
-#endif
 
 		/* check auto-save mode */
 		if (curbp->b_mode & MDASAVE)

@@ -512,7 +512,6 @@ int cinsert(void)
 	return TRUE;
 }
 
-#if	NBRACE
 /*
  * insert a brace into the text here...we are in CMODE
  *
@@ -604,43 +603,6 @@ int insbrace(int n, int c)
 	/* and insert the required brace(s) */
 	return linsert(n, c);
 }
-
-#else
-
-/*
- * insert a brace into the text here...we are in CMODE
- *
- * int n;		repeat count
- * int c;		brace to insert (always { for now)
- */
-int insbrace(int n, int c)
-{
-	int ch;					/* last character before input */
-	int i;
-	int target;				/* column brace should go after */
-
-	/* if we are at the beginning of the line, no go */
-	if (curwp->w_doto == 0)
-		return linsert(n, c);
-
-	/* scan to see if all space before this is white space */
-	for (i = curwp->w_doto - 1; i >= 0; --i) {
-		ch = lgetc(curwp->w_dotp, i);
-		if (ch != ' ' && ch != '\t')
-			return linsert(n, c);
-	}
-
-	/* delete back first */
-	target = getccol(FALSE);		/* calc where we will delete to */
-	target -= 1;
-	target -= target % (tabsize == 0 ? 8 : tabsize);
-	while (getccol(FALSE) > target)
-		backdel(FALSE, 1);
-
-	/* and insert the required brace(s) */
-	return linsert(n, c);
-}
-#endif
 
 int inspound(void)
 {						/* insert a # into the text here...we are in CMODE */
@@ -966,7 +928,6 @@ int writemsg(int f, int n)
 	return TRUE;
 }
 
-#if	CFENCE
 /*
  * the cursor is moved to a matching fence
  *
@@ -1064,7 +1025,6 @@ int getfence(int f, int n)
 	TTbeep();
 	return FALSE;
 }
-#endif
 
 /*
  * Close fences are matched against their partners, and if

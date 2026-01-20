@@ -13,10 +13,6 @@
 
 /*	Configuration options	*/
 
-#define CVMVAS  1				/* arguments to page forward/back in pages      */
-#define	CFENCE	1				/* fench matching in CMODE                      */
-#define	NBRACE	1				/* new style brace matching command             */
-
 #define	ISRCH	1				/* Incremental searches like ITS EMACS          */
 #define	WORDPRO	1				/* Advanced word processing features            */
 #define	APROP	1				/* Add code for Apropos command                 */

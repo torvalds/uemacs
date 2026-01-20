@@ -106,9 +106,7 @@ struct key_tab keytab[NBINDS] = {
 #if	PROC
 	{ META | CONTROL | 'E', execproc },
 #endif
-#if	CFENCE
 	{ META | CONTROL | 'F', getfence },
-#endif
 	{ META | CONTROL | 'H', delbword },
 	{ META | CONTROL | 'K', unbindkey },
 	{ META | CONTROL | 'L', reposition },
