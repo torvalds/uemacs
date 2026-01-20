@@ -24,17 +24,17 @@
 #include "util.h"
 
 struct video {
-	int v_flag;		/* Flags */
-	unicode_t v_text[1];	/* Screen data. */
+	int v_flag;				/* Flags */
+	unicode_t v_text[1];			/* Screen data. */
 };
 
-#define VFCHG   0x0001		/* Changed flag                 */
-#define	VFEXT	0x0002		/* extended (beyond column 80)  */
-#define	VFREQ	0x0008		/* reverse video request        */
-#define	VFCOL	0x0010		/* color change requested       */
+#define VFCHG   0x0001				/* Changed flag                 */
+#define	VFEXT	0x0002				/* extended (beyond column 80)  */
+#define	VFREQ	0x0008				/* reverse video request        */
+#define	VFCOL	0x0010				/* color change requested       */
 
-static struct video **vscreen;		/* Virtual screen. */
-static struct video **pscreen;		/* Physical screen. */
+static struct video **vscreen;			/* Virtual screen. */
+static struct video **pscreen;			/* Physical screen. */
 
 static int displaying = TRUE;
 #include <signal.h>
@@ -65,17 +65,17 @@ void vtinit(void)
 	int i;
 	struct video *vp;
 
-	TTopen();		/* open the screen */
-	TTkopen();		/* open the keyboard */
+	TTopen();				/* open the screen */
+	TTkopen();				/* open the keyboard */
 	TTrev(FALSE);
 	vscreen = xmalloc(term.t_mrow * sizeof(struct video *));
 
 	pscreen = xmalloc(term.t_mrow * sizeof(struct video *));
 	for (i = 0; i < term.t_mrow; ++i) {
-		vp = xmalloc(sizeof(struct video) + term.t_mcol*4);
+		vp = xmalloc(sizeof(struct video) + term.t_mcol * 4);
 		vp->v_flag = 0;
 		vscreen[i] = vp;
-		vp = xmalloc(sizeof(struct video) + term.t_mcol*4);
+		vp = xmalloc(sizeof(struct video) + term.t_mcol * 4);
 		vp->v_flag = 0;
 		pscreen[i] = vp;
 	}
@@ -118,7 +118,7 @@ void vtmove(int row, int col)
  */
 static void vtputc(int c)
 {
-	struct video *vp;	/* ptr to line being updated */
+	struct video *vp;			/* ptr to line being updated */
 
 	/* In case somebody passes us a signed char.. */
 	if (c < 0) {
@@ -161,7 +161,7 @@ static void vtputc(int c)
 		vtputc(hex[c & 15]);
 		return;
 	}
-	
+
 	if (vtcol >= 0)
 		vp->v_text[vtcol] = c;
 	++vtcol;
@@ -213,7 +213,7 @@ int update(int force)
 	while (wp != NULL) {
 		if (wp->w_flag) {
 			/* if the window has changed, service it */
-			reframe(wp);	/* check the framing */
+			reframe(wp);		/* check the framing */
 			if ((wp->w_flag & ~WFMODE) == WFEDIT)
 				updone(wp);	/* update EDITed line */
 			else if (wp->w_flag & ~WFMOVE)
@@ -270,8 +270,7 @@ static int reframe(struct window *wp)
 			i = -1;
 			lp = lp0;
 		}
-		for (; i <= (int) (wp->w_ntrows); i++)
-		{
+		for (; i <= (int)(wp->w_ntrows); i++) {
 			/* if the line is in the window, no reframe */
 			if (lp == wp->w_dotp) {
 				/* if not _quite_ in, we'll reframe gently */
@@ -289,20 +288,20 @@ static int reframe(struct window *wp)
 			lp = lforw(lp);
 		}
 	}
-	if (i == -1) {		/* we're just above the window */
-		i = scrollcount;	/* put dot at first line */
-	} else if (i == wp->w_ntrows) {	/* we're just below the window */
-		i = -scrollcount;	/* put dot at last line */
-	} else			/* put dot where requested */
-		i = wp->w_force;	/* (is 0, unless reposition() was called) */
+	if (i == -1) {				/* we're just above the window */
+		i = scrollcount;		/* put dot at first line */
+	} else if (i == wp->w_ntrows) {		/* we're just below the window */
+		i = -scrollcount;		/* put dot at last line */
+	} else					/* put dot where requested */
+		i = wp->w_force;		/* (is 0, unless reposition() was called) */
 
 	wp->w_flag |= WFMODE;
 
 	/* how far back to reframe? */
-	if (i > 0) {		/* only one screen worth of lines max */
+	if (i > 0) {				/* only one screen worth of lines max */
 		if (--i >= wp->w_ntrows)
 			i = wp->w_ntrows - 1;
-	} else if (i < 0) {	/* negative update???? */
+	} else if (i < 0) {			/* negative update???? */
 		i += wp->w_ntrows;
 		if (i < 0)
 			i = 0;
@@ -342,8 +341,8 @@ static void show_line(struct line *lp)
  */
 static void updone(struct window *wp)
 {
-	struct line *lp;	/* line to update */
-	int sline;	/* physical screen line to update */
+	struct line *lp;			/* line to update */
+	int sline;				/* physical screen line to update */
 
 	/* search down the line we want */
 	lp = wp->w_linep;
@@ -369,8 +368,8 @@ static void updone(struct window *wp)
  */
 static void updall(struct window *wp)
 {
-	struct line *lp;	/* line to update */
-	int sline;	/* physical screen line to update */
+	struct line *lp;			/* line to update */
+	int sline;				/* physical screen line to update */
 
 	/* search down the lines, updating them */
 	lp = wp->w_linep;
@@ -486,10 +485,10 @@ void updgar(void)
 			txt[j] = ' ';
 	}
 
-	movecursor(0, 0);	/* Erase the screen. */
+	movecursor(0, 0);			/* Erase the screen. */
 	(*term.t_eeop) ();
-	sgarbf = FALSE;		/* Erase-page clears */
-	mpresf = FALSE;		/* the message area. */
+	sgarbf = FALSE;				/* Erase-page clears */
+	mpresf = FALSE;				/* the message area. */
 }
 
 /*
@@ -523,8 +522,8 @@ int updupd(int force)
  */
 static void updext(void)
 {
-	int rcursor;	/* real cursor location */
-	struct line *lp;	/* pointer to current line */
+	int rcursor;				/* real cursor location */
+	struct line *lp;			/* pointer to current line */
 
 	/* calculate what column the real cursor will end up in */
 	rcursor = ((curcol - term.t_ncol) % term.t_scrsiz) + term.t_margin;
@@ -532,8 +531,8 @@ static void updext(void)
 
 	/* scan through the line outputing characters to the virtual screen */
 	/* once we reach the left edge                                  */
-	vtmove(currow, -lbound);	/* start scanning offscreen */
-	lp = curwp->w_dotp;	/* line to output */
+	vtmove(currow, -lbound);		/* start scanning offscreen */
+	lp = curwp->w_dotp;			/* line to output */
 	show_line(lp);
 
 	/* truncate the virtual line, restore tab offset */
@@ -593,13 +592,13 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
 
 	while ((pos = find_letter(line, len, pos)) >= 0) {
 		int start = pos;
-		int end = find_not_letter(line, len, pos+1);
+		int end = find_not_letter(line, len, pos + 1);
 
 		// Special case: allow (one) apostrophe for abbreviations
-		if (end+1 < len && line[end] == '\'' && is_letter(line[end+1]))
-			end = find_not_letter(line, len, end+2);
+		if (end + 1 < len && line[end] == '\'' && is_letter(line[end + 1]))
+			end = find_not_letter(line, len, end + 2);
 
-		pos = end+1;
+		pos = end + 1;
 
 		// A word with adjacent numbers or underscores is
 		// not a word, it's a hex number or a variable name
@@ -615,7 +614,7 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
 
 		char word_buffer[80];
 		int word_len = end - start;
-		if (word_len >= sizeof(word_buffer)-1)
+		if (word_len >= sizeof(word_buffer) - 1)
 			continue;
 		for (int i = 0; i < word_len; i++)
 			word_buffer[i] = line[start + i];
@@ -625,7 +624,7 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
 
 		// We found something that hunspell doesn't like
 		result[start] = BAD_WORD_BEGIN;
-		result[end-1] |= BAD_WORD_END;
+		result[end - 1] |= BAD_WORD_END;
 	}
 	return size;
 }
@@ -649,15 +648,15 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 	unsigned char array[256];
 	bool spellcheck = curwp->w_bufp->b_mode & MDSPELL;
 
-	movecursor(row, 0);	/* Go to start of line. */
+	movecursor(row, 0);			/* Go to start of line. */
 
 	/* scan through the line and dump it to the the
-	    virtual screen array, finding where the last non-space is  */
+	   virtual screen array, finding where the last non-space is  */
 	for (int i = 0; i < term.t_ncol; i++) {
 		unicode_t ch = vp1->v_text[i];
 		vp2->v_text[i] = ch;
 		if (ch != ' ')
-			maxchar = i+1;
+			maxchar = i + 1;
 	}
 
 	/* set rev video if needed, and fill all the way */
@@ -708,20 +707,19 @@ static void modeline(struct window *wp)
 {
 	char *cp;
 	int c;
-	int n;		/* cursor position count */
+	int n;					/* cursor position count */
 	struct buffer *bp;
-	int i;		/* loop index */
-	int lchar;	/* character to draw line in buffer with */
-	int firstm;	/* is this the first mode? */
-	char tline[NLINE];	/* buffer for part of mode line */
+	int i;					/* loop index */
+	int lchar;				/* character to draw line in buffer with */
+	int firstm;				/* is this the first mode? */
+	char tline[NLINE];			/* buffer for part of mode line */
 
 	n = wp->w_toprow + wp->w_ntrows;	/* Location. */
 	vscreen[n]->v_flag |= VFCHG | VFREQ | VFCOL;	/* Redraw next time. */
-	vtmove(n, 0);		/* Seek to right line. */
-	if (wp == curwp)	/* mark the current buffer */
+	vtmove(n, 0);				/* Seek to right line. */
+	if (wp == curwp)			/* mark the current buffer */
 		lchar = '-';
-	else
-	if (revexist)
+	else if (revexist)
 		lchar = ' ';
 	else
 		lchar = '-';
@@ -729,7 +727,7 @@ static void modeline(struct window *wp)
 	bp = wp->w_bufp;
 	vtputc(lchar);
 
-	if ((bp->b_flag & BFCHG) != 0)	/* "*" if changed. */
+	if ((bp->b_flag & BFCHG) != 0)		/* "*" if changed. */
 		vtputc('*');
 	else
 		vtputc(lchar);
@@ -762,7 +760,7 @@ static void modeline(struct window *wp)
 		firstm = FALSE;
 		strcat(tline, "Truncated");
 	}
-	for (i = 0; i < NUMMODES; i++)	/* add in the mode flags */
+	for (i = 0; i < NUMMODES; i++)		/* add in the mode flags */
 		if (wp->w_bufp->b_mode & (1 << i)) {
 			if (firstm != TRUE)
 				strcat(tline, " ");
@@ -777,8 +775,7 @@ static void modeline(struct window *wp)
 		++n;
 	}
 
-	if (bp->b_fname[0] != 0 && strcmp(bp->b_bname, bp->b_fname) != 0)
-	{
+	if (bp->b_fname[0] != 0 && strcmp(bp->b_bname, bp->b_fname) != 0) {
 		cp = &bp->b_fname[0];
 
 		while ((c = *cp++) != 0) {
@@ -790,17 +787,17 @@ static void modeline(struct window *wp)
 		++n;
 	}
 
-	while (n < term.t_ncol) {	/* Pad to full width. */
+	while (n < term.t_ncol) {		/* Pad to full width. */
 		vtputc(lchar);
 		++n;
 	}
 
-	{			/* determine if top line, bottom line, or both are visible */
+	{					/* determine if top line, bottom line, or both are visible */
 		struct line *lp = wp->w_linep;
 		int rows = wp->w_ntrows;
 		char *msg = NULL;
 
-		vtcol = n - 7;	/* strlen(" top ") plus a couple */
+		vtcol = n - 7;			/* strlen(" top ") plus a couple */
 		while (rows--) {
 			lp = lforw(lp);
 			if (lp == wp->w_bufp->b_linep) {
@@ -837,8 +834,7 @@ static void modeline(struct window *wp)
 			} else {
 				ratio = 0;
 				if (numlines != 0)
-					ratio =
-					    (100L * predlines) / numlines;
+					ratio = (100L * predlines) / numlines;
 				if (ratio > 99)
 					ratio = 99;
 				sprintf(tline, " %2d%% ", ratio);
@@ -855,7 +851,7 @@ static void modeline(struct window *wp)
 }
 
 void upmode(void)
-{				/* update all the mode lines */
+{						/* update all the mode lines */
 	struct window *wp;
 
 	wp = wheadp;
@@ -915,7 +911,7 @@ void mlerase(void)
  */
 void mlwrite(const char *fmt, ...)
 {
-	int c;		/* current char in format string */
+	int c;					/* current char in format string */
 	va_list ap;
 
 	/* if we are not currently echoing on the command line, abort this */
@@ -987,12 +983,12 @@ void mlwrite(const char *fmt, ...)
  */
 void mlforce(char *s)
 {
-	int oldcmd;	/* original command display flag */
+	int oldcmd;				/* original command display flag */
 
-	oldcmd = discmd;	/* save the discmd value */
-	discmd = TRUE;		/* and turn display on */
-	mlwrite(s);		/* write the string out */
-	discmd = oldcmd;	/* and restore the original setting */
+	oldcmd = discmd;			/* save the discmd value */
+	discmd = TRUE;				/* and turn display on */
+	mlwrite(s);				/* write the string out */
+	discmd = oldcmd;			/* and restore the original setting */
 }
 
 /*
@@ -1050,7 +1046,7 @@ static void mlputli(long l, int r)
 	if (q != 0)
 		mlputli(q, r);
 
-	TTputc((int) (l % r) + '0');
+	TTputc((int)(l % r) + '0');
 	++ttcol;
 }
 
@@ -1061,8 +1057,8 @@ static void mlputli(long l, int r)
  */
 static void mlputf(int s)
 {
-	int i;			/* integer portion of number */
-	int f;			/* fractional portion of number */
+	int i;					/* integer portion of number */
+	int f;					/* fractional portion of number */
 
 	/* break it up */
 	i = s / 100;
@@ -1075,7 +1071,6 @@ static void mlputf(int s)
 	TTputc((f % 10) + '0');
 	ttcol += 3;
 }
-
 
 /* Get terminal size from system.
    Store number of lines into *heightp and width into *widthp.

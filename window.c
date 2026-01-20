@@ -21,7 +21,7 @@
  */
 int reposition(int f, int n)
 {
-	if (f == FALSE)		/* default to 0 to center screen */
+	if (f == FALSE)				/* default to 0 to center screen */
 		n = 0;
 	curwp->w_force = n;
 	curwp->w_flag |= WFFORCE;
@@ -37,7 +37,7 @@ int redraw(int f, int n)
 	if (f == FALSE)
 		sgarbf = TRUE;
 	else {
-		curwp->w_force = 0;	/* Center dot. */
+		curwp->w_force = 0;		/* Center dot. */
 		curwp->w_flag |= WFFORCE;
 	}
 
@@ -57,7 +57,7 @@ int redraw(int f, int n)
 int nextwind(int f, int n)
 {
 	struct window *wp;
-	int nwindows;	/* total number of windows */
+	int nwindows;				/* total number of windows */
 
 	if (f) {
 
@@ -157,7 +157,7 @@ int mvupwind(int f, int n)
 	}
 
 	curwp->w_linep = lp;
-	curwp->w_flag |= WFHARD;	/* Mode line is OK. */
+	curwp->w_flag |= WFHARD;		/* Mode line is OK. */
 
 	for (i = 0; i < curwp->w_ntrows; ++i) {
 		if (lp == curwp->w_dotp)
@@ -200,7 +200,7 @@ int onlywind(int f, int n)
 			wp->w_bufp->b_markp = wp->w_markp;
 			wp->w_bufp->b_marko = wp->w_marko;
 		}
-		free((char *) wp);
+		free((char *)wp);
 	}
 	while (curwp->w_wndp != NULL) {
 		wp = curwp->w_wndp;
@@ -211,7 +211,7 @@ int onlywind(int f, int n)
 			wp->w_bufp->b_markp = wp->w_markp;
 			wp->w_bufp->b_marko = wp->w_marko;
 		}
-		free((char *) wp);
+		free((char *)wp);
 	}
 	lp = curwp->w_linep;
 	i = curwp->w_toprow;
@@ -234,9 +234,9 @@ int onlywind(int f, int n)
  */
 int delwind(int f, int n)
 {
-	struct window *wp;	/* window to recieve deleted space */
-	struct window *lwp;	/* ptr window before curwp */
-	int target;	/* target line to search for */
+	struct window *wp;			/* window to recieve deleted space */
+	struct window *lwp;			/* ptr window before curwp */
+	int target;				/* target line to search for */
 
 	/* if there is only one window, don't delete it */
 	if (wheadp->w_wndp == NULL) {
@@ -292,7 +292,7 @@ int delwind(int f, int n)
 		wheadp = curwp->w_wndp;
 	else
 		lwp->w_wndp = curwp->w_wndp;
-	free((char *) curwp);
+	free((char *)curwp);
 	curwp = wp;
 	wp->w_flag |= WFHARD;
 	curbp = wp->w_bufp;
@@ -325,7 +325,7 @@ int splitwind(int f, int n)
 		return FALSE;
 	}
 	wp = xmalloc(sizeof(struct window));
-	++curbp->b_nwnd;	/* Displayed twice.     */
+	++curbp->b_nwnd;			/* Displayed twice.     */
 	wp->w_bufp = curbp;
 	wp->w_dotp = curwp->w_dotp;
 	wp->w_doto = curwp->w_doto;
@@ -344,14 +344,14 @@ int splitwind(int f, int n)
 	lp = curwp->w_linep;
 	if (((f == FALSE) && (ntrd <= ntru)) || ((f == TRUE) && (n == 1))) {
 		/* Old is upper window. */
-		if (ntrd == ntru)	/* Hit mode line.       */
+		if (ntrd == ntru)		/* Hit mode line.       */
 			lp = lforw(lp);
 		curwp->w_ntrows = ntru;
 		wp->w_wndp = curwp->w_wndp;
 		curwp->w_wndp = wp;
 		wp->w_toprow = curwp->w_toprow + ntru + 1;
 		wp->w_ntrows = ntrl;
-	} else {		/* Old is lower window  */
+	} else {				/* Old is lower window  */
 		wp1 = NULL;
 		wp2 = wheadp;
 		while (wp2 != curwp) {
@@ -365,14 +365,14 @@ int splitwind(int f, int n)
 		wp->w_wndp = curwp;
 		wp->w_toprow = curwp->w_toprow;
 		wp->w_ntrows = ntru;
-		++ntru;		/* Mode line.           */
+		++ntru;				/* Mode line.           */
 		curwp->w_toprow += ntru;
 		curwp->w_ntrows = ntrl;
 		while (ntru--)
 			lp = lforw(lp);
 	}
-	curwp->w_linep = lp;	/* Adjust the top lines */
-	wp->w_linep = lp;	/* if necessary.        */
+	curwp->w_linep = lp;			/* Adjust the top lines */
+	wp->w_linep = lp;			/* if necessary.        */
 	curwp->w_flag |= WFMODE | WFHARD;
 	wp->w_flag |= WFMODE | WFHARD;
 	return TRUE;
@@ -405,13 +405,13 @@ int enlargewind(int f, int n)
 		mlwrite("Impossible change");
 		return FALSE;
 	}
-	if (curwp->w_wndp == adjwp) {	/* Shrink below.        */
+	if (curwp->w_wndp == adjwp) {		/* Shrink below.        */
 		lp = adjwp->w_linep;
 		for (i = 0; i < n && lp != adjwp->w_bufp->b_linep; ++i)
 			lp = lforw(lp);
 		adjwp->w_linep = lp;
 		adjwp->w_toprow += n;
-	} else {		/* Shrink above.        */
+	} else {				/* Shrink above.        */
 		lp = curwp->w_linep;
 		for (i = 0; i < n && lback(lp) != curbp->b_linep; ++i)
 			lp = lback(lp);
@@ -451,14 +451,13 @@ int shrinkwind(int f, int n)
 		mlwrite("Impossible change");
 		return FALSE;
 	}
-	if (curwp->w_wndp == adjwp) {	/* Grow below.          */
+	if (curwp->w_wndp == adjwp) {		/* Grow below.          */
 		lp = adjwp->w_linep;
-		for (i = 0; i < n && lback(lp) != adjwp->w_bufp->b_linep;
-		     ++i)
+		for (i = 0; i < n && lback(lp) != adjwp->w_bufp->b_linep; ++i)
 			lp = lback(lp);
 		adjwp->w_linep = lp;
 		adjwp->w_toprow -= n;
-	} else {		/* Grow above.          */
+	} else {				/* Grow above.          */
 		lp = curwp->w_linep;
 		for (i = 0; i < n && lp != curbp->b_linep; ++i)
 			lp = lforw(lp);
@@ -479,7 +478,7 @@ int shrinkwind(int f, int n)
  */
 int resize(int f, int n)
 {
-	int clines;		/* current # of lines in window */
+	int clines;				/* current # of lines in window */
 
 	/* must have a non-default argument, else ignore call */
 	if (f == FALSE)
@@ -504,17 +503,17 @@ struct window *wpopup(void)
 {
 	struct window *wp;
 
-	if (wheadp->w_wndp == NULL	/* Only 1 window        */
+	if (wheadp->w_wndp == NULL		/* Only 1 window        */
 	    && splitwind(FALSE, 0) == FALSE)	/* and it won't split   */
 		return NULL;
-	wp = wheadp;		/* Find window to use   */
+	wp = wheadp;				/* Find window to use   */
 	while (wp != NULL && wp == curwp)
 		wp = wp->w_wndp;
 	return wp;
 }
 
 int scrnextup(int f, int n)
-{				/* scroll the next window up (back) a page */
+{						/* scroll the next window up (back) a page */
 	nextwind(FALSE, 1);
 	backpage(f, n);
 	prevwind(FALSE, 1);
@@ -522,7 +521,7 @@ int scrnextup(int f, int n)
 }
 
 int scrnextdw(int f, int n)
-{				/* scroll the next window down (forward) a page */
+{						/* scroll the next window down (forward) a page */
 	nextwind(FALSE, 1);
 	forwpage(f, n);
 	prevwind(FALSE, 1);
@@ -530,13 +529,13 @@ int scrnextdw(int f, int n)
 }
 
 int savewnd(int f, int n)
-{				/* save ptr to current window */
+{						/* save ptr to current window */
 	swindow = curwp;
 	return TRUE;
 }
 
 int restwnd(int f, int n)
-{				/* restore the saved screen */
+{						/* restore the saved screen */
 	struct window *wp;
 
 	/* find the window */
@@ -563,10 +562,10 @@ int restwnd(int f, int n)
  */
 int newsize(int f, int n)
 {
-	struct window *wp;		/* current window being examined */
-	struct window *nextwp;	/* next window to scan */
-	struct window *lastwp;	/* last window scanned */
-	int lastline;		/* screen line of last line of current window */
+	struct window *wp;			/* current window being examined */
+	struct window *nextwp;			/* next window to scan */
+	struct window *lastwp;			/* last window scanned */
+	int lastline;				/* screen line of last line of current window */
 
 	/* if the command defaults, assume the largest */
 	if (f == FALSE)
@@ -620,15 +619,14 @@ int newsize(int f, int n)
 					lastwp->w_wndp = NULL;
 
 				/* free the structure */
-				free((char *) wp);
+				free((char *)wp);
 				wp = NULL;
 
 			} else {
 				/* need to change this window size? */
 				lastline = wp->w_toprow + wp->w_ntrows - 1;
 				if (lastline >= n - 2) {
-					wp->w_ntrows =
-					    n - wp->w_toprow - 2;
+					wp->w_ntrows = n - wp->w_toprow - 2;
 					wp->w_flag |= WFHARD | WFMODE;
 				}
 			}
@@ -680,9 +678,9 @@ int newwidth(int f, int n)
 }
 
 int getwpos(void)
-{				/* get screen offset of current line in current window */
-	int sline;	/* screen line from top of window */
-	struct line *lp;	/* scannile line pointer */
+{						/* get screen offset of current line in current window */
+	int sline;				/* screen line from top of window */
+	struct line *lp;			/* scannile line pointer */
 
 	/* search down the line we want */
 	lp = curwp->w_linep;

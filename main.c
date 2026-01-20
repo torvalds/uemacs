@@ -58,10 +58,10 @@
 /* Make global definitions not external. */
 #define	maindef
 
-#include "estruct.h" /* Global structures and defines. */
-#include "edef.h"    /* Global definitions. */
-#include "efunc.h"   /* Function declarations and name table. */
-#include "ebind.h"   /* Default key bindings. */
+#include "estruct.h"				/* Global structures and defines. */
+#include "edef.h"				/* Global definitions. */
+#include "efunc.h"				/* Function declarations and name table. */
+#include "ebind.h"				/* Default key bindings. */
 #include "version.h"
 
 #include <signal.h>
@@ -70,15 +70,15 @@ extern void sizesignal(int);
 
 void usage(int status)
 {
-  printf("Usage: %s filename\n", PROGRAM_NAME);
-  printf("   or: %s [options]\n\n", PROGRAM_NAME);
-  fputs("      +          start at the end of file\n", stdout);
-  fputs("      +<n>       start at line <n>\n", stdout);
-  fputs("      -g[G]<n>   go to line <n>\n", stdout);
-  fputs("      --help     display this help and exit\n", stdout);
-  fputs("      --version  output version information and exit\n", stdout);
+	printf("Usage: %s filename\n", PROGRAM_NAME);
+	printf("   or: %s [options]\n\n", PROGRAM_NAME);
+	fputs("      +          start at the end of file\n", stdout);
+	fputs("      +<n>       start at line <n>\n", stdout);
+	fputs("      -g[G]<n>   go to line <n>\n", stdout);
+	fputs("      --help     display this help and exit\n", stdout);
+	fputs("      --version  output version information and exit\n", stdout);
 
-  exit(status);
+	exit(status);
 }
 
 static Hunhandle *hunhandle;
@@ -99,23 +99,23 @@ static void local_dictionary(Hunhandle *handle, const char *filename)
 
 int main(int argc, char **argv)
 {
-	int c = -1;	/* command character */
-	int f;		/* default flag */
-	int n;		/* numeric repeat count */
-	int mflag;	/* negative flag on repeat */
-	struct buffer *bp;	/* temp buffer pointer */
-	int firstfile;	/* first file flag */
-	int carg;	/* current arg to scan */
-	int startflag;	/* startup executed flag */
-	struct buffer *firstbp = NULL;	/* ptr to first buffer in cmd line */
-	int basec;		/* c stripped of meta character */
-	int viewflag;		/* are we starting in view mode? */
-	int gotoflag;		/* do we need to goto a line at start? */
-	int gline = 0;		/* if so, what line? */
-	int searchflag;		/* Do we need to search at start? */
-	int saveflag;		/* temp store for lastflag */
-	int errflag;		/* C error processing? */
-	char bname[NBUFN];	/* buffer name of file to read */
+	int c = -1;				/* command character */
+	int f;					/* default flag */
+	int n;					/* numeric repeat count */
+	int mflag;				/* negative flag on repeat */
+	struct buffer *bp;			/* temp buffer pointer */
+	int firstfile;				/* first file flag */
+	int carg;				/* current arg to scan */
+	int startflag;				/* startup executed flag */
+	struct buffer *firstbp = NULL;		/* ptr to first buffer in cmd line */
+	int basec;				/* c stripped of meta character */
+	int viewflag;				/* are we starting in view mode? */
+	int gotoflag;				/* do we need to goto a line at start? */
+	int gline = 0;				/* if so, what line? */
+	int searchflag;				/* Do we need to search at start? */
+	int saveflag;				/* temp store for lastflag */
+	int errflag;				/* C error processing? */
+	char bname[NBUFN];			/* buffer name of file to read */
 	int newc;
 
 	const char *aff_path = "/usr/share/hunspell/en_US.aff";
@@ -143,16 +143,16 @@ int main(int argc, char **argv)
 	}
 
 	/* Initialize the editor. */
-	vtinit();		/* Display */
-	edinit("main");		/* Buffers, windows */
-	varinit();		/* user variables */
+	vtinit();				/* Display */
+	edinit("main");				/* Buffers, windows */
+	varinit();				/* user variables */
 
-	viewflag = FALSE;	/* view mode defaults off in command line */
-	gotoflag = FALSE;	/* set to off to begin with */
-	searchflag = FALSE;	/* set to off to begin with */
-	firstfile = TRUE;	/* no file to edit yet */
-	startflag = FALSE;	/* startup file not executed yet */
-	errflag = FALSE;	/* not doing C error parsing */
+	viewflag = FALSE;			/* view mode defaults off in command line */
+	gotoflag = FALSE;			/* set to off to begin with */
+	searchflag = FALSE;			/* set to off to begin with */
+	firstfile = TRUE;			/* no file to edit yet */
+	startflag = FALSE;			/* startup file not executed yet */
+	errflag = FALSE;			/* not doing C error parsing */
 
 	/* Parse the command line */
 	for (carg = 1; carg < argc; ++carg) {
@@ -160,41 +160,40 @@ int main(int argc, char **argv)
 		if (argv[carg][0] == '+') {
 			gotoflag = TRUE;
 			gline = atoi(&argv[carg][1]);
-		} else
-		if (argv[carg][0] == '-') {
+		} else if (argv[carg][0] == '-') {
 			switch (argv[carg][1]) {
 				/* Process Startup macroes */
-			case 'a':	/* process error file */
+			case 'a':		/* process error file */
 			case 'A':
 				errflag = TRUE;
 				break;
-			case 'e':	/* -e for Edit file */
+			case 'e':		/* -e for Edit file */
 			case 'E':
 				viewflag = FALSE;
 				break;
-			case 'g':	/* -g for initial goto */
+			case 'g':		/* -g for initial goto */
 			case 'G':
 				gotoflag = TRUE;
 				gline = atoi(&argv[carg][2]);
 				break;
-			case 'n':	/* -n accept null chars */
+			case 'n':		/* -n accept null chars */
 			case 'N':
 				nullflag = TRUE;
 				break;
-			case 'r':	/* -r restrictive use */
+			case 'r':		/* -r restrictive use */
 			case 'R':
 				restflag = TRUE;
 				break;
-			case 's':	/* -s for initial search string */
+			case 's':		/* -s for initial search string */
 			case 'S':
 				searchflag = TRUE;
 				strncpy(pat, &argv[carg][2], NPAT);
 				break;
-			case 'v':	/* -v for View File */
+			case 'v':		/* -v for View File */
 			case 'V':
 				viewflag = TRUE;
 				break;
-			default:	/* unknown switch */
+			default:		/* unknown switch */
 				/* ignore this for now */
 				break;
 			}
@@ -244,7 +243,7 @@ int main(int argc, char **argv)
 		startup("");
 		startflag = TRUE;
 	}
-	discmd = TRUE;		/* P.K. */
+	discmd = TRUE;				/* P.K. */
 
 	/* if there are any files to read, read the first one! */
 	bp = bfind("main", FALSE, 0);
@@ -269,11 +268,11 @@ int main(int argc, char **argv)
 	}
 
 	/* Setup to process commands. */
-	lastflag = 0;  /* Fake last flags. */
+	lastflag = 0;				/* Fake last flags. */
 
-      loop:
+ loop:
 	/* Execute the "command" macro...normally null. */
-	saveflag = lastflag;  /* Preserve lastflag through this. */
+	saveflag = lastflag;			/* Preserve lastflag through this. */
 	execute(META | SPEC | 'C', FALSE, 1);
 	lastflag = saveflag;
 
@@ -284,8 +283,7 @@ int main(int argc, char **argv)
 			fn_t execfunc;
 
 			if (c == newc && (execfunc = getbind(c)) != NULL
-			    && execfunc != insert_newline
-			    && execfunc != insert_tab)
+			    && execfunc != insert_newline && execfunc != insert_tab)
 				newc = getcmd();
 			else
 				break;
@@ -305,12 +303,12 @@ int main(int argc, char **argv)
 
 	/* do META-# processing if needed */
 
-	basec = c & ~META;	/* strip meta char off if there */
+	basec = c & ~META;			/* strip meta char off if there */
 	if ((c & META) && ((basec >= '0' && basec <= '9') || basec == '-')) {
-		f = TRUE;	/* there is a # arg */
-		n = 0;		/* start with a zero default */
-		mflag = 1;	/* current minus flag */
-		c = basec;	/* strip the META */
+		f = TRUE;			/* there is a # arg */
+		n = 0;				/* start with a zero default */
+		mflag = 1;			/* current minus flag */
+		c = basec;			/* strip the META */
 		while ((c >= '0' && c <= '9') || (c == '-')) {
 			if (c == '-') {
 				/* already hit a minus or digit? */
@@ -325,20 +323,19 @@ int main(int argc, char **argv)
 			else
 				mlwrite("Arg: %d", n * mflag);
 
-			c = getcmd();	/* get the next key */
+			c = getcmd();		/* get the next key */
 		}
-		n = n * mflag;	/* figure in the sign */
+		n = n * mflag;			/* figure in the sign */
 	}
 
 	/* do ^U repeat argument processing */
 
-	if (c == reptc) {	/* ^U, start argument   */
+	if (c == reptc) {			/* ^U, start argument   */
 		f = TRUE;
-		n = 4;		/* with argument of 4 */
-		mflag = 0;	/* that can be discarded. */
+		n = 4;				/* with argument of 4 */
+		mflag = 0;			/* that can be discarded. */
 		mlwrite("Arg: 4");
-		while (((c = getcmd()) >= '0' && c <= '9') || c == reptc
-		       || c == '-') {
+		while (((c = getcmd()) >= '0' && c <= '9') || c == reptc || c == '-') {
 			if (c == reptc)
 				if ((n > 0) == ((n * 4) > 0))
 					n = n * 4;
@@ -365,8 +362,7 @@ int main(int argc, char **argv)
 				}
 				n = 10 * n + c - '0';
 			}
-			mlwrite("Arg: %d",
-				(mflag >= 0) ? n : (n ? -n : -1));
+			mlwrite("Arg: %d", (mflag >= 0) ? n : (n ? -n : -1));
 		}
 		/*
 		 * Make arguments preceded by a minus sign negative and change
@@ -394,26 +390,26 @@ void edinit(char *bname)
 	struct buffer *bp;
 	struct window *wp;
 
-	bp = bfind(bname, TRUE, 0);	/* First buffer         */
+	bp = bfind(bname, TRUE, 0);		/* First buffer         */
 	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
 	wp = (struct window *)malloc(sizeof(struct window));	/* First window         */
 	if (bp == NULL || wp == NULL || blistp == NULL)
 		exit(1);
-	curbp = bp;		/* Make this current    */
+	curbp = bp;				/* Make this current    */
 	wheadp = wp;
 	curwp = wp;
-	wp->w_wndp = NULL;	/* Initialize window    */
+	wp->w_wndp = NULL;			/* Initialize window    */
 	wp->w_bufp = bp;
-	bp->b_nwnd = 1;		/* Displayed.           */
+	bp->b_nwnd = 1;				/* Displayed.           */
 	wp->w_linep = bp->b_linep;
 	wp->w_dotp = bp->b_linep;
 	wp->w_doto = 0;
 	wp->w_markp = NULL;
 	wp->w_marko = 0;
 	wp->w_toprow = 0;
-	wp->w_ntrows = term.t_nrow - 1;	/* "-1" for mode line.  */
+	wp->w_ntrows = term.t_nrow - 1;		/* "-1" for mode line.  */
 	wp->w_force = 0;
-	wp->w_flag = WFMODE | WFHARD;	/* Full.                */
+	wp->w_flag = WFMODE | WFHARD;		/* Full.                */
 }
 
 /*
@@ -442,25 +438,23 @@ int execute(int c, int f, int n)
 	 * and we are not read-only, perform word wrap.
 	 */
 	if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fillcol > 0 &&
-	    n >= 0 && getccol(FALSE) > fillcol &&
-	    (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
+	    n >= 0 && getccol(FALSE) > fillcol && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
 		execute(META | SPEC | 'W', FALSE, 1);
 
-	if ((c >= 0x20 && c <= 0x7E)	/* Self inserting.      */
-	    || (c >= 0xA0 && c <= 0x10FFFF)) {
-		if (n <= 0) {	/* Fenceposts.          */
+	if ((c >= 0x20 && c <= 0x7E)		/* Self inserting.      */
+	    ||(c >= 0xA0 && c <= 0x10FFFF)) {
+		if (n <= 0) {			/* Fenceposts.          */
 			lastflag = 0;
 			return n < 0 ? FALSE : TRUE;
 		}
-		thisflag = 0;	/* For the future.      */
+		thisflag = 0;			/* For the future.      */
 
 		/* if we are in overwrite mode, not at eol,
 		   and next char is not a tab or we are at a tab stop,
 		   delete a char forword                        */
 		if (curwp->w_bufp->b_mode & MDOVER &&
 		    curwp->w_doto < curwp->w_dotp->l_used &&
-		    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' ||
-		     (curwp->w_doto) % 8 == 7))
+		    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' || (curwp->w_doto) % 8 == 7))
 			ldelchar(1, FALSE);
 
 		/* do the appropriate insertion */
@@ -473,8 +467,7 @@ int execute(int c, int f, int n)
 
 #if	CFENCE
 		/* check for CMODE fence matching */
-		if ((c == '}' || c == ')' || c == ']') &&
-		    (curbp->b_mode & MDCMOD) != 0)
+		if ((c == '}' || c == ')' || c == ']') && (curbp->b_mode & MDCMOD) != 0)
 			fmatch(c);
 #endif
 
@@ -491,8 +484,8 @@ int execute(int c, int f, int n)
 		return status;
 	}
 	TTbeep();
-	mlwrite("(Key not bound)");	/* complain             */
-	lastflag = 0;		/* Fake last flags.     */
+	mlwrite("(Key not bound)");		/* complain             */
+	lastflag = 0;				/* Fake last flags.     */
 	return FALSE;
 }
 
@@ -502,27 +495,27 @@ int execute(int c, int f, int n)
  */
 int quickexit(int f, int n)
 {
-	struct buffer *bp;	/* scanning pointer to buffers */
-	struct buffer *oldcb;	/* original current buffer */
+	struct buffer *bp;			/* scanning pointer to buffers */
+	struct buffer *oldcb;			/* original current buffer */
 	int status;
 
-	oldcb = curbp;		/* save in case we fail */
+	oldcb = curbp;				/* save in case we fail */
 
 	bp = bheadp;
 	while (bp != NULL) {
 		if ((bp->b_flag & BFCHG) != 0	/* Changed.             */
 		    && (bp->b_flag & BFTRUNC) == 0	/* Not truncated P.K.   */
 		    && (bp->b_flag & BFINVS) == 0) {	/* Real.                */
-			curbp = bp;	/* make that buffer cur */
+			curbp = bp;		/* make that buffer cur */
 			mlwrite("(Saving %s)", bp->b_fname);
 			if ((status = filesave(f, n)) != TRUE) {
 				curbp = oldcb;	/* restore curbp */
 				return status;
 			}
 		}
-		bp = bp->b_bufp;	/* on to the next buffer */
+		bp = bp->b_bufp;		/* on to the next buffer */
 	}
-	quit(f, n);		/* conditionally quit   */
+	quit(f, n);				/* conditionally quit   */
 	return TRUE;
 }
 
@@ -540,11 +533,10 @@ int quit(int f, int n)
 {
 	int s;
 
-	if (f != FALSE		/* Argument forces it.  */
-	    || anycb() == FALSE	/* All buffers clean.   */
+	if (f != FALSE				/* Argument forces it.  */
+	    || anycb() == FALSE			/* All buffers clean.   */
 	    /* User says it's OK.   */
-	    || (s =
-		mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
+	    || (s = mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
 		if (lockrel() != TRUE) {
 			TTputc('\n');
 			TTputc('\r');
@@ -610,9 +602,9 @@ int ctlxe(int f, int n)
 	}
 	if (n <= 0)
 		return TRUE;
-	kbdrep = n;		/* remember how many times to execute */
-	kbdmode = PLAY;		/* start us in play mode */
-	kbdptr = &kbdm[0];	/*    at the beginning */
+	kbdrep = n;				/* remember how many times to execute */
+	kbdmode = PLAY;				/* start us in play mode */
+	kbdptr = &kbdm[0];			/*    at the beginning */
 	return TRUE;
 }
 

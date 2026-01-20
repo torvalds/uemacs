@@ -23,15 +23,14 @@
 #include "efunc.h"
 #include "utf8.h"
 
-static int kbdflgs;			/* saved keyboard fd flags      */
-static int kbdpoll;			/* in O_NDELAY mode             */
+static int kbdflgs;				/* saved keyboard fd flags      */
+static int kbdpoll;				/* in O_NDELAY mode             */
 
-static struct termios otermios;		/* original terminal characteristics */
-static struct termios ntermios;		/* charactoristics to use inside */
+static struct termios otermios;			/* original terminal characteristics */
+static struct termios ntermios;			/* charactoristics to use inside */
 
 #define TBUFSIZ 128
-static char tobuf[TBUFSIZ];		/* terminal output buffer */
-
+static char tobuf[TBUFSIZ];			/* terminal output buffer */
 
 /*
  * This function is called once to set up the terminal device streams.
@@ -40,7 +39,7 @@ static char tobuf[TBUFSIZ];		/* terminal output buffer */
  */
 void ttopen(void)
 {
-	tcgetattr(0, &otermios);	/* save old settings */
+	tcgetattr(0, &otermios);		/* save old settings */
 
 	/*
 	 * base new settings on old ones - don't change things
@@ -49,12 +48,10 @@ void ttopen(void)
 	ntermios = otermios;
 
 	/* raw CR/NL etc input handling, but keep ISTRIP if we're on a 7-bit line */
-	ntermios.c_iflag &= ~(IGNBRK | BRKINT | IGNPAR | PARMRK
-			      | INPCK | INLCR | IGNCR | ICRNL);
+	ntermios.c_iflag &= ~(IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK | INLCR | IGNCR | ICRNL);
 
 	/* raw CR/NR etc output handling */
-	ntermios.c_oflag &=
-	    ~(OPOST | ONLCR | OLCUC | OCRNL | ONOCR | ONLRET);
+	ntermios.c_oflag &= ~(OPOST | ONLCR | OLCUC | OCRNL | ONOCR | ONLRET);
 
 	/* No signal handling, no echo etc */
 	ntermios.c_lflag &= ~(ISIG | ICANON | XCASE | ECHO | ECHOE | ECHOK
@@ -155,7 +152,7 @@ int ttgetc(void)
 		pending = count;
 	}
 
-	c = (unsigned char) buffer[0];
+	c = (unsigned char)buffer[0];
 	if (c >= 32 && c < 128)
 		goto done;
 
@@ -180,7 +177,7 @@ int ttgetc(void)
 	if (count < expected) {
 		int n;
 		ntermios.c_cc[VMIN] = 0;
-		ntermios.c_cc[VTIME] = 1;		/* A .1 second lag */
+		ntermios.c_cc[VTIME] = 1;	/* A .1 second lag */
 		tcsetattr(0, TCSANOW, &ntermios);
 
 		n = read(0, buffer + count, sizeof(buffer) - count);
@@ -199,7 +196,7 @@ int ttgetc(void)
 		/* Turn ESC+'[' into CSI */
 		if (c == 27 && second == '[') {
 			bytes = 2;
-			c = 128+27;
+			c = 128 + 27;
 			goto done;
 		}
 	}
@@ -208,9 +205,9 @@ int ttgetc(void)
 	/* Hackety hack! Turn no-break space into regular space */
 	if (c == 0xa0)
 		c = ' ';
-done:
+ done:
 	pending -= bytes;
-	memmove(buffer, buffer+bytes, pending);
+	memmove(buffer, buffer + bytes, pending);
 	return c;
 }
 
@@ -220,7 +217,7 @@ done:
 
 int typahead(void)
 {
-	int x;			/* holds # of pending chars */
+	int x;					/* holds # of pending chars */
 
 	if (ioctl(0, FIONREAD, &x) < 0)
 		x = 0;

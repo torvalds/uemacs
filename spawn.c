@@ -30,10 +30,10 @@ int spawncli(int f, int n)
 	if (restflag)
 		return resterr();
 
-	movecursor(term.t_nrow, 0);	/* Seek to last line.   */
+	movecursor(term.t_nrow, 0);		/* Seek to last line.   */
 	TTflush();
-	TTclose();		/* stty to old settings */
-	TTkclose();		/* Close "keyboard" */
+	TTclose();				/* stty to old settings */
+	TTkclose();				/* Close "keyboard" */
 	if ((cp = getenv("SHELL")) != NULL && *cp != '\0')
 		system(cp);
 	else
@@ -55,7 +55,7 @@ int spawncli(int f, int n)
 }
 
 int bktoshell(int f, int n)
-{				/* suspend MicroEMACS and wait to wake up */
+{						/* suspend MicroEMACS and wait to wake up */
 	vttidy();
 /******************************
 	int pid;
@@ -91,16 +91,16 @@ int spawn(int f, int n)
 	if ((s = mlreply("!", line, NLINE)) != TRUE)
 		return s;
 	TTflush();
-	TTclose();		/* stty to old modes    */
+	TTclose();				/* stty to old modes    */
 	TTkclose();
 	system(line);
-	fflush(stdout);		/* to be sure P.K.      */
+	fflush(stdout);				/* to be sure P.K.      */
 	TTopen();
 
 	if (clexec == FALSE) {
-		mlputs("(End)");	/* Pause.               */
+		mlputs("(End)");		/* Pause.               */
 		TTflush();
-		while ((s = tgetc()) != '\r' && s != ' ');
+		while ((s = tgetc()) != '\r' && s != ' ') ;
 		mlputs("\r\n");
 	}
 	TTkopen();
@@ -125,16 +125,16 @@ int execprg(int f, int n)
 
 	if ((s = mlreply("!", line, NLINE)) != TRUE)
 		return s;
-	TTputc('\n');		/* Already have '\r'    */
+	TTputc('\n');				/* Already have '\r'    */
 	TTflush();
-	TTclose();		/* stty to old modes    */
+	TTclose();				/* stty to old modes    */
 	TTkclose();
 	system(line);
-	fflush(stdout);		/* to be sure P.K.      */
+	fflush(stdout);				/* to be sure P.K.      */
 	TTopen();
-	mlputs("(End)");	/* Pause.               */
+	mlputs("(End)");			/* Pause.               */
 	TTflush();
-	while ((s = tgetc()) != '\r' && s != ' ');
+	while ((s = tgetc()) != '\r' && s != ' ') ;
 	sgarbf = TRUE;
 	return TRUE;
 }
@@ -145,10 +145,10 @@ int execprg(int f, int n)
  */
 int pipecmd(int f, int n)
 {
-	int s;		/* return status from CLI */
-	struct window *wp;	/* pointer to new window */
-	struct buffer *bp;	/* pointer to buffer to zot */
-	char line[NLINE];	/* command line send to shell */
+	int s;					/* return status from CLI */
+	struct window *wp;			/* pointer to new window */
+	struct buffer *bp;			/* pointer to buffer to zot */
+	char line[NLINE];			/* command line send to shell */
 	static char bname[] = "command";
 
 	static char filnam[NSTRING] = "command";
@@ -176,12 +176,11 @@ int pipecmd(int f, int n)
 			wp = wp->w_wndp;
 		}
 		if (zotbuf(bp) != TRUE)
-
 			return FALSE;
 	}
 
 	TTflush();
-	TTclose();		/* stty to old modes    */
+	TTclose();				/* stty to old modes    */
 	TTkclose();
 	strcat(line, ">");
 	strcat(line, filnam);
@@ -222,10 +221,10 @@ int pipecmd(int f, int n)
  */
 int filter_buffer(int f, int n)
 {
-	int s;		/* return status from CLI */
-	struct buffer *bp;	/* pointer to buffer to zot */
-	char line[NLINE];	/* command line send to shell */
-	char tmpnam[NFILEN];	/* place to store real file name */
+	int s;					/* return status from CLI */
+	struct buffer *bp;			/* pointer to buffer to zot */
+	char line[NLINE];			/* command line send to shell */
+	char tmpnam[NFILEN];			/* place to store real file name */
 	static char bname1[] = "fltinp";
 
 	static char filnam1[] = "fltinp";
@@ -235,8 +234,8 @@ int filter_buffer(int f, int n)
 	if (restflag)
 		return resterr();
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 
 	/* get the filter name and its args */
 	if ((s = mlreply("#", line, NLINE)) != TRUE)
@@ -244,8 +243,8 @@ int filter_buffer(int f, int n)
 
 	/* setup the proper file names */
 	bp = curbp;
-	strcpy(tmpnam, bp->b_fname);	/* save the original name */
-	strcpy(bp->b_fname, bname1);	/* set it to our new one */
+	strcpy(tmpnam, bp->b_fname);		/* save the original name */
+	strcpy(bp->b_fname, bname1);		/* set it to our new one */
 
 	/* write it out, checking for errors */
 	if (writeout(filnam1) != TRUE) {
@@ -253,9 +252,9 @@ int filter_buffer(int f, int n)
 		strcpy(bp->b_fname, tmpnam);
 		return FALSE;
 	}
-	TTputc('\n');		/* Already have '\r'    */
+	TTputc('\n');				/* Already have '\r'    */
 	TTflush();
-	TTclose();		/* stty to old modes    */
+	TTclose();				/* stty to old modes    */
 	TTkclose();
 	strcat(line, " <fltinp >fltout");
 	system(line);
@@ -275,8 +274,8 @@ int filter_buffer(int f, int n)
 	}
 
 	/* reset file name */
-	strcpy(bp->b_fname, tmpnam);	/* restore name */
-	bp->b_flag |= BFCHG;	/* flag it as changed */
+	strcpy(bp->b_fname, tmpnam);		/* restore name */
+	bp->b_flag |= BFCHG;			/* flag it as changed */
 
 	/* and get rid of the temporary file */
 	unlink(filnam1);

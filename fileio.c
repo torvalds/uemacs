@@ -11,8 +11,8 @@
 #include        "edef.h"
 #include	"efunc.h"
 
-static FILE *ffp;			/* File pointer, all functions. */
-static int eofflag;			/* end-of-file flag */
+static FILE *ffp;				/* File pointer, all functions. */
+static int eofflag;				/* end-of-file flag */
 
 /*
  * Open a file for reading.
@@ -87,9 +87,9 @@ int ffputline(char *buf, int nbuf)
  */
 int ffgetline(void)
 {
-	int c;		/* current character read */
-	int i;		/* current index into fline */
-	char *tmpline;	/* temp storage for expanding line */
+	int c;					/* current character read */
+	int i;					/* current index into fline */
+	char *tmpline;				/* temp storage for expanding line */
 
 	/* if we are at the end...return it */
 	if (eofflag)
@@ -108,7 +108,7 @@ int ffgetline(void)
 
 	/* read the line in */
 	if (!nullflag) {
-		if (fgets(fline, NSTRING, ffp) == (char *) NULL) {	/* EOF ? */
+		if (fgets(fline, NSTRING, ffp) == (char *)NULL) {	/* EOF ? */
 			i = 0;
 			c = EOF;
 		} else {
@@ -128,8 +128,7 @@ int ffgetline(void)
 			fline[i++] = c;
 			/* if it's longer, get more room */
 			if (i >= flen) {
-				if ((tmpline =
-				     malloc(flen + NSTRING)) == NULL)
+				if ((tmpline = malloc(flen + NSTRING)) == NULL)
 					return FIOMEM;
 				strncpy(tmpline, fline, flen);
 				flen += NSTRING;

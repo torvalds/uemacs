@@ -33,4 +33,4 @@ static inline int next_column(int old, unicode_t c)
 	return old + 1;
 }
 
-#endif  /* UTIL_H_ */
+#endif				/* UTIL_H_ */

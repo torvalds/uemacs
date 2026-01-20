@@ -15,4 +15,4 @@ static char *pathname[] = {
 	"/usr/local/", "/usr/lib/", ""
 };
 
-#endif  /* EPATH_H_ */
+#endif				/* EPATH_H_ */

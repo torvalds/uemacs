@@ -10,7 +10,7 @@
  * sceen size has changed.
  *	-lbt
  */
-#define	termdef	1 /* Don't define "term" external. */
+#define	termdef	1				/* Don't define "term" external. */
 
 #include <curses.h>
 #include <stdio.h>
@@ -24,7 +24,7 @@
 
 #define	MARGIN	8
 #define	SCRSIZ	64
-#define	NPAUSE	10    /* # times thru update to pause. */
+#define	NPAUSE	10				/* # times thru update to pause. */
 #define BEL     0x07
 #define ESC     0x1B
 
@@ -48,7 +48,7 @@ static char *UP, PC, *CM, *CE, *CL, *SO, *SE;
 static char *TI, *TE;
 
 struct terminal term = {
-	0, /* These four values are set dynamically at open time. */
+	0,					/* These four values are set dynamically at open time. */
 	0,
 	0,
 	0,
@@ -78,72 +78,71 @@ static void tcapopen(void)
 	char err_str[72];
 	int int_col, int_row;
 
-		if ((tv_stype = getenv("TERM")) == NULL) {
-			puts("Environment variable TERM not defined!");
-			exit(1);
-		}
+	if ((tv_stype = getenv("TERM")) == NULL) {
+		puts("Environment variable TERM not defined!");
+		exit(1);
+	}
 
-		if ((tgetent(tcbuf, tv_stype)) != 1) {
-			sprintf(err_str, "Unknown terminal type %s!",
-				tv_stype);
-			puts(err_str);
-			exit(1);
-		}
+	if ((tgetent(tcbuf, tv_stype)) != 1) {
+		sprintf(err_str, "Unknown terminal type %s!", tv_stype);
+		puts(err_str);
+		exit(1);
+	}
 
-		/* Get screen size from system, or else from termcap.  */
-		getscreensize(&int_col, &int_row);
-		term.t_nrow = int_row - 1;
-		term.t_ncol = int_col;
+	/* Get screen size from system, or else from termcap.  */
+	getscreensize(&int_col, &int_row);
+	term.t_nrow = int_row - 1;
+	term.t_ncol = int_col;
 
-		if ((term.t_nrow <= 0)
-		    && (term.t_nrow = (short) tgetnum("li") - 1) == -1) {
-			puts("termcap entry incomplete (lines)");
-			exit(1);
-		}
+	if ((term.t_nrow <= 0)
+	    && (term.t_nrow = (short)tgetnum("li") - 1) == -1) {
+		puts("termcap entry incomplete (lines)");
+		exit(1);
+	}
 
-		if ((term.t_ncol <= 0)
-		    && (term.t_ncol = (short) tgetnum("co")) == -1) {
-			puts("Termcap entry incomplete (columns)");
-			exit(1);
-		}
-		term.t_mrow = MAXROW;
-		term.t_mcol = MAXCOL;
-		p = tcapbuf;
-		t = tgetstr("pc", &p);
-		if (t)
-			PC = *t;
-		else
-			PC = 0;
+	if ((term.t_ncol <= 0)
+	    && (term.t_ncol = (short)tgetnum("co")) == -1) {
+		puts("Termcap entry incomplete (columns)");
+		exit(1);
+	}
+	term.t_mrow = MAXROW;
+	term.t_mcol = MAXCOL;
+	p = tcapbuf;
+	t = tgetstr("pc", &p);
+	if (t)
+		PC = *t;
+	else
+		PC = 0;
 
-		CL = tgetstr("cl", &p);
-		CM = tgetstr("cm", &p);
-		CE = tgetstr("ce", &p);
-		UP = tgetstr("up", &p);
-		SE = tgetstr("se", &p);
-		SO = tgetstr("so", &p);
-		if (SO != NULL)
-			revexist = TRUE;
+	CL = tgetstr("cl", &p);
+	CM = tgetstr("cm", &p);
+	CE = tgetstr("ce", &p);
+	UP = tgetstr("up", &p);
+	SE = tgetstr("se", &p);
+	SO = tgetstr("so", &p);
+	if (SO != NULL)
+		revexist = TRUE;
 
-		if (tgetnum("sg") > 0) {	/* can reverse be used? P.K. */
-			revexist = FALSE;
-			SE = NULL;
-			SO = NULL;
-		}
-		TI = tgetstr("ti", &p);	/* terminal init and exit */
-		TE = tgetstr("te", &p);
+	if (tgetnum("sg") > 0) {		/* can reverse be used? P.K. */
+		revexist = FALSE;
+		SE = NULL;
+		SO = NULL;
+	}
+	TI = tgetstr("ti", &p);			/* terminal init and exit */
+	TE = tgetstr("te", &p);
 
-		if (CL == NULL || CM == NULL || UP == NULL) {
-			puts("Incomplete termcap entry\n");
-			exit(1);
-		}
+	if (CL == NULL || CM == NULL || UP == NULL) {
+		puts("Incomplete termcap entry\n");
+		exit(1);
+	}
 
-		if (CE == NULL)	/* will we be able to use clear to EOL? */
-			eolexist = FALSE;
+	if (CE == NULL)				/* will we be able to use clear to EOL? */
+		eolexist = FALSE;
 
-		if (p >= &tcapbuf[TCAPSLEN]) {
-			puts("Terminal description too big!\n");
-			exit(1);
-		}
+	if (p >= &tcapbuf[TCAPSLEN]) {
+		puts("Terminal description too big!\n");
+		exit(1);
+	}
 	ttopen();
 }
 
@@ -205,7 +204,6 @@ static int tcapcres(char *res)
 {
 	return TRUE;
 }
-
 
 static void tcapbeep(void)
 {

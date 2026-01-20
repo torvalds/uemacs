@@ -21,8 +21,8 @@
  */
 int mlyesno(char *prompt)
 {
-	char c;			/* input character */
-	char buf[NPAT];		/* prompt to user */
+	char c;					/* input character */
+	char buf[NPAT];				/* prompt to user */
 
 	for (;;) {
 		/* build and prompt the user */
@@ -33,7 +33,7 @@ int mlyesno(char *prompt)
 		/* get the responce */
 		c = tgetc();
 
-		if (c == ectoc(abortc))	/* Bail out! */
+		if (c == ectoc(abortc))		/* Bail out! */
 			return ABORT;
 
 		if (c == 'y' || c == 'Y')
@@ -95,13 +95,13 @@ int ctoec(int c)
  */
 fn_t getname(void)
 {
-	int cpos;	/* current column on screen output */
+	int cpos;				/* current column on screen output */
 	int c;
-	char *sp;	/* pointer to string for output */
-	struct name_bind *ffp;	/* first ptr to entry in name binding table */
-	struct name_bind *cffp;	/* current ptr to entry in name binding table */
-	struct name_bind *lffp;	/* last ptr to entry in name binding table */
-	char buf[NSTRING];	/* buffer to hold tentative command name */
+	char *sp;				/* pointer to string for output */
+	struct name_bind *ffp;			/* first ptr to entry in name binding table */
+	struct name_bind *cffp;			/* current ptr to entry in name binding table */
+	struct name_bind *lffp;			/* last ptr to entry in name binding table */
+	char buf[NSTRING];			/* buffer to hold tentative command name */
 
 	/* starting at the beginning of the string buffer */
 	cpos = 0;
@@ -139,7 +139,7 @@ fn_t getname(void)
 				TTflush();
 			}
 
-		} else if (c == 0x15) {	/* C-U, kill */
+		} else if (c == 0x15) {		/* C-U, kill */
 			while (cpos != 0) {
 				TTputc('\b');
 				TTputc(' ');
@@ -153,16 +153,14 @@ fn_t getname(void)
 		} else if (c == ' ' || c == 0x1b || c == 0x09) {
 /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 			/* attempt a completion */
-			buf[cpos] = 0;	/* terminate it for us */
+			buf[cpos] = 0;		/* terminate it for us */
 			ffp = &names[0];	/* scan for matches */
 			while (ffp->n_func != NULL) {
 				if (strncmp(buf, ffp->n_name, strlen(buf))
 				    == 0) {
 					/* a possible match! More than one? */
 					if ((ffp + 1)->n_func == NULL ||
-					    (strncmp
-					     (buf, (ffp + 1)->n_name,
-					      strlen(buf)) != 0)) {
+					    (strncmp(buf, (ffp + 1)->n_name, strlen(buf)) != 0)) {
 						/* no...we match, print it */
 						sp = ffp->n_name + cpos;
 						while (*sp)
@@ -175,14 +173,9 @@ fn_t getname(void)
 
 						/* first scan down until we no longer match the current input */
 						lffp = (ffp + 1);
-						while ((lffp +
-							1)->n_func !=
-						       NULL) {
+						while ((lffp + 1)->n_func != NULL) {
 							if (strncmp
-							    (buf,
-							     (lffp +
-							      1)->n_name,
-							     strlen(buf))
+							    (buf, (lffp + 1)->n_name, strlen(buf))
 							    != 0)
 								break;
 							++lffp;
@@ -191,27 +184,19 @@ fn_t getname(void)
 						/* and now, attempt to partial complete the string, char at a time */
 						while (TRUE) {
 							/* add the next char in */
-							buf[cpos] =
-							    ffp->
-							    n_name[cpos];
+							buf[cpos] = ffp->n_name[cpos];
 
 							/* scan through the candidates */
 							cffp = ffp + 1;
-							while (cffp <=
-							       lffp) {
-								if (cffp->
-								    n_name
-								    [cpos]
-								    !=
-								    buf
-								    [cpos])
+							while (cffp <= lffp) {
+								if (cffp->n_name[cpos]
+								    != buf[cpos])
 									goto onward;
 								++cffp;
 							}
 
 							/* add the character */
-							TTputc(buf
-							       [cpos++]);
+							TTputc(buf[cpos++]);
 						}
 /* << << << << << << << << << << << << << << << << << */
 					}
@@ -221,7 +206,7 @@ fn_t getname(void)
 
 			/* no match.....beep and onward */
 			TTbeep();
-		      onward:;
+ onward:		;
 			TTflush();
 /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 		} else {
@@ -241,14 +226,14 @@ fn_t getname(void)
 
 int tgetc(void)
 {
-	int c;			/* fetched character */
+	int c;					/* fetched character */
 
 	/* if we are playing a keyboard macro back, */
 	if (kbdmode == PLAY) {
 
 		/* if there is some left... */
 		if (kbdptr < kbdend)
-			return (int) *kbdptr++;
+			return (int)*kbdptr++;
 
 		/* at the end of last repitition? */
 		if (--kbdrep < 1) {
@@ -259,7 +244,7 @@ int tgetc(void)
 
 			/* reset the macro to the begining for the next rep */
 			kbdptr = &kbdm[0];
-			return (int) *kbdptr++;
+			return (int)*kbdptr++;
 		}
 	}
 
@@ -296,7 +281,7 @@ int get1key(void)
 	/* get a keystroke */
 	c = tgetc();
 
-	if (c >= 0x00 && c <= 0x1F)	/* C0 control -> C-     */
+	if (c >= 0x00 && c <= 0x1F)		/* C0 control -> C-     */
 		c = CONTROL | (c + '@');
 	return c;
 }
@@ -306,29 +291,29 @@ int get1key(void)
 							*/
 int getcmd(void)
 {
-	int c;			/* fetched keystroke */
-	int d;			/* second character P.K. */
+	int c;					/* fetched keystroke */
+	int d;					/* second character P.K. */
 	int cmask = 0;
 	/* get initial character */
 	c = get1key();
 
-      proc_metac:
-	if (c == 128+27)		/* CSI */
+ proc_metac:
+	if (c == 128 + 27)			/* CSI */
 		goto handle_CSI;
 	/* process META prefix */
 	if (c == (CONTROL | '[')) {
 		c = get1key();
 		if (c == '[' || c == 'O') {	/* CSI P.K. */
-handle_CSI:
+ handle_CSI:
 			c = get1key();
 			if (c >= 'A' && c <= 'D')
 				return SPEC | c | cmask;
 			if (c >= 'E' && c <= 'z' && c != 'i' && c != 'c')
 				return SPEC | c | cmask;
 			d = get1key();
-			if (d == '~')	/* ESC [ n ~   P.K. */
+			if (d == '~')		/* ESC [ n ~   P.K. */
 				return SPEC | c | cmask;
-			switch (c) {	/* ESC [ n n ~ P.K. */
+			switch (c) {		/* ESC [ n n ~ P.K. */
 			case '1':
 				c = d + 32;
 				break;
@@ -342,9 +327,9 @@ handle_CSI:
 				c = '?';
 				break;
 			}
-			if (d != '~')	/* eat tilde P.K. */
+			if (d != '~')		/* eat tilde P.K. */
 				get1key();
-			if (c == 'i') {	/* DO key    P.K. */
+			if (c == 'i') {		/* DO key    P.K. */
 				c = ctlxc;
 				goto proc_ctlxc;
 			} else if (c == 'c')	/* ESC key   P.K. */
@@ -356,27 +341,25 @@ handle_CSI:
 			cmask = META;
 			goto proc_metac;
 		}
-		if (islower(c))	/* Force to upper */
+		if (islower(c))			/* Force to upper */
 			c ^= DIFCASE;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
 			c = CONTROL | (c + '@');
 		return META | c;
-	}
-	else if (c == metac) {
+	} else if (c == metac) {
 		c = get1key();
 		if (c == (CONTROL | '[')) {
 			cmask = META;
 			goto proc_metac;
 		}
-		if (islower(c))	/* Force to upper */
+		if (islower(c))			/* Force to upper */
 			c ^= DIFCASE;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
 			c = CONTROL | (c + '@');
 		return META | c;
 	}
 
-
-      proc_ctlxc:
+ proc_ctlxc:
 	/* process CTLX prefix */
 	if (c == ctlxc) {
 		c = get1key();
@@ -401,9 +384,9 @@ handle_CSI:
 							*/
 int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 {
-	int cpos;	/* current character position in string */
+	int cpos;				/* current character position in string */
 	int c;
-	int quotef;	/* are we quoting the next char? */
+	int quotef;				/* are we quoting the next char? */
 	int ffile, ocpos, nskip = 0, didtry = 0;
 
 	static char tmp[] = "/tmp/meXXXXXX";
@@ -413,8 +396,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 		 || strcmp(prompt, "View file: ") == 0
 		 || strcmp(prompt, "Insert file: ") == 0
 		 || strcmp(prompt, "Write file: ") == 0
-		 || strcmp(prompt, "Read file: ") == 0
-		 || strcmp(prompt, "File to execute: ") == 0);
+		 || strcmp(prompt, "Read file: ") == 0 || strcmp(prompt, "File to execute: ") == 0);
 
 	cpos = 0;
 	quotef = FALSE;
@@ -491,8 +473,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			}
 			TTflush();
 
-		} else if ((c == 0x09 || c == ' ') && quotef == FALSE
-			   && ffile) {
+		} else if ((c == 0x09 || c == ' ') && quotef == FALSE && ffile) {
 			/* TAB, complete file name */
 			char ffbuf[255];
 			int n, iswild = 0;
@@ -534,8 +515,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			}
 			c = ' ';
 			for (n = nskip; n > 0; n--)
-				while ((c = getc(tmpf)) != EOF
-				       && c != ' ');
+				while ((c = getc(tmpf)) != EOF && c != ' ') ;
 			nskip++;
 
 			if (c != ' ') {
@@ -543,9 +523,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 				nskip = 0;
 			}
 
-			while ((c = getc(tmpf)) != EOF && c != '\n'
-			       && c != ' ' && c != '*')
-			{
+			while ((c = getc(tmpf)) != EOF && c != '\n' && c != ' ' && c != '*') {
 				if (cpos < nbuf - 1)
 					buf[cpos++] = c;
 			}

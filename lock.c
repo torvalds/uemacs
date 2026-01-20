@@ -12,8 +12,8 @@
 
 #include <sys/errno.h>
 
-static char *lname[NLOCKS];		/* names of all locked files */
-static int numlocks;			/* # of current locks active */
+static char *lname[NLOCKS];			/* names of all locked files */
+static int numlocks;				/* # of current locks active */
 
 /*
  * lockchk:
@@ -23,8 +23,8 @@ static int numlocks;			/* # of current locks active */
  */
 int lockchk(char *fname)
 {
-	int i;		/* loop indexes */
-	int status;	/* return status */
+	int i;					/* loop indexes */
+	int status;				/* return status */
 
 	/* check to see if that file is already locked here */
 	if (numlocks > 0)
@@ -40,15 +40,15 @@ int lockchk(char *fname)
 
 	/* next, try to lock it */
 	status = lock(fname);
-	if (status == ABORT)	/* file is locked, no override */
+	if (status == ABORT)			/* file is locked, no override */
 		return ABORT;
-	if (status == FALSE)	/* locked, overriden, dont add to table */
+	if (status == FALSE)			/* locked, overriden, dont add to table */
 		return TRUE;
 
 	/* we have now locked it, add it to our table */
-	lname[++numlocks - 1] = (char *) malloc(strlen(fname) + 1);
+	lname[++numlocks - 1] = (char *)malloc(strlen(fname) + 1);
 	if (lname[numlocks - 1] == NULL) {	/* malloc failure */
-		undolock(fname);	/* free the lock */
+		undolock(fname);		/* free the lock */
 		mlwrite("Cannot lock, out of memory");
 		--numlocks;
 		return ABORT;
@@ -65,9 +65,9 @@ int lockchk(char *fname)
  */
 int lockrel(void)
 {
-	int i;		/* loop index */
-	int status;	/* status of locks */
-	int s;		/* status of one unlock */
+	int i;					/* loop index */
+	int status;				/* status of locks */
+	int s;					/* status of one unlock */
 
 	status = TRUE;
 	if (numlocks > 0)
@@ -91,13 +91,13 @@ int lockrel(void)
  */
 int lock(char *fname)
 {
-	char *locker;	/* lock error message */
-	int status;	/* return status */
-	char msg[NSTRING];	/* message string */
+	char *locker;				/* lock error message */
+	int status;				/* return status */
+	char msg[NSTRING];			/* message string */
 
 	/* attempt to lock the file */
 	locker = dolock(fname);
-	if (locker == NULL)	/* we win */
+	if (locker == NULL)			/* we win */
 		return TRUE;
 
 	/* file failed...abort */
@@ -110,7 +110,7 @@ int lock(char *fname)
 	strcpy(msg, "File in use by ");
 	strcat(msg, locker);
 	strcat(msg, ", override?");
-	status = mlyesno(msg);	/* ask them */
+	status = mlyesno(msg);			/* ask them */
 	if (status == TRUE)
 		return FALSE;
 	else
@@ -126,7 +126,7 @@ int lock(char *fname)
  */
 int unlock(char *fname)
 {
-	char *locker;	/* undolock return string */
+	char *locker;				/* undolock return string */
 
 	/* unclock and return */
 	locker = undolock(fname);
@@ -145,7 +145,7 @@ int unlock(char *fname)
  */
 void lckerror(char *errstr)
 {
-	char obuf[NSTRING];	/* output buffer for error message */
+	char obuf[NSTRING];			/* output buffer for error message */
 
 	strcpy(obuf, errstr);
 	strcat(obuf, " - ");

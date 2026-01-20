@@ -44,7 +44,7 @@ unsigned utf8_to_unicode(char *line, unsigned index, unsigned len, unicode_t *re
 	if (bytes > len)
 		return 1;
 
-	value = c & (mask-1);
+	value = c & (mask - 1);
 
 	/* Ok, do the bytes */
 	for (i = 1; i < bytes; i++) {
@@ -61,8 +61,10 @@ static void reverse_string(char *begin, char *end)
 {
 	do {
 		char a = *begin, b = *end;
-		*end = a; *begin = b;
-		begin++; end--;
+		*end = a;
+		*begin = b;
+		begin++;
+		end--;
 	} while (begin < end);
 }
 
@@ -91,7 +93,7 @@ unsigned unicode_to_utf8(unsigned int c, char *utf8)
 			prefix >>= 1;
 			c >>= 6;
 		} while (c >= prefix);
-		*p = c - 2*prefix;
+		*p = c - 2 * prefix;
 		reverse_string(utf8, p);
 	}
 	return bytes;

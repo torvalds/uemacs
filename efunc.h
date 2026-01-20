@@ -47,8 +47,7 @@ extern int newsize(int f, int n);
 extern int newwidth(int f, int n);
 extern int getwpos(void);
 extern void cknewwindow(void);
-extern struct window *wpopup(void);  /* Pop up window creation. */
-
+extern struct window *wpopup(void);		/* Pop up window creation. */
 
 /* basic.c */
 extern int gotobol(int f, int n);
@@ -68,7 +67,7 @@ extern int setmark(int f, int n);
 extern int swapmark(int f, int n);
 
 /* random.c */
-extern int tabsize;  /* Tab size (0: use real tabs). */
+extern int tabsize;				/* Tab size (0: use real tabs). */
 extern int setfillcol(int f, int n);
 extern int showcpos(int f, int n);
 extern int getcline(void);

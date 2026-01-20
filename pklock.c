@@ -18,7 +18,6 @@
 #define MAXLOCK 512
 #define MAXNAME 128
 
-
 /**********************
  *
  * if successful, returns NULL  
@@ -66,7 +65,6 @@ char *dolock(char *fname)
 	locker[n > MAXNAME ? MAXNAME : n] = 0;
 	return locker;
 }
-
 
 /*********************
  *

@@ -132,21 +132,20 @@ int forwchar(int f, int n)
 int gotoline(int f, int n)
 {
 	int status;
-	char arg[NSTRING]; /* Buffer to hold argument. */
+	char arg[NSTRING];			/* Buffer to hold argument. */
 
 	/* Get an argument if one doesnt exist. */
 	if (f == FALSE) {
-		if ((status =
-		     mlreply("Line to GOTO: ", arg, NSTRING)) != TRUE) {
+		if ((status = mlreply("Line to GOTO: ", arg, NSTRING)) != TRUE) {
 			mlwrite("(Aborted)");
 			return status;
 		}
 		n = atoi(arg);
 	}
-        /* Handle the case where the user may be passed something like this:
-         * em filename +
-         * In this case we just go to the end of the buffer.
-         */
+	/* Handle the case where the user may be passed something like this:
+	 * em filename +
+	 * In this case we just go to the end of the buffer.
+	 */
 	if (n == 0)
 		return gotoeob(f, n);
 
@@ -289,18 +288,18 @@ static int is_new_para(void)
  */
 int gotobop(int f, int n)
 {
-	int suc;  /* success of last backchar */
+	int suc;				/* success of last backchar */
 
-	if (n < 0) /* the other way... */
+	if (n < 0)				/* the other way... */
 		return gotoeop(f, -n);
 
-	while (n-- > 0) {  /* for each one asked for */
+	while (n-- > 0) {			/* for each one asked for */
 
 		/* first scan back until we are in a word */
 		suc = backchar(FALSE, 1);
 		while (!inword() && suc)
 			suc = backchar(FALSE, 1);
-		curwp->w_doto = 0;	/* and go to the B-O-Line */
+		curwp->w_doto = 0;		/* and go to the B-O-Line */
 
 		/* and scan back until we hit a <NL><NL> or <NL><TAB>
 		   or a <NL><SPACE>                                     */
@@ -315,7 +314,7 @@ int gotobop(int f, int n)
 		while (suc && !inword())
 			suc = forwchar(FALSE, 1);
 	}
-	curwp->w_flag |= WFMOVE;	/* force screen update */
+	curwp->w_flag |= WFMOVE;		/* force screen update */
 	return TRUE;
 }
 
@@ -328,18 +327,18 @@ int gotobop(int f, int n)
  */
 int gotoeop(int f, int n)
 {
-	int suc;  /* success of last backchar */
+	int suc;				/* success of last backchar */
 
-	if (n < 0)  /* the other way... */
+	if (n < 0)				/* the other way... */
 		return gotobop(f, -n);
 
-	while (n-- > 0) {  /* for each one asked for */
+	while (n-- > 0) {			/* for each one asked for */
 		/* first scan forward until we are in a word */
 		suc = forwchar(FALSE, 1);
 		while (!inword() && suc)
 			suc = forwchar(FALSE, 1);
-		curwp->w_doto = 0;	/* and go to the B-O-Line */
-		if (suc)	/* of next line if not at EOF */
+		curwp->w_doto = 0;		/* and go to the B-O-Line */
+		if (suc)			/* of next line if not at EOF */
 			curwp->w_dotp = lforw(curwp->w_dotp);
 
 		/* and scan forword until we hit a <NL><NL> or <NL><TAB>
@@ -357,7 +356,7 @@ int gotoeop(int f, int n)
 		}
 		curwp->w_doto = llength(curwp->w_dotp);	/* and to the EOL */
 	}
-	curwp->w_flag |= WFMOVE;  /* force screen update */
+	curwp->w_flag |= WFMOVE;		/* force screen update */
 	return TRUE;
 }
 #endif
@@ -373,14 +372,14 @@ int forwpage(int f, int n)
 	struct line *lp;
 
 	if (f == FALSE) {
-		n = curwp->w_ntrows - 2;  /* Default scroll. */
-		if (n <= 0)	/* Forget the overlap. */
-			n = 1;	/* If tiny window. */
+		n = curwp->w_ntrows - 2;	/* Default scroll. */
+		if (n <= 0)			/* Forget the overlap. */
+			n = 1;			/* If tiny window. */
 	} else if (n < 0)
 		return backpage(f, -n);
 #if     CVMVAS
-	else			/* Convert from pages. */
-		n *= curwp->w_ntrows;	/* To lines. */
+	else					/* Convert from pages. */
+		n *= curwp->w_ntrows;		/* To lines. */
 #endif
 	lp = curwp->w_linep;
 	while (n-- && lp != curbp->b_linep)
@@ -403,14 +402,14 @@ int backpage(int f, int n)
 	struct line *lp;
 
 	if (f == FALSE) {
-		n = curwp->w_ntrows - 2; /* Default scroll. */
-		if (n <= 0)	/* Don't blow up if the. */
-			n = 1;	/* Window is tiny. */
+		n = curwp->w_ntrows - 2;	/* Default scroll. */
+		if (n <= 0)			/* Don't blow up if the. */
+			n = 1;			/* Window is tiny. */
 	} else if (n < 0)
 		return forwpage(f, -n);
 #if     CVMVAS
-	else  /* Convert from pages. */
-		n *= curwp->w_ntrows;  /* To lines. */
+	else					/* Convert from pages. */
+		n *= curwp->w_ntrows;		/* To lines. */
 #endif
 	lp = curwp->w_linep;
 	while (n-- && lback(lp) != curbp->b_linep)
