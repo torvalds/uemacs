@@ -18,15 +18,15 @@ PROGRAM=em
 
 SRC=	basic.c bind.c buffer.c display.c eval.c exec.c file.c fileio.c \
 	globals.c input.c isearch.c line.c lock.c main.c names.c \
-	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
+	pklock.c posix.c random.c region.c search.c spawn.c syntax.c tcap.c \
 	usage.c utf8.c version.c window.c word.c wrapper.c
 
 OBJ=	basic.o bind.o buffer.o display.o eval.o exec.o file.o fileio.o \
 	globals.o input.o isearch.o line.o lock.o main.o names.o \
-	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
+	pklock.o posix.o random.o region.o search.o spawn.o syntax.o tcap.o \
 	usage.o utf8.o version.o window.o word.o wrapper.o
 
-HDR=	ebind.h edef.h efunc.h epath.h estruct.h evar.h line.h usage.h \
+HDR=	ebind.h edef.h efunc.h epath.h estruct.h evar.h line.h syntax.h usage.h \
 	utf8.h util.h version.h wrapper.h
 
 # DO NOT ADD OR MODIFY ANY LINES ABOVE THIS -- make source creates them
@@ -91,7 +91,7 @@ depend: ${SRC}
 basic.o: basic.c estruct.h edef.h efunc.h line.h utf8.h
 bind.o: bind.c estruct.h edef.h efunc.h epath.h line.h utf8.h util.h
 buffer.o: buffer.c estruct.h edef.h efunc.h line.h utf8.h
-display.o: display.c estruct.h edef.h efunc.h line.h utf8.h version.h wrapper.h
+display.o: display.c estruct.h edef.h efunc.h line.h utf8.h version.h wrapper.h syntax.h
 eval.o: eval.c estruct.h edef.h efunc.h evar.h line.h utf8.h util.h version.h
 exec.o: exec.c estruct.h edef.h efunc.h line.h utf8.h
 file.o: file.c estruct.h edef.h efunc.h line.h utf8.h util.h
@@ -107,6 +107,7 @@ random.o: random.c estruct.h edef.h efunc.h line.h utf8.h
 region.o: region.c estruct.h edef.h efunc.h line.h utf8.h
 search.o: search.c estruct.h edef.h efunc.h line.h utf8.h
 spawn.o: spawn.c estruct.h edef.h efunc.h
+syntax.o: syntax.c estruct.h edef.h syntax.h utf8.h
 tcap.o: tcap.c estruct.h edef.h efunc.h
 window.o: window.c estruct.h edef.h efunc.h line.h utf8.h wrapper.h
 word.o: word.c estruct.h edef.h efunc.h line.h utf8.h
