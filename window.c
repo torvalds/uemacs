@@ -69,7 +69,6 @@ int newsize(int f, int n)
 
 	/* Update the current window as needed */
 	wp = curwp;
-	wp->w_ntrows = n - wp->w_toprow - 2;
 	wp->w_flag |= WFHARD | WFMODE;
 
 	/* screen is garbage */

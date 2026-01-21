@@ -261,11 +261,11 @@ static int reframe(struct window *wp)
 			i = -1;
 			lp = lp0;
 		}
-		for (; i <= (int)(wp->w_ntrows); i++) {
+		for (; i < term.t_nrow; i++) {
 			/* if the line is in the window, no reframe */
 			if (lp == wp->w_dotp) {
 				/* if not _quite_ in, we'll reframe gently */
-				if (i < 0 || i == wp->w_ntrows) {
+				if (i < 0 || i == term.t_nrow - 1) {
 					break;
 				}
 				return TRUE;
@@ -281,7 +281,7 @@ static int reframe(struct window *wp)
 	}
 	if (i == -1) {				/* we're just above the window */
 		i = scrollcount;		/* put dot at first line */
-	} else if (i == wp->w_ntrows) {		/* we're just below the window */
+	} else if (i == term.t_nrow - 1) {	/* we're just below the window */
 		i = -scrollcount;		/* put dot at last line */
 	} else					/* put dot where requested */
 		i = wp->w_force;		/* (is 0, unless reposition() was called) */
@@ -290,14 +290,14 @@ static int reframe(struct window *wp)
 
 	/* how far back to reframe? */
 	if (i > 0) {				/* only one screen worth of lines max */
-		if (--i >= wp->w_ntrows)
-			i = wp->w_ntrows - 1;
+		if (--i >= term.t_nrow - 1)
+			i = term.t_nrow - 2;
 	} else if (i < 0) {			/* negative update???? */
-		i += wp->w_ntrows;
+		i += term.t_nrow - 1;
 		if (i < 0)
 			i = 0;
 	} else
-		i = wp->w_ntrows / 2;
+		i = (term.t_nrow - 1) / 2;
 
 	/* backup to new line at top of window */
 	lp = wp->w_dotp;
@@ -337,7 +337,7 @@ static void updone(struct window *wp)
 
 	/* search down the line we want */
 	lp = wp->w_linep;
-	sline = wp->w_toprow;
+	sline = 0;
 	while (lp != wp->w_dotp) {
 		++sline;
 		lp = lforw(lp);
@@ -364,8 +364,8 @@ static void updall(struct window *wp)
 
 	/* search down the lines, updating them */
 	lp = wp->w_linep;
-	sline = wp->w_toprow;
-	while (sline < wp->w_toprow + wp->w_ntrows) {
+	sline = 0;
+	while (sline < term.t_nrow - 1) {
 
 		/* and update the virtual line */
 		vscreen[sline]->v_flag |= VFCHG;
@@ -396,7 +396,7 @@ void updpos(void)
 
 	/* find the current row */
 	lp = curwp->w_linep;
-	currow = curwp->w_toprow;
+	currow = 0;
 	while (lp != curwp->w_dotp) {
 		++currow;
 		lp = lforw(lp);
@@ -434,9 +434,9 @@ void upddex(void)
 
 	wp = curwp;
 	lp = wp->w_linep;
-	i = wp->w_toprow;
+	i = 0;
 
-	while (i < wp->w_toprow + wp->w_ntrows) {
+	while (i < term.t_nrow - 1) {
 		if (vscreen[i]->v_flag & VFEXT) {
 			if ((wp != curwp) || (lp != wp->w_dotp) ||
 			    (curcol < term.t_ncol - 1)) {
@@ -693,7 +693,7 @@ static void modeline(struct window *wp)
 	int firstm;				/* is this the first mode? */
 	char tline[NLINE];			/* buffer for part of mode line */
 
-	n = wp->w_toprow + wp->w_ntrows;	/* Location. */
+	n = term.t_nrow - 1;			/* Location. */
 	vscreen[n]->v_flag |= VFCHG | VFREQ | VFCOL;	/* Redraw next time. */
 	vtmove(n, 0);				/* Seek to right line. */
 	if (wp == curwp)			/* mark the current buffer */
@@ -773,7 +773,7 @@ static void modeline(struct window *wp)
 
 	{					/* determine if top line, bottom line, or both are visible */
 		struct line *lp = wp->w_linep;
-		int rows = wp->w_ntrows;
+		int rows = term.t_nrow - 1;
 		char *msg = NULL;
 
 		vtcol = n - 7;			/* strlen(" top ") plus a couple */

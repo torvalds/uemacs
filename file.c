@@ -117,7 +117,7 @@ int getfile(char *fname, int lockfl)
 		if ((bp->b_flag & BFINVS) == 0 && strcmp(bp->b_fname, fname) == 0) {
 			swbuffer(bp);
 			lp = curwp->w_dotp;
-			i = curwp->w_ntrows / 2;
+			i = (term.t_nrow - 1) / 2;
 			while (i-- && lback(lp) != curbp->b_linep)
 				lp = lback(lp);
 			curwp->w_linep = lp;
