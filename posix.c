@@ -133,26 +133,58 @@ void ttflush(void)
 }
 
 /*
+ * Small tty input buffer
+ */
+static struct {
+	int nr;
+	char buf[32];
+} TT;
+
+/* Pause for x*.1 second lag or until keypress */
+static void pause_read(int pause)
+{
+	int n;
+
+	ntermios.c_cc[VMIN] = 0;
+	ntermios.c_cc[VTIME] = pause;
+	tcsetattr(0, TCSANOW, &ntermios);
+
+	n = read(0, TT.buf + TT.nr, sizeof(TT.buf) - TT.nr);
+
+	/* Undo timeout */
+	ntermios.c_cc[VMIN] = 1;
+	ntermios.c_cc[VTIME] = 0;
+	tcsetattr(0, TCSANOW, &ntermios);
+
+	if (n > 0)
+		TT.nr += n;
+}
+
+void ttpause(void)
+{
+	if (term.t_pause && !TT.nr)
+		pause_read(term.t_pause);
+}
+
+/*
  * Read a character from the terminal, performing no editing and doing no echo
  * at all. More complex in VMS that almost anyplace else, which figures. Very
  * simple on CPM, because the system can do exactly what you want.
  */
 int ttgetc(void)
 {
-	static char buffer[32];
-	static int pending;
 	unicode_t c;
 	int count, bytes = 1, expected;
 
-	count = pending;
+	count = TT.nr;
 	if (!count) {
-		count = read(0, buffer, sizeof(buffer));
+		count = read(0, TT.buf, sizeof(TT.buf));
 		if (count <= 0)
 			return 0;
-		pending = count;
+		TT.nr = count;
 	}
 
-	c = (unsigned char)buffer[0];
+	c = (unsigned char)TT.buf[0];
 	if (c >= 32 && c < 128)
 		goto done;
 
@@ -173,25 +205,12 @@ int ttgetc(void)
 	if ((c & 0xe0) == 0xe0)
 		expected = 6;
 
-	/* Special character - try to fill buffer */
-	if (count < expected) {
-		int n;
-		ntermios.c_cc[VMIN] = 0;
-		ntermios.c_cc[VTIME] = 1;	/* A .1 second lag */
-		tcsetattr(0, TCSANOW, &ntermios);
+	/* Special character - try to re-fill the buffer */
+	if (count < expected)
+		pause_read(1);
 
-		n = read(0, buffer + count, sizeof(buffer) - count);
-
-		/* Undo timeout */
-		ntermios.c_cc[VMIN] = 1;
-		ntermios.c_cc[VTIME] = 0;
-		tcsetattr(0, TCSANOW, &ntermios);
-
-		if (n > 0)
-			pending += n;
-	}
-	if (pending > 1) {
-		unsigned char second = buffer[1];
+	if (TT.nr > 1) {
+		unsigned char second = TT.buf[1];
 
 		/* Turn ESC+'[' into CSI */
 		if (c == 27 && second == '[') {
@@ -200,26 +219,26 @@ int ttgetc(void)
 			goto done;
 		}
 	}
-	bytes = utf8_to_unicode(buffer, 0, pending, &c);
+	bytes = utf8_to_unicode(TT.buf, 0, TT.nr, &c);
 
 	/* Hackety hack! Turn no-break space into regular space */
 	if (c == 0xa0)
 		c = ' ';
  done:
-	pending -= bytes;
-	memmove(buffer, buffer + bytes, pending);
+	TT.nr -= bytes;
+	memmove(TT.buf, TT.buf + bytes, TT.nr);
 	return c;
 }
 
 /* typahead:	Check to see if any characters are already in the
-		keyboard buffer
+		keyboard TT.buf
 */
 
 int typahead(void)
 {
-	int x;					/* holds # of pending chars */
+	int x;
 
 	if (ioctl(0, FIONREAD, &x) < 0)
 		x = 0;
-	return x;
+	return x + TT.nr;
 }

@@ -24,7 +24,7 @@
 
 #define	MARGIN	8
 #define	SCRSIZ	64
-#define	NPAUSE	10				/* # times thru update to pause. */
+#define	NPAUSE	2				/* Pause in 0.1 seconds */
 #define BEL     0x07
 #define ESC     0x1B
 

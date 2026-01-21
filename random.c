@@ -1038,7 +1038,6 @@ int fmatch(int ch)
 	int count;				/* current fence level count */
 	char opench;				/* open fence */
 	char c;					/* current character in scan */
-	int i;
 
 	/* first get the display update out there */
 	update(FALSE);
@@ -1076,12 +1075,10 @@ int fmatch(int ch)
 	}
 
 	/* if count is zero, we have a match, display the sucker */
-	/* there is a real machine dependant timing problem here we have
-	   yet to solve......... */
 	if (count == 0) {
 		forwchar(FALSE, 1);
-		for (i = 0; i < term.t_pause; i++)
-			update(FALSE);
+		update(FALSE);
+		ttpause();
 	}
 
 	/* restore the current position */

@@ -135,6 +135,7 @@ extern void ttopen(void);
 extern void ttclose(void);
 extern int ttputc(int c);
 extern void ttflush(void);
+extern void ttpause(void);
 extern int ttgetc(void);
 extern int typahead(void);
 
