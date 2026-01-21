@@ -97,7 +97,6 @@ extern int lastflag;				/* Flags, last command          */
 extern int curgoal;				/* Goal for C-P, C-N            */
 extern struct window *curwp;			/* Current window               */
 extern struct buffer *curbp;			/* Current buffer               */
-extern struct window *wheadp;			/* Head of list of windows      */
 extern struct buffer *bheadp;			/* Head of list of buffers      */
 extern struct buffer *blistp;			/* Buffer for C-X C-B           */
 

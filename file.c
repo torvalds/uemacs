@@ -86,7 +86,6 @@ int viewfile(int f, int n)
 {						/* visit a file in VIEW mode */
 	char fname[NFILEN];			/* file user wishes to find */
 	int s;					/* status return */
-	struct window *wp;			/* scan for windows that need updating */
 
 	if (restflag)				/* don't allow this command if restricted */
 		return resterr();
@@ -95,13 +94,7 @@ int viewfile(int f, int n)
 	s = getfile(fname, FALSE);
 	if (s) {				/* if we succeed, put it in view mode */
 		curwp->w_bufp->b_mode |= MDVIEW;
-
-		/* scan through and update mode lines of all windows */
-		wp = wheadp;
-		while (wp != NULL) {
-			wp->w_flag |= WFMODE;
-			wp = wp->w_wndp;
-		}
+		curwp->w_flag = WFMODE;
 	}
 	return s;
 }
@@ -248,15 +241,14 @@ int readin(char *fname, int lockfl)
 	mlwrite(mesg);
 
  out:
-	for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
-		if (wp->w_bufp == curbp) {
-			wp->w_linep = lforw(curbp->b_linep);
-			wp->w_dotp = lforw(curbp->b_linep);
-			wp->w_doto = 0;
-			wp->w_markp = NULL;
-			wp->w_marko = 0;
-			wp->w_flag |= WFMODE | WFHARD;
-		}
+	wp = curwp;
+	if (wp->w_bufp == curbp) {
+		wp->w_linep = lforw(curbp->b_linep);
+		wp->w_dotp = lforw(curbp->b_linep);
+		wp->w_doto = 0;
+		wp->w_markp = NULL;
+		wp->w_marko = 0;
+		wp->w_flag |= WFMODE | WFHARD;
 	}
 	if (s == FIOERR || s == FIOFNF)		/* False if error.      */
 		return FALSE;
@@ -333,12 +325,9 @@ int filewrite(int f, int n)
 	if ((s = writeout(fname)) == TRUE) {
 		strcpy(curbp->b_fname, fname);
 		curbp->b_flag &= ~BFCHG;
-		wp = wheadp;			/* Update mode lines.   */
-		while (wp != NULL) {
-			if (wp->w_bufp == curbp)
-				wp->w_flag |= WFMODE;
-			wp = wp->w_wndp;
-		}
+		wp = curwp;			/* Update mode line.    */
+		if (wp->w_bufp == curbp)
+			wp->w_flag |= WFMODE;
 	}
 	return s;
 }
@@ -353,7 +342,6 @@ int filewrite(int f, int n)
  */
 int filesave(int f, int n)
 {
-	struct window *wp;
 	int s;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
@@ -375,12 +363,7 @@ int filesave(int f, int n)
 
 	if ((s = writeout(curbp->b_fname)) == TRUE) {
 		curbp->b_flag &= ~BFCHG;
-		wp = wheadp;			/* Update mode lines.   */
-		while (wp != NULL) {
-			if (wp->w_bufp == curbp)
-				wp->w_flag |= WFMODE;
-			wp = wp->w_wndp;
-		}
+		curwp->w_flag |= WFMODE;	/* Update mode line.    */
 	}
 	return s;
 }
@@ -437,7 +420,6 @@ int writeout(char *fn)
  */
 int filename(int f, int n)
 {
-	struct window *wp;
 	int s;
 	char fname[NFILEN];
 
@@ -449,12 +431,7 @@ int filename(int f, int n)
 		strcpy(curbp->b_fname, "");
 	else
 		strcpy(curbp->b_fname, fname);
-	wp = wheadp;				/* Update mode lines.   */
-	while (wp != NULL) {
-		if (wp->w_bufp == curbp)
-			wp->w_flag |= WFMODE;
-		wp = wp->w_wndp;
-	}
+	curwp->w_flag |= WFMODE;		/* Update mode lines.   */
 	curbp->b_mode &= ~MDVIEW;		/* no longer read only mode */
 	return TRUE;
 }

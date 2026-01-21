@@ -141,16 +141,14 @@
 #define isxupper(c)	(('A' <= c && 'Z' >= c) || (192 <= c && 220 >= c))
 
 /*
- * There is a window structure allocated for every active display window. The
- * windows are kept in a big list, in top to bottom screen order, with the
- * listhead at "wheadp". Each window contains its own values of dot and mark.
+ * There is a window structure allocated for the active display window.
+ * The window contains its own values of dot and mark.
  * The flag field contains some bits that are set by commands to guide
  * redisplay. Although this is a bit of a compromise in terms of decoupling,
  * the full blown redisplay is just too expensive to run for every input
  * character.
  */
 struct window {
-	struct window *w_wndp;			/* Next window                  */
 	struct buffer *w_bufp;			/* Buffer displayed in window   */
 	struct line *w_linep;			/* Top line in the window       */
 	struct line *w_dotp;			/* Line containing "."          */

@@ -396,10 +396,8 @@ void edinit(char *bname)
 	if (bp == NULL || wp == NULL || blistp == NULL)
 		exit(1);
 	curbp = bp;				/* Make this current    */
-	wheadp = wp;
 	curwp = wp;
-	wp->w_wndp = NULL;			/* Initialize window    */
-	wp->w_bufp = bp;
+	wp->w_bufp = bp;			/* Initialize window    */
 	bp->b_nwnd = 1;				/* Displayed.           */
 	wp->w_linep = bp->b_linep;
 	wp->w_dotp = bp->b_linep;

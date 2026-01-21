@@ -58,20 +58,18 @@ void lfree(struct line *lp)
 	struct buffer *bp;
 	struct window *wp;
 
-	wp = wheadp;
-	while (wp != NULL) {
-		if (wp->w_linep == lp)
-			wp->w_linep = lp->l_fp;
-		if (wp->w_dotp == lp) {
-			wp->w_dotp = lp->l_fp;
-			wp->w_doto = 0;
-		}
-		if (wp->w_markp == lp) {
-			wp->w_markp = lp->l_fp;
-			wp->w_marko = 0;
-		}
-		wp = wp->w_wndp;
+	wp = curwp;
+	if (wp->w_linep == lp)
+		wp->w_linep = lp->l_fp;
+	if (wp->w_dotp == lp) {
+		wp->w_dotp = lp->l_fp;
+		wp->w_doto = 0;
 	}
+	if (wp->w_markp == lp) {
+		wp->w_markp = lp->l_fp;
+		wp->w_marko = 0;
+	}
+
 	bp = bheadp;
 	while (bp != NULL) {
 		if (bp->b_nwnd == 0) {
@@ -108,12 +106,9 @@ void lchange(int flag)
 		flag |= WFMODE;			/* update mode lines.   */
 		curbp->b_flag |= BFCHG;
 	}
-	wp = wheadp;
-	while (wp != NULL) {
-		if (wp->w_bufp == curbp)
-			wp->w_flag |= flag;
-		wp = wp->w_wndp;
-	}
+	wp = curwp;
+	if (wp->w_bufp == curbp)
+		wp->w_flag |= flag;
 }
 
 /*
@@ -220,21 +215,17 @@ static int linsert_byte(int n, int c)
 	}
 	for (i = 0; i < n; ++i)			/* Add the characters       */
 		lp2->l_text[doto + i] = c;
-	wp = wheadp;				/* Update windows       */
-	while (wp != NULL) {
-		if (wp->w_linep == lp1)
-			wp->w_linep = lp2;
-		if (wp->w_dotp == lp1) {
-			wp->w_dotp = lp2;
-			if (wp == curwp || wp->w_doto > doto)
-				wp->w_doto += n;
-		}
-		if (wp->w_markp == lp1) {
-			wp->w_markp = lp2;
-			if (wp->w_marko > doto)
-				wp->w_marko += n;
-		}
-		wp = wp->w_wndp;
+	wp = curwp;				/* Update window        */
+	if (wp->w_linep == lp1)
+		wp->w_linep = lp2;
+	if (wp->w_dotp == lp1) {
+		wp->w_dotp = lp2;
+		wp->w_doto += n;
+	}
+	if (wp->w_markp == lp1) {
+		wp->w_markp = lp2;
+		if (wp->w_marko > doto)
+			wp->w_marko += n;
 	}
 	return TRUE;
 }
@@ -328,23 +319,20 @@ int lnewline(void)
 	lp1->l_bp = lp2;
 	lp2->l_bp->l_fp = lp2;
 	lp2->l_fp = lp1;
-	wp = wheadp;				/* Windows              */
-	while (wp != NULL) {
-		if (wp->w_linep == lp1)
-			wp->w_linep = lp2;
-		if (wp->w_dotp == lp1) {
-			if (wp->w_doto < doto)
-				wp->w_dotp = lp2;
-			else
-				wp->w_doto -= doto;
-		}
-		if (wp->w_markp == lp1) {
-			if (wp->w_marko < doto)
-				wp->w_markp = lp2;
-			else
-				wp->w_marko -= doto;
-		}
-		wp = wp->w_wndp;
+	wp = curwp;				/* Window               */
+	if (wp->w_linep == lp1)
+		wp->w_linep = lp2;
+	if (wp->w_dotp == lp1) {
+		if (wp->w_doto < doto)
+			wp->w_dotp = lp2;
+		else
+			wp->w_doto -= doto;
+	}
+	if (wp->w_markp == lp1) {
+		if (wp->w_marko < doto)
+			wp->w_markp = lp2;
+		else
+			wp->w_marko -= doto;
 	}
 	return TRUE;
 }
@@ -422,19 +410,16 @@ int ldelete(long n, int kflag)
 		while (cp2 != &dotp->l_text[dotp->l_used])
 			*cp1++ = *cp2++;
 		dotp->l_used -= chunk;
-		wp = wheadp;			/* Fix windows          */
-		while (wp != NULL) {
-			if (wp->w_dotp == dotp && wp->w_doto >= doto) {
-				wp->w_doto -= chunk;
-				if (wp->w_doto < doto)
-					wp->w_doto = doto;
-			}
-			if (wp->w_markp == dotp && wp->w_marko >= doto) {
-				wp->w_marko -= chunk;
-				if (wp->w_marko < doto)
-					wp->w_marko = doto;
-			}
-			wp = wp->w_wndp;
+		wp = curwp;			/* Fix window           */
+		if (wp->w_dotp == dotp && wp->w_doto >= doto) {
+			wp->w_doto -= chunk;
+			if (wp->w_doto < doto)
+				wp->w_doto = doto;
+		}
+		if (wp->w_markp == dotp && wp->w_marko >= doto) {
+			wp->w_marko -= chunk;
+			if (wp->w_marko < doto)
+				wp->w_marko = doto;
 		}
 		n -= chunk;
 	}
@@ -523,19 +508,16 @@ int ldelnewline(void)
 		cp2 = &lp2->l_text[0];
 		while (cp2 != &lp2->l_text[lp2->l_used])
 			*cp1++ = *cp2++;
-		wp = wheadp;
-		while (wp != NULL) {
-			if (wp->w_linep == lp2)
-				wp->w_linep = lp1;
-			if (wp->w_dotp == lp2) {
-				wp->w_dotp = lp1;
-				wp->w_doto += lp1->l_used;
-			}
-			if (wp->w_markp == lp2) {
-				wp->w_markp = lp1;
-				wp->w_marko += lp1->l_used;
-			}
-			wp = wp->w_wndp;
+		wp = curwp;
+		if (wp->w_linep == lp2)
+			wp->w_linep = lp1;
+		if (wp->w_dotp == lp2) {
+			wp->w_dotp = lp1;
+			wp->w_doto += lp1->l_used;
+		}
+		if (wp->w_markp == lp2) {
+			wp->w_markp = lp1;
+			wp->w_marko += lp1->l_used;
 		}
 		lp1->l_used += lp2->l_used;
 		lp1->l_fp = lp2->l_fp;
@@ -556,23 +538,20 @@ int ldelnewline(void)
 	lp3->l_fp = lp2->l_fp;
 	lp2->l_fp->l_bp = lp3;
 	lp3->l_bp = lp1->l_bp;
-	wp = wheadp;
-	while (wp != NULL) {
-		if (wp->w_linep == lp1 || wp->w_linep == lp2)
-			wp->w_linep = lp3;
-		if (wp->w_dotp == lp1)
-			wp->w_dotp = lp3;
-		else if (wp->w_dotp == lp2) {
-			wp->w_dotp = lp3;
-			wp->w_doto += lp1->l_used;
-		}
-		if (wp->w_markp == lp1)
-			wp->w_markp = lp3;
-		else if (wp->w_markp == lp2) {
-			wp->w_markp = lp3;
-			wp->w_marko += lp1->l_used;
-		}
-		wp = wp->w_wndp;
+	wp = curwp;
+	if (wp->w_linep == lp1 || wp->w_linep == lp2)
+		wp->w_linep = lp3;
+	if (wp->w_dotp == lp1)
+		wp->w_dotp = lp3;
+	else if (wp->w_dotp == lp2) {
+		wp->w_dotp = lp3;
+		wp->w_doto += lp1->l_used;
+	}
+	if (wp->w_markp == lp1)
+		wp->w_markp = lp3;
+	else if (wp->w_markp == lp2) {
+		wp->w_markp = lp3;
+		wp->w_marko += lp1->l_used;
 	}
 	free((char *)lp1);
 	free((char *)lp2);

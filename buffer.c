@@ -80,8 +80,6 @@ int nextbuffer(int f, int n)
  */
 int swbuffer(struct buffer *bp)
 {
-	struct window *wp;
-
 	if (--curbp->b_nwnd == 0) {		/* Last use.            */
 		curbp->b_dotp = curwp->w_dotp;
 		curbp->b_doto = curwp->w_doto;
@@ -107,17 +105,6 @@ int swbuffer(struct buffer *bp)
 		curwp->w_marko = bp->b_marko;
 		cknewwindow();
 		return TRUE;
-	}
-	wp = wheadp;				/* Look for old.        */
-	while (wp != NULL) {
-		if (wp != curwp && wp->w_bufp == bp) {
-			curwp->w_dotp = wp->w_dotp;
-			curwp->w_doto = wp->w_doto;
-			curwp->w_markp = wp->w_markp;
-			curwp->w_marko = wp->w_marko;
-			break;
-		}
-		wp = wp->w_wndp;
 	}
 	cknewwindow();
 	return TRUE;

@@ -53,9 +53,6 @@ int redraw(int f, int n)
 int newsize(int f, int n)
 {
 	struct window *wp;			/* current window being examined */
-	struct window *nextwp;			/* next window to scan */
-	struct window *lastwp;			/* last window scanned */
-	int lastline;				/* screen line of last line of current window */
 
 	/* if the command defaults, assume the largest */
 	if (f == FALSE)
@@ -69,61 +66,11 @@ int newsize(int f, int n)
 
 	if (term.t_nrow == n - 1)
 		return TRUE;
-	else if (term.t_nrow < n - 1) {
 
-		/* go to the last window */
-		wp = wheadp;
-		while (wp->w_wndp != NULL)
-			wp = wp->w_wndp;
-
-		/* and enlarge it as needed */
-		wp->w_ntrows = n - wp->w_toprow - 2;
-		wp->w_flag |= WFHARD | WFMODE;
-
-	} else {
-
-		/* rebuild the window structure */
-		nextwp = wheadp;
-		wp = NULL;
-		lastwp = NULL;
-		while (nextwp != NULL) {
-			wp = nextwp;
-			nextwp = wp->w_wndp;
-
-			/* get rid of it if it is too low */
-			if (wp->w_toprow > n - 2) {
-
-				/* save the point/mark if needed */
-				if (--wp->w_bufp->b_nwnd == 0) {
-					wp->w_bufp->b_dotp = wp->w_dotp;
-					wp->w_bufp->b_doto = wp->w_doto;
-					wp->w_bufp->b_markp = wp->w_markp;
-					wp->w_bufp->b_marko = wp->w_marko;
-				}
-
-				/* update curwp and lastwp if needed */
-				if (wp == curwp)
-					curwp = wheadp;
-				curbp = curwp->w_bufp;
-				if (lastwp != NULL)
-					lastwp->w_wndp = NULL;
-
-				/* free the structure */
-				free((char *)wp);
-				wp = NULL;
-
-			} else {
-				/* need to change this window size? */
-				lastline = wp->w_toprow + wp->w_ntrows - 1;
-				if (lastline >= n - 2) {
-					wp->w_ntrows = n - wp->w_toprow - 2;
-					wp->w_flag |= WFHARD | WFMODE;
-				}
-			}
-
-			lastwp = wp;
-		}
-	}
+	/* Update the current window as needed */
+	wp = curwp;
+	wp->w_ntrows = n - wp->w_toprow - 2;
+	wp->w_flag |= WFHARD | WFMODE;
 
 	/* screen is garbage */
 	term.t_nrow = n - 1;
@@ -139,8 +86,6 @@ int newsize(int f, int n)
  */
 int newwidth(int f, int n)
 {
-	struct window *wp;
-
 	/* if the command defaults, assume the largest */
 	if (f == FALSE)
 		n = term.t_mcol;
@@ -156,12 +101,8 @@ int newwidth(int f, int n)
 	term.t_margin = n / 10;
 	term.t_scrsiz = n - (term.t_margin * 2);
 
-	/* florce all windows to redraw */
-	wp = wheadp;
-	while (wp) {
-		wp->w_flag |= WFHARD | WFMOVE | WFMODE;
-		wp = wp->w_wndp;
-	}
+	/* force window to redraw */
+	curwp->w_flag |= WFHARD | WFMOVE | WFMODE;
 	sgarbf = TRUE;
 
 	return TRUE;

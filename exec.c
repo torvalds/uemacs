@@ -723,15 +723,12 @@ int dobuf(struct buffer *bp)
 		/* check for a command error */
 		if (status != TRUE) {
 			/* look if buffer is showing */
-			wp = wheadp;
-			while (wp != NULL) {
-				if (wp->w_bufp == bp) {
-					/* and point it */
-					wp->w_dotp = lp;
-					wp->w_doto = 0;
-					wp->w_flag |= WFHARD;
-				}
-				wp = wp->w_wndp;
+			wp = curwp;
+			if (wp->w_bufp == bp) {
+				/* and point it */
+				wp->w_dotp = lp;
+				wp->w_doto = 0;
+				wp->w_flag |= WFHARD;
 			}
 			/* in any case set the buffer . */
 			bp->b_dotp = lp;

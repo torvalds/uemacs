@@ -204,22 +204,18 @@ int update(int force)
 	displaying = TRUE;
 
 	/* update any windows that need refreshing */
-	wp = wheadp;
-	while (wp != NULL) {
-		if (wp->w_flag) {
-			/* if the window has changed, service it */
-			reframe(wp);		/* check the framing */
-			if ((wp->w_flag & ~WFMODE) == WFEDIT)
-				updone(wp);	/* update EDITed line */
-			else if (wp->w_flag & ~WFMOVE)
-				updall(wp);	/* update all lines */
-			if (wp->w_flag & WFMODE)
-				modeline(wp);	/* update modeline */
-			wp->w_flag = 0;
-			wp->w_force = 0;
-		}
-		/* on to the next window */
-		wp = wp->w_wndp;
+	wp = curwp;
+	if (wp->w_flag) {
+		/* if the window has changed, service it */
+		reframe(wp);		/* check the framing */
+		if ((wp->w_flag & ~WFMODE) == WFEDIT)
+			updone(wp);	/* update EDITed line */
+		else if (wp->w_flag & ~WFMOVE)
+			updall(wp);	/* update all lines */
+		if (wp->w_flag & WFMODE)
+			modeline(wp);	/* update modeline */
+		wp->w_flag = 0;
+		wp->w_force = 0;
 	}
 
 	/* recalc the current hardware cursor location */
@@ -436,30 +432,25 @@ void upddex(void)
 	struct line *lp;
 	int i;
 
-	wp = wheadp;
+	wp = curwp;
+	lp = wp->w_linep;
+	i = wp->w_toprow;
 
-	while (wp != NULL) {
-		lp = wp->w_linep;
-		i = wp->w_toprow;
+	while (i < wp->w_toprow + wp->w_ntrows) {
+		if (vscreen[i]->v_flag & VFEXT) {
+			if ((wp != curwp) || (lp != wp->w_dotp) ||
+			    (curcol < term.t_ncol - 1)) {
+				vtmove(i, 0);
+				show_line(lp);
+				vteeol();
 
-		while (i < wp->w_toprow + wp->w_ntrows) {
-			if (vscreen[i]->v_flag & VFEXT) {
-				if ((wp != curwp) || (lp != wp->w_dotp) ||
-				    (curcol < term.t_ncol - 1)) {
-					vtmove(i, 0);
-					show_line(lp);
-					vteeol();
-
-					/* this line no longer is extended */
-					vscreen[i]->v_flag &= ~VFEXT;
-					vscreen[i]->v_flag |= VFCHG;
-				}
+				/* this line no longer is extended */
+				vscreen[i]->v_flag &= ~VFEXT;
+				vscreen[i]->v_flag |= VFCHG;
 			}
-			lp = lforw(lp);
-			++i;
 		}
-		/* and onward to the next window */
-		wp = wp->w_wndp;
+		lp = lforw(lp);
+		++i;
 	}
 }
 
@@ -840,13 +831,7 @@ static void modeline(struct window *wp)
 
 void upmode(void)
 {						/* update all the mode lines */
-	struct window *wp;
-
-	wp = wheadp;
-	while (wp != NULL) {
-		wp->w_flag |= WFMODE;
-		wp = wp->w_wndp;
-	}
+	curwp->w_flag |= WFMODE;
 }
 
 /*
