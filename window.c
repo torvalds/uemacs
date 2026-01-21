@@ -107,25 +107,3 @@ int newwidth(int f, int n)
 
 	return TRUE;
 }
-
-int getwpos(void)
-{						/* get screen offset of current line in current window */
-	int sline;				/* screen line from top of window */
-	struct line *lp;			/* scannile line pointer */
-
-	/* search down the line we want */
-	lp = curwp->w_linep;
-	sline = 1;
-	while (lp != curwp->w_dotp) {
-		++sline;
-		lp = lforw(lp);
-	}
-
-	/* and return the value */
-	return sline;
-}
-
-void cknewwindow(void)
-{
-	execute(META | SPEC | 'X', FALSE, 1);
-}

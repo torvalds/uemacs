@@ -32,8 +32,6 @@ extern int redraw(int f, int n);
 extern int resize(int f, int n);
 extern int newsize(int f, int n);
 extern int newwidth(int f, int n);
-extern int getwpos(void);
-extern void cknewwindow(void);
 
 /* basic.c */
 extern int gotobol(int f, int n);

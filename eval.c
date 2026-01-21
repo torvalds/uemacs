@@ -259,10 +259,6 @@ char *gtenv(char *vname)
 		return itoa(seed);
 	case EVDISINP:
 		return ltos(disinp);
-	case EVWLINE:
-		return itoa(curwp->w_ntrows);
-	case EVCWLINE:
-		return itoa(getwpos());
 	case EVTARGET:
 		saveflag = lastflag;
 		return itoa(curgoal);
@@ -535,11 +531,6 @@ int svar(struct variable_description *var, char *value)
 			break;
 		case EVDISINP:
 			disinp = stol(value);
-			break;
-		case EVWLINE:
-			break;
-		case EVCWLINE:
-			status = forwline(TRUE, atoi(value) - getwpos());
 			break;
 		case EVTARGET:
 			curgoal = atoi(value);

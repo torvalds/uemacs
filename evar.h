@@ -42,8 +42,8 @@ static char *envars[] = {
 	"progname",				/* returns current prog name - "MicroEMACS" */
 	"seed",					/* current random number seed */
 	"disinp",				/* display command line input characters */
-	"wline",				/* # of lines in current window */
-	"cwline",				/* current screen line in window */
+	"nopewline",				/* Used to be # of lines in current window */
+	"nopecwline",				/* Used to be current screen line in window */
 	"target",				/* target for line moves */
 	"search",				/* search pattern */
 	"replace",				/* replacement pattern */
@@ -86,8 +86,8 @@ static char *envars[] = {
 #define	EVPROGNAME	19
 #define	EVSEED		20
 #define	EVDISINP	21
-#define	EVWLINE		22
-#define EVCWLINE	23
+// gone EVWLINE		22
+// gone EVCWLINE	23
 #define	EVTARGET	24
 #define	EVSEARCH	25
 #define	EVREPLACE	26

@@ -122,7 +122,6 @@ int getfile(char *fname, int lockfl)
 				lp = lback(lp);
 			curwp->w_linep = lp;
 			curwp->w_flag |= WFMODE | WFHARD;
-			cknewwindow();
 			mlwrite("(Old buffer)");
 			return TRUE;
 		}
@@ -152,7 +151,6 @@ int getfile(char *fname, int lockfl)
 	curwp->w_bufp = bp;
 	curbp->b_nwnd++;
 	s = readin(fname, lockfl);		/* Read it in.          */
-	cknewwindow();
 	return s;
 }
 

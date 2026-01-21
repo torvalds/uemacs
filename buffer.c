@@ -103,10 +103,8 @@ int swbuffer(struct buffer *bp)
 		curwp->w_doto = bp->b_doto;
 		curwp->w_markp = bp->b_markp;
 		curwp->w_marko = bp->b_marko;
-		cknewwindow();
 		return TRUE;
 	}
-	cknewwindow();
 	return TRUE;
 }
 
