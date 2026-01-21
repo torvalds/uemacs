@@ -537,7 +537,6 @@ int svar(struct variable_description *var, char *value)
 			disinp = stol(value);
 			break;
 		case EVWLINE:
-			status = resize(TRUE, atoi(value));
 			break;
 		case EVCWLINE:
 			status = forwline(TRUE, atoi(value) - getwpos());

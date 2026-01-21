@@ -29,25 +29,11 @@ extern int wordcount(int f, int n);
 /* window.c */
 extern int reposition(int f, int n);
 extern int redraw(int f, int n);
-extern int nextwind(int f, int n);
-extern int prevwind(int f, int n);
-extern int mvdnwind(int f, int n);
-extern int mvupwind(int f, int n);
-extern int onlywind(int f, int n);
-extern int delwind(int f, int n);
-extern int splitwind(int f, int n);
-extern int enlargewind(int f, int n);
-extern int shrinkwind(int f, int n);
 extern int resize(int f, int n);
-extern int scrnextup(int f, int n);
-extern int scrnextdw(int f, int n);
-extern int savewnd(int f, int n);
-extern int restwnd(int f, int n);
 extern int newsize(int f, int n);
 extern int newwidth(int f, int n);
 extern int getwpos(void);
 extern void cknewwindow(void);
-extern struct window *wpopup(void);		/* Pop up window creation. */
 
 /* basic.c */
 extern int gotobol(int f, int n);
@@ -195,7 +181,6 @@ extern int swbuffer(struct buffer *bp);
 extern int killbuffer(int f, int n);
 extern int zotbuf(struct buffer *bp);
 extern int namebuffer(int f, int n);
-extern int listbuffers(int f, int n);
 extern int makelist(int iflag);
 extern void ltoa(char *buf, int width, long num);
 extern int addline(char *text);
@@ -291,7 +276,6 @@ extern int bktoshell(int f, int n);
 extern void rtfrmshell(void);
 extern int spawn(int f, int n);
 extern int execprg(int f, int n);
-extern int pipecmd(int f, int n);
 extern int filter_buffer(int f, int n);
 extern int sys(char *cmd);
 extern int shellprog(char *cmd);
