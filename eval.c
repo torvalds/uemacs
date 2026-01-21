@@ -186,7 +186,7 @@ char *gtusr(char *vname)
 	return errorm;
 }
 
-extern char *getkill(void);
+static char *getkill(void);
 
 /*
  * gtenv()
@@ -305,7 +305,7 @@ char *gtenv(char *vname)
 /*
  * return some of the contents of the kill buffer
  */
-char *getkill(void)
+static char *getkill(void)
 {
 	int size;				/* max number of chars to return */
 	static char value[NSTRING];		/* temp buffer for value */
@@ -319,7 +319,8 @@ char *getkill(void)
 			size = kused;
 		else
 			size = NSTRING - 1;
-		strncpy(value, kbufh->d_chunk, size);
+		memcpy(value, kbufh->d_chunk, size);
+		value[size] = 0;
 	}
 
 	/* and return the constructed value */

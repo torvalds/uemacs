@@ -332,7 +332,6 @@ extern void varinit(void);
 extern char *gtfun(char *fname);
 extern char *gtusr(char *vname);
 extern char *gtenv(char *vname);
-extern char *getkill(void);
 extern int setvar(int f, int n);
 extern void findvar(char *var, struct variable_description *vd, int size);
 extern int svar(struct variable_description *var, char *value);
