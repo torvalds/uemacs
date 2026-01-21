@@ -34,7 +34,6 @@ struct video {
 #define	VFCOL	0x0010				/* color change requested       */
 
 static struct video **vscreen;			/* Virtual screen. */
-static struct video **pscreen;			/* Physical screen. */
 
 static int displaying = TRUE;
 #include <signal.h>
@@ -46,7 +45,7 @@ static int reframe(struct window *wp);
 static void updone(struct window *wp);
 static void updall(struct window *wp);
 static void updext(void);
-static int updateline(int row, struct video *vp1, struct video *vp2);
+static int updateline(int row, struct video *vp);
 static void modeline(struct window *wp);
 static void mlputi(int i, int r);
 static void mlputli(long l, int r);
@@ -70,14 +69,10 @@ void vtinit(void)
 	TTrev(FALSE);
 	vscreen = xmalloc(term.t_mrow * sizeof(struct video *));
 
-	pscreen = xmalloc(term.t_mrow * sizeof(struct video *));
 	for (i = 0; i < term.t_mrow; ++i) {
 		vp = xmalloc(sizeof(struct video) + term.t_mcol * 4);
 		vp->v_flag = 0;
 		vscreen[i] = vp;
-		vp = xmalloc(sizeof(struct video) + term.t_mcol * 4);
-		vp->v_flag = 0;
-		pscreen[i] = vp;
 	}
 }
 
@@ -475,15 +470,10 @@ void upddex(void)
  */
 void updgar(void)
 {
-	unicode_t *txt;
-	int i, j;
+	int i;
 
-	for (i = 0; i < term.t_nrow; ++i) {
+	for (i = 0; i < term.t_nrow; ++i)
 		vscreen[i]->v_flag |= VFCHG;
-		txt = pscreen[i]->v_text;
-		for (j = 0; j < term.t_ncol; ++j)
-			txt[j] = ' ';
-	}
 
 	movecursor(0, 0);			/* Erase the screen. */
 	(*term.t_eeop) ();
@@ -507,7 +497,7 @@ int updupd(int force)
 
 		/* for each line that needs to be updated */
 		if ((vp1->v_flag & VFCHG) != 0) {
-			updateline(i, vp1, pscreen[i]);
+			updateline(i, vp1);
 		}
 	}
 	return TRUE;
@@ -639,10 +629,9 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
  * updateline()
  *
  * int row;		row of screen to update
- * struct video *vp1;	virtual screen image
- * struct video *vp2;	physical screen image
+ * struct video *vp;	virtual screen image
  */
-static int updateline(int row, struct video *vp1, struct video *vp2)
+static int updateline(int row, struct video *vp)
 {
 	int maxchar = 0, analyzed = 0;
 	unsigned char array[256];
@@ -653,21 +642,20 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 	/* scan through the line and dump it to the the
 	   virtual screen array, finding where the last non-space is  */
 	for (int i = 0; i < term.t_ncol; i++) {
-		unicode_t ch = vp1->v_text[i];
-		vp2->v_text[i] = ch;
+		unicode_t ch = vp->v_text[i];
 		if (ch != ' ')
 			maxchar = i + 1;
 	}
 
 	/* set rev video if needed, and fill all the way */
-	if (vp1->v_flag & VFREQ) {
+	if (vp->v_flag & VFREQ) {
 		maxchar = term.t_ncol;
 		TTrev(TRUE);
 		spellcheck = false;
 	}
 
 	if (spellcheck)
-		analyzed = findwords(vp1->v_text, maxchar, array, sizeof(array));
+		analyzed = findwords(vp->v_text, maxchar, array, sizeof(array));
 
 #define SPELLSTART "\033[1m"
 #define SPELLSTOP "\033[22m"
@@ -678,7 +666,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 			started = 1;
 			TTputs(SPELLSTART);
 		}
-		TTputc(vp1->v_text[i]);
+		TTputc(vp->v_text[i]);
 		if (i < analyzed && (array[i] & BAD_WORD_END)) {
 			TTputs(SPELLSTOP);
 			started = 0;
@@ -693,7 +681,7 @@ static int updateline(int row, struct video *vp1, struct video *vp2)
 	TTrev(FALSE);
 
 	/* update the needed flags */
-	vp1->v_flag &= ~VFCHG;
+	vp->v_flag &= ~VFCHG;
 	return TRUE;
 }
 
