@@ -185,7 +185,7 @@ int ttgetc(void)
 	}
 
 	c = (unsigned char)TT.buf[0];
-	if (c >= 32 && c < 128)
+	if (c != 27 && c < 128)
 		goto done;
 
 	/*
