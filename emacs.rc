@@ -204,6 +204,9 @@ bind-to-key execute-macro-40 M-?
 		!return
 	!endif
 	set %rctmp &mid $cfname &add %rctmp 1 5
+	!if &seq %rctmp "scad"
+		add-mode "cmode"
+	!endif
 	!if &or &seq %rctmp "c" &seq %rctmp "h"
 		add-mode "cmode"
 	!endif

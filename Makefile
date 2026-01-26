@@ -59,9 +59,9 @@ clean:
 install: $(PROGRAM)
 	install em ${BINDIR}
 	cp emacs.hlp ${LIBDIR}
-	cp emacs.rc ${LIBDIR}/.emacsrc
+	cp emacs.rc ${HOME}/.emacsrc
 	chmod 755 ${BINDIR}/em
-	chmod 644 ${LIBDIR}/emacs.hlp ${LIBDIR}/.emacsrc
+	chmod 644 ${LIBDIR}/emacs.hlp ${HOME}/.emacsrc
 
 source:
 	@mv makefile makefile.bak
