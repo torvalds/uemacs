@@ -405,7 +405,13 @@ int backpage(int f, int n)
 		return forwpage(f, -n);
 	else					/* Convert from pages. */
 		n *= term.t_nrow - 1;		/* To lines. */
+
 	lp = curwp->w_linep;
+
+	/* if we are on the first line as we start... do nothing */
+	if (lback(lp) == curbp->b_linep)
+		return FALSE;
+
 	while (n-- && lback(lp) != curbp->b_linep)
 		lp = lback(lp);
 	curwp->w_linep = lp;
