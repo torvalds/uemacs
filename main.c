@@ -116,7 +116,6 @@ int main(int argc, char **argv)
 	int saveflag;				/* temp store for lastflag */
 	int errflag;				/* C error processing? */
 	char bname[NBUFN];			/* buffer name of file to read */
-	int newc;
 
 	const char *aff_path = "/usr/share/hunspell/en_US.aff";
 	const char *dic_path = "/usr/share/hunspell/en_US.dic";
@@ -276,23 +275,10 @@ int main(int argc, char **argv)
 	execute(META | SPEC | 'C', FALSE, 1);
 	lastflag = saveflag;
 
-	if (typahead()) {
-		newc = getcmd();
+	if (!typahead())
 		update(FALSE);
-		do {
-			fn_t execfunc;
+	c = getcmd();
 
-			if (c == newc && (execfunc = getbind(c)) != NULL
-			    && execfunc != insert_newline && execfunc != insert_tab)
-				newc = getcmd();
-			else
-				break;
-		} while (typahead());
-		c = newc;
-	} else {
-		update(FALSE);
-		c = getcmd();
-	}
 	/* if there is something on the command line, clear it */
 	if (mpresf != FALSE) {
 		mlerase();
