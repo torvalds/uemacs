@@ -408,9 +408,13 @@ int backpage(int f, int n)
 
 	lp = curwp->w_linep;
 
-	/* if we are on the first line as we start... do nothing */
-	if (lback(lp) == curbp->b_linep)
+	/* if we are on the first line as we start... move cursor */
+	if (lback(lp) == curbp->b_linep) {
+		curwp->w_dotp = lp;
+		curwp->w_doto = 0;
+		curwp->w_flag |= WFMOVE;
 		return FALSE;
+	}
 
 	while (n-- && lback(lp) != curbp->b_linep)
 		lp = lback(lp);
