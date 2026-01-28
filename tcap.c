@@ -35,7 +35,6 @@ static void tcapeeol(void);
 static void tcapeeop(void);
 static void tcapbeep(void);
 static void tcaprev(int);
-static int tcapcres(char *);
 static void putpad(char *str);
 
 static void tcapopen(void);
@@ -67,7 +66,6 @@ struct terminal term = {
 	tcapeeop,
 	tcapbeep,
 	tcaprev,
-	tcapcres,
 };
 
 static void tcapopen(void)
@@ -161,7 +159,6 @@ static void tcapkopen(void)
 	ttrow = 999;
 	ttcol = 999;
 	sgarbf = TRUE;
-	strcpy(sres, "NORMAL");
 }
 
 static void tcapkclose(void)
@@ -197,12 +194,6 @@ static void tcaprev(int state)
 			putpad(SO);
 	} else if (SE != NULL)
 		putpad(SE);
-}
-
-/* Change screen resolution. */
-static int tcapcres(char *res)
-{
-	return TRUE;
 }
 
 static void tcapbeep(void)

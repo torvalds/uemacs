@@ -93,7 +93,6 @@ extern struct buffer *curbp;			/* Current buffer               */
 extern struct buffer *bheadp;			/* Head of list of buffers      */
 extern struct buffer *blistp;			/* Buffer for C-X C-B           */
 
-extern char sres[NBUFN];			/* Current screen resolution.   */
 extern char pat[];				/* Search pattern.              */
 extern char tap[];				/* Reversed pattern array.      */
 extern char rpat[];				/* Replacement pattern.         */

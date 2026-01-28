@@ -245,7 +245,6 @@ struct terminal {
 	void (*t_eeop)(void);			/* Erase to end of page.        */
 	void (*t_beep)(void);			/* Beep.                        */
 	void (*t_rev)(int);			/* set reverse video state      */
-	int (*t_rez)(char *);			/* change screen resolution     */
 };
 
 /*	TEMPORARY macros for terminal I/O  (to be placed in a machine
@@ -263,7 +262,6 @@ struct terminal {
 #define	TTeeop		(*term.t_eeop)
 #define	TTbeep		(*term.t_beep)
 #define	TTrev		(*term.t_rev)
-#define	TTrez		(*term.t_rez)
 
 /* Structure for the table of initial key bindings. */
 struct key_tab {

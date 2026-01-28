@@ -82,7 +82,6 @@ struct buffer *curbp;				/* Current buffer               */
 struct buffer *bheadp;				/* Head of list of buffers      */
 struct buffer *blistp;				/* Buffer for C-X C-B           */
 
-char sres[NBUFN];				/* current screen resolution    */
 char pat[NPAT];					/* Search pattern               */
 char tap[NPAT];					/* Reversed pattern array.      */
 char rpat[NPAT];				/* replacement pattern          */

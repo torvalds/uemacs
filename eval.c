@@ -233,7 +233,7 @@ char *gtenv(char *vname)
 	case EVCFNAME:
 		return curbp->b_fname;
 	case EVSRES:
-		return sres;
+		return "NORMAL";
 	case EVDEBUG:
 		return ltos(macbug);
 	case EVSTATUS:
@@ -492,7 +492,6 @@ int svar(struct variable_description *var, char *value)
 			curwp->w_flag |= WFMODE;
 			break;
 		case EVSRES:
-			status = TTrez(value);
 			break;
 		case EVDEBUG:
 			macbug = stol(value);
