@@ -24,8 +24,8 @@
 #include "util.h"
 
 struct video {
-	int v_flag;				/* Flags */
 	struct line *v_line;			/* Source line (NULL for modeline/ext) */
+	int v_flag;				/* Flags */
 	unicode_t v_text[1];			/* Screen data. */
 };
 
