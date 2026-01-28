@@ -812,6 +812,19 @@ static int updateline(int row, struct video *vp)
  * change the modeline format by hacking at this routine. Called by "update"
  * any time there is a dirty window.
  */
+/*
+ * Write a character to both the terminal and the vscreen buffer.
+ * This is used by modeline() to render directly while also keeping
+ * vscreen populated for the screen-garbage fallback path.
+ */
+static void mode_putc(int c, int row)
+{
+	TTputc(c);
+	if (vtcol >= 0 && vtcol < term.t_ncol)
+		vscreen[row]->v_text[vtcol] = c;
+	++vtcol;
+}
+
 static void modeline(struct window *wp)
 {
 	char *cp;
@@ -822,10 +835,19 @@ static void modeline(struct window *wp)
 	int lchar;				/* character to draw line in buffer with */
 	int firstm;				/* is this the first mode? */
 	char tline[NLINE];			/* buffer for part of mode line */
+	int row = term.t_nrow - 1;		/* Location. */
 
-	n = term.t_nrow - 1;			/* Location. */
-	vscreen[n]->v_flag |= VFCHG | VFREQ;		/* Redraw next time. */
-	vtmove(n, 0);				/* Seek to right line. */
+	/*
+	 * Write the modeline directly to the terminal in reverse video,
+	 * while also filling vscreen so the screen-garbage fallback in
+	 * updateline() has valid data.
+	 */
+	vscreen[row]->v_flag |= VFCHG | VFREQ;
+	vscreen[row]->v_line = NULL;
+	vtmove(row, 0);
+	movecursor(row, 0);
+	TTrev(TRUE);
+
 	if (wp == curwp)			/* mark the current buffer */
 		lchar = '-';
 	else if (revexist)
@@ -834,12 +856,12 @@ static void modeline(struct window *wp)
 		lchar = '-';
 
 	bp = wp->w_bufp;
-	vtputc(lchar);
+	mode_putc(lchar, row);
 
 	if ((bp->b_flag & BFCHG) != 0)		/* "*" if changed. */
-		vtputc('*');
+		mode_putc('*', row);
 	else
-		vtputc(lchar);
+		mode_putc(lchar, row);
 
 	n = 2;
 
@@ -850,13 +872,13 @@ static void modeline(struct window *wp)
 	strcat(tline, ": ");
 	cp = &tline[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		mode_putc(c, row);
 		++n;
 	}
 
 	cp = &bp->b_bname[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		mode_putc(c, row);
 		++n;
 	}
 
@@ -880,7 +902,7 @@ static void modeline(struct window *wp)
 
 	cp = &tline[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		mode_putc(c, row);
 		++n;
 	}
 
@@ -888,16 +910,16 @@ static void modeline(struct window *wp)
 		cp = &bp->b_fname[0];
 
 		while ((c = *cp++) != 0) {
-			vtputc(c);
+			mode_putc(c, row);
 			++n;
 		}
 
-		vtputc(' ');
+		mode_putc(' ', row);
 		++n;
 	}
 
 	while (n < term.t_ncol) {		/* Pad to full width. */
-		vtputc(lchar);
+		mode_putc(lchar, row);
 		++n;
 	}
 
@@ -907,6 +929,7 @@ static void modeline(struct window *wp)
 		char *msg = NULL;
 
 		vtcol = n - 7;			/* strlen(" top ") plus a couple */
+		movecursor(row, n - 7);
 		while (rows--) {
 			lp = lforw(lp);
 			if (lp == wp->w_bufp->b_linep) {
@@ -953,10 +976,18 @@ static void modeline(struct window *wp)
 
 		cp = msg;
 		while ((c = *cp++) != 0) {
-			vtputc(c);
+			mode_putc(c, row);
 			++n;
 		}
 	}
+	TTrev(FALSE);
+
+	/*
+	 * We rendered directly, so clear VFCHG. Keep VFREQ set so that
+	 * if updgar() later sets VFCHG (screen garbage), updateline()
+	 * knows to use the vscreen fallback with reverse video.
+	 */
+	vscreen[row]->v_flag = VFREQ;
 }
 
 void upmode(void)
