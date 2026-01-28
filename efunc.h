@@ -29,7 +29,6 @@ extern int wordcount(int f, int n);
 /* window.c */
 extern int reposition(int f, int n);
 extern int redraw(int f, int n);
-extern int resize(int f, int n);
 extern int newsize(int f, int n);
 extern int newwidth(int f, int n);
 
@@ -105,7 +104,6 @@ extern int cexit(int status);
 
 /* display.c */
 extern void vtinit(void);
-extern void vtfree(void);
 extern void vttidy(void);
 extern void vtmove(int row, int col);
 extern int upscreen(int f, int n);
