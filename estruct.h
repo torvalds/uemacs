@@ -30,7 +30,6 @@
 #define NPAT    128				/* # of bytes, pattern          */
 #define HUGE    1000				/* Huge number                  */
 #define	NLOCKS	1000				/* max # of file locks active   */
-#define	NCOLORS	8				/* number of supported colors   */
 #define	KBLOCK	250				/* sizeof kill buffer chunks    */
 
 #define CONTROL 0x10000000			/* Control flag, or'ed in       */
@@ -164,7 +163,6 @@ struct window {
 #define WFEDIT  0x04				/* Editing within a line        */
 #define WFHARD  0x08				/* Better to a full display     */
 #define WFMODE  0x10				/* Update mode line.            */
-#define	WFCOLR	0x20				/* Needs a color change         */
 
 /*
  * Text is kept in buffers. A buffer header, described below, exists for every

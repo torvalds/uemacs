@@ -35,8 +35,6 @@ extern struct key_tab keytab[];			/* key bind to functions table  */
 extern struct name_bind names[];		/* name to function table */
 extern int gmode;				/* global editor mode           */
 extern int gflags;				/* global control flag          */
-extern int gfcolor;				/* global forgrnd color (white) */
-extern int gbcolor;				/* global backgrnd color (black) */
 extern int gasave;				/* global ASAVE size            */
 extern int gacount;				/* count until next ASAVE       */
 extern int sgarbf;				/* State of screen unknown      */

@@ -31,7 +31,6 @@ struct video {
 #define VFCHG   0x0001				/* Changed flag                 */
 #define	VFEXT	0x0002				/* extended (beyond column 80)  */
 #define	VFREQ	0x0008				/* reverse video request        */
-#define	VFCOL	0x0010				/* color change requested       */
 
 static struct video **vscreen;			/* Virtual screen. */
 
@@ -694,7 +693,7 @@ static void modeline(struct window *wp)
 	char tline[NLINE];			/* buffer for part of mode line */
 
 	n = term.t_nrow - 1;			/* Location. */
-	vscreen[n]->v_flag |= VFCHG | VFREQ | VFCOL;	/* Redraw next time. */
+	vscreen[n]->v_flag |= VFCHG | VFREQ;		/* Redraw next time. */
 	vtmove(n, 0);				/* Seek to right line. */
 	if (wp == curwp)			/* mark the current buffer */
 		lchar = '-';
