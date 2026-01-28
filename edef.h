@@ -64,7 +64,6 @@ extern struct kill *kbufp;			/* current kill buffer chunk pointer */
 extern struct kill *kbufh;			/* kill buffer header pointer   */
 extern int kused;				/* # of bytes used in KB        */
 extern struct window *swindow;			/* saved window pointer         */
-extern int cryptflag;				/* currently encrypting?        */
 extern int *kbdptr;				/* current position in keyboard buf */
 extern int *kbdend;				/* ptr to end of the keyboard */
 extern int kbdmode;				/* current keyboard macro mode  */
