@@ -27,7 +27,6 @@ extern char golabel[];				/* current line to go to        */
 extern int execlevel;				/* execution IF level           */
 extern int eolexist;				/* does clear to EOL exist?     */
 extern int revexist;				/* does reverse video exist?    */
-extern int flickcode;				/* do flicker supression?       */
 extern char *modename[];			/* text names of modes          */
 extern char *mode2name[];			/* text names of modes          */
 extern char modecode[];				/* letters to represent modes   */
@@ -68,13 +67,11 @@ extern int kbdrep;				/* number of repetitions        */
 extern int restflag;				/* restricted use?              */
 extern int lastkey;				/* last keystoke                */
 extern int seed;				/* random number seed           */
-extern long envram;				/* # of bytes current in use by malloc */
 extern int macbug;				/* macro debuging flag          */
 extern char errorm[];				/* error literal                */
 extern char truem[];				/* true literal                 */
 extern char falsem[];				/* false litereal               */
 extern int cmdstatus;				/* last command status          */
-extern char palstr[];				/* palette string               */
 extern int saveflag;				/* Flags, saved with the $target var */
 extern char *fline;				/* dynamic return line */
 extern int flen;				/* current length of fline */

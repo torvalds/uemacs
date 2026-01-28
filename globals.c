@@ -10,7 +10,6 @@ char golabel[NPAT] = "";			/* current line to go to        */
 int execlevel = 0;				/* execution IF level           */
 int eolexist = TRUE;				/* does clear to EOL exist      */
 int revexist = FALSE;				/* does reverse video exist?    */
-int flickcode = FALSE;				/* do flicker supression?       */
 char *modename[] = {				/* name of modes                */
 	"WRAP", "CMODE", "SPELL", "EXACT", "VIEW", "OVER",
 	"MAGIC", "ASAVE", "UTF-8"
@@ -57,13 +56,11 @@ int kbdrep = 0;					/* number of repetitions        */
 int restflag = FALSE;				/* restricted use?              */
 int lastkey = 0;				/* last keystoke                */
 int seed = 0;					/* random number seed           */
-long envram = 0l;				/* # of bytes current in use by malloc */
 int macbug = FALSE;				/* macro debuging flag          */
 char errorm[] = "ERROR";			/* error literal                */
 char truem[] = "TRUE";				/* true literal                 */
 char falsem[] = "FALSE";			/* false litereal               */
 int cmdstatus = TRUE;				/* last command status          */
-char palstr[49] = "";				/* palette string               */
 int saveflag = 0;				/* Flags, saved with the $target var */
 char *fline = NULL;				/* dynamic return line */
 int flen = 0;					/* current length of fline */
