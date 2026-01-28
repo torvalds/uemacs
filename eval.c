@@ -223,9 +223,9 @@ char *gtenv(char *vname)
 	case EVCURLINE:
 		return itoa(getcline());
 	case EVRAM:
-		return itoa((int)(envram / 1024l));
+		return itoa(0);
 	case EVFLICKER:
-		return ltos(flickcode);
+		return ltos(FALSE);
 	case EVCURWIDTH:
 		return itoa(term.t_ncol);
 	case EVCBUFNAME:
@@ -233,13 +233,13 @@ char *gtenv(char *vname)
 	case EVCFNAME:
 		return curbp->b_fname;
 	case EVSRES:
-		return sres;
+		return "NORMAL";
 	case EVDEBUG:
 		return ltos(macbug);
 	case EVSTATUS:
 		return ltos(cmdstatus);
 	case EVPALETTE:
-		return palstr;
+		return "";
 	case EVASAVE:
 		return itoa(gasave);
 	case EVACOUNT:
@@ -479,7 +479,6 @@ int svar(struct variable_description *var, char *value)
 		case EVRAM:
 			break;
 		case EVFLICKER:
-			flickcode = stol(value);
 			break;
 		case EVCURWIDTH:
 			status = newwidth(TRUE, atoi(value));
@@ -493,7 +492,6 @@ int svar(struct variable_description *var, char *value)
 			curwp->w_flag |= WFMODE;
 			break;
 		case EVSRES:
-			status = TTrez(value);
 			break;
 		case EVDEBUG:
 			macbug = stol(value);

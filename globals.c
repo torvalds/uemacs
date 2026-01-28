@@ -10,7 +10,6 @@ char golabel[NPAT] = "";			/* current line to go to        */
 int execlevel = 0;				/* execution IF level           */
 int eolexist = TRUE;				/* does clear to EOL exist      */
 int revexist = FALSE;				/* does reverse video exist?    */
-int flickcode = FALSE;				/* do flicker supression?       */
 char *modename[] = {				/* name of modes                */
 	"WRAP", "CMODE", "SPELL", "EXACT", "VIEW", "OVER",
 	"MAGIC", "ASAVE", "UTF-8"
@@ -24,8 +23,6 @@ char *mode2name[] = {				/* name of modes                */
 char modecode[] = "WCSEVOMYAU";			/* letters to represent modes   */
 int gmode = 0;					/* global editor mode           */
 int gflags = GFREAD;				/* global control flag          */
-int gfcolor = 7;				/* global forgrnd color (white) */
-int gbcolor = 0;				/* global backgrnd color (black) */
 int gasave = 256;				/* global ASAVE size            */
 int gacount = 256;				/* count until next ASAVE       */
 int sgarbf = TRUE;				/* TRUE if screen is garbage    */
@@ -52,7 +49,6 @@ int tabmask = 0x07;				/* tabulator mask */
 struct kill *kbufp = NULL;			/* current kill buffer chunk pointer    */
 struct kill *kbufh = NULL;			/* kill buffer header pointer           */
 int kused = KBLOCK;				/* # of bytes used in kill buffer       */
-struct window *swindow = NULL;			/* saved window pointer                 */
 int *kbdptr;					/* current position in keyboard buf */
 int *kbdend = &kbdm[0];				/* ptr to end of the keyboard */
 int kbdmode = STOP;				/* current keyboard macro mode  */
@@ -60,13 +56,11 @@ int kbdrep = 0;					/* number of repetitions        */
 int restflag = FALSE;				/* restricted use?              */
 int lastkey = 0;				/* last keystoke                */
 int seed = 0;					/* random number seed           */
-long envram = 0l;				/* # of bytes current in use by malloc */
 int macbug = FALSE;				/* macro debuging flag          */
 char errorm[] = "ERROR";			/* error literal                */
 char truem[] = "TRUE";				/* true literal                 */
 char falsem[] = "FALSE";			/* false litereal               */
 int cmdstatus = TRUE;				/* last command status          */
-char palstr[49] = "";				/* palette string               */
 int saveflag = 0;				/* Flags, saved with the $target var */
 char *fline = NULL;				/* dynamic return line */
 int flen = 0;					/* current length of fline */
@@ -88,7 +82,6 @@ struct buffer *curbp;				/* Current buffer               */
 struct buffer *bheadp;				/* Head of list of buffers      */
 struct buffer *blistp;				/* Buffer for C-X C-B           */
 
-char sres[NBUFN];				/* current screen resolution    */
 char pat[NPAT];					/* Search pattern               */
 char tap[NPAT];					/* Reversed pattern array.      */
 char rpat[NPAT];				/* replacement pattern          */

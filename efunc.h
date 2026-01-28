@@ -29,7 +29,6 @@ extern int wordcount(int f, int n);
 /* window.c */
 extern int reposition(int f, int n);
 extern int redraw(int f, int n);
-extern int resize(int f, int n);
 extern int newsize(int f, int n);
 extern int newwidth(int f, int n);
 
@@ -105,7 +104,6 @@ extern int cexit(int status);
 
 /* display.c */
 extern void vtinit(void);
-extern void vtfree(void);
 extern void vttidy(void);
 extern void vtmove(int row, int col);
 extern int upscreen(int f, int n);
@@ -329,10 +327,6 @@ extern int abs(int x);
 extern int ernd(void);
 extern int sindex(char *source, char *pattern);
 extern char *xlat(char *source, char *lookup, char *trans);
-
-/* crypt.c */
-extern int set_encryption_key(int f, int n);
-extern void myencrypt(char *bptr, unsigned len);
 
 /* lock.c */
 extern int lockchk(char *fname);

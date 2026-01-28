@@ -27,7 +27,6 @@ extern char golabel[];				/* current line to go to        */
 extern int execlevel;				/* execution IF level           */
 extern int eolexist;				/* does clear to EOL exist?     */
 extern int revexist;				/* does reverse video exist?    */
-extern int flickcode;				/* do flicker supression?       */
 extern char *modename[];			/* text names of modes          */
 extern char *mode2name[];			/* text names of modes          */
 extern char modecode[];				/* letters to represent modes   */
@@ -35,8 +34,6 @@ extern struct key_tab keytab[];			/* key bind to functions table  */
 extern struct name_bind names[];		/* name to function table */
 extern int gmode;				/* global editor mode           */
 extern int gflags;				/* global control flag          */
-extern int gfcolor;				/* global forgrnd color (white) */
-extern int gbcolor;				/* global backgrnd color (black) */
 extern int gasave;				/* global ASAVE size            */
 extern int gacount;				/* count until next ASAVE       */
 extern int sgarbf;				/* State of screen unknown      */
@@ -63,8 +60,6 @@ extern int tabmask;
 extern struct kill *kbufp;			/* current kill buffer chunk pointer */
 extern struct kill *kbufh;			/* kill buffer header pointer   */
 extern int kused;				/* # of bytes used in KB        */
-extern struct window *swindow;			/* saved window pointer         */
-extern int cryptflag;				/* currently encrypting?        */
 extern int *kbdptr;				/* current position in keyboard buf */
 extern int *kbdend;				/* ptr to end of the keyboard */
 extern int kbdmode;				/* current keyboard macro mode  */
@@ -72,13 +67,11 @@ extern int kbdrep;				/* number of repetitions        */
 extern int restflag;				/* restricted use?              */
 extern int lastkey;				/* last keystoke                */
 extern int seed;				/* random number seed           */
-extern long envram;				/* # of bytes current in use by malloc */
 extern int macbug;				/* macro debuging flag          */
 extern char errorm[];				/* error literal                */
 extern char truem[];				/* true literal                 */
 extern char falsem[];				/* false litereal               */
 extern int cmdstatus;				/* last command status          */
-extern char palstr[];				/* palette string               */
 extern int saveflag;				/* Flags, saved with the $target var */
 extern char *fline;				/* dynamic return line */
 extern int flen;				/* current length of fline */
@@ -100,7 +93,6 @@ extern struct buffer *curbp;			/* Current buffer               */
 extern struct buffer *bheadp;			/* Head of list of buffers      */
 extern struct buffer *blistp;			/* Buffer for C-X C-B           */
 
-extern char sres[NBUFN];			/* Current screen resolution.   */
 extern char pat[];				/* Search pattern.              */
 extern char tap[];				/* Reversed pattern array.      */
 extern char rpat[];				/* Replacement pattern.         */
