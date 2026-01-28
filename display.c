@@ -25,6 +25,7 @@
 
 struct video {
 	int v_flag;				/* Flags */
+	struct line *v_line;			/* Source line (NULL for modeline/ext) */
 	unicode_t v_text[1];			/* Screen data. */
 };
 
@@ -71,6 +72,7 @@ void vtinit(void)
 	for (i = 0; i < term.t_mrow; ++i) {
 		vp = xmalloc(sizeof(struct video) + term.t_mcol * 4);
 		vp->v_flag = 0;
+		vp->v_line = NULL;
 		vscreen[i] = vp;
 	}
 }
@@ -345,9 +347,7 @@ static void updone(struct window *wp)
 	/* and update the virtual line */
 	vscreen[sline]->v_flag |= VFCHG;
 	vscreen[sline]->v_flag &= ~VFREQ;
-	vtmove(sline, 0);
-	show_line(lp);
-	vteeol();
+	vscreen[sline]->v_line = lp;
 }
 
 /*
@@ -369,15 +369,15 @@ static void updall(struct window *wp)
 		/* and update the virtual line */
 		vscreen[sline]->v_flag |= VFCHG;
 		vscreen[sline]->v_flag &= ~VFREQ;
-		vtmove(sline, 0);
 		if (lp != wp->w_bufp->b_linep) {
 			/* if we are not at the end */
-			show_line(lp);
+			vscreen[sline]->v_line = lp;
 			lp = lforw(lp);
+		} else {
+			vscreen[sline]->v_line = NULL;
 		}
 
 		/* on to the next one */
-		vteeol();
 		++sline;
 	}
 
@@ -439,13 +439,11 @@ void upddex(void)
 		if (vscreen[i]->v_flag & VFEXT) {
 			if ((wp != curwp) || (lp != wp->w_dotp) ||
 			    (curcol < term.t_ncol - 1)) {
-				vtmove(i, 0);
-				show_line(lp);
-				vteeol();
 
 				/* this line no longer is extended */
 				vscreen[i]->v_flag &= ~VFEXT;
 				vscreen[i]->v_flag |= VFCHG;
+				vscreen[i]->v_line = lp;
 			}
 		}
 		lp = lforw(lp);
@@ -514,6 +512,7 @@ static void updext(void)
 	vtmove(currow, -lbound);		/* start scanning offscreen */
 	lp = curwp->w_dotp;			/* line to output */
 	show_line(lp);
+	vscreen[currow]->v_line = NULL;		/* use vscreen for extended lines */
 
 	/* truncate the virtual line, restore tab offset */
 	vteeol();
@@ -621,54 +620,186 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
  * int row;		row of screen to update
  * struct video *vp;	virtual screen image
  */
-static int updateline(int row, struct video *vp)
-{
-	int maxchar = 0, analyzed = 0;
-	unsigned char array[256];
-	bool spellcheck = curwp->w_bufp->b_mode & MDSPELL;
-
-	movecursor(row, 0);			/* Go to start of line. */
-
-	/* scan through the line and dump it to the the
-	   virtual screen array, finding where the last non-space is  */
-	for (int i = 0; i < term.t_ncol; i++) {
-		unicode_t ch = vp->v_text[i];
-		if (ch != ' ')
-			maxchar = i + 1;
-	}
-
-	/* set rev video if needed, and fill all the way */
-	if (vp->v_flag & VFREQ) {
-		maxchar = term.t_ncol;
-		TTrev(TRUE);
-		spellcheck = false;
-	}
-
-	if (spellcheck)
-		analyzed = findwords(vp->v_text, maxchar, array, sizeof(array));
-
 #define SPELLSTART "\033[1m"
 #define SPELLSTOP "\033[22m"
 
-	int started = 0;
-	for (int i = 0; i < maxchar; i++) {
-		if (i < analyzed && (array[i] & BAD_WORD_BEGIN)) {
-			started = 1;
-			TTputs(SPELLSTART);
+/*
+ * Render a unicode character to the terminal, handling tabs, control
+ * characters, and column overflow. Returns the new column position.
+ */
+static int render_char(unicode_t c, int col, int ncol)
+{
+	static const char hex[] = "0123456789abcdef";
+
+	if (col >= ncol) {
+		if (col == ncol) {
+			movecursor(ttrow, ncol - 1);
+			TTputc('$');
 		}
-		TTputc(vp->v_text[i]);
-		if (i < analyzed && (array[i] & BAD_WORD_END)) {
-			TTputs(SPELLSTOP);
-			started = 0;
+		return col + 1;
+	}
+
+	if (c == '\t') {
+		do {
+			TTputc(' ');
+			col++;
+			if (col >= ncol) {
+				movecursor(ttrow, ncol - 1);
+				TTputc('$');
+				return col;
+			}
+		} while ((col & tabmask) != 0);
+		return col;
+	}
+
+	if (c < 0x20) {
+		col = render_char('^', col, ncol);
+		return render_char(c ^ 0x40, col, ncol);
+	}
+
+	if (c == 0x7f) {
+		col = render_char('^', col, ncol);
+		return render_char('?', col, ncol);
+	}
+
+	if (c >= 0x80 && c <= 0xA0) {
+		col = render_char('\\', col, ncol);
+		col = render_char(hex[c >> 4], col, ncol);
+		return render_char(hex[c & 15], col, ncol);
+	}
+
+	TTputc(c);
+	return col + 1;
+}
+
+/*
+ * Build a unicode_t array from the line buffer, expanding tabs and
+ * control characters exactly as render_char does. This is needed for
+ * findwords() which operates on unicode_t arrays.
+ */
+static int line_to_unicode(struct line *lp, unicode_t *buf, int maxcol)
+{
+	static const char hex[] = "0123456789abcdef";
+	int i = 0, col = 0, len = llength(lp);
+
+	while (i < len && col < maxcol) {
+		unicode_t c;
+		i += utf8_to_unicode(lp->l_text, i, len, &c);
+
+		if (c == '\t') {
+			do {
+				if (col >= maxcol)
+					break;
+				buf[col++] = ' ';
+			} while ((col & tabmask) != 0);
+		} else if (c < 0x20) {
+			if (col < maxcol) buf[col++] = '^';
+			if (col < maxcol) buf[col++] = c ^ 0x40;
+		} else if (c == 0x7f) {
+			if (col < maxcol) buf[col++] = '^';
+			if (col < maxcol) buf[col++] = '?';
+		} else if (c >= 0x80 && c <= 0xA0) {
+			if (col < maxcol) buf[col++] = '\\';
+			if (col < maxcol) buf[col++] = hex[c >> 4];
+			if (col < maxcol) buf[col++] = hex[c & 15];
+		} else {
+			buf[col++] = c;
 		}
 	}
-	if (started)
-		TTputs(SPELLSTOP);
-	ttcol = term.t_ncol;
+	return col;
+}
 
-	TTeeol();
-	/* turn rev video off */
-	TTrev(FALSE);
+static int updateline(int row, struct video *vp)
+{
+	struct line *lp = vp->v_line;
+	int analyzed = 0;
+	unsigned char array[256];
+	bool do_spell = curwp->w_bufp->b_mode & MDSPELL;
+
+	movecursor(row, 0);			/* Go to start of line. */
+
+	/*
+	 * If we have a source line, render directly from its UTF-8 bytes.
+	 * Otherwise fall back to the vscreen unicode_t buffer (used for
+	 * extended lines and the modeline).
+	 */
+	if (lp && !(vp->v_flag & (VFREQ | VFEXT))) {
+		int i = 0, col = 0, len = llength(lp);
+		int ncol = term.t_ncol;
+
+		if (do_spell) {
+			unicode_t ubuf[256];
+			int ucols = line_to_unicode(lp, ubuf, sizeof(ubuf) / sizeof(ubuf[0]));
+			analyzed = findwords(ubuf, ucols, array, sizeof(array));
+		}
+
+		int started = 0;
+		while (i < len) {
+			unicode_t c;
+			i += utf8_to_unicode(lp->l_text, i, len, &c);
+			if (col < analyzed && (array[col] & BAD_WORD_BEGIN)) {
+				started = 1;
+				TTputs(SPELLSTART);
+			}
+			int newcol = render_char(c, col, ncol);
+			/* Check spell end on each column we rendered */
+			for (int j = col; j < newcol && j < analyzed; j++) {
+				if (array[j] & BAD_WORD_END) {
+					TTputs(SPELLSTOP);
+					started = 0;
+				}
+			}
+			col = newcol;
+			if (col > ncol)
+				break;
+		}
+		if (started)
+			TTputs(SPELLSTOP);
+		ttcol = term.t_ncol;
+		TTeeol();
+		vp->v_flag &= ~VFCHG;
+		return TRUE;
+	}
+
+	/* Fall back to vscreen buffer (modeline, extended lines) */
+	{
+		int maxchar = 0;
+
+		for (int i = 0; i < term.t_ncol; i++) {
+			unicode_t ch = vp->v_text[i];
+			if (ch != ' ')
+				maxchar = i + 1;
+		}
+
+		/* set rev video if needed, and fill all the way */
+		if (vp->v_flag & VFREQ) {
+			maxchar = term.t_ncol;
+			TTrev(TRUE);
+			do_spell = false;
+		}
+
+		if (do_spell)
+			analyzed = findwords(vp->v_text, maxchar, array, sizeof(array));
+
+		int started = 0;
+		for (int i = 0; i < maxchar; i++) {
+			if (i < analyzed && (array[i] & BAD_WORD_BEGIN)) {
+				started = 1;
+				TTputs(SPELLSTART);
+			}
+			TTputc(vp->v_text[i]);
+			if (i < analyzed && (array[i] & BAD_WORD_END)) {
+				TTputs(SPELLSTOP);
+				started = 0;
+			}
+		}
+		if (started)
+			TTputs(SPELLSTOP);
+		ttcol = term.t_ncol;
+
+		TTeeol();
+		TTrev(FALSE);
+	}
 
 	/* update the needed flags */
 	vp->v_flag &= ~VFCHG;
