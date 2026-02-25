@@ -24,14 +24,13 @@
 #include "util.h"
 
 struct video {
-	int v_flag;				/* Flags */
 	struct line *v_line;			/* Source line (NULL for modeline) */
+	int v_flag;				/* Flags */
 	int v_lbound;				/* Left bound for extended lines */
 	unicode_t v_text[1];			/* Screen data. */
 };
 
 #define VFCHG   0x0001				/* Changed flag                 */
-#define	VFEXT	0x0002				/* extended (beyond column 80)  */
 #define	VFREQ	0x0008				/* reverse video request        */
 
 static struct video **vscreen;			/* Virtual screen. */
@@ -211,9 +210,6 @@ int update(int force)
 	/* recalc the current hardware cursor location */
 	updpos();
 
-	/* check for lines to de-extend */
-	upddex();
-
 	/* if screen is garbage, re-plot it */
 	if (sgarbf != FALSE)
 		updgar();
@@ -362,7 +358,12 @@ static void updall(struct window *wp)
  * updpos:
  *	update the position of the hardware cursor and handle extended
  *	lines. This is the only update for simple moves.
+ *
+ *	Tracks the previously extended row in 'extrow' so it can be
+ *	de-extended (repainted with lbound=0) when the cursor moves away.
  */
+static int extrow = -1;			/* row of last extended line, -1 if none */
+
 void updpos(void)
 {
 	struct line *lp;
@@ -393,41 +394,26 @@ void updpos(void)
 		int rcursor;
 		rcursor = ((curcol - term.t_ncol) % term.t_scrsiz) + term.t_margin;
 		taboff = lbound = curcol - rcursor + 1;
-		vscreen[currow]->v_flag |= (VFEXT | VFCHG);
+
+		/* de-extend the previous row if it was a different one */
+		if (extrow >= 0 && extrow != currow) {
+			vscreen[extrow]->v_flag |= VFCHG;
+			vscreen[extrow]->v_lbound = 0;
+		}
+
+		vscreen[currow]->v_flag |= VFCHG;
 		vscreen[currow]->v_line = lp;
 		vscreen[currow]->v_lbound = lbound;
+		extrow = currow;
 		taboff = 0;
-	} else
-		lbound = 0;
-}
-
-/*
- * upddex:
- *	de-extend any line that derserves it
- */
-void upddex(void)
-{
-	struct window *wp;
-	struct line *lp;
-	int i;
-
-	wp = curwp;
-	lp = wp->w_linep;
-	i = 0;
-
-	while (i < term.t_nrow - 1) {
-		if (vscreen[i]->v_flag & VFEXT) {
-			if ((wp != curwp) || (lp != wp->w_dotp) ||
-			    (curcol < term.t_ncol - 1)) {
-				/* this line no longer is extended */
-				vscreen[i]->v_flag &= ~VFEXT;
-				vscreen[i]->v_flag |= VFCHG;
-				vscreen[i]->v_line = lp;
-				vscreen[i]->v_lbound = 0;
-			}
+	} else {
+		/* de-extend the previous row if there was one */
+		if (extrow >= 0) {
+			vscreen[extrow]->v_flag |= VFCHG;
+			vscreen[extrow]->v_lbound = 0;
+			extrow = -1;
 		}
-		lp = lforw(lp);
-		++i;
+		lbound = 0;
 	}
 }
 
