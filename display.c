@@ -31,7 +31,6 @@ struct video {
 };
 
 #define VFCHG   0x0001				/* Changed flag                 */
-#define	VFREQ	0x0008				/* reverse video request        */
 
 static struct video **vscreen;			/* Virtual screen. */
 
@@ -91,76 +90,6 @@ void vttidy(void)
 	TTclose();
 	TTkclose();
 	write(1, "\r", 1);
-}
-
-/*
- * Set the virtual cursor to the specified row and column on the virtual
- * screen. There is no checking for nonsense values; this might be a good
- * idea during the early stages.
- */
-void vtmove(int row, int col)
-{
-	vtrow = row;
-	vtcol = col;
-}
-
-/*
- * Write a character to the virtual screen. The virtual row and
- * column are updated. If we are not yet on left edge, don't print
- * it yet. If the line is too long put a "$" in the last column.
- *
- * This routine only puts printing characters into the virtual
- * terminal buffers. Only column overflow is checked.
- */
-static void vtputc(int c)
-{
-	struct video *vp;			/* ptr to line being updated */
-
-	/* In case somebody passes us a signed char.. */
-	if (c < 0) {
-		c += 256;
-		if (c < 0)
-			return;
-	}
-
-	vp = vscreen[vtrow];
-
-	if (vtcol >= term.t_ncol) {
-		++vtcol;
-		vp->v_text[term.t_ncol - 1] = '$';
-		return;
-	}
-
-	if (c == '\t') {
-		do {
-			vtputc(' ');
-		} while (((vtcol + taboff) & tabmask) != 0);
-		return;
-	}
-
-	if (c < 0x20) {
-		vtputc('^');
-		vtputc(c ^ 0x40);
-		return;
-	}
-
-	if (c == 0x7f) {
-		vtputc('^');
-		vtputc('?');
-		return;
-	}
-
-	if (c >= 0x80 && c <= 0xA0) {
-		static const char hex[] = "0123456789abcdef";
-		vtputc('\\');
-		vtputc(hex[c >> 4]);
-		vtputc(hex[c & 15]);
-		return;
-	}
-
-	if (vtcol >= 0)
-		vp->v_text[vtcol] = c;
-	++vtcol;
 }
 
 /*
@@ -320,7 +249,6 @@ static void updone(struct window *wp)
 
 	/* store the line pointer for direct rendering */
 	vscreen[sline]->v_flag |= VFCHG;
-	vscreen[sline]->v_flag &= ~VFREQ;
 	vscreen[sline]->v_line = lp;
 	vscreen[sline]->v_lbound = 0;
 }
@@ -341,8 +269,7 @@ static void updall(struct window *wp)
 	sline = 0;
 	while (sline < term.t_nrow - 1) {
 		vscreen[sline]->v_flag |= VFCHG;
-		vscreen[sline]->v_flag &= ~VFREQ;
-		vscreen[sline]->v_lbound = 0;
+			vscreen[sline]->v_lbound = 0;
 		if (lp != wp->w_bufp->b_linep) {
 			/* if we are not at the end */
 			vscreen[sline]->v_line = lp;
@@ -678,31 +605,13 @@ static int updateline_text(int row, struct line *lp, int lb)
 }
 
 /*
- * Render a modeline from the vscreen unicode_t array.
- */
-static int updateline_modeline(int row, struct video *vp)
-{
-	movecursor(row, 0);
-	TTrev(TRUE);
-	for (int i = 0; i < term.t_ncol; i++)
-		TTputc(vp->v_text[i]);
-	ttcol = term.t_ncol;
-	TTeeol();
-	TTrev(FALSE);
-	vp->v_flag &= ~VFCHG;
-	return TRUE;
-}
-
-/*
- * Update a single line. Dispatches to text or modeline rendering.
+ * Update a single line from its line data, or clear if empty.
  */
 static int updateline(int row, struct video *vp)
 {
-	if (vp->v_flag & VFREQ)
-		return updateline_modeline(row, vp);
 	if (vp->v_line)
 		return updateline_text(row, vp->v_line, vp->v_lbound);
-	/* Fallback: empty line */
+	/* Empty line (past end of buffer) */
 	movecursor(row, 0);
 	ttcol = term.t_ncol;
 	TTeeol();
@@ -726,10 +635,11 @@ static void modeline(struct window *wp)
 	int lchar;				/* character to draw line in buffer with */
 	int firstm;				/* is this the first mode? */
 	char tline[NLINE];			/* buffer for part of mode line */
+	int row = term.t_nrow - 1;		/* modeline row */
 
-	n = term.t_nrow - 1;			/* Location. */
-	vscreen[n]->v_flag |= VFCHG | VFREQ;		/* Redraw next time. */
-	vtmove(n, 0);				/* Seek to right line. */
+	movecursor(row, 0);
+	TTrev(TRUE);
+
 	if (wp == curwp)			/* mark the current buffer */
 		lchar = '-';
 	else if (revexist)
@@ -738,12 +648,12 @@ static void modeline(struct window *wp)
 		lchar = '-';
 
 	bp = wp->w_bufp;
-	vtputc(lchar);
+	TTputc(lchar);
 
 	if ((bp->b_flag & BFCHG) != 0)		/* "*" if changed. */
-		vtputc('*');
+		TTputc('*');
 	else
-		vtputc(lchar);
+		TTputc(lchar);
 
 	n = 2;
 
@@ -754,13 +664,13 @@ static void modeline(struct window *wp)
 	strcat(tline, ": ");
 	cp = &tline[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		TTputc(c);
 		++n;
 	}
 
 	cp = &bp->b_bname[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		TTputc(c);
 		++n;
 	}
 
@@ -784,7 +694,7 @@ static void modeline(struct window *wp)
 
 	cp = &tline[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		TTputc(c);
 		++n;
 	}
 
@@ -792,16 +702,16 @@ static void modeline(struct window *wp)
 		cp = &bp->b_fname[0];
 
 		while ((c = *cp++) != 0) {
-			vtputc(c);
+			TTputc(c);
 			++n;
 		}
 
-		vtputc(' ');
+		TTputc(' ');
 		++n;
 	}
 
 	while (n < term.t_ncol) {		/* Pad to full width. */
-		vtputc(lchar);
+		TTputc(lchar);
 		++n;
 	}
 
@@ -809,8 +719,8 @@ static void modeline(struct window *wp)
 		struct line *lp = wp->w_linep;
 		int rows = term.t_nrow - 1;
 		char *msg = NULL;
+		int pos = n - 7;		/* strlen(" top ") plus a couple */
 
-		vtcol = n - 7;			/* strlen(" top ") plus a couple */
 		while (rows--) {
 			lp = lforw(lp);
 			if (lp == wp->w_bufp->b_linep) {
@@ -855,12 +765,15 @@ static void modeline(struct window *wp)
 			}
 		}
 
+		/* overwrite the position indicator at the right end */
+		movecursor(row, pos);
 		cp = msg;
-		while ((c = *cp++) != 0) {
-			vtputc(c);
-			++n;
-		}
+		while ((c = *cp++) != 0)
+			TTputc(c);
 	}
+
+	ttcol = term.t_ncol;
+	TTrev(FALSE);
 }
 
 void upmode(void)

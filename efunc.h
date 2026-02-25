@@ -105,7 +105,6 @@ extern int cexit(int status);
 /* display.c */
 extern void vtinit(void);
 extern void vttidy(void);
-extern void vtmove(int row, int col);
 extern int upscreen(int f, int n);
 extern int update(int force);
 extern void updpos(void);
