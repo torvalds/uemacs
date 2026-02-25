@@ -11,8 +11,8 @@
 #include        "edef.h"
 #include	"efunc.h"
 
-static FILE *ffp;			/* File pointer, all functions. */
-static int eofflag;			/* end-of-file flag */
+static FILE *ffp;				/* File pointer, all functions. */
+static int eofflag;				/* end-of-file flag */
 
 /*
  * Open a file for reading.
@@ -31,14 +31,7 @@ int ffropen(char *fn)
  */
 int ffwopen(char *fn)
 {
-#if     VMS
-	int fd;
-
-	if ((fd = creat(fn, 0666, "rfm=var", "rat=cr")) < 0
-	    || (ffp = fdopen(fd, "w")) == NULL) {
-#else
 	if ((ffp = fopen(fn, "w")) == NULL) {
-#endif
 		mlwrite("Cannot open file for writing");
 		return FIOERR;
 	}
@@ -57,20 +50,11 @@ int ffclose(void)
 	}
 	eofflag = FALSE;
 
-#if	MSDOS & CTRLZ
-	fputc(26, ffp);		/* add a ^Z at the end of the file */
-#endif
-
-#if     V7 | USG | BSD | (MSDOS & (MSC | TURBO))
 	if (fclose(ffp) != FALSE) {
 		mlwrite("Error closing file");
 		return FIOERR;
 	}
 	return FIOSUC;
-#else
-	fclose(ffp);
-	return FIOSUC;
-#endif
 }
 
 /*
@@ -81,22 +65,9 @@ int ffclose(void)
 int ffputline(char *buf, int nbuf)
 {
 	int i;
-#if	CRYPT
-	char c;			/* character to translate */
 
-	if (cryptflag) {
-		for (i = 0; i < nbuf; ++i) {
-			c = buf[i] & 0xff;
-			myencrypt(&c, 1);
-			fputc(c, ffp);
-		}
-	} else
-		for (i = 0; i < nbuf; ++i)
-			fputc(buf[i] & 0xFF, ffp);
-#else
 	for (i = 0; i < nbuf; ++i)
 		fputc(buf[i] & 0xFF, ffp);
-#endif
 
 	fputc('\n', ffp);
 
@@ -116,9 +87,9 @@ int ffputline(char *buf, int nbuf)
  */
 int ffgetline(void)
 {
-	int c;		/* current character read */
-	int i;		/* current index into fline */
-	char *tmpline;	/* temp storage for expanding line */
+	int c;					/* current character read */
+	int i;					/* current index into fline */
+	char *tmpline;				/* temp storage for expanding line */
 
 	/* if we are at the end...return it */
 	if (eofflag)
@@ -136,9 +107,8 @@ int ffgetline(void)
 			return FIOMEM;
 
 	/* read the line in */
-#if	PKCODE
 	if (!nullflag) {
-		if (fgets(fline, NSTRING, ffp) == (char *) NULL) {	/* EOF ? */
+		if (fgets(fline, NSTRING, ffp) == (char *)NULL) {	/* EOF ? */
 			i = 0;
 			c = EOF;
 		} else {
@@ -154,28 +124,19 @@ int ffgetline(void)
 		c = fgetc(ffp);
 	}
 	while (c != EOF && c != '\n') {
-#else
-	i = 0;
-	while ((c = fgetc(ffp)) != EOF && c != '\n') {
-#endif
-#if	PKCODE
 		if (c) {
-#endif
 			fline[i++] = c;
 			/* if it's longer, get more room */
 			if (i >= flen) {
-				if ((tmpline =
-				     malloc(flen + NSTRING)) == NULL)
+				if ((tmpline = malloc(flen + NSTRING)) == NULL)
 					return FIOMEM;
 				strncpy(tmpline, fline, flen);
 				flen += NSTRING;
 				free(fline);
 				fline = tmpline;
 			}
-#if	PKCODE
 		}
 		c = fgetc(ffp);
-#endif
 	}
 
 	/* test for any errors that may have occured */
@@ -193,10 +154,6 @@ int ffgetline(void)
 
 	/* terminate and decrypt the string */
 	fline[i] = 0;
-#if	CRYPT
-	if (cryptflag)
-		myencrypt(fline, strlen(fline));
-#endif
 	return FIOSUC;
 }
 

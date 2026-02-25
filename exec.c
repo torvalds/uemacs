@@ -19,7 +19,7 @@
  */
 int namedcmd(int f, int n)
 {
-	fn_t kfunc;	/* ptr to the requexted function to bind to */
+	fn_t kfunc;				/* ptr to the requexted function to bind to */
 
 	/* prompt the user to type a named command */
 	mlwrite(": ");
@@ -44,8 +44,8 @@ int namedcmd(int f, int n)
  */
 int execcmd(int f, int n)
 {
-	int status;	/* status return */
-	char cmdstr[NSTRING];	/* string holding command to execute */
+	int status;				/* status return */
+	char cmdstr[NSTRING];			/* string holding command to execute */
 
 	/* get the line wanted */
 	if ((status = mlreply(": ", cmdstr, NSTRING)) != TRUE)
@@ -70,20 +70,20 @@ int execcmd(int f, int n)
  */
 int docmd(char *cline)
 {
-	int f;		/* default argument flag */
-	int n;		/* numeric repeat value */
-	fn_t fnc;		/* function to execute */
-	int status;		/* return status of function */
-	int oldcle;		/* old contents of clexec flag */
-	char *oldestr;		/* original exec string */
-	char tkn[NSTRING];	/* next token off of command line */
+	int f;					/* default argument flag */
+	int n;					/* numeric repeat value */
+	fn_t fnc;				/* function to execute */
+	int status;				/* return status of function */
+	int oldcle;				/* old contents of clexec flag */
+	char *oldestr;				/* original exec string */
+	char tkn[NSTRING];			/* next token off of command line */
 
 	/* if we are scanning and not executing..go back here */
 	if (execlevel)
 		return TRUE;
 
-	oldestr = execstr;	/* save last ptr to string to execute */
-	execstr = cline;	/* and set this one as current */
+	oldestr = execstr;			/* save last ptr to string to execute */
+	execstr = cline;			/* and set this one as current */
 
 	/* first set up the default command values */
 	f = FALSE;
@@ -117,11 +117,11 @@ int docmd(char *cline)
 	}
 
 	/* save the arguments and go execute the command */
-	oldcle = clexec;	/* save old clexec flag */
-	clexec = TRUE;		/* in cline execution */
-	status = (*fnc) (f, n);	/* call the function */
-	cmdstatus = status;	/* save the status */
-	clexec = oldcle;	/* restore clexec flag */
+	oldcle = clexec;			/* save old clexec flag */
+	clexec = TRUE;				/* in cline execution */
+	status = (*fnc) (f, n);			/* call the function */
+	cmdstatus = status;			/* save the status */
+	clexec = oldcle;			/* restore clexec flag */
 	execstr = oldestr;
 	return status;
 }
@@ -136,8 +136,8 @@ int docmd(char *cline)
  */
 char *token(char *src, char *tok, int size)
 {
-	int quotef;	/* is the current string quoted? */
-	char c;	/* temporary character */
+	int quotef;				/* is the current string quoted? */
+	char c;					/* temporary character */
 
 	/* first scan past any whitespace in the source string */
 	while (*src == ' ' || *src == '\t')
@@ -208,13 +208,13 @@ char *token(char *src, char *tok, int size)
  */
 int macarg(char *tok)
 {
-	int savcle;		/* buffer to store original clexec */
+	int savcle;				/* buffer to store original clexec */
 	int status;
 
-	savcle = clexec;	/* save execution mode */
-	clexec = TRUE;		/* get the argument */
+	savcle = clexec;			/* save execution mode */
+	clexec = TRUE;				/* get the argument */
 	status = nextarg("", tok, NSTRING, ctoec('\n'));
-	clexec = savcle;	/* restore execution mode */
+	clexec = savcle;			/* restore execution mode */
 	return status;
 }
 
@@ -251,8 +251,8 @@ int nextarg(char *prompt, char *buffer, int size, int terminator)
  */
 int storemac(int f, int n)
 {
-	struct buffer *bp;	/* pointer to macro buffer */
-	char bname[NBUFN];	/* name of buffer to use */
+	struct buffer *bp;			/* pointer to macro buffer */
+	char bname[NBUFN];			/* name of buffer to use */
 
 	/* must have a numeric argument to this function */
 	if (f == FALSE) {
@@ -286,7 +286,6 @@ int storemac(int f, int n)
 	return TRUE;
 }
 
-#if	PROC
 /*
  * storeproc:
  *	Set up a procedure buffer and flag to store all
@@ -297,17 +296,16 @@ int storemac(int f, int n)
  */
 int storeproc(int f, int n)
 {
-	struct buffer *bp;	/* pointer to macro buffer */
-	int status;	/* return status */
-	char bname[NBUFN];	/* name of buffer to use */
+	struct buffer *bp;			/* pointer to macro buffer */
+	int status;				/* return status */
+	char bname[NBUFN];			/* name of buffer to use */
 
 	/* a numeric argument means its a numbered macro */
 	if (f == TRUE)
 		return storemac(f, n);
 
 	/* get the name of the procedure */
-	if ((status =
-	     mlreply("Procedure name: ", &bname[1], NBUFN - 2)) != TRUE)
+	if ((status = mlreply("Procedure name: ", &bname[1], NBUFN - 2)) != TRUE)
 		return status;
 
 	/* construct the macro buffer name */
@@ -337,13 +335,12 @@ int storeproc(int f, int n)
  */
 int execproc(int f, int n)
 {
-	struct buffer *bp;	/* ptr to buffer to execute */
-	int status;	/* status return */
-	char bufn[NBUFN + 2];	/* name of buffer to execute */
+	struct buffer *bp;			/* ptr to buffer to execute */
+	int status;				/* status return */
+	char bufn[NBUFN + 2];			/* name of buffer to execute */
 
 	/* find out what buffer the user wants to execute */
-	if ((status =
-	     mlreply("Execute procedure: ", &bufn[1], NBUFN)) != TRUE)
+	if ((status = mlreply("Execute procedure: ", &bufn[1], NBUFN)) != TRUE)
 		return status;
 
 	/* construct the buffer name */
@@ -362,7 +359,6 @@ int execproc(int f, int n)
 			return status;
 	return TRUE;
 }
-#endif
 
 /*
  * execbuf:
@@ -372,9 +368,9 @@ int execproc(int f, int n)
  */
 int execbuf(int f, int n)
 {
-	struct buffer *bp;	/* ptr to buffer to execute */
-	int status;	/* status return */
-	char bufn[NSTRING];	/* name of buffer to execute */
+	struct buffer *bp;			/* ptr to buffer to execute */
+	int status;				/* status return */
+	char bufn[NSTRING];			/* name of buffer to execute */
 
 	/* find out what buffer the user wants to execute */
 	if ((status = mlreply("Execute buffer: ", bufn, NBUFN)) != TRUE)
@@ -418,28 +414,22 @@ int execbuf(int f, int n)
  */
 int dobuf(struct buffer *bp)
 {
-	int status;	/* status return */
-	struct line *lp;	/* pointer to line to execute */
-	struct line *hlp;	/* pointer to line header */
-	struct line *glp;	/* line to goto */
-	struct line *mp;		/* Macro line storage temp */
-	int dirnum;		/* directive index */
-	int linlen;		/* length of line to execute */
-	int i;			/* index */
-	int c;			/* temp character */
-	int force;		/* force TRUE result? */
-	struct window *wp;		/* ptr to windows to scan */
-	struct while_block *whlist;	/* ptr to !WHILE list */
-	struct while_block *scanner;	/* ptr during scan */
-	struct while_block *whtemp;	/* temporary ptr to a struct while_block */
-	char *einit;		/* initial value of eline */
-	char *eline;		/* text of line to execute */
-	char tkn[NSTRING];	/* buffer to evaluate an expresion in */
-
-#if	DEBUGM
-	char *sp;		/* temp for building debug string */
-	char *ep;	/* ptr to end of outline */
-#endif
+	int status;				/* status return */
+	struct line *lp;			/* pointer to line to execute */
+	struct line *hlp;			/* pointer to line header */
+	struct line *glp;			/* line to goto */
+	struct line *mp;			/* Macro line storage temp */
+	int dirnum;				/* directive index */
+	int linlen;				/* length of line to execute */
+	int i;					/* index */
+	int force;				/* force TRUE result? */
+	struct window *wp;			/* ptr to windows to scan */
+	struct while_block *whlist;		/* ptr to !WHILE list */
+	struct while_block *scanner;		/* ptr during scan */
+	struct while_block *whtemp;		/* temporary ptr to a struct while_block */
+	char *einit;				/* initial value of eline */
+	char *eline;				/* text of line to execute */
+	char tkn[NSTRING];			/* buffer to evaluate an expresion in */
 
 	/* clear IF level flags/while ptr */
 	execlevel = 0;
@@ -464,12 +454,11 @@ int dobuf(struct buffer *bp)
 
 		/* if is a while directive, make a block... */
 		if (eline[0] == '!' && eline[1] == 'w' && eline[2] == 'h') {
-			whtemp = (struct while_block *)malloc(sizeof(struct while_block));
+			whtemp = (struct while_block *)
+			    malloc(sizeof(struct while_block));
 			if (whtemp == NULL) {
-			      noram:mlwrite
-				    ("%%Out of memory during while scan");
-			      failexit:freewhile
-				    (scanner);
+ noram:			mlwrite("%%Out of memory during while scan");
+ failexit:			freewhile(scanner);
 				freewhile(whlist);
 				return FALSE;
 			}
@@ -482,11 +471,11 @@ int dobuf(struct buffer *bp)
 		/* if is a BREAK directive, make a block... */
 		if (eline[0] == '!' && eline[1] == 'b' && eline[2] == 'r') {
 			if (scanner == NULL) {
-				mlwrite
-				    ("%%!BREAK outside of any !WHILE loop");
+				mlwrite("%%!BREAK outside of any !WHILE loop");
 				goto failexit;
 			}
-			whtemp = (struct while_block *)malloc(sizeof(struct while_block));
+			whtemp = (struct while_block *)
+			    malloc(sizeof(struct while_block));
 			if (whtemp == NULL)
 				goto noram;
 			whtemp->w_begin = lp;
@@ -499,8 +488,7 @@ int dobuf(struct buffer *bp)
 		if (eline[0] == '!' && strncmp(&eline[1], "endw", 4) == 0) {
 			if (scanner == NULL) {
 				mlwrite
-				    ("%%!ENDWHILE with no preceding !WHILE in '%s'",
-				     bp->b_bname);
+				    ("%%!ENDWHILE with no preceding !WHILE in '%s'", bp->b_bname);
 				goto failexit;
 			}
 			/* move top records from the scanner list to the
@@ -515,14 +503,13 @@ int dobuf(struct buffer *bp)
 			} while (whlist->w_type == BTBREAK);
 		}
 
-	      nxtscan:		/* on to the next line */
+ nxtscan:					/* on to the next line */
 		lp = lp->l_fp;
 	}
 
 	/* while and endwhile should match! */
 	if (scanner != NULL) {
-		mlwrite("%%!WHILE with no matching !ENDWHILE in '%s'",
-			bp->b_bname);
+		mlwrite("%%!WHILE with no matching !ENDWHILE in '%s'", bp->b_bname);
 		goto failexit;
 	}
 
@@ -541,7 +528,7 @@ int dobuf(struct buffer *bp)
 			return FALSE;
 		}
 		strncpy(eline, lp->l_text, linlen);
-		eline[linlen] = 0;	/* make sure it ends */
+		eline[linlen] = 0;		/* make sure it ends */
 
 		/* trim leading whitespace */
 		while (*eline == ' ' || *eline == '\t')
@@ -551,67 +538,13 @@ int dobuf(struct buffer *bp)
 		if (*eline == ';' || *eline == 0)
 			goto onward;
 
-#if	DEBUGM
-		/* if $debug == TRUE, every line to execute
-		   gets echoed and a key needs to be pressed to continue
-		   ^G will abort the command */
-
-		if (macbug) {
-			strcpy(outline, "<<<");
-
-			/* debug macro name */
-			strcat(outline, bp->b_bname);
-			strcat(outline, ":");
-
-			/* debug if levels */
-			strcat(outline, itoa(execlevel));
-			strcat(outline, ":");
-
-			/* and lastly the line */
-			strcat(outline, eline);
-			strcat(outline, ">>>");
-
-			/* change all '%' to ':' so mlwrite won't expect arguments */
-			sp = outline;
-			while (*sp)
-				if (*sp++ == '%') {
-					/* advance to the end */
-					ep = --sp;
-					while (*ep++);
-					/* null terminate the string one out */
-					*(ep + 1) = 0;
-					/* copy backwards */
-					while (ep-- > sp)
-						*(ep + 1) = *ep;
-
-					/* and advance sp past the new % */
-					sp += 2;
-				}
-
-			/* write out the debug line */
-			mlforce(outline);
-			update(TRUE);
-
-			/* and get the keystroke */
-			if ((c = get1key()) == abortc) {
-				mlforce("(Macro aborted)");
-				freewhile(whlist);
-				return FALSE;
-			}
-
-			if (c == metac)
-				macbug = FALSE;
-		}
-#endif
-
 		/* Parse directives here.... */
 		dirnum = -1;
 		if (*eline == '!') {
 			/* Find out which directive this is */
 			++eline;
 			for (dirnum = 0; dirnum < NUMDIRS; dirnum++)
-				if (strncmp(eline, dname[dirnum],
-					    strlen(dname[dirnum])) == 0)
+				if (strncmp(eline, dname[dirnum], strlen(dname[dirnum])) == 0)
 					break;
 
 			/* and bitch if it's illegal */
@@ -637,8 +570,7 @@ int dobuf(struct buffer *bp)
 			/* allocate the space for the line */
 			linlen = strlen(eline);
 			if ((mp = lalloc(linlen)) == NULL) {
-				mlwrite
-				    ("Out of memory while storing macro");
+				mlwrite("Out of memory while storing macro");
 				return FALSE;
 			}
 
@@ -654,7 +586,6 @@ int dobuf(struct buffer *bp)
 			goto onward;
 		}
 
-
 		force = FALSE;
 
 		/* dump comments */
@@ -669,7 +600,7 @@ int dobuf(struct buffer *bp)
 			execstr = eline;
 
 			switch (dirnum) {
-			case DIF:	/* IF directive */
+			case DIF:		/* IF directive */
 				/* grab the value of the logical exp */
 				if (execlevel == 0) {
 					if (macarg(tkn) != TRUE)
@@ -680,7 +611,7 @@ int dobuf(struct buffer *bp)
 					++execlevel;
 				goto onward;
 
-			case DWHILE:	/* WHILE directive */
+			case DWHILE:		/* WHILE directive */
 				/* grab the value of the logical exp */
 				if (execlevel == 0) {
 					if (macarg(tkn) != TRUE)
@@ -690,7 +621,7 @@ int dobuf(struct buffer *bp)
 				}
 				/* drop down and act just like !BREAK */
 
-			case DBREAK:	/* BREAK directive */
+			case DBREAK:		/* BREAK directive */
 				if (dirnum == DBREAK && execlevel)
 					goto onward;
 
@@ -704,8 +635,7 @@ int dobuf(struct buffer *bp)
 				}
 
 				if (whtemp == NULL) {
-					mlwrite
-					    ("%%Internal While loop error");
+					mlwrite("%%Internal While loop error");
 					freewhile(whlist);
 					return FALSE;
 				}
@@ -714,33 +644,30 @@ int dobuf(struct buffer *bp)
 				lp = whtemp->w_end;
 				goto onward;
 
-			case DELSE:	/* ELSE directive */
+			case DELSE:		/* ELSE directive */
 				if (execlevel == 1)
 					--execlevel;
 				else if (execlevel == 0)
 					++execlevel;
 				goto onward;
 
-			case DENDIF:	/* ENDIF directive */
+			case DENDIF:		/* ENDIF directive */
 				if (execlevel)
 					--execlevel;
 				goto onward;
 
-			case DGOTO:	/* GOTO directive */
+			case DGOTO:		/* GOTO directive */
 				/* .....only if we are currently executing */
 				if (execlevel == 0) {
 
 					/* grab label to jump to */
-					eline =
-					    token(eline, golabel, NPAT);
+					eline = token(eline, golabel, NPAT);
 					linlen = strlen(golabel);
 					glp = hlp->l_fp;
 					while (glp != hlp) {
 						if (*glp->l_text == '*' &&
 						    (strncmp
-						     (&glp->l_text[1],
-						      golabel,
-						      linlen) == 0)) {
+						     (&glp->l_text[1], golabel, linlen) == 0)) {
 							lp = glp;
 							goto onward;
 						}
@@ -752,7 +679,7 @@ int dobuf(struct buffer *bp)
 				}
 				goto onward;
 
-			case DRETURN:	/* RETURN directive */
+			case DRETURN:		/* RETURN directive */
 				if (execlevel == 0)
 					goto eexec;
 				goto onward;
@@ -766,15 +693,13 @@ int dobuf(struct buffer *bp)
 					whtemp = whlist;
 					while (whtemp) {
 						if (whtemp->w_type ==
-						    BTWHILE
-						    && whtemp->w_end == lp)
+						    BTWHILE && whtemp->w_end == lp)
 							break;
 						whtemp = whtemp->w_next;
 					}
 
 					if (whtemp == NULL) {
-						mlwrite
-						    ("%%Internal While loop error");
+						mlwrite("%%Internal While loop error");
 						freewhile(whlist);
 						return FALSE;
 					}
@@ -784,7 +709,7 @@ int dobuf(struct buffer *bp)
 					goto onward;
 				}
 
-			case DFORCE:	/* FORCE directive */
+			case DFORCE:		/* FORCE directive */
 				force = TRUE;
 
 			}
@@ -792,21 +717,18 @@ int dobuf(struct buffer *bp)
 
 		/* execute the statement */
 		status = docmd(eline);
-		if (force)	/* force the status */
+		if (force)			/* force the status */
 			status = TRUE;
 
 		/* check for a command error */
 		if (status != TRUE) {
 			/* look if buffer is showing */
-			wp = wheadp;
-			while (wp != NULL) {
-				if (wp->w_bufp == bp) {
-					/* and point it */
-					wp->w_dotp = lp;
-					wp->w_doto = 0;
-					wp->w_flag |= WFHARD;
-				}
-				wp = wp->w_wndp;
+			wp = curwp;
+			if (wp->w_bufp == bp) {
+				/* and point it */
+				wp->w_dotp = lp;
+				wp->w_doto = 0;
+				wp->w_flag |= WFHARD;
 			}
 			/* in any case set the buffer . */
 			bp->b_dotp = lp;
@@ -817,12 +739,12 @@ int dobuf(struct buffer *bp)
 			return status;
 		}
 
-	      onward:		/* on to the next line */
+ onward:					/* on to the next line */
 		free(einit);
 		lp = lp->l_fp;
 	}
 
-      eexec:			/* exit the current function */
+ eexec:					/* exit the current function */
 	execlevel = 0;
 	freewhile(whlist);
 	return TRUE;
@@ -849,23 +771,20 @@ void freewhile(struct while_block *wp)
  */
 int execfile(int f, int n)
 {
-	int status;	/* return status of name query */
-	char fname[NSTRING];	/* name of file to execute */
-	char *fspec;		/* full file spec */
+	int status;				/* return status of name query */
+	char fname[NSTRING];			/* name of file to execute */
+	char *fspec;				/* full file spec */
 
-	if ((status =
-	     mlreply("File to execute: ", fname, NSTRING - 1)) != TRUE)
+	if ((status = mlreply("File to execute: ", fname, NSTRING - 1)) != TRUE)
 		return status;
 
-#if	1
 	/* look up the path for the file */
-	fspec = flook(fname, FALSE);	/* used to by TRUE, P.K. */
+	fspec = flook(fname, FALSE);		/* used to by TRUE, P.K. */
 
 	/* if it isn't around */
 	if (fspec == NULL)
 		return FALSE;
 
-#endif
 	/* otherwise, execute it */
 	while (n-- > 0)
 		if ((status = dofile(fspec)) != TRUE)
@@ -883,27 +802,27 @@ int execfile(int f, int n)
  */
 int dofile(char *fname)
 {
-	struct buffer *bp;	/* buffer to place file to exeute */
-	struct buffer *cb;	/* temp to hold current buf while we read */
-	int status;	/* results of various calls */
-	char bname[NBUFN];	/* name of buffer */
+	struct buffer *bp;			/* buffer to place file to exeute */
+	struct buffer *cb;			/* temp to hold current buf while we read */
+	int status;				/* results of various calls */
+	char bname[NBUFN];			/* name of buffer */
 
-	makename(bname, fname);	/* derive the name of the buffer */
-	unqname(bname);		/* make sure we don't stomp things */
+	makename(bname, fname);			/* derive the name of the buffer */
+	unqname(bname);				/* make sure we don't stomp things */
 	if ((bp = bfind(bname, TRUE, 0)) == NULL)	/* get the needed buffer */
 		return FALSE;
 
-	bp->b_mode = MDVIEW;	/* mark the buffer as read only */
-	cb = curbp;		/* save the old buffer */
-	curbp = bp;		/* make this one current */
+	bp->b_mode = MDVIEW;			/* mark the buffer as read only */
+	cb = curbp;				/* save the old buffer */
+	curbp = bp;				/* make this one current */
 	/* and try to read in the file to execute */
 	if ((status = readin(fname, FALSE)) != TRUE) {
-		curbp = cb;	/* restore the current buffer */
+		curbp = cb;			/* restore the current buffer */
 		return status;
 	}
 
 	/* go execute it! */
-	curbp = cb;		/* restore the current buffer */
+	curbp = cb;				/* restore the current buffer */
 	if ((status = dobuf(bp)) != TRUE)
 		return status;
 
@@ -922,8 +841,8 @@ int dofile(char *fname)
  */
 int cbuf(int f, int n, int bufnum)
 {
-	struct buffer *bp;	/* ptr to buffer to execute */
-	int status;	/* status return */
+	struct buffer *bp;			/* ptr to buffer to execute */
+	int status;				/* status return */
 	static char bufname[] = "*Macro xx*";
 
 	/* make the buffer name */

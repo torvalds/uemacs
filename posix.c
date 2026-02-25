@@ -10,36 +10,27 @@
  *	fixed for termios rather than the old termio.. Linus Torvalds
  */
 
-#ifdef POSIX
-
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #include "estruct.h"
 #include "edef.h"
 #include "efunc.h"
 #include "utf8.h"
 
-/* Since Mac OS X's termios.h doesn't have the following 2 macros, define them.
- */
-#if defined(SYSV) && (defined(_DARWIN_C_SOURCE) || defined(_FREEBSD_C_SOURCE))
-#define OLCUC 0000002
-#define XCASE 0000004
-#endif
+static int kbdflgs;				/* saved keyboard fd flags      */
+static int kbdpoll;				/* in O_NDELAY mode             */
 
-static int kbdflgs;			/* saved keyboard fd flags      */
-static int kbdpoll;			/* in O_NDELAY mode             */
-
-static struct termios otermios;		/* original terminal characteristics */
-static struct termios ntermios;		/* charactoristics to use inside */
+static struct termios otermios;			/* original terminal characteristics */
+static struct termios ntermios;			/* charactoristics to use inside */
 
 #define TBUFSIZ 128
-static char tobuf[TBUFSIZ];		/* terminal output buffer */
-
+static char tobuf[TBUFSIZ];			/* terminal output buffer */
 
 /*
  * This function is called once to set up the terminal device streams.
@@ -48,7 +39,7 @@ static char tobuf[TBUFSIZ];		/* terminal output buffer */
  */
 void ttopen(void)
 {
-	tcgetattr(0, &otermios);	/* save old settings */
+	tcgetattr(0, &otermios);		/* save old settings */
 
 	/*
 	 * base new settings on old ones - don't change things
@@ -57,12 +48,10 @@ void ttopen(void)
 	ntermios = otermios;
 
 	/* raw CR/NL etc input handling, but keep ISTRIP if we're on a 7-bit line */
-	ntermios.c_iflag &= ~(IGNBRK | BRKINT | IGNPAR | PARMRK
-			      | INPCK | INLCR | IGNCR | ICRNL);
+	ntermios.c_iflag &= ~(IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK | INLCR | IGNCR | ICRNL);
 
 	/* raw CR/NR etc output handling */
-	ntermios.c_oflag &=
-	    ~(OPOST | ONLCR | OLCUC | OCRNL | ONOCR | ONLRET);
+	ntermios.c_oflag &= ~(OPOST | ONLCR | OLCUC | OCRNL | ONOCR | ONLRET);
 
 	/* No signal handling, no echo etc */
 	ntermios.c_lflag &= ~(ISIG | ICANON | XCASE | ECHO | ECHOE | ECHOK
@@ -144,27 +133,59 @@ void ttflush(void)
 }
 
 /*
+ * Small tty input buffer
+ */
+static struct {
+	int nr;
+	char buf[32];
+} TT;
+
+/* Pause for x*.1 second lag or until keypress */
+static void pause_read(int pause)
+{
+	int n;
+
+	ntermios.c_cc[VMIN] = 0;
+	ntermios.c_cc[VTIME] = pause;
+	tcsetattr(0, TCSANOW, &ntermios);
+
+	n = read(0, TT.buf + TT.nr, sizeof(TT.buf) - TT.nr);
+
+	/* Undo timeout */
+	ntermios.c_cc[VMIN] = 1;
+	ntermios.c_cc[VTIME] = 0;
+	tcsetattr(0, TCSANOW, &ntermios);
+
+	if (n > 0)
+		TT.nr += n;
+}
+
+void ttpause(void)
+{
+	if (term.t_pause && !TT.nr)
+		pause_read(term.t_pause);
+}
+
+/*
  * Read a character from the terminal, performing no editing and doing no echo
  * at all. More complex in VMS that almost anyplace else, which figures. Very
  * simple on CPM, because the system can do exactly what you want.
  */
 int ttgetc(void)
 {
-	static char buffer[32];
-	static int pending;
 	unicode_t c;
 	int count, bytes = 1, expected;
 
-	count = pending;
+	count = TT.nr;
 	if (!count) {
-		count = read(0, buffer, sizeof(buffer));
+		count = read(0, TT.buf, sizeof(TT.buf));
 		if (count <= 0)
 			return 0;
-		pending = count;
+		TT.nr = count;
 	}
 
-	c = (unsigned char) buffer[0];
-	if (c >= 32 && c < 128)
+	c = (unsigned char)TT.buf[0];
+	if (c != 27 && c < 128)
 		goto done;
 
 	/*
@@ -184,59 +205,40 @@ int ttgetc(void)
 	if ((c & 0xe0) == 0xe0)
 		expected = 6;
 
-	/* Special character - try to fill buffer */
-	if (count < expected) {
-		int n;
-		ntermios.c_cc[VMIN] = 0;
-		ntermios.c_cc[VTIME] = 1;		/* A .1 second lag */
-		tcsetattr(0, TCSANOW, &ntermios);
+	/* Special character - try to re-fill the buffer */
+	if (count < expected)
+		pause_read(1);
 
-		n = read(0, buffer + count, sizeof(buffer) - count);
-
-		/* Undo timeout */
-		ntermios.c_cc[VMIN] = 1;
-		ntermios.c_cc[VTIME] = 0;
-		tcsetattr(0, TCSANOW, &ntermios);
-
-		if (n > 0)
-			pending += n;
-	}
-	if (pending > 1) {
-		unsigned char second = buffer[1];
+	if (TT.nr > 1) {
+		unsigned char second = TT.buf[1];
 
 		/* Turn ESC+'[' into CSI */
 		if (c == 27 && second == '[') {
 			bytes = 2;
-			c = 128+27;
+			c = 128 + 27;
 			goto done;
 		}
 	}
-	bytes = utf8_to_unicode(buffer, 0, pending, &c);
+	bytes = utf8_to_unicode(TT.buf, 0, TT.nr, &c);
 
 	/* Hackety hack! Turn no-break space into regular space */
 	if (c == 0xa0)
 		c = ' ';
-done:
-	pending -= bytes;
-	memmove(buffer, buffer+bytes, pending);
+ done:
+	TT.nr -= bytes;
+	memmove(TT.buf, TT.buf + bytes, TT.nr);
 	return c;
 }
 
 /* typahead:	Check to see if any characters are already in the
-		keyboard buffer
+		keyboard TT.buf
 */
 
 int typahead(void)
 {
-	int x;			/* holds # of pending chars */
+	int x;
 
-#ifdef FIONREAD
 	if (ioctl(0, FIONREAD, &x) < 0)
 		x = 0;
-#else
-	x = 0;
-#endif
-	return x;
+	return x + TT.nr;
 }
-
-#endif				/* POSIX */

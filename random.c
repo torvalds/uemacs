@@ -12,8 +12,10 @@
 #include "edef.h"
 #include "efunc.h"
 #include "line.h"
+#include "utf8.h"
+#include "util.h"
 
-int tabsize; /* Tab size (0: use real tabs) */
+int tabsize;					/* Tab size (0: use real tabs) */
 
 /*
  * Set fill column to n.
@@ -34,16 +36,16 @@ int setfillcol(int f, int n)
  */
 int showcpos(int f, int n)
 {
-	struct line *lp;	/* current line */
-	long numchars;	/* # of chars in file */
-	int numlines;	/* # of lines in file */
-	long predchars;	/* # chars preceding point */
-	int predlines;	/* # lines preceding point */
-	int curchar;	/* character under cursor */
+	struct line *lp;			/* current line */
+	long numchars;				/* # of chars in file */
+	int numlines;				/* # of lines in file */
+	long predchars;				/* # chars preceding point */
+	int predlines;				/* # lines preceding point */
+	int curchar;				/* character under cursor */
 	int ratio;
 	int col;
-	int savepos;		/* temp save for current offset */
-	int ecol;		/* column pos/end of current line */
+	int savepos;				/* temp save for current offset */
+	int ecol;				/* column pos/end of current line */
 
 	/* starting at the beginning of the buffer */
 	lp = lforw(curbp->b_linep);
@@ -74,9 +76,7 @@ int showcpos(int f, int n)
 	if (curwp->w_dotp == curbp->b_linep) {
 		predlines = numlines;
 		predchars = numchars;
-#if	PKCODE
 		curchar = 0;
-#endif
 	}
 
 	/* Get real column and end-of-line column. */
@@ -86,21 +86,20 @@ int showcpos(int f, int n)
 	ecol = getccol(FALSE);
 	curwp->w_doto = savepos;
 
-	ratio = 0;		/* Ratio before dot. */
+	ratio = 0;				/* Ratio before dot. */
 	if (numchars != 0)
 		ratio = (100L * predchars) / numchars;
 
 	/* summarize and report the info */
 	mlwrite("Line %d/%d Col %d/%d Char %D/%D (%d%%) char = 0x%x",
-		predlines + 1, numlines + 1, col, ecol,
-		predchars, numchars, ratio, curchar);
+		predlines + 1, numlines + 1, col, ecol, predchars, numchars, ratio, curchar);
 	return TRUE;
 }
 
 int getcline(void)
-{				/* get the current line number */
-	struct line *lp;	/* current line */
-	int numlines;	/* # of lines before point */
+{						/* get the current line number */
+	struct line *lp;			/* current line */
+	int numlines;				/* # of lines before point */
 
 	/* starting at the beginning of the buffer */
 	lp = lforw(curbp->b_linep);
@@ -121,6 +120,10 @@ int getcline(void)
 
 /*
  * Return current column.  Stop at first non-blank given TRUE argument.
+ *
+ * See vtputc() for rough formatting of unicode characters. We show
+ * control characters as multiple characters, the rest are given one
+ * unicode slot each and assumed to show as a single fixed size char.
  */
 int getccol(int bflg)
 {
@@ -136,13 +139,7 @@ int getccol(int bflg)
 		i += utf8_to_unicode(dlp->l_text, i, len, &c);
 		if (c != ' ' && c != '\t' && bflg)
 			break;
-		if (c == '\t')
-			col |= tabmask;
-		else if (c < 0x20 || c == 0x7F)
-			++col;
-		else if (c >= 0xc0 && c <= 0xa0)
-			col += 2;
-		++col;
+		col = next_column(col, c);
 	}
 	return col;
 }
@@ -154,10 +151,10 @@ int getccol(int bflg)
  */
 int setccol(int pos)
 {
-	int c;		/* character being scanned */
-	int i;		/* index into current line */
-	int col;	/* current cursor column   */
-	int llen;	/* length of line in bytes */
+	int c;					/* character being scanned */
+	int i;					/* index into current line */
+	int col;				/* current cursor column   */
+	int llen;				/* length of line in bytes */
 
 	col = 0;
 	llen = llength(curwp->w_dotp);
@@ -198,8 +195,8 @@ int twiddle(int f, int n)
 	int cl;
 	int cr;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 	dotp = curwp->w_dotp;
 	doto = curwp->w_doto;
 	if (doto == llength(dotp) && --doto < 0)
@@ -225,8 +222,8 @@ int quote(int f, int n)
 	int s;
 	int c;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 	c = tgetc();
 	if (n < 0)
 		return FALSE;
@@ -261,7 +258,6 @@ int insert_tab(int f, int n)
 	return linsert(tabsize - (getccol(FALSE) % tabsize), ' ');
 }
 
-#if	AEDIT
 /*
  * change tabs to spaces
  *
@@ -269,10 +265,10 @@ int insert_tab(int f, int n)
  */
 int detab(int f, int n)
 {
-	int inc;	/* increment to next line [sgn(n)] */
+	int inc;				/* increment to next line [sgn(n)] */
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 
 	if (f == FALSE)
 		n = 1;
@@ -280,16 +276,14 @@ int detab(int f, int n)
 	/* loop thru detabbing n lines */
 	inc = ((n > 0) ? 1 : -1);
 	while (n) {
-		curwp->w_doto = 0;	/* start at the beginning */
+		curwp->w_doto = 0;		/* start at the beginning */
 
 		/* detab the entire current line */
 		while (curwp->w_doto < llength(curwp->w_dotp)) {
 			/* if we have a tab */
 			if (lgetc(curwp->w_dotp, curwp->w_doto) == '\t') {
 				ldelchar(1, FALSE);
-				insspace(TRUE,
-					 (tabmask + 1) -
-					 (curwp->w_doto & tabmask));
+				insspace(TRUE, (tabmask + 1) - (curwp->w_doto & tabmask));
 			}
 			forwchar(FALSE, 1);
 		}
@@ -298,9 +292,9 @@ int detab(int f, int n)
 		forwline(TRUE, inc);
 		n -= inc;
 	}
-	curwp->w_doto = 0;	/* to the begining of the line */
-	thisflag &= ~CFCPCN;	/* flag that this resets the goal column */
-	lchange(WFEDIT);	/* yes, we have made at least an edit */
+	curwp->w_doto = 0;			/* to the begining of the line */
+	thisflag &= ~CFCPCN;			/* flag that this resets the goal column */
+	lchange(WFEDIT);			/* yes, we have made at least an edit */
 	return TRUE;
 }
 
@@ -311,13 +305,13 @@ int detab(int f, int n)
  */
 int entab(int f, int n)
 {
-	int inc;	/* increment to next line [sgn(n)] */
-	int fspace;	/* pointer to first space if in a run */
-	int ccol;	/* current cursor column */
-	char cchar;	/* current character */
+	int inc;				/* increment to next line [sgn(n)] */
+	int fspace;				/* pointer to first space if in a run */
+	int ccol;				/* current cursor column */
+	char cchar;				/* current character */
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 
 	if (f == FALSE)
 		n = 1;
@@ -325,7 +319,7 @@ int entab(int f, int n)
 	/* loop thru entabbing n lines */
 	inc = ((n > 0) ? 1 : -1);
 	while (n) {
-		curwp->w_doto = 0;	/* start at the beginning */
+		curwp->w_doto = 0;		/* start at the beginning */
 
 		/* entab the entire current line */
 		fspace = -1;
@@ -339,8 +333,7 @@ int entab(int f, int n)
 					/* there is a bug here dealing with mixed space/tabed
 					   lines.......it will get fixed                */
 					backchar(TRUE, ccol - fspace);
-					ldelete((long) (ccol - fspace),
-						FALSE);
+					ldelete((long)(ccol - fspace), FALSE);
 					linsert(1, '\t');
 					fspace = -1;
 				}
@@ -350,17 +343,17 @@ int entab(int f, int n)
 			cchar = lgetc(curwp->w_dotp, curwp->w_doto);
 
 			switch (cchar) {
-			case '\t':	/* a tab...count em up */
+			case '\t':		/* a tab...count em up */
 				ccol = nextab(ccol);
 				break;
 
-			case ' ':	/* a space...compress? */
+			case ' ':		/* a space...compress? */
 				if (fspace == -1)
 					fspace = ccol;
 				ccol++;
 				break;
 
-			default:	/* any other char...just count */
+			default:		/* any other char...just count */
 				ccol++;
 				fspace = -1;
 				break;
@@ -372,9 +365,9 @@ int entab(int f, int n)
 		forwline(TRUE, inc);
 		n -= inc;
 	}
-	curwp->w_doto = 0;	/* to the begining of the line */
-	thisflag &= ~CFCPCN;	/* flag that this resets the goal column */
-	lchange(WFEDIT);	/* yes, we have made at least an edit */
+	curwp->w_doto = 0;			/* to the begining of the line */
+	thisflag &= ~CFCPCN;			/* flag that this resets the goal column */
+	lchange(WFEDIT);			/* yes, we have made at least an edit */
 	return TRUE;
 }
 
@@ -385,13 +378,13 @@ int entab(int f, int n)
  */
 int trim(int f, int n)
 {
-	struct line *lp;	/* current line pointer */
-	int offset;	/* original line offset position */
-	int length;	/* current length */
-	int inc;	/* increment to next line [sgn(n)] */
+	struct line *lp;			/* current line pointer */
+	int offset;				/* original line offset position */
+	int length;				/* current length */
+	int inc;				/* increment to next line [sgn(n)] */
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 
 	if (f == FALSE)
 		n = 1;
@@ -399,14 +392,13 @@ int trim(int f, int n)
 	/* loop thru trimming n lines */
 	inc = ((n > 0) ? 1 : -1);
 	while (n) {
-		lp = curwp->w_dotp;	/* find current line text */
-		offset = curwp->w_doto;	/* save original offset */
-		length = lp->l_used;	/* find current length */
+		lp = curwp->w_dotp;		/* find current line text */
+		offset = curwp->w_doto;		/* save original offset */
+		length = lp->l_used;		/* find current length */
 
 		/* trim the current line */
 		while (length > offset) {
-			if (lgetc(lp, length - 1) != ' ' &&
-			    lgetc(lp, length - 1) != '\t')
+			if (lgetc(lp, length - 1) != ' ' && lgetc(lp, length - 1) != '\t')
 				break;
 			length--;
 		}
@@ -417,10 +409,9 @@ int trim(int f, int n)
 		n -= inc;
 	}
 	lchange(WFEDIT);
-	thisflag &= ~CFCPCN;	/* flag that this resets the goal column */
+	thisflag &= ~CFCPCN;			/* flag that this resets the goal column */
 	return TRUE;
 }
-#endif
 
 /*
  * Open up some blank space. The basic plan is to insert a bunch of newlines,
@@ -432,18 +423,18 @@ int openline(int f, int n)
 	int i;
 	int s;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	if (n == 0)
 		return TRUE;
-	i = n;			/* Insert newlines.     */
+	i = n;					/* Insert newlines.     */
 	do {
 		s = lnewline();
 	} while (s == TRUE && --i);
-	if (s == TRUE)		/* Then back up overtop */
-		s = backchar(f, n);	/* of them all.         */
+	if (s == TRUE)				/* Then back up overtop */
+		s = backchar(f, n);		/* of them all.         */
 	return s;
 }
 
@@ -455,14 +446,13 @@ int insert_newline(int f, int n)
 {
 	int s;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 
 	/* if we are in C mode and this is a default <NL> */
-	if (n == 1 && (curbp->b_mode & MDCMOD) &&
-	    curwp->w_dotp != curbp->b_linep)
+	if (n == 1 && (curbp->b_mode & MDCMOD) && curwp->w_dotp != curbp->b_linep)
 		return cinsert();
 
 	/*
@@ -471,28 +461,24 @@ int insert_newline(int f, int n)
 	 * and we are not read-only, perform word wrap.
 	 */
 	if ((curwp->w_bufp->b_mode & MDWRAP) && fillcol > 0 &&
-	    getccol(FALSE) > fillcol &&
-	    (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
+	    getccol(FALSE) > fillcol && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
 		execute(META | SPEC | 'W', FALSE, 1);
 
 	/* insert some lines */
 	while (n--) {
 		if ((s = lnewline()) != TRUE)
 			return s;
-#if SCROLLCODE
-		curwp->w_flag |= WFINS;
-#endif
 	}
 	return TRUE;
 }
 
 int cinsert(void)
-{				/* insert a newline and indentation for C */
-	char *cptr;	/* string pointer into text to copy */
-	int tptr;	/* index to scan into line */
-	int bracef;	/* was there a brace at the end of line? */
+{						/* insert a newline and indentation for C */
+	char *cptr;				/* string pointer into text to copy */
+	int tptr;				/* index to scan into line */
+	int bracef;				/* was there a brace at the end of line? */
 	int i;
-	char ichar[NSTRING];	/* buffer to hold indent of last line */
+	char ichar[NSTRING];			/* buffer to hold indent of last line */
 
 	/* grab a pointer to text to copy indentation from */
 	cptr = &curwp->w_dotp->l_text[0];
@@ -508,7 +494,7 @@ int cinsert(void)
 		ichar[i] = cptr[i];
 		++i;
 	}
-	ichar[i] = 0;		/* terminate it */
+	ichar[i] = 0;				/* terminate it */
 
 	/* put in the newline */
 	if (lnewline() == FALSE)
@@ -521,13 +507,9 @@ int cinsert(void)
 	if (bracef)
 		insert_tab(FALSE, 1);
 
-#if SCROLLCODE
-	curwp->w_flag |= WFINS;
-#endif
 	return TRUE;
 }
 
-#if	NBRACE
 /*
  * insert a brace into the text here...we are in CMODE
  *
@@ -536,16 +518,15 @@ int cinsert(void)
  */
 int insbrace(int n, int c)
 {
-	int ch;	/* last character before input */
-	int oc;	/* caractere oppose a c */
+	int ch;					/* last character before input */
+	int oc;					/* caractere oppose a c */
 	int i, count;
-	int target;	/* column brace should go after */
+	int target;				/* column brace should go after */
 	struct line *oldlp;
 	int oldoff;
 
 	/* if we aren't at the beginning of the line... */
 	if (curwp->w_doto != 0)
-
 		/* scan to see if all space before this is white space */
 		for (i = curwp->w_doto - 1; i >= 0; --i) {
 			ch = lgetc(curwp->w_dotp, i);
@@ -590,20 +571,19 @@ int insbrace(int n, int c)
 			break;
 	}
 
-	if (count != 0) {	/* no match */
+	if (count != 0) {			/* no match */
 		curwp->w_dotp = oldlp;
 		curwp->w_doto = oldoff;
 		return linsert(n, c);
 	}
 
-	curwp->w_doto = 0;	/* debut de ligne */
+	curwp->w_doto = 0;			/* debut de ligne */
 	/* aller au debut de la ligne apres la tabulation */
-	while ((ch = lgetc(curwp->w_dotp, curwp->w_doto)) == ' '
-	       || ch == '\t')
+	while ((ch = lgetc(curwp->w_dotp, curwp->w_doto)) == ' ' || ch == '\t')
 		forwchar(FALSE, 1);
 
 	/* delete back first */
-	target = getccol(FALSE);	/* c'est l'indent que l'on doit avoir */
+	target = getccol(FALSE);		/* c'est l'indent que l'on doit avoir */
 	curwp->w_dotp = oldlp;
 	curwp->w_doto = oldoff;
 
@@ -611,7 +591,7 @@ int insbrace(int n, int c)
 		if (target < getccol(FALSE))	/* on doit detruire des caracteres */
 			while (getccol(FALSE) > target)
 				backdel(FALSE, 1);
-		else {		/* on doit en inserer */
+		else {				/* on doit en inserer */
 			while (target - getccol(FALSE) >= 8)
 				linsert(1, '\t');
 			linsert(target - getccol(FALSE), ' ');
@@ -622,46 +602,9 @@ int insbrace(int n, int c)
 	return linsert(n, c);
 }
 
-#else
-
-/*
- * insert a brace into the text here...we are in CMODE
- *
- * int n;		repeat count
- * int c;		brace to insert (always { for now)
- */
-int insbrace(int n, int c)
-{
-	int ch;	/* last character before input */
-	int i;
-	int target;	/* column brace should go after */
-
-	/* if we are at the beginning of the line, no go */
-	if (curwp->w_doto == 0)
-		return linsert(n, c);
-
-	/* scan to see if all space before this is white space */
-	for (i = curwp->w_doto - 1; i >= 0; --i) {
-		ch = lgetc(curwp->w_dotp, i);
-		if (ch != ' ' && ch != '\t')
-			return linsert(n, c);
-	}
-
-	/* delete back first */
-	target = getccol(FALSE);	/* calc where we will delete to */
-	target -= 1;
-	target -= target % (tabsize == 0 ? 8 : tabsize);
-	while (getccol(FALSE) > target)
-		backdel(FALSE, 1);
-
-	/* and insert the required brace(s) */
-	return linsert(n, c);
-}
-#endif
-
 int inspound(void)
-{				/* insert a # into the text here...we are in CMODE */
-	int ch;	/* last character before input */
+{						/* insert a # into the text here...we are in CMODE */
+	int ch;					/* last character before input */
 	int i;
 
 	/* if we are at the beginning of the line, no go */
@@ -697,8 +640,8 @@ int deblank(int f, int n)
 	struct line *lp2;
 	long nld;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 	lp1 = curwp->w_dotp;
 	while (llength(lp1) == 0 && (lp2 = lback(lp1)) != curbp->b_linep)
 		lp1 = lp2;
@@ -727,8 +670,8 @@ int indent(int f, int n)
 	int c;
 	int i;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	while (n--) {
@@ -741,8 +684,7 @@ int indent(int f, int n)
 				nicol |= tabmask;
 			++nicol;
 		}
-		if (lnewline() == FALSE
-		    || ((i = nicol / 8) != 0 && linsert(i, '\t') == FALSE)
+		if (lnewline() == FALSE || ((i = nicol / 8) != 0 && linsert(i, '\t') == FALSE)
 		    || ((i = nicol % 8) != 0 && linsert(i, ' ') == FALSE))
 			return FALSE;
 	}
@@ -757,16 +699,16 @@ int indent(int f, int n)
  */
 int forwdel(int f, int n)
 {
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 	if (n < 0)
 		return backdel(f, -n);
-	if (f != FALSE) {	/* Really a kill.       */
+	if (f != FALSE) {			/* Really a kill.       */
 		if ((lastflag & CFKILL) == 0)
 			kdelete();
 		thisflag |= CFKILL;
 	}
-	return ldelchar((long) n, f);
+	return ldelchar((long)n, f);
 }
 
 /*
@@ -779,11 +721,11 @@ int backdel(int f, int n)
 {
 	int s;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
 	if (n < 0)
 		return forwdel(f, -n);
-	if (f != FALSE) {	/* Really a kill.       */
+	if (f != FALSE) {			/* Really a kill.       */
 		if ((lastflag & CFKILL) == 0)
 			kdelete();
 		thisflag |= CFKILL;
@@ -806,10 +748,10 @@ int killtext(int f, int n)
 	struct line *nextp;
 	long chunk;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
-	if ((lastflag & CFKILL) == 0)	/* Clear kill buffer if */
-		kdelete();	/* last wasn't a kill.  */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return rdonly();		/* we are in read only mode     */
+	if ((lastflag & CFKILL) == 0)		/* Clear kill buffer if */
+		kdelete();			/* last wasn't a kill.  */
 	thisflag |= CFKILL;
 	if (f == FALSE) {
 		chunk = llength(curwp->w_dotp) - curwp->w_doto;
@@ -841,11 +783,7 @@ int killtext(int f, int n)
  */
 int setemode(int f, int n)
 {
-#if 	PKCODE
 	return adjustmode(TRUE, FALSE);
-#else
-	adjustmode(TRUE, FALSE);
-#endif
 }
 
 /*
@@ -855,11 +793,7 @@ int setemode(int f, int n)
  */
 int delmode(int f, int n)
 {
-#if	PKCODE
 	return adjustmode(FALSE, FALSE);
-#else
-	adjustmode(FALSE, FALSE);
-#endif
 }
 
 /*
@@ -869,11 +803,7 @@ int delmode(int f, int n)
  */
 int setgmode(int f, int n)
 {
-#if	PKCODE
 	return adjustmode(TRUE, TRUE);
-#else
-	adjustmode(TRUE, TRUE);
-#endif
 }
 
 /*
@@ -883,11 +813,7 @@ int setgmode(int f, int n)
  */
 int delgmode(int f, int n)
 {
-#if	PKCODE
 	return adjustmode(FALSE, TRUE);
-#else
-	adjustmode(FALSE, TRUE);
-#endif
 }
 
 /*
@@ -898,14 +824,11 @@ int delgmode(int f, int n)
  */
 int adjustmode(int kind, int global)
 {
-	char *scan;	/* scanning pointer to convert prompt */
-	int i;		/* loop index */
-	int status;	/* error return on input */
-#if	COLOR
-	int uflag;	/* was modename uppercase?      */
-#endif
-	char prompt[50];	/* string to prompt user with */
-	char cbuf[NPAT];	/* buffer to recieve mode name into */
+	char *scan;				/* scanning pointer to convert prompt */
+	int i;					/* loop index */
+	int status;				/* error return on input */
+	char prompt[50];			/* string to prompt user with */
+	char cbuf[NPAT];			/* buffer to recieve mode name into */
 
 	/* build the proper prompt string */
 	if (global)
@@ -927,45 +850,10 @@ int adjustmode(int kind, int global)
 	/* make it uppercase */
 
 	scan = cbuf;
-#if	COLOR
-	uflag = (*scan >= 'A' && *scan <= 'Z');
-#endif
 	while (*scan != 0) {
 		if (*scan >= 'a' && *scan <= 'z')
 			*scan = *scan - 32;
 		scan++;
-	}
-
-	/* test it first against the colors we know */
-#if	PKCODE & IBMPC
-	for (i = 0; i <= NCOLORS; i++) {
-#else
-	for (i = 0; i < NCOLORS; i++) {
-#endif
-		if (strcmp(cbuf, cname[i]) == 0) {
-			/* finding the match, we set the color */
-#if	COLOR
-			if (uflag) {
-				if (global)
-					gfcolor = i;
-#if	PKCODE == 0
-				else
-#endif
-					curwp->w_fcolor = i;
-			} else {
-				if (global)
-					gbcolor = i;
-#if	PKCODE == 0
-				else
-#endif
-					curwp->w_bcolor = i;
-			}
-
-			curwp->w_flag |= WFCOLR;
-#endif
-			mlerase();
-			return TRUE;
-		}
 	}
 
 	/* test it against the modes we know */
@@ -985,7 +873,7 @@ int adjustmode(int kind, int global)
 			/* display new mode line */
 			if (global == 0)
 				upmode();
-			mlerase();	/* erase the junk */
+			mlerase();		/* erase the junk */
 			return TRUE;
 		}
 	}
@@ -1014,14 +902,13 @@ int clrmes(int f, int n)
  */
 int writemsg(int f, int n)
 {
-	char *sp;	/* pointer into buf to expand %s */
-	char *np;	/* ptr into nbuf */
+	char *sp;				/* pointer into buf to expand %s */
+	char *np;				/* ptr into nbuf */
 	int status;
-	char buf[NPAT];		/* buffer to recieve message into */
-	char nbuf[NPAT * 2];	/* buffer to expand string into */
+	char buf[NPAT];				/* buffer to recieve message into */
+	char nbuf[NPAT * 2];			/* buffer to expand string into */
 
-	if ((status =
-	     mlreply("Message to write: ", buf, NPAT - 1)) != TRUE)
+	if ((status = mlreply("Message to write: ", buf, NPAT - 1)) != TRUE)
 		return status;
 
 	/* expand all '%' to "%%" so mlwrite won't expect arguments */
@@ -1039,7 +926,6 @@ int writemsg(int f, int n)
 	return TRUE;
 }
 
-#if	CFENCE
 /*
  * the cursor is moved to a matching fence
  *
@@ -1047,13 +933,13 @@ int writemsg(int f, int n)
  */
 int getfence(int f, int n)
 {
-	struct line *oldlp;	/* original line pointer */
-	int oldoff;	/* and offset */
-	int sdir;	/* direction of search (1/-1) */
-	int count;	/* current fence level count */
-	char ch;	/* fence type to match against */
-	char ofence;	/* open fence */
-	char c;	/* current character in scan */
+	struct line *oldlp;			/* original line pointer */
+	int oldoff;				/* and offset */
+	int sdir;				/* direction of search (1/-1) */
+	int count;				/* current fence level count */
+	char ch;				/* fence type to match against */
+	char ofence;				/* open fence */
+	char c;					/* current character in scan */
 
 	/* save the original cursor position */
 	oldlp = curwp->w_dotp;
@@ -1137,7 +1023,6 @@ int getfence(int f, int n)
 	TTbeep();
 	return FALSE;
 }
-#endif
 
 /*
  * Close fences are matched against their partners, and if
@@ -1147,13 +1032,12 @@ int getfence(int f, int n)
  */
 int fmatch(int ch)
 {
-	struct line *oldlp;	/* original line pointer */
-	int oldoff;	/* and offset */
-	struct line *toplp;	/* top line in current window */
-	int count;	/* current fence level count */
-	char opench;	/* open fence */
-	char c;	/* current character in scan */
-	int i;
+	struct line *oldlp;			/* original line pointer */
+	int oldoff;				/* and offset */
+	struct line *toplp;			/* top line in current window */
+	int count;				/* current fence level count */
+	char opench;				/* open fence */
+	char c;					/* current character in scan */
 
 	/* first get the display update out there */
 	update(FALSE);
@@ -1186,18 +1070,15 @@ int fmatch(int ch)
 		if (c == opench)
 			--count;
 		backchar(FALSE, 1);
-		if (curwp->w_dotp == curwp->w_bufp->b_linep->l_fp &&
-		    curwp->w_doto == 0)
+		if (curwp->w_dotp == curwp->w_bufp->b_linep->l_fp && curwp->w_doto == 0)
 			break;
 	}
 
 	/* if count is zero, we have a match, display the sucker */
-	/* there is a real machine dependant timing problem here we have
-	   yet to solve......... */
 	if (count == 0) {
 		forwchar(FALSE, 1);
-		for (i = 0; i < term.t_pause; i++)
-			update(FALSE);
+		update(FALSE);
+		ttpause();
 	}
 
 	/* restore the current position */
@@ -1214,12 +1095,11 @@ int fmatch(int ch)
  */
 int istring(int f, int n)
 {
-	int status;	/* status return code */
-	char tstring[NPAT + 1];	/* string to add */
+	int status;				/* status return code */
+	char tstring[NPAT + 1];			/* string to add */
 
 	/* ask for string to insert */
-	status =
-	    mlreplyt("String to insert<META>: ", tstring, NPAT, metac);
+	status = mlreplyt("String to insert<META>: ", tstring, NPAT, metac);
 	if (status != TRUE)
 		return status;
 
@@ -1230,7 +1110,7 @@ int istring(int f, int n)
 		n = -n;
 
 	/* insert it */
-	while (n-- && (status = linstr(tstring)));
+	while (n-- && (status = linstr(tstring))) ;
 	return status;
 }
 
@@ -1242,12 +1122,11 @@ int istring(int f, int n)
  */
 int ovstring(int f, int n)
 {
-	int status;	/* status return code */
-	char tstring[NPAT + 1];	/* string to add */
+	int status;				/* status return code */
+	char tstring[NPAT + 1];			/* string to add */
 
 	/* ask for string to insert */
-	status =
-	    mlreplyt("String to overwrite<META>: ", tstring, NPAT, metac);
+	status = mlreplyt("String to overwrite<META>: ", tstring, NPAT, metac);
 	if (status != TRUE)
 		return status;
 
@@ -1258,6 +1137,6 @@ int ovstring(int f, int n)
 		n = -n;
 
 	/* insert it */
-	while (n-- && (status = lover(tstring)));
+	while (n-- && (status = lover(tstring))) ;
 	return status;
 }

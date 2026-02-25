@@ -178,6 +178,7 @@ bind-to-key execute-macro-40 M-?
 ;	Set up auto CMODE
 
 36	store-macro
+	add-mode "spell"
 	!if &seq &mid $cfname 1 7 "/tmp/Re"
 		add-mode "wrap"
 		!return
@@ -203,6 +204,9 @@ bind-to-key execute-macro-40 M-?
 		!return
 	!endif
 	set %rctmp &mid $cfname &add %rctmp 1 5
+	!if &seq %rctmp "scad"
+		add-mode "cmode"
+	!endif
 	!if &or &seq %rctmp "c" &seq %rctmp "h"
 		add-mode "cmode"
 	!endif

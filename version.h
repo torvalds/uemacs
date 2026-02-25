@@ -9,4 +9,4 @@
 /* Print the version string. */
 void version(void);
 
-#endif  /* VERSION_H_ */
+#endif				/* VERSION_H_ */

@@ -29,26 +29,8 @@ extern int wordcount(int f, int n);
 /* window.c */
 extern int reposition(int f, int n);
 extern int redraw(int f, int n);
-extern int nextwind(int f, int n);
-extern int prevwind(int f, int n);
-extern int mvdnwind(int f, int n);
-extern int mvupwind(int f, int n);
-extern int onlywind(int f, int n);
-extern int delwind(int f, int n);
-extern int splitwind(int f, int n);
-extern int enlargewind(int f, int n);
-extern int shrinkwind(int f, int n);
-extern int resize(int f, int n);
-extern int scrnextup(int f, int n);
-extern int scrnextdw(int f, int n);
-extern int savewnd(int f, int n);
-extern int restwnd(int f, int n);
 extern int newsize(int f, int n);
 extern int newwidth(int f, int n);
-extern int getwpos(void);
-extern void cknewwindow(void);
-extern struct window *wpopup(void);  /* Pop up window creation. */
-
 
 /* basic.c */
 extern int gotobol(int f, int n);
@@ -68,7 +50,7 @@ extern int setmark(int f, int n);
 extern int swapmark(int f, int n);
 
 /* random.c */
-extern int tabsize;  /* Tab size (0: use real tabs). */
+extern int tabsize;				/* Tab size (0: use real tabs). */
 extern int setfillcol(int f, int n);
 extern int showcpos(int f, int n);
 extern int getcline(void);
@@ -103,6 +85,7 @@ extern int istring(int f, int n);
 extern int ovstring(int f, int n);
 
 /* main.c */
+extern int spellcheck(const char *word);
 extern void edinit(char *bname);
 extern int execute(int c, int f, int n);
 extern int quickexit(int f, int n);
@@ -121,7 +104,6 @@ extern int cexit(int status);
 
 /* display.c */
 extern void vtinit(void);
-extern void vtfree(void);
 extern void vttidy(void);
 extern void vtmove(int row, int col);
 extern int upscreen(int f, int n);
@@ -151,6 +133,7 @@ extern void ttopen(void);
 extern void ttclose(void);
 extern int ttputc(int c);
 extern void ttflush(void);
+extern void ttpause(void);
 extern int ttgetc(void);
 extern int typahead(void);
 
@@ -195,7 +178,6 @@ extern int swbuffer(struct buffer *bp);
 extern int killbuffer(int f, int n);
 extern int zotbuf(struct buffer *bp);
 extern int namebuffer(int f, int n);
-extern int listbuffers(int f, int n);
 extern int makelist(int iflag);
 extern void ltoa(char *buf, int width, long num);
 extern int addline(char *text);
@@ -291,7 +273,6 @@ extern int bktoshell(int f, int n);
 extern void rtfrmshell(void);
 extern int spawn(int f, int n);
 extern int execprg(int f, int n);
-extern int pipecmd(int f, int n);
 extern int filter_buffer(int f, int n);
 extern int sys(char *cmd);
 extern int shellprog(char *cmd);
@@ -332,7 +313,6 @@ extern void varinit(void);
 extern char *gtfun(char *fname);
 extern char *gtusr(char *vname);
 extern char *gtenv(char *vname);
-extern char *getkill(void);
 extern int setvar(int f, int n);
 extern void findvar(char *var, struct variable_description *vd, int size);
 extern int svar(struct variable_description *var, char *value);
@@ -341,16 +321,12 @@ extern int gettyp(char *token);
 extern char *getval(char *token, char *result, int size);
 extern int stol(char *val);
 extern char *ltos(int val);
-extern char *mkupper(char *str);
-extern char *mklower(char *str);
+extern char *mkupper(const char *str, char *result);
+extern char *mklower(const char *str, char *result);
 extern int abs(int x);
 extern int ernd(void);
 extern int sindex(char *source, char *pattern);
 extern char *xlat(char *source, char *lookup, char *trans);
-
-/* crypt.c */
-extern int set_encryption_key(int f, int n);
-extern void myencrypt(char *bptr, unsigned len);
 
 /* lock.c */
 extern int lockchk(char *fname);
