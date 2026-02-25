@@ -385,7 +385,7 @@ int inword(void)
 	if (c >= 'A' && c <= 'Z')
 #endif
 		return TRUE;
-	if (c >= '0' && c <= '9')
+	if (isnumber(c))
 		return TRUE;
 	return FALSE;
 }
