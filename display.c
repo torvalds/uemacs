@@ -1,9 +1,8 @@
 /*	display.c
  *
- *      The functions in this file handle redisplay. There are two halves, the
- *      ones that update the virtual display screen, and the ones that make the
- *      physical display screen the same as the virtual display screen. These
- *      functions use hints that are left in the windows by the commands.
+ *	The functions in this file handle redisplay.  Text lines and
+ *	modelines are rendered directly to the terminal from the buffer
+ *	line data.  Window flags guide what needs repainting.
  *
  *	Modified by Petri Kutvonen
  */
@@ -37,6 +36,8 @@ int chg_width, chg_height;
 static int reframe(struct window *wp);
 static void updone(struct window *wp);
 static void updall(struct window *wp);
+static void updpos(void);
+static void updgar(void);
 static void updateline(int row);
 static void modeline(struct window *wp);
 static void mlputi(int i, int r);
@@ -91,17 +92,15 @@ int upscreen(int f, int n)
 }
 
 /*
- * Make sure that the display is right. This is a three part process. First,
- * scan through all of the windows looking for dirty ones. Check the framing,
- * and refresh the screen. Second, make sure that "currow" and "curcol" are
- * correct for the current window. Third, make the virtual and physical
- * screens the same.
+ * Make sure that the display is right. Check framing, mark dirty rows,
+ * render them directly to the terminal, then position the cursor.
  *
  * int force;		force update past type ahead?
  */
 int update(int force)
 {
 	struct window *wp;
+	int i;
 
 	if (force == FALSE && kbdmode == PLAY)
 		return TRUE;
@@ -130,10 +129,15 @@ int update(int force)
 	if (sgarbf != FALSE)
 		updgar();
 
-	/* update the virtual screen to the physical screen */
-	updupd(force);
+	/* render all dirty rows */
+	for (i = 0; i < term.t_nrow - 1; ++i) {
+		if (row_dirty[i]) {
+			updateline(i);
+			row_dirty[i] = 0;
+		}
+	}
 
-	/* update the cursor and flush the buffers */
+	/* position the cursor and flush */
 	movecursor(currow, curcol - lbound);
 	TTflush();
 	displaying = FALSE;
@@ -278,7 +282,7 @@ static void updall(struct window *wp)
  */
 static int extrow = -1;			/* row of last extended line, -1 if none */
 
-void updpos(void)
+static void updpos(void)
 {
 	struct line *lp;
 	int i;
@@ -335,7 +339,7 @@ void updpos(void)
  *	if the screen is garbage, clear the physical screen and
  *	the virtual screen and force a full update
  */
-void updgar(void)
+static void updgar(void)
 {
 	int i;
 
@@ -346,25 +350,6 @@ void updgar(void)
 	(*term.t_eeop) ();
 	sgarbf = FALSE;				/* Erase-page clears */
 	mpresf = FALSE;				/* the message area. */
-}
-
-/*
- * updupd:
- *	render all dirty rows to the physical screen
- *
- * int force;		forced update flag
- */
-int updupd(int force)
-{
-	int i;
-
-	for (i = 0; i < term.t_nrow - 1; ++i) {
-		if (row_dirty[i]) {
-			updateline(i);
-			row_dirty[i] = 0;
-		}
-	}
-	return TRUE;
 }
 
 
