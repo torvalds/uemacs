@@ -346,6 +346,7 @@ extern char *mklower(char *str);
 extern int abs(int x);
 extern int ernd(void);
 extern int sindex(char *source, char *pattern);
+extern int rsindex(char *source, char *pattern);
 extern char *xlat(char *source, char *lookup, char *trans);
 
 /* crypt.c */
