@@ -23,16 +23,10 @@
 #include "utf8.h"
 #include "util.h"
 
-struct video {
-	struct line *v_line;			/* Source line (NULL for modeline) */
-	int v_flag;				/* Flags */
-	int v_lbound;				/* Left bound for extended lines */
-	unicode_t v_text[1];			/* Screen data. */
-};
-
-#define VFCHG   0x0001				/* Changed flag                 */
-
-static struct video **vscreen;			/* Virtual screen. */
+/* Per-row rendering state: line pointer, horizontal scroll offset, dirty flag */
+static struct line **row_line;			/* source line per row (NULL = empty) */
+static int *row_lbound;				/* left bound per row (0 = no scroll) */
+static unsigned char *row_dirty;		/* non-zero = needs repaint */
 
 static int displaying = TRUE;
 #include <signal.h>
@@ -43,7 +37,7 @@ int chg_width, chg_height;
 static int reframe(struct window *wp);
 static void updone(struct window *wp);
 static void updall(struct window *wp);
-static int updateline(int row, struct video *vp);
+static void updateline(int row);
 static void modeline(struct window *wp);
 static void mlputi(int i, int r);
 static void mlputli(long l, int r);
@@ -51,28 +45,21 @@ static void mlputf(int s);
 static int newscreensize(int h, int w);
 
 /*
- * Initialize the data structures used by the display code. The edge vectors
- * used to access the screens are set up. The operating system's terminal I/O
- * channel is set up. All the other things get initialized at compile time.
- * The original window has "WFCHG" set, so that it will get completely
- * redrawn on the first call to "update".
+ * Initialize the data structures used by the display code.
+ * The operating system's terminal I/O channel is set up.
  */
 void vtinit(void)
 {
-	int i;
-	struct video *vp;
-
 	TTopen();				/* open the screen */
 	TTkopen();				/* open the keyboard */
 	TTrev(FALSE);
-	vscreen = xmalloc(term.t_mrow * sizeof(struct video *));
-
-	for (i = 0; i < term.t_mrow; ++i) {
-		vp = xmalloc(sizeof(struct video) + term.t_mcol * 4);
-		vp->v_flag = 0;
-		vp->v_line = NULL;
-		vp->v_lbound = 0;
-		vscreen[i] = vp;
+	row_line = xmalloc(term.t_mrow * sizeof(struct line *));
+	row_lbound = xmalloc(term.t_mrow * sizeof(int));
+	row_dirty = xmalloc(term.t_mrow * sizeof(unsigned char));
+	for (int i = 0; i < term.t_mrow; ++i) {
+		row_line[i] = NULL;
+		row_lbound[i] = 0;
+		row_dirty[i] = 0;
 	}
 }
 
@@ -248,9 +235,9 @@ static void updone(struct window *wp)
 	}
 
 	/* store the line pointer for direct rendering */
-	vscreen[sline]->v_flag |= VFCHG;
-	vscreen[sline]->v_line = lp;
-	vscreen[sline]->v_lbound = 0;
+	row_dirty[sline] = 1;
+	row_line[sline] = lp;
+	row_lbound[sline] = 0;
 }
 
 /*
@@ -268,14 +255,14 @@ static void updall(struct window *wp)
 	lp = wp->w_linep;
 	sline = 0;
 	while (sline < term.t_nrow - 1) {
-		vscreen[sline]->v_flag |= VFCHG;
-			vscreen[sline]->v_lbound = 0;
+		row_dirty[sline] = 1;
+		row_lbound[sline] = 0;
 		if (lp != wp->w_bufp->b_linep) {
 			/* if we are not at the end */
-			vscreen[sline]->v_line = lp;
+			row_line[sline] = lp;
 			lp = lforw(lp);
 		} else {
-			vscreen[sline]->v_line = NULL;
+			row_line[sline] = NULL;
 		}
 		++sline;
 	}
@@ -320,24 +307,23 @@ void updpos(void)
 	if (curcol >= term.t_ncol - 1) {
 		int rcursor;
 		rcursor = ((curcol - term.t_ncol) % term.t_scrsiz) + term.t_margin;
-		taboff = lbound = curcol - rcursor + 1;
+		lbound = curcol - rcursor + 1;
 
 		/* de-extend the previous row if it was a different one */
 		if (extrow >= 0 && extrow != currow) {
-			vscreen[extrow]->v_flag |= VFCHG;
-			vscreen[extrow]->v_lbound = 0;
+			row_dirty[extrow] = 1;
+			row_lbound[extrow] = 0;
 		}
 
-		vscreen[currow]->v_flag |= VFCHG;
-		vscreen[currow]->v_line = lp;
-		vscreen[currow]->v_lbound = lbound;
+		row_dirty[currow] = 1;
+		row_line[currow] = lp;
+		row_lbound[currow] = lbound;
 		extrow = currow;
-		taboff = 0;
 	} else {
 		/* de-extend the previous row if there was one */
 		if (extrow >= 0) {
-			vscreen[extrow]->v_flag |= VFCHG;
-			vscreen[extrow]->v_lbound = 0;
+			row_dirty[extrow] = 1;
+			row_lbound[extrow] = 0;
 			extrow = -1;
 		}
 		lbound = 0;
@@ -354,7 +340,7 @@ void updgar(void)
 	int i;
 
 	for (i = 0; i < term.t_nrow; ++i)
-		vscreen[i]->v_flag |= VFCHG;
+		row_dirty[i] = 1;
 
 	movecursor(0, 0);			/* Erase the screen. */
 	(*term.t_eeop) ();
@@ -364,21 +350,18 @@ void updgar(void)
 
 /*
  * updupd:
- *	update the physical screen from the virtual screen
+ *	render all dirty rows to the physical screen
  *
  * int force;		forced update flag
  */
 int updupd(int force)
 {
-	struct video *vp1;
 	int i;
 
-	for (i = 0; i < term.t_nrow; ++i) {
-		vp1 = vscreen[i];
-
-		/* for each line that needs to be updated */
-		if ((vp1->v_flag & VFCHG) != 0) {
-			updateline(i, vp1);
+	for (i = 0; i < term.t_nrow - 1; ++i) {
+		if (row_dirty[i]) {
+			updateline(i);
+			row_dirty[i] = 0;
 		}
 	}
 	return TRUE;
@@ -607,16 +590,16 @@ static int updateline_text(int row, struct line *lp, int lb)
 /*
  * Update a single line from its line data, or clear if empty.
  */
-static int updateline(int row, struct video *vp)
+static void updateline(int row)
 {
-	if (vp->v_line)
-		return updateline_text(row, vp->v_line, vp->v_lbound);
+	if (row_line[row]) {
+		updateline_text(row, row_line[row], row_lbound[row]);
+		return;
+	}
 	/* Empty line (past end of buffer) */
 	movecursor(row, 0);
 	ttcol = term.t_ncol;
 	TTeeol();
-	vp->v_flag &= ~VFCHG;
-	return TRUE;
 }
 
 /*
