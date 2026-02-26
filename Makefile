@@ -18,16 +18,16 @@ PROGRAM=em
 
 SRC=	basic.c bind.c buffer.c display.c eval.c exec.c file.c fileio.c \
 	globals.c input.c isearch.c line.c lock.c main.c names.c \
-	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
+	pklock.c posix.c random.c region.c search.c spawn.c spelling.c tcap.c \
 	usage.c utf8.c version.c window.c word.c wrapper.c
 
 OBJ=	basic.o bind.o buffer.o display.o eval.o exec.o file.o fileio.o \
 	globals.o input.o isearch.o line.o lock.o main.o names.o \
-	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
+	pklock.o posix.o random.o region.o search.o spawn.o spelling.o tcap.o \
 	usage.o utf8.o version.o window.o word.o wrapper.o
 
-HDR=	ebind.h edef.h efunc.h epath.h estruct.h evar.h line.h usage.h \
-	utf8.h util.h version.h wrapper.h
+HDR=	ebind.h edef.h efunc.h epath.h estruct.h evar.h line.h spelling.h \
+	usage.h utf8.h util.h version.h wrapper.h
 
 # DO NOT ADD OR MODIFY ANY LINES ABOVE THIS -- make source creates them
 
