@@ -10,7 +10,6 @@
 #include "edef.h"
 #include "efunc.h"
 
-#if	BSD | SVR4
 #include <sys/errno.h>
 
 static char *lname[NLOCKS];		/* names of all locked files */
@@ -92,8 +91,8 @@ int lockrel(void)
  */
 int lock(char *fname)
 {
-	char *locker;	/* lock error message */
-	int status;	/* return status */
+	const char *locker;	/* lock error message */
+	int status;		/* return status */
 	char msg[NSTRING];	/* message string */
 
 	/* attempt to lock the file */
@@ -102,15 +101,13 @@ int lock(char *fname)
 		return TRUE;
 
 	/* file failed...abort */
-	if (strncmp(locker, "LOCK", 4) == 0) {
+	if (is_lock_error(locker)) {
 		lckerror(locker);
 		return ABORT;
 	}
 
 	/* someone else has it....override? */
-	strcpy(msg, "File in use by ");
-	strcat(msg, locker);
-	strcat(msg, ", override?");
+	(void)snprintf(msg, sizeof(msg), "File in use by %s, override?", locker);
 	status = mlyesno(msg);	/* ask them */
 	if (status == TRUE)
 		return FALSE;
@@ -127,7 +124,7 @@ int lock(char *fname)
  */
 int unlock(char *fname)
 {
-	char *locker;	/* undolock return string */
+	const char *locker;	/* undolock return string */
 
 	/* unclock and return */
 	locker = undolock(fname);
@@ -144,13 +141,10 @@ int unlock(char *fname)
  *
  * char *errstr;	lock error string to print out
  */
-void lckerror(char *errstr)
+void lckerror(const char *errstr)
 {
 	char obuf[NSTRING];	/* output buffer for error message */
 
-	strcpy(obuf, errstr);
-	strcat(obuf, " - ");
-	strcat(obuf, strerror(errno));
-	mlwrite(obuf);
+	(void)snprintf(obuf, sizeof(obuf), "%s - %s", errstr, strerror(errno));
+	mlwrite("%s", obuf);
 }
-#endif
