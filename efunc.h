@@ -357,8 +357,9 @@ extern int lockchk(char *fname);
 extern int lockrel(void);
 extern int lock(char *fname);
 extern int unlock(char *fname);
-extern void lckerror(char *errstr);
+extern void lckerror(const char *errstr);
 
 /* pklock.c */
-extern char *dolock(char *fname);
-extern char *undolock(char *fname);
+extern const char *dolock(char *fname);
+extern const char *undolock(char *fname);
+extern int is_lock_error(const char *msg);
