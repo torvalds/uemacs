@@ -1,9 +1,8 @@
 /*	display.c
  *
- *      The functions in this file handle redisplay. There are two halves, the
- *      ones that update the virtual display screen, and the ones that make the
- *      physical display screen the same as the virtual display screen. These
- *      functions use hints that are left in the windows by the commands.
+ *	The functions in this file handle redisplay.  Text lines and
+ *	modelines are rendered directly to the terminal from the buffer
+ *	line data.  Window flags guide what needs repainting.
  *
  *	Modified by Petri Kutvonen
  */
@@ -23,16 +22,10 @@
 #include "utf8.h"
 #include "util.h"
 
-struct video {
-	int v_flag;				/* Flags */
-	unicode_t v_text[1];			/* Screen data. */
-};
-
-#define VFCHG   0x0001				/* Changed flag                 */
-#define	VFEXT	0x0002				/* extended (beyond column 80)  */
-#define	VFREQ	0x0008				/* reverse video request        */
-
-static struct video **vscreen;			/* Virtual screen. */
+/* Per-row rendering state: line pointer, horizontal scroll offset, dirty flag */
+static struct line **row_line;			/* source line per row (NULL = empty) */
+static int *row_lbound;				/* left bound per row (0 = no scroll) */
+static unsigned char *row_dirty;		/* non-zero = needs repaint */
 
 static int displaying = TRUE;
 #include <signal.h>
@@ -43,8 +36,9 @@ int chg_width, chg_height;
 static int reframe(struct window *wp);
 static void updone(struct window *wp);
 static void updall(struct window *wp);
-static void updext(void);
-static int updateline(int row, struct video *vp);
+static void updpos(void);
+static void updgar(void);
+static void updateline(int row);
 static void modeline(struct window *wp);
 static void mlputi(int i, int r);
 static void mlputli(long l, int r);
@@ -52,26 +46,21 @@ static void mlputf(int s);
 static int newscreensize(int h, int w);
 
 /*
- * Initialize the data structures used by the display code. The edge vectors
- * used to access the screens are set up. The operating system's terminal I/O
- * channel is set up. All the other things get initialized at compile time.
- * The original window has "WFCHG" set, so that it will get completely
- * redrawn on the first call to "update".
+ * Initialize the data structures used by the display code.
+ * The operating system's terminal I/O channel is set up.
  */
 void vtinit(void)
 {
-	int i;
-	struct video *vp;
-
 	TTopen();				/* open the screen */
 	TTkopen();				/* open the keyboard */
 	TTrev(FALSE);
-	vscreen = xmalloc(term.t_mrow * sizeof(struct video *));
-
-	for (i = 0; i < term.t_mrow; ++i) {
-		vp = xmalloc(sizeof(struct video) + term.t_mcol * 4);
-		vp->v_flag = 0;
-		vscreen[i] = vp;
+	row_line = xmalloc(term.t_mrow * sizeof(struct line *));
+	row_lbound = xmalloc(term.t_mrow * sizeof(int));
+	row_dirty = xmalloc(term.t_mrow * sizeof(unsigned char));
+	for (int i = 0; i < term.t_mrow; ++i) {
+		row_line[i] = NULL;
+		row_lbound[i] = 0;
+		row_dirty[i] = 0;
 	}
 }
 
@@ -92,88 +81,6 @@ void vttidy(void)
 }
 
 /*
- * Set the virtual cursor to the specified row and column on the virtual
- * screen. There is no checking for nonsense values; this might be a good
- * idea during the early stages.
- */
-void vtmove(int row, int col)
-{
-	vtrow = row;
-	vtcol = col;
-}
-
-/*
- * Write a character to the virtual screen. The virtual row and
- * column are updated. If we are not yet on left edge, don't print
- * it yet. If the line is too long put a "$" in the last column.
- *
- * This routine only puts printing characters into the virtual
- * terminal buffers. Only column overflow is checked.
- */
-static void vtputc(int c)
-{
-	struct video *vp;			/* ptr to line being updated */
-
-	/* In case somebody passes us a signed char.. */
-	if (c < 0) {
-		c += 256;
-		if (c < 0)
-			return;
-	}
-
-	vp = vscreen[vtrow];
-
-	if (vtcol >= term.t_ncol) {
-		++vtcol;
-		vp->v_text[term.t_ncol - 1] = '$';
-		return;
-	}
-
-	if (c == '\t') {
-		do {
-			vtputc(' ');
-		} while (((vtcol + taboff) & tabmask) != 0);
-		return;
-	}
-
-	if (c < 0x20) {
-		vtputc('^');
-		vtputc(c ^ 0x40);
-		return;
-	}
-
-	if (c == 0x7f) {
-		vtputc('^');
-		vtputc('?');
-		return;
-	}
-
-	if (c >= 0x80 && c <= 0xA0) {
-		static const char hex[] = "0123456789abcdef";
-		vtputc('\\');
-		vtputc(hex[c >> 4]);
-		vtputc(hex[c & 15]);
-		return;
-	}
-
-	if (vtcol >= 0)
-		vp->v_text[vtcol] = c;
-	++vtcol;
-}
-
-/*
- * Erase from the end of the software cursor to the end of the line on which
- * the software cursor is located.
- */
-static void vteeol(void)
-{
-	unicode_t *vcp = vscreen[vtrow]->v_text;
-
-	while (vtcol < term.t_ncol)
-		vcp[vtcol++] = ' ';
-}
-
-/*
  * upscreen:
  *	user routine to force a screen update
  *	always finishes complete update
@@ -185,17 +92,15 @@ int upscreen(int f, int n)
 }
 
 /*
- * Make sure that the display is right. This is a three part process. First,
- * scan through all of the windows looking for dirty ones. Check the framing,
- * and refresh the screen. Second, make sure that "currow" and "curcol" are
- * correct for the current window. Third, make the virtual and physical
- * screens the same.
+ * Make sure that the display is right. Check framing, mark dirty rows,
+ * render them directly to the terminal, then position the cursor.
  *
  * int force;		force update past type ahead?
  */
 int update(int force)
 {
 	struct window *wp;
+	int i;
 
 	if (force == FALSE && kbdmode == PLAY)
 		return TRUE;
@@ -220,17 +125,19 @@ int update(int force)
 	/* recalc the current hardware cursor location */
 	updpos();
 
-	/* check for lines to de-extend */
-	upddex();
-
 	/* if screen is garbage, re-plot it */
 	if (sgarbf != FALSE)
 		updgar();
 
-	/* update the virtual screen to the physical screen */
-	updupd(force);
+	/* render all dirty rows */
+	for (i = 0; i < term.t_nrow - 1; ++i) {
+		if (row_dirty[i]) {
+			updateline(i);
+			row_dirty[i] = 0;
+		}
+	}
 
-	/* update the cursor and flush the buffers */
+	/* position the cursor and flush */
 	movecursor(currow, curcol - lbound);
 	TTflush();
 	displaying = FALSE;
@@ -312,17 +219,6 @@ static int reframe(struct window *wp)
 	return TRUE;
 }
 
-static void show_line(struct line *lp)
-{
-	int i = 0, len = llength(lp);
-
-	while (i < len) {
-		unicode_t c;
-		i += utf8_to_unicode(lp->l_text, i, len, &c);
-		vtputc(c);
-	}
-}
-
 /*
  * updone:
  *	update the current line	to the virtual screen
@@ -342,12 +238,10 @@ static void updone(struct window *wp)
 		lp = lforw(lp);
 	}
 
-	/* and update the virtual line */
-	vscreen[sline]->v_flag |= VFCHG;
-	vscreen[sline]->v_flag &= ~VFREQ;
-	vtmove(sline, 0);
-	show_line(lp);
-	vteeol();
+	/* store the line pointer for direct rendering */
+	row_dirty[sline] = 1;
+	row_line[sline] = lp;
+	row_lbound[sline] = 0;
 }
 
 /*
@@ -361,34 +255,34 @@ static void updall(struct window *wp)
 	struct line *lp;			/* line to update */
 	int sline;				/* physical screen line to update */
 
-	/* search down the lines, updating them */
+	/* search down the lines, storing line pointers for direct rendering */
 	lp = wp->w_linep;
 	sline = 0;
 	while (sline < term.t_nrow - 1) {
-
-		/* and update the virtual line */
-		vscreen[sline]->v_flag |= VFCHG;
-		vscreen[sline]->v_flag &= ~VFREQ;
-		vtmove(sline, 0);
+		row_dirty[sline] = 1;
+		row_lbound[sline] = 0;
 		if (lp != wp->w_bufp->b_linep) {
 			/* if we are not at the end */
-			show_line(lp);
+			row_line[sline] = lp;
 			lp = lforw(lp);
+		} else {
+			row_line[sline] = NULL;
 		}
-
-		/* on to the next one */
-		vteeol();
 		++sline;
 	}
-
 }
 
 /*
  * updpos:
  *	update the position of the hardware cursor and handle extended
  *	lines. This is the only update for simple moves.
+ *
+ *	Tracks the previously extended row in 'extrow' so it can be
+ *	de-extended (repainted with lbound=0) when the cursor moves away.
  */
-void updpos(void)
+static int extrow = -1;			/* row of last extended line, -1 if none */
+
+static void updpos(void)
 {
 	struct line *lp;
 	int i;
@@ -413,43 +307,30 @@ void updpos(void)
 		curcol = next_column(curcol, c);
 	}
 
-	/* if extended, flag so and update the virtual line image */
+	/* if extended, calculate lbound and flag for redraw */
 	if (curcol >= term.t_ncol - 1) {
-		vscreen[currow]->v_flag |= (VFEXT | VFCHG);
-		updext();
-	} else
-		lbound = 0;
-}
+		int rcursor;
+		rcursor = ((curcol - term.t_ncol) % term.t_scrsiz) + term.t_margin;
+		lbound = curcol - rcursor + 1;
 
-/*
- * upddex:
- *	de-extend any line that derserves it
- */
-void upddex(void)
-{
-	struct window *wp;
-	struct line *lp;
-	int i;
-
-	wp = curwp;
-	lp = wp->w_linep;
-	i = 0;
-
-	while (i < term.t_nrow - 1) {
-		if (vscreen[i]->v_flag & VFEXT) {
-			if ((wp != curwp) || (lp != wp->w_dotp) ||
-			    (curcol < term.t_ncol - 1)) {
-				vtmove(i, 0);
-				show_line(lp);
-				vteeol();
-
-				/* this line no longer is extended */
-				vscreen[i]->v_flag &= ~VFEXT;
-				vscreen[i]->v_flag |= VFCHG;
-			}
+		/* de-extend the previous row if it was a different one */
+		if (extrow >= 0 && extrow != currow) {
+			row_dirty[extrow] = 1;
+			row_lbound[extrow] = 0;
 		}
-		lp = lforw(lp);
-		++i;
+
+		row_dirty[currow] = 1;
+		row_line[currow] = lp;
+		row_lbound[currow] = lbound;
+		extrow = currow;
+	} else {
+		/* de-extend the previous row if there was one */
+		if (extrow >= 0) {
+			row_dirty[extrow] = 1;
+			row_lbound[extrow] = 0;
+			extrow = -1;
+		}
+		lbound = 0;
 	}
 }
 
@@ -458,12 +339,12 @@ void upddex(void)
  *	if the screen is garbage, clear the physical screen and
  *	the virtual screen and force a full update
  */
-void updgar(void)
+static void updgar(void)
 {
 	int i;
 
 	for (i = 0; i < term.t_nrow; ++i)
-		vscreen[i]->v_flag |= VFCHG;
+		row_dirty[i] = 1;
 
 	movecursor(0, 0);			/* Erase the screen. */
 	(*term.t_eeop) ();
@@ -471,57 +352,6 @@ void updgar(void)
 	mpresf = FALSE;				/* the message area. */
 }
 
-/*
- * updupd:
- *	update the physical screen from the virtual screen
- *
- * int force;		forced update flag
- */
-int updupd(int force)
-{
-	struct video *vp1;
-	int i;
-
-	for (i = 0; i < term.t_nrow; ++i) {
-		vp1 = vscreen[i];
-
-		/* for each line that needs to be updated */
-		if ((vp1->v_flag & VFCHG) != 0) {
-			updateline(i, vp1);
-		}
-	}
-	return TRUE;
-}
-
-/*
- * updext:
- *	update the extended line which the cursor is currently
- *	on at a column greater than the terminal width. The line
- *	will be scrolled right or left to let the user see where
- *	the cursor is
- */
-static void updext(void)
-{
-	int rcursor;				/* real cursor location */
-	struct line *lp;			/* pointer to current line */
-
-	/* calculate what column the real cursor will end up in */
-	rcursor = ((curcol - term.t_ncol) % term.t_scrsiz) + term.t_margin;
-	taboff = lbound = curcol - rcursor + 1;
-
-	/* scan through the line outputing characters to the virtual screen */
-	/* once we reach the left edge                                  */
-	vtmove(currow, -lbound);		/* start scanning offscreen */
-	lp = curwp->w_dotp;			/* line to output */
-	show_line(lp);
-
-	/* truncate the virtual line, restore tab offset */
-	vteeol();
-	taboff = 0;
-
-	/* and put a '$' in column 1 */
-	vscreen[currow]->v_text[0] = '$';
-}
 
 static void TTputs(const char *s)
 {
@@ -529,30 +359,35 @@ static void TTputs(const char *s)
 		TTputc(c);
 }
 
-static bool is_letter(unicode_t ch)
+/*
+ * Spell checking operates on raw UTF-8 bytes from the line buffer.
+ * Bytes >= 128 are treated as letters (UTF-8 continuation/lead bytes
+ * are always >= 128, so multi-byte characters "just work" as words).
+ */
+static bool is_letter(unsigned char ch)
 {
-	return ch > 128 || isalpha(ch);
+	return ch >= 128 || isalpha(ch);
 }
 
-static bool is_notaword(unicode_t ch)
+static bool is_notaword(unsigned char ch)
 {
 	return ch == '_' || (ch >= '0' && ch <= '9');
 }
 
-static int find_letter(unicode_t *line, size_t len, int pos)
+static int find_letter(const char *text, int len, int pos)
 {
 	while (pos < len) {
-		if (is_letter(line[pos]))
+		if (is_letter(text[pos]))
 			return pos;
 		pos++;
 	}
 	return -1;
 }
 
-static int find_not_letter(unicode_t *line, size_t len, int pos)
+static int find_not_letter(const char *text, int len, int pos)
 {
 	while (pos < len) {
-		if (!is_letter(line[pos]))
+		if (!is_letter(text[pos]))
 			return pos;
 		pos++;
 	}
@@ -562,7 +397,11 @@ static int find_not_letter(unicode_t *line, size_t len, int pos)
 #define BAD_WORD_BEGIN 1
 #define BAD_WORD_END 2
 
-static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size_t size)
+/*
+ * Find misspelled words in raw UTF-8 text, marking byte positions
+ * in the result array with BAD_WORD_BEGIN/BAD_WORD_END flags.
+ */
+static int findwords(const char *text, int len, unsigned char *result, int size)
 {
 	int pos = 0;
 
@@ -570,21 +409,21 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
 		size = len;
 	memset(result, 0, size);
 
-	while ((pos = find_letter(line, len, pos)) >= 0) {
+	while ((pos = find_letter(text, len, pos)) >= 0) {
 		int start = pos;
-		int end = find_not_letter(line, len, pos + 1);
+		int end = find_not_letter(text, len, pos + 1);
 
 		// Special case: allow (one) apostrophe for abbreviations
-		if (end + 1 < len && line[end] == '\'' && is_letter(line[end + 1]))
-			end = find_not_letter(line, len, end + 2);
+		if (end + 1 < len && text[end] == '\'' && is_letter(text[end + 1]))
+			end = find_not_letter(text, len, end + 2);
 
 		pos = end + 1;
 
 		// A word with adjacent numbers or underscores is
 		// not a word, it's a hex number or a variable name
-		if (start && is_notaword(line[start - 1]))
+		if (start && is_notaword(text[start - 1]))
 			continue;
-		if (end < len && is_notaword(line[end]))
+		if (end < len && is_notaword(text[end]))
 			continue;
 
 		// We found something that may be a real word.
@@ -596,8 +435,7 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
 		int word_len = end - start;
 		if (word_len >= sizeof(word_buffer) - 1)
 			continue;
-		for (int i = 0; i < word_len; i++)
-			word_buffer[i] = line[start + i];
+		memcpy(word_buffer, text + start, word_len);
 		word_buffer[word_len] = 0;
 		if (spellcheck(word_buffer))
 			continue;
@@ -610,69 +448,143 @@ static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size
 }
 
 /*
- * Update a single line. This does not know how to use insert or delete
- * character sequences; we are using VT52 functionality. Update the physical
- * row and column variables. It does try an exploit erase to end of line.
+ * Output one unicode character to the terminal, expanding tabs,
+ * control chars, and non-printable bytes as vtputc does.
+ * Returns the number of columns consumed.
  */
-
-/*
- * updateline()
- *
- * int row;		row of screen to update
- * struct video *vp;	virtual screen image
- */
-static int updateline(int row, struct video *vp)
+static int ttputchar(unicode_t c, int col, int off)
 {
-	int maxchar = 0, analyzed = 0;
-	unsigned char array[256];
-	bool spellcheck = curwp->w_bufp->b_mode & MDSPELL;
-
-	movecursor(row, 0);			/* Go to start of line. */
-
-	/* scan through the line and dump it to the the
-	   virtual screen array, finding where the last non-space is  */
-	for (int i = 0; i < term.t_ncol; i++) {
-		unicode_t ch = vp->v_text[i];
-		if (ch != ' ')
-			maxchar = i + 1;
+	if (c == '\t') {
+		do {
+			TTputc(' ');
+			col++;
+		} while (((col + off) & tabmask) != 0);
+		return col;
 	}
 
-	/* set rev video if needed, and fill all the way */
-	if (vp->v_flag & VFREQ) {
-		maxchar = term.t_ncol;
-		TTrev(TRUE);
-		spellcheck = false;
+	if (c < 0x20) {
+		TTputc('^');
+		TTputc(c ^ 0x40);
+		return col + 2;
 	}
 
-	if (spellcheck)
-		analyzed = findwords(vp->v_text, maxchar, array, sizeof(array));
+	if (c == 0x7f) {
+		TTputc('^');
+		TTputc('?');
+		return col + 2;
+	}
+
+	if (c >= 0x80 && c <= 0xA0) {
+		static const char hex[] = "0123456789abcdef";
+		TTputc('\\');
+		TTputc(hex[c >> 4]);
+		TTputc(hex[c & 15]);
+		return col + 3;
+	}
+
+	/* Regular printable character — output raw UTF-8 bytes */
+	{
+		char utf8[6];
+		unsigned bytes = unicode_to_utf8(c, utf8);
+		for (unsigned j = 0; j < bytes; j++)
+			TTputc(utf8[j]);
+	}
+	return col + 1;
+}
 
 #define SPELLSTART "\033[1m"
 #define SPELLSTOP "\033[22m"
 
+/*
+ * Render a text line directly from its UTF-8 line data to the terminal.
+ * Spell checking is done on the raw bytes; byte positions are tracked
+ * alongside column output.  For extended lines (lb > 0), characters
+ * before lb are skipped and a '$' marker is placed in column 0.
+ *
+ * 'srccol' tracks the logical column in the source line.
+ * 'scrcol' tracks the screen column being written to.
+ */
+static int updateline_text(int row, struct line *lp, int lb)
+{
+	int len = llength(lp);
+	bool do_spell = curwp->w_bufp->b_mode & MDSPELL;
+	int analyzed = 0;
+	unsigned char spellbuf[1024];
+	int srccol = 0;				/* column in the source line */
+	int scrcol = 0;				/* column on screen */
+	int i = 0;
 	int started = 0;
-	for (int i = 0; i < maxchar; i++) {
-		if (i < analyzed && (array[i] & BAD_WORD_BEGIN)) {
+
+	movecursor(row, 0);
+
+	if (do_spell)
+		analyzed = findwords(lp->l_text, len, spellbuf, sizeof(spellbuf));
+
+	/* For extended lines, put '$' marker in column 0 */
+	if (lb > 0) {
+		TTputc('$');
+		scrcol = 1;
+	}
+
+	/* Walk UTF-8 bytes, tracking byte position and source column */
+	while (i < len) {
+		unicode_t c;
+		int bytes = utf8_to_unicode(lp->l_text, i, len, &c);
+		int width = next_column(srccol, c) - srccol;
+
+		/* Skip characters before lbound */
+		if (srccol + width <= lb) {
+			srccol += width;
+			i += bytes;
+			continue;
+		}
+
+		/* Check if this character would exceed the screen */
+		if (scrcol + width > term.t_ncol) {
+			/* Put '$' at last column to indicate continuation */
+			movecursor(row, term.t_ncol - 1);
+			TTputc('$');
+			break;
+		}
+
+		/* Handle spell highlight start */
+		if (i < analyzed && (spellbuf[i] & BAD_WORD_BEGIN)) {
 			started = 1;
 			TTputs(SPELLSTART);
 		}
-		TTputc(vp->v_text[i]);
-		if (i < analyzed && (array[i] & BAD_WORD_END)) {
+
+		scrcol = ttputchar(c, scrcol, srccol - scrcol);
+		srccol += width;
+
+		/* Handle spell highlight end */
+		if (i + bytes - 1 < analyzed && (spellbuf[i + bytes - 1] & BAD_WORD_END)) {
 			TTputs(SPELLSTOP);
 			started = 0;
 		}
+
+		i += bytes;
 	}
 	if (started)
 		TTputs(SPELLSTOP);
+
 	ttcol = term.t_ncol;
-
 	TTeeol();
-	/* turn rev video off */
-	TTrev(FALSE);
-
-	/* update the needed flags */
-	vp->v_flag &= ~VFCHG;
 	return TRUE;
+}
+
+/*
+ * Update a single line from its line data, or clear if empty.
+ */
+static void updateline(int row)
+{
+	if (row_line[row]) {
+		updateline_text(row, row_line[row], row_lbound[row]);
+		return;
+	}
+	/* Empty line (past end of buffer) */
+	movecursor(row, 0);
+	ttcol = term.t_ncol;
+	TTeeol();
 }
 
 /*
@@ -691,10 +603,11 @@ static void modeline(struct window *wp)
 	int lchar;				/* character to draw line in buffer with */
 	int firstm;				/* is this the first mode? */
 	char tline[NLINE];			/* buffer for part of mode line */
+	int row = term.t_nrow - 1;		/* modeline row */
 
-	n = term.t_nrow - 1;			/* Location. */
-	vscreen[n]->v_flag |= VFCHG | VFREQ;		/* Redraw next time. */
-	vtmove(n, 0);				/* Seek to right line. */
+	movecursor(row, 0);
+	TTrev(TRUE);
+
 	if (wp == curwp)			/* mark the current buffer */
 		lchar = '-';
 	else if (revexist)
@@ -703,12 +616,12 @@ static void modeline(struct window *wp)
 		lchar = '-';
 
 	bp = wp->w_bufp;
-	vtputc(lchar);
+	TTputc(lchar);
 
 	if ((bp->b_flag & BFCHG) != 0)		/* "*" if changed. */
-		vtputc('*');
+		TTputc('*');
 	else
-		vtputc(lchar);
+		TTputc(lchar);
 
 	n = 2;
 
@@ -719,13 +632,13 @@ static void modeline(struct window *wp)
 	strcat(tline, ": ");
 	cp = &tline[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		TTputc(c);
 		++n;
 	}
 
 	cp = &bp->b_bname[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		TTputc(c);
 		++n;
 	}
 
@@ -749,7 +662,7 @@ static void modeline(struct window *wp)
 
 	cp = &tline[0];
 	while ((c = *cp++) != 0) {
-		vtputc(c);
+		TTputc(c);
 		++n;
 	}
 
@@ -757,16 +670,16 @@ static void modeline(struct window *wp)
 		cp = &bp->b_fname[0];
 
 		while ((c = *cp++) != 0) {
-			vtputc(c);
+			TTputc(c);
 			++n;
 		}
 
-		vtputc(' ');
+		TTputc(' ');
 		++n;
 	}
 
 	while (n < term.t_ncol) {		/* Pad to full width. */
-		vtputc(lchar);
+		TTputc(lchar);
 		++n;
 	}
 
@@ -774,8 +687,8 @@ static void modeline(struct window *wp)
 		struct line *lp = wp->w_linep;
 		int rows = term.t_nrow - 1;
 		char *msg = NULL;
+		int pos = n - 7;		/* strlen(" top ") plus a couple */
 
-		vtcol = n - 7;			/* strlen(" top ") plus a couple */
 		while (rows--) {
 			lp = lforw(lp);
 			if (lp == wp->w_bufp->b_linep) {
@@ -820,12 +733,15 @@ static void modeline(struct window *wp)
 			}
 		}
 
+		/* overwrite the position indicator at the right end */
+		movecursor(row, pos);
 		cp = msg;
-		while ((c = *cp++) != 0) {
-			vtputc(c);
-			++n;
-		}
+		while ((c = *cp++) != 0)
+			TTputc(c);
 	}
+
+	ttcol = term.t_ncol;
+	TTrev(FALSE);
 }
 
 void upmode(void)
