@@ -14,27 +14,45 @@ export E Q
 
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
-PROGRAM=em
+PROGRAM=bin/em
 
-SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c \
-	file.c fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c \
-	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
-	termio.c vmsvt.c vt52.c window.c word.c names.c globals.c version.c \
-	usage.c wrapper.c utf8.c
+BUILD_DIR=build
+BIN_DIR=bin
 
-OBJ=ansi.o basic.o bind.o buffer.o crypt.o display.o eval.o exec.o \
-	file.o fileio.o ibmpc.o input.o isearch.o line.o lock.o main.o \
-	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
-	termio.o vmsvt.o vt52.o window.o word.o names.o globals.o version.o \
-	usage.o wrapper.o utf8.o
+VPATH = src src/tty src/core src/bind src/util include
 
-HDR=ebind.h edef.h efunc.h epath.h estruct.h evar.h util.h version.h
+SRC=src/tty/ansi.c src/core/basic.c src/bind/bind.c src/core/buffer.c \
+	src/core/crypt.c src/core/display.c src/core/eval.c \
+	src/core/exec.c src/core/file.c src/core/fileio.c \
+	src/tty/ibmpc.c src/core/input.c src/core/isearch.c \
+	src/core/line.c src/core/lock.c \
+	main.c \
+	src/util/pklock.c src/tty/posix.c src/core/random.c \
+	src/core/region.c src/core/search.c \
+	src/util/spawn.c src/tty/tcap.c src/tty/termio.c \
+	src/tty/vmsvt.c src/tty/vt52.c \
+	src/core/window.c src/core/word.c src/bind/names.c \
+	src/core/globals.c src/util/version.c \
+	src/util/usage.c src/util/wrapper.c src/util/utf8.c
+
+OBJ=build/ansi.o build/basic.o build/bind.o build/buffer.o \
+	build/crypt.o build/display.o build/eval.o build/exec.o \
+	build/file.o build/fileio.o build/ibmpc.o build/input.o \
+	build/isearch.o build/line.o build/lock.o build/main.o \
+	build/pklock.o build/posix.o build/random.o build/region.o \
+	build/search.o build/spawn.o build/tcap.o build/termio.o \
+	build/vmsvt.o build/vt52.o build/window.o build/word.o \
+	build/names.o build/globals.o build/version.o \
+	build/usage.o build/wrapper.o build/utf8.o
+
+HDR=include/ebind.h include/edef.h include/efunc.h include/epath.h \
+	include/estruct.h include/evar.h include/util.h include/version.h
 
 # DO NOT ADD OR MODIFY ANY LINES ABOVE THIS -- make source creates them
 
 CC=gcc
 WARNINGS=-Wall -Wstrict-prototypes
-CFLAGS=-O2 $(WARNINGS)
+CFLAGS=-O2 $(WARNINGS) -Iinclude
 #CC=c89 +O3			# HP
 #CFLAGS= -D_HPUX_SOURCE -DSYSV
 #CFLAGS=-O4 -DSVR4		# Sun
@@ -57,9 +75,12 @@ LFLAGS=-hbx
 BINDIR=/usr/bin
 LIBDIR=/usr/lib
 
-$(PROGRAM): $(OBJ)
+$(PROGRAM): $(OBJ) | $(BIN_DIR)
 	$(E) "  LINK    " $@
 	$(Q) $(CC) $(LDFLAGS) $(DEFINES) -o $@ $(OBJ) $(LIBS)
+
+$(BUILD_DIR) $(BIN_DIR):
+	mkdir -p $@
 
 SPARSE=sparse
 SPARSE_FLAGS=-D__LITTLE_ENDIAN__ -D__x86_64__ -D__linux__ -D__unix__
@@ -69,11 +90,11 @@ sparse:
 
 clean:
 	$(E) "  CLEAN"
-	$(Q) rm -f $(PROGRAM) core lintout makeout tags makefile.bak *.o
+	$(Q) rm -rf $(BUILD_DIR) $(BIN_DIR) core lintout makeout tags makefile.bak
 
 install: $(PROGRAM)
 	strip $(PROGRAM)
-	cp em ${BINDIR}
+	cp bin/em ${BINDIR}
 	cp emacs.hlp ${LIBDIR}
 	cp emacs.rc ${LIBDIR}/.emacsrc
 	chmod 755 ${BINDIR}/em
@@ -121,41 +142,41 @@ depend: ${SRC}
 	@echo '# IF YOU PUT STUFF HERE IT WILL GO AWAY' >>makefile
 	@echo '# see make depend above' >>makefile
 
-.c.o:
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 	$(E) "  CC      " $@
-	$(Q) ${CC} ${CFLAGS} ${DEFINES} -c $*.c
+	$(Q) ${CC} ${CFLAGS} ${DEFINES} -c $< -o $@
 
 # DO NOT DELETE THIS LINE -- make depend uses it
 
-ansi.o: ansi.c estruct.h edef.h
-basic.o: basic.c estruct.h edef.h
-bind.o: bind.c estruct.h edef.h epath.h
-buffer.o: buffer.c estruct.h edef.h
-crypt.o: crypt.c estruct.h edef.h
-display.o: display.c estruct.h edef.h utf8.h
-eval.o: eval.c estruct.h edef.h evar.h
-exec.o: exec.c estruct.h edef.h
-file.o: file.c estruct.h edef.h
-fileio.o: fileio.c estruct.h edef.h
-ibmpc.o: ibmpc.c estruct.h edef.h
-input.o: input.c estruct.h edef.h
-isearch.o: isearch.c estruct.h edef.h
-line.o: line.c estruct.h edef.h
-lock.o: lock.c estruct.h edef.h
-main.o: main.c estruct.h efunc.h edef.h ebind.h
-pklock.o: pklock.c estruct.h
-posix.o: posix.c estruct.h utf8.h
-random.o: random.c estruct.h edef.h
-region.o: region.c estruct.h edef.h
-search.o: search.c estruct.h edef.h
-spawn.o: spawn.c estruct.h edef.h
-tcap.o: tcap.c estruct.h edef.h
-termio.o: termio.c estruct.h edef.h
-utf8.o: utf8.c utf8.h
-vmsvt.o: vmsvt.c estruct.h edef.h
-vt52.o: vt52.c estruct.h edef.h
-window.o: window.c estruct.h edef.h
-word.o: word.c estruct.h edef.h
+build/ansi.o: ansi.c estruct.h edef.h
+build/basic.o: basic.c estruct.h edef.h
+build/bind.o: bind.c estruct.h edef.h epath.h
+build/buffer.o: buffer.c estruct.h edef.h
+build/crypt.o: crypt.c estruct.h edef.h
+build/display.o: display.c estruct.h edef.h utf8.h
+build/eval.o: eval.c estruct.h edef.h evar.h
+build/exec.o: exec.c estruct.h edef.h
+build/file.o: file.c estruct.h edef.h
+build/fileio.o: fileio.c estruct.h edef.h
+build/ibmpc.o: ibmpc.c estruct.h edef.h
+build/input.o: input.c estruct.h edef.h
+build/isearch.o: isearch.c estruct.h edef.h
+build/line.o: line.c estruct.h edef.h
+build/lock.o: lock.c estruct.h edef.h
+build/main.o: main.c estruct.h efunc.h edef.h ebind.h
+build/pklock.o: pklock.c estruct.h
+build/posix.o: posix.c estruct.h utf8.h
+build/random.o: random.c estruct.h edef.h
+build/region.o: region.c estruct.h edef.h
+build/search.o: search.c estruct.h edef.h
+build/spawn.o: spawn.c estruct.h edef.h
+build/tcap.o: tcap.c estruct.h edef.h
+build/termio.o: termio.c estruct.h edef.h
+build/utf8.o: utf8.c utf8.h
+build/vmsvt.o: vmsvt.c estruct.h edef.h
+build/vt52.o: vt52.c estruct.h edef.h
+build/window.o: window.c estruct.h edef.h
+build/word.o: word.c estruct.h edef.h
 
 # DEPENDENCIES MUST END AT END OF FILE
 # IF YOU PUT STUFF HERE IT WILL GO AWAY
