@@ -12,8 +12,6 @@ else
 endif
 export E Q
 
-uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
-
 PROGRAM=em
 
 SRC=	basic.c bind.c buffer.c display.c eval.c exec.c file.c fileio.c \
@@ -56,7 +54,7 @@ $(OBJ): $(HDR)
 
 clean:
 	$(E) "  CLEAN"
-	$(Q) rm -f $(PROGRAM) core lintout makeout tags *.o
+	$(Q) rm -f $(PROGRAM) core *.o
 
 install: $(PROGRAM)
 	install em ${BINDIR}
