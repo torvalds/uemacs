@@ -201,6 +201,7 @@ extern int filesave(int f, int n);
 extern int writeout(char *fn);
 extern int filename(int f, int n);
 extern int ifile(char *fname);
+extern int file_changed(struct buffer *bp, char *fn);
 
 /* fileio.c */
 extern int ffropen(char *fn);

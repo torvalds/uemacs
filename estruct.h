@@ -8,6 +8,9 @@
  *	modified by Petri Kutvonen
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #define MAXCOL	500
 #define MAXROW	500
 
@@ -165,6 +168,35 @@ struct window {
 #define WFMODE  0x10				/* Update mode line.            */
 
 /*
+ * What the file looked like when the buffer last matched it - set when
+ * we read it, and again each time we write it.  Before overwriting the
+ * file we look again, and if it no longer looks like this then somebody
+ * else has been at it and we ask first.
+ *
+ * "Did not exist" is a state of its own, and is the interesting one: a
+ * file that is not there yet cannot be locked, so two editors started on
+ * the same new name are invisible to each other until one of them saves.
+ *
+ * Device and inode matter as much as size and time do.  A file replaced
+ * by writing a temporary and renaming it over - which is what git and
+ * patch and most other editors do - lands on a new inode, very often at
+ * exactly the same size.  Our own writes go through fopen(fn, "w"),
+ * which truncates in place and keeps the inode, so this never trips over
+ * our own feet.
+ */
+#define	FSTATE_UNKNOWN	0			/* no baseline recorded */
+#define	FSTATE_ABSENT	1			/* it wasn't there      */
+#define	FSTATE_PRESENT	2			/* it was, see below    */
+
+struct filestate {
+	int fs_what;
+	dev_t fs_dev;
+	ino_t fs_ino;
+	off_t fs_size;
+	struct timespec fs_mtim;
+};
+
+/*
  * Text is kept in buffers. A buffer header, described below, exists for every
  * buffer in the system. The buffers are kept in a big list, so that commands
  * that search for a buffer by name can find the buffer header. There is a
@@ -186,6 +218,7 @@ struct buffer {
 	char b_active;				/* window activated flag        */
 	char b_nwnd;				/* Count of windows on buffer   */
 	char b_flag;				/* Flags                        */
+	struct filestate b_fstate;		/* File as of our last match    */
 	char b_fname[NFILEN];			/* File name                    */
 	char b_bname[NBUFN];			/* Buffer name                  */
 };

@@ -149,6 +149,7 @@ int filter_buffer(int f, int n)
 	struct buffer *bp;			/* pointer to buffer to zot */
 	char line[NLINE];			/* command line send to shell */
 	char tmpnam[NFILEN];			/* place to store real file name */
+	struct filestate tmpstate;		/* and the state that goes with it */
 	static char bname1[] = "fltinp";
 
 	static char filnam1[] = "fltinp";
@@ -168,12 +169,14 @@ int filter_buffer(int f, int n)
 	/* setup the proper file names */
 	bp = curbp;
 	strcpy(tmpnam, bp->b_fname);		/* save the original name */
+	tmpstate = bp->b_fstate;		/* and what we know about it */
 	strcpy(bp->b_fname, bname1);		/* set it to our new one */
 
 	/* write it out, checking for errors */
 	if (writeout(filnam1) != TRUE) {
 		mlwrite("(Cannot write filter file)");
 		strcpy(bp->b_fname, tmpnam);
+		bp->b_fstate = tmpstate;
 		return FALSE;
 	}
 	TTputc('\n');				/* Already have '\r'    */
@@ -192,13 +195,20 @@ int filter_buffer(int f, int n)
 	if (s != TRUE || (readin(filnam2, FALSE) == FALSE)) {
 		mlwrite("(Execution failed)");
 		strcpy(bp->b_fname, tmpnam);
+		bp->b_fstate = tmpstate;
 		unlink(filnam1);
 		unlink(filnam2);
 		return s;
 	}
 
-	/* reset file name */
+	/*
+	 * Reset file name.  The state goes back with it: readin() has just
+	 * recorded what the filter's output file looked like, which says
+	 * nothing at all about the file the buffer is really for - and we
+	 * have not touched that one, so what we knew about it still holds.
+	 */
 	strcpy(bp->b_fname, tmpnam);		/* restore name */
+	bp->b_fstate = tmpstate;
 	bp->b_flag |= BFCHG;			/* flag it as changed */
 
 	/* and get rid of the temporary file */

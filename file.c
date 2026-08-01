@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include "estruct.h"
@@ -18,6 +19,57 @@
 
 /* Max number of lines from one file. */
 #define	MAXNLINE 10000000
+
+/*
+ * Remember what the file looks like now, as the state the buffer
+ * matches.  Called after reading the file, and after writing it.
+ */
+static void record_fstate(struct buffer *bp, char *fn)
+{
+	struct stat st;
+
+	if (stat(fn, &st) < 0) {
+		/* Not being there is a perfectly good answer, and the
+		   one that matters: it is how two editors started on the
+		   same new name find out about each other.  Anything
+		   else and we simply do not know. */
+		bp->b_fstate.fs_what = errno == ENOENT ? FSTATE_ABSENT : FSTATE_UNKNOWN;
+		return;
+	}
+
+	bp->b_fstate.fs_what = FSTATE_PRESENT;
+	bp->b_fstate.fs_dev = st.st_dev;
+	bp->b_fstate.fs_ino = st.st_ino;
+	bp->b_fstate.fs_size = st.st_size;
+	bp->b_fstate.fs_mtim = st.st_mtim;
+}
+
+/*
+ * Has the file been changed by somebody else since we last matched it?
+ *
+ * With no baseline we say no: we have nothing to go on, and claiming a
+ * file changed when we never looked at it would be a lie.
+ */
+int file_changed(struct buffer *bp, char *fn)
+{
+	struct stat st;
+	int there = stat(fn, &st) == 0;
+
+	switch (bp->b_fstate.fs_what) {
+	case FSTATE_ABSENT:
+		return there;
+	case FSTATE_PRESENT:
+		if (!there)
+			return TRUE;
+		return st.st_dev != bp->b_fstate.fs_dev ||
+		       st.st_ino != bp->b_fstate.fs_ino ||
+		       st.st_size != bp->b_fstate.fs_size ||
+		       st.st_mtim.tv_sec != bp->b_fstate.fs_mtim.tv_sec ||
+		       st.st_mtim.tv_nsec != bp->b_fstate.fs_mtim.tv_nsec;
+	default:
+		return FALSE;
+	}
+}
 
 /*
  * Read a file into the current
@@ -239,6 +291,12 @@ int readin(char *fname, int lockfl)
 	mlwrite(mesg);
 
  out:
+	/* The buffer now matches the file, whatever the file turned out
+	   to be - including not being there at all.  Skip the case where
+	   lockchk() sent us here, since that clears the name. */
+	if (bp->b_fname[0])
+		record_fstate(bp, bp->b_fname);
+
 	wp = curwp;
 	if (wp->w_bufp == curbp) {
 		wp->w_linep = lforw(curbp->b_linep);
@@ -322,6 +380,7 @@ int filewrite(int f, int n)
 		return s;
 	if ((s = writeout(fname)) == TRUE) {
 		strcpy(curbp->b_fname, fname);
+		record_fstate(curbp, fname);	/* This is our file now */
 		curbp->b_flag &= ~BFCHG;
 		wp = curwp;			/* Update mode line.    */
 		if (wp->w_bufp == curbp)
@@ -359,7 +418,16 @@ int filesave(int f, int n)
 		}
 	}
 
+	/* Somebody else may have been at it while we had it open */
+	if (file_changed(curbp, curbp->b_fname)) {
+		if (mlyesno("File changed on disk, overwrite") != TRUE) {
+			mlwrite("(Aborted)");
+			return FALSE;
+		}
+	}
+
 	if ((s = writeout(curbp->b_fname)) == TRUE) {
+		record_fstate(curbp, curbp->b_fname);
 		curbp->b_flag &= ~BFCHG;
 		curwp->w_flag |= WFMODE;	/* Update mode line.    */
 	}

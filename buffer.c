@@ -309,6 +309,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 		bp->b_mode = gmode;
 		bp->b_nwnd = 0;
 		bp->b_linep = lp;
+		bp->b_fstate.fs_what = FSTATE_UNKNOWN;
 		strcpy(bp->b_fname, "");
 		strcpy(bp->b_bname, bname);
 		lp->l_fp = lp;
