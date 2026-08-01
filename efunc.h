@@ -330,4 +330,3 @@ extern char *xlat(char *source, char *lookup, char *trans);
 
 /* lock.c */
 extern int lockchk(char *fname);
-extern int lockrel(void);

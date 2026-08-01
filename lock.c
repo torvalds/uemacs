@@ -18,14 +18,15 @@
 
 /*
  * A lock is an exclusive flock() on an open file descriptor, so the
- * descriptor has to stay open for as long as we hold the file.  Keeping
- * those descriptors somewhere is the only reason this table exists.
+ * descriptor has to stay open for as long as we hold the file.  Nothing
+ * ever reads 'fd' again - it is here so that the descriptor is not lost,
+ * and it is closed by exit() along with everything else.
  *
- * It is keyed on device and inode rather than on the file name, because
- * the same file reached by two different names is the same file.  With
- * name keying flock() would refuse our own second descriptor and leave
- * us reporting that somebody else had it, which is a silly way to be
- * told you can spell.
+ * The table is keyed on device and inode rather than on the file name,
+ * because the same file reached by two different names is the same file.
+ * With name keying flock() would refuse our own second descriptor and
+ * leave us reporting that somebody else had it, which is a silly way to
+ * be told you can spell.
  */
 static struct filelock {
 	dev_t dev;
@@ -103,19 +104,5 @@ int lockchk(char *fname)
 	locks[numlocks].ino = st.st_ino;
 	locks[numlocks].fd = fd;
 	numlocks++;
-	return TRUE;
-}
-
-/*
- * lockrel:
- *	release all the file locks so others may edit
- */
-int lockrel(void)
-{
-	int i;
-
-	for (i = 0; i < numlocks; i++)
-		close(locks[i].fd);
-	numlocks = 0;
 	return TRUE;
 }
