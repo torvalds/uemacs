@@ -331,10 +331,3 @@ extern char *xlat(char *source, char *lookup, char *trans);
 /* lock.c */
 extern int lockchk(char *fname);
 extern int lockrel(void);
-extern int lock(char *fname);
-extern int unlock(char *fname);
-extern void lckerror(char *errstr);
-
-/* pklock.c */
-extern char *dolock(char *fname);
-extern char *undolock(char *fname);
