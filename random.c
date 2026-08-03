@@ -20,7 +20,7 @@ int tabsize;					/* Tab size (0: use real tabs) */
 /*
  * Set fill column to n.
  */
-int setfillcol(int f, int n)
+int cmd_set_fill_column(int f, int n)
 {
 	fillcol = n;
 	mlwrite("(Fill column is %d)", n);
@@ -34,7 +34,7 @@ int setfillcol(int f, int n)
  * column, but the column that would be used on an infinite width display.
  * Normally this is bound to "C-X =".
  */
-int showcpos(int f, int n)
+int cmd_buffer_position(int f, int n)
 {
 	struct line *lp;			/* current line */
 	long numchars;				/* # of chars in file */
@@ -188,7 +188,7 @@ int setccol(int pos)
  * work. This fixes up a very common typo with a single stroke. Normally bound
  * to "C-T". This always works within a line, so "WFEDIT" is good enough.
  */
-int twiddle(int f, int n)
+int cmd_transpose_characters(int f, int n)
 {
 	struct line *dotp;
 	int doto;
@@ -217,7 +217,7 @@ int twiddle(int f, int n)
  * its line splitting meaning. The character is always read, even if it is
  * inserted 0 times, for regularity. Bound to "C-Q"
  */
-int quote(int f, int n)
+int cmd_quote_character(int f, int n)
 {
 	int s;
 	int c;
@@ -245,7 +245,7 @@ int quote(int f, int n)
  * done in this slightly funny way because the tab (in ASCII) has been turned
  * into "C-I" (in 10 bit code) already. Bound to "C-I".
  */
-int insert_tab(int f, int n)
+int cmd_handle_tab(int f, int n)
 {
 	if (n < 0)
 		return FALSE;
@@ -263,7 +263,7 @@ int insert_tab(int f, int n)
  *
  * int f, n;		default flag and numeric repeat count
  */
-int detab(int f, int n)
+int cmd_detab_line(int f, int n)
 {
 	int inc;				/* increment to next line [sgn(n)] */
 
@@ -283,13 +283,13 @@ int detab(int f, int n)
 			/* if we have a tab */
 			if (lgetc(curwp->w_dotp, curwp->w_doto) == '\t') {
 				ldelchar(1, FALSE);
-				insspace(TRUE, (tabmask + 1) - (curwp->w_doto & tabmask));
+				cmd_insert_space(TRUE, (tabmask + 1) - (curwp->w_doto & tabmask));
 			}
-			forwchar(FALSE, 1);
+			cmd_forward_character(FALSE, 1);
 		}
 
 		/* advance/or back to the next line */
-		forwline(TRUE, inc);
+		cmd_next_line(TRUE, inc);
 		n -= inc;
 	}
 	curwp->w_doto = 0;			/* to the begining of the line */
@@ -303,7 +303,7 @@ int detab(int f, int n)
  *
  * int f, n;		default flag and numeric repeat count
  */
-int entab(int f, int n)
+int cmd_entab_line(int f, int n)
 {
 	int inc;				/* increment to next line [sgn(n)] */
 	int fspace;				/* pointer to first space if in a run */
@@ -332,7 +332,7 @@ int entab(int f, int n)
 				else {
 					/* there is a bug here dealing with mixed space/tabed
 					   lines.......it will get fixed                */
-					backchar(TRUE, ccol - fspace);
+					cmd_backward_character(TRUE, ccol - fspace);
 					ldelete((long)(ccol - fspace), FALSE);
 					linsert(1, '\t');
 					fspace = -1;
@@ -358,11 +358,11 @@ int entab(int f, int n)
 				fspace = -1;
 				break;
 			}
-			forwchar(FALSE, 1);
+			cmd_forward_character(FALSE, 1);
 		}
 
 		/* advance/or back to the next line */
-		forwline(TRUE, inc);
+		cmd_next_line(TRUE, inc);
 		n -= inc;
 	}
 	curwp->w_doto = 0;			/* to the begining of the line */
@@ -376,7 +376,7 @@ int entab(int f, int n)
  *
  * int f, n;		default flag and numeric repeat count
  */
-int trim(int f, int n)
+int cmd_trim_line(int f, int n)
 {
 	struct line *lp;			/* current line pointer */
 	int offset;				/* original line offset position */
@@ -405,7 +405,7 @@ int trim(int f, int n)
 		lp->l_used = length;
 
 		/* advance/or back to the next line */
-		forwline(TRUE, inc);
+		cmd_next_line(TRUE, inc);
 		n -= inc;
 	}
 	lchange(WFEDIT);
@@ -418,7 +418,7 @@ int trim(int f, int n)
  * and then back up over them. Everything is done by the subcommand
  * procerssors. They even handle the looping. Normally this is bound to "C-O".
  */
-int openline(int f, int n)
+int cmd_open_line(int f, int n)
 {
 	int i;
 	int s;
@@ -434,7 +434,7 @@ int openline(int f, int n)
 		s = lnewline();
 	} while (s == TRUE && --i);
 	if (s == TRUE)				/* Then back up overtop */
-		s = backchar(f, n);		/* of them all.         */
+		s = cmd_backward_character(f, n);		/* of them all.         */
 	return s;
 }
 
@@ -442,7 +442,7 @@ int openline(int f, int n)
  * Insert a newline. Bound to "C-M". If we are in CMODE, do automatic
  * indentation as specified.
  */
-int insert_newline(int f, int n)
+int cmd_newline(int f, int n)
 {
 	int s;
 
@@ -505,7 +505,7 @@ int cinsert(void)
 
 	/* and one more tab for a brace */
 	if (bracef)
-		insert_tab(FALSE, 1);
+		cmd_handle_tab(FALSE, 1);
 
 	return TRUE;
 }
@@ -553,7 +553,7 @@ int insbrace(int n, int c)
 	oldoff = curwp->w_doto;
 
 	count = 1;
-	backchar(FALSE, 1);
+	cmd_backward_character(FALSE, 1);
 
 	while (count > 0) {
 		if (curwp->w_doto == llength(curwp->w_dotp))
@@ -566,7 +566,7 @@ int insbrace(int n, int c)
 		if (ch == oc)
 			--count;
 
-		backchar(FALSE, 1);
+		cmd_backward_character(FALSE, 1);
 		if (boundry(curwp->w_dotp, curwp->w_doto, REVERSE))
 			break;
 	}
@@ -580,7 +580,7 @@ int insbrace(int n, int c)
 	curwp->w_doto = 0;			/* debut de ligne */
 	/* aller au debut de la ligne apres la tabulation */
 	while ((ch = lgetc(curwp->w_dotp, curwp->w_doto)) == ' ' || ch == '\t')
-		forwchar(FALSE, 1);
+		cmd_forward_character(FALSE, 1);
 
 	/* delete back first */
 	target = getccol(FALSE);		/* c'est l'indent que l'on doit avoir */
@@ -590,7 +590,7 @@ int insbrace(int n, int c)
 	while (target != getccol(FALSE)) {
 		if (target < getccol(FALSE))	/* on doit detruire des caracteres */
 			while (getccol(FALSE) > target)
-				backdel(FALSE, 1);
+				cmd_delete_previous_character(FALSE, 1);
 		else {				/* on doit en inserer */
 			while (target - getccol(FALSE) >= 8)
 				linsert(1, '\t');
@@ -620,7 +620,7 @@ int inspound(void)
 
 	/* delete back first */
 	while (getccol(FALSE) >= 1)
-		backdel(FALSE, 1);
+		cmd_delete_previous_character(FALSE, 1);
 
 	/* and insert the required pound */
 	return linsert(1, '#');
@@ -634,7 +634,7 @@ int inspound(void)
  * the line. Normally this command is bound to "C-X C-O". Any argument is
  * ignored.
  */
-int deblank(int f, int n)
+int cmd_delete_blank_lines(int f, int n)
 {
 	struct line *lp1;
 	struct line *lp2;
@@ -664,7 +664,7 @@ int deblank(int f, int n)
  * of tabs and spaces. Return TRUE if all ok. Return FALSE if one of the
  * subcomands failed. Normally bound to "C-J".
  */
-int indent(int f, int n)
+int cmd_newline_and_indent(int f, int n)
 {
 	int nicol;
 	int c;
@@ -697,12 +697,12 @@ int indent(int f, int n)
  * If any argument is present, it kills rather than deletes, to prevent loss
  * of text if typed with a big argument. Normally bound to "C-D".
  */
-int forwdel(int f, int n)
+int cmd_delete_next_character(int f, int n)
 {
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
 	if (n < 0)
-		return backdel(f, -n);
+		return cmd_delete_previous_character(f, -n);
 	if (f != FALSE) {			/* Really a kill.       */
 		if ((lastflag & CFKILL) == 0)
 			kdelete();
@@ -717,20 +717,20 @@ int forwdel(int f, int n)
  * forward, this actually does a kill if presented with an argument. Bound to
  * both "RUBOUT" and "C-H".
  */
-int backdel(int f, int n)
+int cmd_delete_previous_character(int f, int n)
 {
 	int s;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
 	if (n < 0)
-		return forwdel(f, -n);
+		return cmd_delete_next_character(f, -n);
 	if (f != FALSE) {			/* Really a kill.       */
 		if ((lastflag & CFKILL) == 0)
 			kdelete();
 		thisflag |= CFKILL;
 	}
-	if ((s = backchar(f, n)) == TRUE)
+	if ((s = cmd_backward_character(f, n)) == TRUE)
 		s = ldelchar(n, f);
 	return s;
 }
@@ -743,7 +743,7 @@ int backdel(int f, int n)
  * number of newlines. If called with a negative argument it kills backwards
  * that number of newlines. Normally bound to "C-K".
  */
-int killtext(int f, int n)
+int cmd_kill_to_end_of_line(int f, int n)
 {
 	struct line *nextp;
 	long chunk;
@@ -781,7 +781,7 @@ int killtext(int f, int n)
  *
  * int f, n;		default and argument
  */
-int setemode(int f, int n)
+int cmd_add_mode(int f, int n)
 {
 	return adjustmode(TRUE, FALSE);
 }
@@ -791,7 +791,7 @@ int setemode(int f, int n)
  *
  * int f, n;		default and argument
  */
-int delmode(int f, int n)
+int cmd_delete_mode(int f, int n)
 {
 	return adjustmode(FALSE, FALSE);
 }
@@ -801,7 +801,7 @@ int delmode(int f, int n)
  *
  * int f, n;		default and argument
  */
-int setgmode(int f, int n)
+int cmd_add_global_mode(int f, int n)
 {
 	return adjustmode(TRUE, TRUE);
 }
@@ -811,7 +811,7 @@ int setgmode(int f, int n)
  *
  * int f, n;		default and argument
  */
-int delgmode(int f, int n)
+int cmd_delete_global_mode(int f, int n)
 {
 	return adjustmode(FALSE, TRUE);
 }
@@ -888,7 +888,7 @@ int adjustmode(int kind, int global)
  *
  * int f, n;		arguments ignored
  */
-int clrmes(int f, int n)
+int cmd_clear_message_line(int f, int n)
 {
 	mlforce("");
 	return TRUE;
@@ -900,7 +900,7 @@ int clrmes(int f, int n)
  *
  * int f, n;		arguments ignored
  */
-int writemsg(int f, int n)
+int cmd_write_message(int f, int n)
 {
 	int status;
 	char buf[NPAT];				/* buffer to recieve message into */
@@ -918,7 +918,7 @@ int writemsg(int f, int n)
  *
  * int f, n;		not used
  */
-int getfence(int f, int n)
+int cmd_goto_matching_fence(int f, int n)
 {
 	struct line *oldlp;			/* original line pointer */
 	int oldoff;				/* and offset */
@@ -972,9 +972,9 @@ int getfence(int f, int n)
 	/* set up for scan */
 	count = 1;
 	if (sdir == REVERSE)
-		backchar(FALSE, 1);
+		cmd_backward_character(FALSE, 1);
 	else
-		forwchar(FALSE, 1);
+		cmd_forward_character(FALSE, 1);
 
 	/* scan until we find it, or reach the end of file */
 	while (count > 0) {
@@ -987,9 +987,9 @@ int getfence(int f, int n)
 		if (c == ofence)
 			--count;
 		if (sdir == FORWARD)
-			forwchar(FALSE, 1);
+			cmd_forward_character(FALSE, 1);
 		else
-			backchar(FALSE, 1);
+			cmd_backward_character(FALSE, 1);
 		if (boundry(curwp->w_dotp, curwp->w_doto, sdir))
 			break;
 	}
@@ -997,9 +997,9 @@ int getfence(int f, int n)
 	/* if count is zero, we have a match, move the sucker */
 	if (count == 0) {
 		if (sdir == FORWARD)
-			backchar(FALSE, 1);
+			cmd_backward_character(FALSE, 1);
 		else
-			forwchar(FALSE, 1);
+			cmd_forward_character(FALSE, 1);
 		curwp->w_flag |= WFMOVE;
 		return TRUE;
 	}
@@ -1044,7 +1044,7 @@ int fmatch(int ch)
 	/* find the top line and set up for scan */
 	toplp = curwp->w_linep->l_bp;
 	count = 1;
-	backchar(FALSE, 2);
+	cmd_backward_character(FALSE, 2);
 
 	/* scan back until we find it, or reach past the top of the window */
 	while (count > 0 && curwp->w_dotp != toplp) {
@@ -1056,14 +1056,14 @@ int fmatch(int ch)
 			++count;
 		if (c == opench)
 			--count;
-		backchar(FALSE, 1);
+		cmd_backward_character(FALSE, 1);
 		if (curwp->w_dotp == curwp->w_bufp->b_linep->l_fp && curwp->w_doto == 0)
 			break;
 	}
 
 	/* if count is zero, we have a match, display the sucker */
 	if (count == 0) {
-		forwchar(FALSE, 1);
+		cmd_forward_character(FALSE, 1);
 		update();
 		ttpause();
 	}
@@ -1080,7 +1080,7 @@ int fmatch(int ch)
  *
  * int f, n;		ignored arguments
  */
-int istring(int f, int n)
+int cmd_insert_string(int f, int n)
 {
 	int status;				/* status return code */
 	char tstring[NPAT + 1];			/* string to add */
@@ -1107,7 +1107,7 @@ int istring(int f, int n)
  *
  * int f, n;		ignored arguments
  */
-int ovstring(int f, int n)
+int cmd_overwrite_string(int f, int n)
 {
 	int status;				/* status return code */
 	char tstring[NPAT + 1];			/* string to add */

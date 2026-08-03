@@ -329,7 +329,7 @@ static char *getkill(void)
  * int f;		default flag
  * int n;		numeric arg (can overide prompted value)
  */
-int setvar(int f, int n)
+int cmd_set(int f, int n)
 {
 	int status;				/* status return */
 	struct variable_description vd;		/* variable num/type */
@@ -468,20 +468,20 @@ int svar(struct variable_description *var, char *value)
 			fillcol = atoi(value);
 			break;
 		case EVPAGELEN:
-			status = newsize(TRUE, atoi(value));
+			status = cmd_change_screen_size(TRUE, atoi(value));
 			break;
 		case EVCURCOL:
 			status = setccol(atoi(value));
 			break;
 		case EVCURLINE:
-			status = gotoline(TRUE, atoi(value));
+			status = cmd_goto_line(TRUE, atoi(value));
 			break;
 		case EVRAM:
 			break;
 		case EVFLICKER:
 			break;
 		case EVCURWIDTH:
-			status = newwidth(TRUE, atoi(value));
+			status = cmd_change_screen_width(TRUE, atoi(value));
 			break;
 		case EVCBUFNAME:
 			strcpy(curbp->b_bname, value);
@@ -515,7 +515,7 @@ int svar(struct variable_description *var, char *value)
 				lnewline();
 			else
 				linsert(1, c);
-			backchar(FALSE, 1);
+			cmd_backward_character(FALSE, 1);
 			break;
 		case EVDISCMD:
 			discmd = stol(value);

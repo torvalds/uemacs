@@ -293,7 +293,7 @@ static void paint_window(struct window *wp, bool check)
  * The update-screen command: repaint whatever is on the screen, whether
  * anything is thought to have changed or not.
  */
-int update_screen(int f, int n)
+int cmd_update_screen(int f, int n)
 {
 	update_now();
 	return TRUE;
@@ -882,9 +882,9 @@ void checkwinsize(void)
 
 	chg_width = chg_height = 0;
 	if (h - 1 < term.t_mrow)
-		newsize(TRUE, h);
+		cmd_change_screen_size(TRUE, h);
 	if (w < term.t_mcol)
-		newwidth(TRUE, w);
+		cmd_change_screen_width(TRUE, w);
 
 	update_now();
 }

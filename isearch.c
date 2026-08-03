@@ -45,7 +45,7 @@ static int cmd_reexecute = -1;			/* > 0 if re-executing command */
  * Subroutine to do incremental reverse search.  It actually uses the
  * same code as the normal incremental search, as both can go both ways.
  */
-int risearch(int f, int n)
+int cmd_reverse_incremental_search(int f, int n)
 {
 	struct line *curline;			/* Current line on entry              */
 	int curoff;				/* Current offset on entry            */
@@ -57,7 +57,7 @@ int risearch(int f, int n)
 
 	/* Make sure the search doesn't match where we already are:               */
 
-	backchar(TRUE, 1);			/* Back up a character                */
+	cmd_backward_character(TRUE, 1);			/* Back up a character                */
 
 	if (!(isearch(f, -n))) {		/* Call ISearch backwards       *//* If error in search:                */
 		curwp->w_dotp = curline;	/* Reset the line pointer             */
@@ -75,7 +75,7 @@ int risearch(int f, int n)
 /*
  * Again, but for the forward direction
  */
-int fisearch(int f, int n)
+int cmd_incremental_search(int f, int n)
 {
 	struct line *curline;			/* Current line on entry              */
 	int curoff;				/* Current offset on entry            */
@@ -169,7 +169,7 @@ int isearch(int f, int n)
 			col = echo_char(pat[cpos], col);	/*  and re-echo the string    */
 		if (c == IS_REVERSE) {		/* forward search?            */
 			n = -1;			/* No, search in reverse      */
-			backchar(TRUE, 1);	/* Be defensive about EOB     */
+			cmd_backward_character(TRUE, 1);	/* Be defensive about EOB     */
 		} else
 			n = 1;			/* Yes, search forward        */
 		status = scanmore(pat, n);	/* Do the search              */

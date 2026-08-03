@@ -17,7 +17,7 @@
 /*
  * Execute a named command even if it is not bound.
  */
-int namedcmd(int f, int n)
+int cmd_execute_named_command(int f, int n)
 {
 	fn_t kfunc;				/* ptr to the requexted function to bind to */
 
@@ -42,7 +42,7 @@ int namedcmd(int f, int n)
  *
  * int f, n;		default Flag and Numeric argument
  */
-int execcmd(int f, int n)
+int cmd_execute_command_line(int f, int n)
 {
 	int status;				/* status return */
 	char cmdstr[NSTRING];			/* string holding command to execute */
@@ -249,7 +249,7 @@ int nextarg(char *prompt, char *buffer, int size, int terminator)
  * int f;		default flag
  * int n;		macro number to use
  */
-int storemac(int f, int n)
+int cmd_store_macro(int f, int n)
 {
 	struct buffer *bp;			/* pointer to macro buffer */
 	char bname[NBUFN];			/* name of buffer to use */
@@ -294,7 +294,7 @@ int storemac(int f, int n)
  * int f;		default flag
  * int n;		macro number to use
  */
-int storeproc(int f, int n)
+int cmd_store_procedure(int f, int n)
 {
 	struct buffer *bp;			/* pointer to macro buffer */
 	int status;				/* return status */
@@ -302,7 +302,7 @@ int storeproc(int f, int n)
 
 	/* a numeric argument means its a numbered macro */
 	if (f == TRUE)
-		return storemac(f, n);
+		return cmd_store_macro(f, n);
 
 	/* get the name of the procedure */
 	if ((status = mlreply("Procedure name: ", &bname[1], NBUFN - 2)) != TRUE)
@@ -333,7 +333,7 @@ int storeproc(int f, int n)
  *
  * int f, n;		default flag and numeric arg
  */
-int execproc(int f, int n)
+int cmd_execute_procedure(int f, int n)
 {
 	struct buffer *bp;			/* ptr to buffer to execute */
 	int status;				/* status return */
@@ -366,7 +366,7 @@ int execproc(int f, int n)
  *
  * int f, n;		default flag and numeric arg
  */
-int execbuf(int f, int n)
+int cmd_execute_buffer(int f, int n)
 {
 	struct buffer *bp;			/* ptr to buffer to execute */
 	int status;				/* status return */
@@ -769,7 +769,7 @@ void freewhile(struct while_block *wp)
  *
  * int f, n;		default flag and numeric arg to pass on to file
  */
-int execfile(int f, int n)
+int cmd_execute_file(int f, int n)
 {
 	int status;				/* return status of name query */
 	char fname[NSTRING];			/* name of file to execute */
@@ -862,202 +862,202 @@ int cbuf(int f, int n, int bufnum)
 	return TRUE;
 }
 
-int cbuf1(int f, int n)
+int cmd_execute_macro_1(int f, int n)
 {
 	return cbuf(f, n, 1);
 }
 
-int cbuf2(int f, int n)
+int cmd_execute_macro_2(int f, int n)
 {
 	return cbuf(f, n, 2);
 }
 
-int cbuf3(int f, int n)
+int cmd_execute_macro_3(int f, int n)
 {
 	return cbuf(f, n, 3);
 }
 
-int cbuf4(int f, int n)
+int cmd_execute_macro_4(int f, int n)
 {
 	return cbuf(f, n, 4);
 }
 
-int cbuf5(int f, int n)
+int cmd_execute_macro_5(int f, int n)
 {
 	return cbuf(f, n, 5);
 }
 
-int cbuf6(int f, int n)
+int cmd_execute_macro_6(int f, int n)
 {
 	return cbuf(f, n, 6);
 }
 
-int cbuf7(int f, int n)
+int cmd_execute_macro_7(int f, int n)
 {
 	return cbuf(f, n, 7);
 }
 
-int cbuf8(int f, int n)
+int cmd_execute_macro_8(int f, int n)
 {
 	return cbuf(f, n, 8);
 }
 
-int cbuf9(int f, int n)
+int cmd_execute_macro_9(int f, int n)
 {
 	return cbuf(f, n, 9);
 }
 
-int cbuf10(int f, int n)
+int cmd_execute_macro_10(int f, int n)
 {
 	return cbuf(f, n, 10);
 }
 
-int cbuf11(int f, int n)
+int cmd_execute_macro_11(int f, int n)
 {
 	return cbuf(f, n, 11);
 }
 
-int cbuf12(int f, int n)
+int cmd_execute_macro_12(int f, int n)
 {
 	return cbuf(f, n, 12);
 }
 
-int cbuf13(int f, int n)
+int cmd_execute_macro_13(int f, int n)
 {
 	return cbuf(f, n, 13);
 }
 
-int cbuf14(int f, int n)
+int cmd_execute_macro_14(int f, int n)
 {
 	return cbuf(f, n, 14);
 }
 
-int cbuf15(int f, int n)
+int cmd_execute_macro_15(int f, int n)
 {
 	return cbuf(f, n, 15);
 }
 
-int cbuf16(int f, int n)
+int cmd_execute_macro_16(int f, int n)
 {
 	return cbuf(f, n, 16);
 }
 
-int cbuf17(int f, int n)
+int cmd_execute_macro_17(int f, int n)
 {
 	return cbuf(f, n, 17);
 }
 
-int cbuf18(int f, int n)
+int cmd_execute_macro_18(int f, int n)
 {
 	return cbuf(f, n, 18);
 }
 
-int cbuf19(int f, int n)
+int cmd_execute_macro_19(int f, int n)
 {
 	return cbuf(f, n, 19);
 }
 
-int cbuf20(int f, int n)
+int cmd_execute_macro_20(int f, int n)
 {
 	return cbuf(f, n, 20);
 }
 
-int cbuf21(int f, int n)
+int cmd_execute_macro_21(int f, int n)
 {
 	return cbuf(f, n, 21);
 }
 
-int cbuf22(int f, int n)
+int cmd_execute_macro_22(int f, int n)
 {
 	return cbuf(f, n, 22);
 }
 
-int cbuf23(int f, int n)
+int cmd_execute_macro_23(int f, int n)
 {
 	return cbuf(f, n, 23);
 }
 
-int cbuf24(int f, int n)
+int cmd_execute_macro_24(int f, int n)
 {
 	return cbuf(f, n, 24);
 }
 
-int cbuf25(int f, int n)
+int cmd_execute_macro_25(int f, int n)
 {
 	return cbuf(f, n, 25);
 }
 
-int cbuf26(int f, int n)
+int cmd_execute_macro_26(int f, int n)
 {
 	return cbuf(f, n, 26);
 }
 
-int cbuf27(int f, int n)
+int cmd_execute_macro_27(int f, int n)
 {
 	return cbuf(f, n, 27);
 }
 
-int cbuf28(int f, int n)
+int cmd_execute_macro_28(int f, int n)
 {
 	return cbuf(f, n, 28);
 }
 
-int cbuf29(int f, int n)
+int cmd_execute_macro_29(int f, int n)
 {
 	return cbuf(f, n, 29);
 }
 
-int cbuf30(int f, int n)
+int cmd_execute_macro_30(int f, int n)
 {
 	return cbuf(f, n, 30);
 }
 
-int cbuf31(int f, int n)
+int cmd_execute_macro_31(int f, int n)
 {
 	return cbuf(f, n, 31);
 }
 
-int cbuf32(int f, int n)
+int cmd_execute_macro_32(int f, int n)
 {
 	return cbuf(f, n, 32);
 }
 
-int cbuf33(int f, int n)
+int cmd_execute_macro_33(int f, int n)
 {
 	return cbuf(f, n, 33);
 }
 
-int cbuf34(int f, int n)
+int cmd_execute_macro_34(int f, int n)
 {
 	return cbuf(f, n, 34);
 }
 
-int cbuf35(int f, int n)
+int cmd_execute_macro_35(int f, int n)
 {
 	return cbuf(f, n, 35);
 }
 
-int cbuf36(int f, int n)
+int cmd_execute_macro_36(int f, int n)
 {
 	return cbuf(f, n, 36);
 }
 
-int cbuf37(int f, int n)
+int cmd_execute_macro_37(int f, int n)
 {
 	return cbuf(f, n, 37);
 }
 
-int cbuf38(int f, int n)
+int cmd_execute_macro_38(int f, int n)
 {
 	return cbuf(f, n, 38);
 }
 
-int cbuf39(int f, int n)
+int cmd_execute_macro_39(int f, int n)
 {
 	return cbuf(f, n, 39);
 }
 
-int cbuf40(int f, int n)
+int cmd_execute_macro_40(int f, int n)
 {
 	return cbuf(f, n, 40);
 }

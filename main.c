@@ -90,11 +90,11 @@ int spellcheck(const char *word)
 	return Hunspell_spell(hunhandle, word);
 }
 
-static void local_dictionary(Hunhandle *handle, const char *filename)
+static void local_dictionary(Hunhandle *handle, const char *cmd_change_file_name)
 {
 	struct stat st;
-	if (!stat(filename, &st) && S_ISREG(st.st_mode))
-		Hunspell_add_dic(handle, filename);
+	if (!stat(cmd_change_file_name, &st) && S_ISREG(st.st_mode))
+		Hunspell_add_dic(handle, cmd_change_file_name);
 }
 
 int main(int argc, char **argv)
@@ -264,12 +264,12 @@ int main(int argc, char **argv)
 		update();
 		mlwrite("(Can not search and goto at the same time!)");
 	} else if (gotoflag) {
-		if (gotoline(TRUE, gline) == FALSE) {
+		if (cmd_goto_line(TRUE, gline) == FALSE) {
 			update();
 			mlwrite("(Bogus goto argument)");
 		}
 	} else if (searchflag) {
-		if (forwhunt(FALSE, 0) == FALSE)
+		if (cmd_hunt_forward(FALSE, 0) == FALSE)
 			update();
 	}
 
@@ -462,8 +462,8 @@ int execute(int c, int f, int n)
 		if (curbp->b_mode & MDASAVE)
 			if (--gacount == 0) {
 				/* and save the file if needed */
-				update_screen(FALSE, 0);
-				filesave(FALSE, 0);
+				cmd_update_screen(FALSE, 0);
+				cmd_save_file(FALSE, 0);
 				gacount = gasave;
 			}
 
@@ -480,7 +480,7 @@ int execute(int c, int f, int n)
  * Fancy quit command, as implemented by Norm. If the any buffer has
  * changed do a write on that buffer and exit emacs, otherwise simply exit.
  */
-int quickexit(int f, int n)
+int cmd_quick_exit(int f, int n)
 {
 	struct buffer *bp;			/* scanning pointer to buffers */
 	struct buffer *oldcb;			/* original current buffer */
@@ -495,28 +495,28 @@ int quickexit(int f, int n)
 		    && (bp->b_flag & BFINVS) == 0) {	/* Real.                */
 			curbp = bp;		/* make that buffer cur */
 			mlwrite("(Saving %s)", bp->b_fname);
-			if ((status = filesave(f, n)) != TRUE) {
+			if ((status = cmd_save_file(f, n)) != TRUE) {
 				curbp = oldcb;	/* restore curbp */
 				return status;
 			}
 		}
 		bp = bp->b_bufp;		/* on to the next buffer */
 	}
-	quit(f, n);				/* conditionally quit   */
+	cmd_exit_emacs(f, n);				/* conditionally quit   */
 	return TRUE;
 }
 
 static void emergencyexit(int signr)
 {
-	quickexit(FALSE, 0);
-	quit(TRUE, 0);
+	cmd_quick_exit(FALSE, 0);
+	cmd_exit_emacs(TRUE, 0);
 }
 
 /*
  * Quit command. If an argument, always quit. Otherwise confirm if a buffer
  * has been changed and not written out. Normally bound to "C-X C-C".
  */
-int quit(int f, int n)
+int cmd_exit_emacs(int f, int n)
 {
 	int s;
 
@@ -539,7 +539,7 @@ int quit(int f, int n)
  * Error if not at the top level in keyboard processing. Set up variables and
  * return.
  */
-int ctlxlp(int f, int n)
+int cmd_begin_macro(int f, int n)
 {
 	if (kbdmode != STOP) {
 		mlwrite("%%Macro already active");
@@ -556,7 +556,7 @@ int ctlxlp(int f, int n)
  * End keyboard macro. Check for the same limit conditions as the above
  * routine. Set up the variables and return to the caller.
  */
-int ctlxrp(int f, int n)
+int cmd_end_macro(int f, int n)
 {
 	if (kbdmode == STOP) {
 		mlwrite("%%Macro not active");
@@ -574,7 +574,7 @@ int ctlxrp(int f, int n)
  * The command argument is the number of times to loop. Quit as soon as a
  * command gets an error. Return TRUE if all ok, else FALSE.
  */
-int ctlxe(int f, int n)
+int cmd_execute_macro(int f, int n)
 {
 	if (kbdmode != STOP) {
 		mlwrite("%%Macro already active");
@@ -593,7 +593,7 @@ int ctlxe(int f, int n)
  * Beep the beeper. Kill off any keyboard macro, etc., that is in progress.
  * Sometimes called as a routine, to do general aborting of stuff.
  */
-int ctrlg(int f, int n)
+int cmd_abort_command(int f, int n)
 {
 	tcapbeep();
 	kbdmode = STOP;
@@ -620,25 +620,25 @@ int resterr(void)
 }
 
 /* user function that does NOTHING */
-int nullproc(int f, int n)
+int cmd_nop(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to meta prefix */
-int metafn(int f, int n)
+int cmd_meta_prefix(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to control-x prefix */
-int cex(int f, int n)
+int cmd_ctlx_prefix(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to universal-argument */
-int unarg(int f, int n)
+int cmd_universal_argument(int f, int n)
 {
 	return TRUE;
 }

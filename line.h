@@ -27,7 +27,7 @@ struct line {
 
 extern void lfree(struct line *lp);
 extern void lchange(int flag);
-extern int insspace(int f, int n);
+extern int cmd_insert_space(int f, int n);
 extern int linstr(char *instr);
 extern int linsert(int n, int c);
 extern int lowrite(int c);
@@ -41,7 +41,7 @@ extern int putctext(char *iline);
 extern int ldelnewline(void);
 extern void kdelete(void);
 extern int kinsert(int c);
-extern int yank(int f, int n);
+extern int cmd_yank(int f, int n);
 extern struct line *lalloc(int);		/* Allocate a line. */
 
 #endif				/* LINE_H_ */

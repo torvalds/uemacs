@@ -19,7 +19,7 @@
  * bottom. If it is 0 the window is centered (this is what the standard
  * redisplay code does). With no argument it defaults to 0. Bound to M-!.
  */
-int reposition(int f, int n)
+int cmd_redraw_display(int f, int n)
 {
 	if (f == FALSE)				/* default to 0 to center screen */
 		n = 0;
@@ -32,7 +32,7 @@ int reposition(int f, int n)
  * Refresh the screen. With no argument, it just does the refresh. With an
  * argument it recenters "." in the current window. Bound to "C-L".
  */
-int redraw(int f, int n)
+int cmd_clear_and_redraw(int f, int n)
 {
 	if (f == FALSE)
 		sgarbf = TRUE;
@@ -50,7 +50,7 @@ int redraw(int f, int n)
  * int f;	default flag
  * int n;	numeric argument
  */
-int newsize(int f, int n)
+int cmd_change_screen_size(int f, int n)
 {
 	struct window *wp;			/* current window being examined */
 
@@ -83,7 +83,7 @@ int newsize(int f, int n)
  * int f;		default flag
  * int n;		numeric argument
  */
-int newwidth(int f, int n)
+int cmd_change_screen_width(int f, int n)
 {
 	/* if the command defaults, assume the largest */
 	if (f == FALSE)

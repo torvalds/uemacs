@@ -20,7 +20,7 @@
  * Move "." to the start, and kill the characters.
  * Bound to "C-W".
  */
-int killregion(int f, int n)
+int cmd_kill_region(int f, int n)
 {
 	int s;
 	struct region region;
@@ -43,7 +43,7 @@ int killregion(int f, int n)
  * at all. This is a bit like a kill region followed
  * by a yank. Bound to "M-W".
  */
-int copyregion(int f, int n)
+int cmd_copy_region(int f, int n)
 {
 	struct line *linep;
 	int loffs;
@@ -81,7 +81,7 @@ int copyregion(int f, int n)
  * redisplay is done in all buffers. Bound to
  * "C-X C-L".
  */
-int lowerregion(int f, int n)
+int cmd_case_region_lower(int f, int n)
 {
 	struct line *linep;
 	int loffs;
@@ -118,7 +118,7 @@ int lowerregion(int f, int n)
  * redisplay is done in all buffers. Bound to
  * "C-X C-L".
  */
-int upperregion(int f, int n)
+int cmd_case_region_upper(int f, int n)
 {
 	struct line *linep;
 	int loffs;

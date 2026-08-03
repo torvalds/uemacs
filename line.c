@@ -116,10 +116,10 @@ void lchange(int flag)
  *
  * int f, n;		default flag and numeric argument
  */
-int insspace(int f, int n)
+int cmd_insert_space(int f, int n)
 {
 	linsert(n, ' ');
-	backchar(f, n);
+	cmd_backward_character(f, n);
 	return TRUE;
 }
 
@@ -454,14 +454,14 @@ int putctext(char *iline)
 
 	/* delete the current line */
 	curwp->w_doto = 0;			/* starting at the beginning of the line */
-	if ((status = killtext(TRUE, 1)) != TRUE)
+	if ((status = cmd_kill_to_end_of_line(TRUE, 1)) != TRUE)
 		return status;
 
 	/* insert the new line */
 	if ((status = linstr(iline)) != TRUE)
 		return status;
 	status = lnewline();
-	backline(TRUE, 1);
+	cmd_previous_line(TRUE, 1);
 	return status;
 }
 
@@ -605,7 +605,7 @@ int kinsert(int c)
  * is done by the standard insert routines. All you do is run the loop, and
  * check for errors. Bound to "C-Y".
  */
-int yank(int f, int n)
+int cmd_yank(int f, int n)
 {
 	int c;
 	int i;

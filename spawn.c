@@ -20,7 +20,7 @@
  * repaint. Bound to "^X C". The message at the start in VMS puts out a newline.
  * Under some (unknown) condition, you don't get one free when DCL starts up.
  */
-int spawncli(int f, int n)
+int cmd_interactive_shell(int f, int n)
 {
 	char *cp;
 
@@ -43,7 +43,7 @@ int spawncli(int f, int n)
 	return TRUE;
 }
 
-int bktoshell(int f, int n)
+int cmd_suspend_emacs(int f, int n)
 {						/* suspend MicroEMACS and wait to wake up */
 	display_close();
 /******************************
@@ -68,7 +68,7 @@ void rtfrmshell(void)
  * character to be typed, then mark the screen as garbage so a full repaint is
  * done. Bound to "C-X !".
  */
-int spawn(int f, int n)
+int cmd_shell_command(int f, int n)
 {
 	int s;
 	char line[NLINE];
@@ -103,7 +103,7 @@ int spawn(int f, int n)
  * done. Bound to "C-X $".
  */
 
-int execprg(int f, int n)
+int cmd_execute_program(int f, int n)
 {
 	int s;
 	char line[NLINE];
@@ -132,7 +132,7 @@ int execprg(int f, int n)
  * filter a buffer through an external DOS program
  * Bound to ^X #
  */
-int filter_buffer(int f, int n)
+int cmd_filter_buffer(int f, int n)
 {
 	int s;					/* return status from CLI */
 	struct buffer *bp;			/* pointer to buffer to zot */

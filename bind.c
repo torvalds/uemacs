@@ -16,7 +16,7 @@
 #include "line.h"
 #include "util.h"
 
-int deskey(int f, int n)
+int cmd_describe_key(int f, int n)
 {						/* describe the command for a certain key */
 	int c;					/* key to describe */
 	char *ptr;				/* string pointer to scan output strings */
@@ -48,7 +48,7 @@ int deskey(int f, int n)
  *
  * int f, n;		command arguments [IGNORED]
  */
-int bindtokey(int f, int n)
+int cmd_bind_to_key(int f, int n)
 {
 	unsigned int c;				/* command key to bind */
 	fn_t kfunc;				/* ptr to the requested function to bind to */
@@ -68,7 +68,7 @@ int bindtokey(int f, int n)
 	ostring(" ");
 
 	/* get the command sequence to bind */
-	c = getckey((kfunc == metafn) || (kfunc == cex) || (kfunc == unarg) || (kfunc == ctrlg));
+	c = getckey((kfunc == cmd_meta_prefix) || (kfunc == cmd_ctlx_prefix) || (kfunc == cmd_universal_argument) || (kfunc == cmd_abort_command));
 
 	/* change it to something we can print as well */
 	cmdstr(c, &outseq[0]);
@@ -77,7 +77,7 @@ int bindtokey(int f, int n)
 	ostring(outseq);
 
 	/* if the function is a prefix key */
-	if (kfunc == metafn || kfunc == cex || kfunc == unarg || kfunc == ctrlg) {
+	if (kfunc == cmd_meta_prefix || kfunc == cmd_ctlx_prefix || kfunc == cmd_universal_argument || kfunc == cmd_abort_command) {
 
 		/* search for an existing binding for the prefix key */
 		ktp = &keytab[0];
@@ -89,13 +89,13 @@ int bindtokey(int f, int n)
 		}
 
 		/* reset the appropriate global prefix variable */
-		if (kfunc == metafn)
+		if (kfunc == cmd_meta_prefix)
 			metac = c;
-		if (kfunc == cex)
+		if (kfunc == cmd_ctlx_prefix)
 			ctlxc = c;
-		if (kfunc == unarg)
+		if (kfunc == cmd_universal_argument)
 			reptc = c;
-		if (kfunc == ctrlg)
+		if (kfunc == cmd_abort_command)
 			abortc = c;
 	}
 
@@ -134,7 +134,7 @@ int bindtokey(int f, int n)
  *
  * int f, n;		command arguments [IGNORED]
  */
-int unbindkey(int f, int n)
+int cmd_unbind_key(int f, int n)
 {
 	int c;					/* command key to unbind */
 	char outseq[80];			/* output buffer for keystroke sequence */

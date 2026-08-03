@@ -125,7 +125,7 @@ fn_t getname(void)
 			return fncmatch(&buf[0]);
 
 		} else if (c == ectoc(abortc)) {	/* Bell, abort */
-			ctrlg(FALSE, 0);
+			cmd_abort_command(FALSE, 0);
 			ttflush();
 			return NULL;
 
@@ -435,7 +435,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 
 		if (c == ectoc(abortc) && quotef == FALSE) {
 			/* Abort the input? */
-			ctrlg(FALSE, 0);
+			cmd_abort_command(FALSE, 0);
 			ttflush();
 			return ABORT;
 		} else if ((c == 0x7F || c == 0x08) && quotef == FALSE) {

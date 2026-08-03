@@ -78,7 +78,7 @@ int file_changed(struct buffer *bp, char *fn)
  * "read a file into the current buffer" code.
  * Bound to "C-X C-R".
  */
-int fileread(int f, int n)
+int cmd_read_file(int f, int n)
 {
 	int s;
 	char fname[NFILEN];
@@ -97,7 +97,7 @@ int fileread(int f, int n)
  * "insert a file into the current buffer" code.
  * Bound to "C-X C-I".
  */
-int insfile(int f, int n)
+int cmd_insert_file(int f, int n)
 {
 	int s;
 	char fname[NFILEN];
@@ -110,7 +110,7 @@ int insfile(int f, int n)
 		return s;
 	if ((s = ifile(fname)) != TRUE)
 		return s;
-	return reposition(TRUE, -1);
+	return cmd_redraw_display(TRUE, -1);
 }
 
 /*
@@ -122,7 +122,7 @@ int insfile(int f, int n)
  * text, and switch to the new buffer.
  * Bound to C-X C-F.
  */
-int filefind(int f, int n)
+int cmd_find_file(int f, int n)
 {
 	char fname[NFILEN];			/* file user wishes to find */
 	int s;					/* status return */
@@ -134,7 +134,7 @@ int filefind(int f, int n)
 	return getfile(fname, TRUE);
 }
 
-int viewfile(int f, int n)
+int cmd_view_file(int f, int n)
 {						/* visit a file in VIEW mode */
 	char fname[NFILEN];			/* file user wishes to find */
 	int s;					/* status return */
@@ -368,7 +368,7 @@ void unqname(char *name)
  * is more compatable with Gosling EMACS than
  * with ITS EMACS. Bound to "C-X C-W".
  */
-int filewrite(int f, int n)
+int cmd_write_file(int f, int n)
 {
 	struct window *wp;
 	int s;
@@ -397,7 +397,7 @@ int filewrite(int f, int n)
  * name for the buffer. Bound to "C-X C-S". May
  * get called by "C-Z".
  */
-int filesave(int f, int n)
+int cmd_save_file(int f, int n)
 {
 	int s;
 
@@ -484,7 +484,7 @@ int writeout(char *fn)
  * as needing an update. You can type a blank line at the
  * prompt if you wish.
  */
-int filename(int f, int n)
+int cmd_change_file_name(int f, int n)
 {
 	int s;
 	char fname[NFILEN];

@@ -22,7 +22,7 @@
  * if the use count is 0. Otherwise, they come
  * from some other window.
  */
-int usebuffer(int f, int n)
+int cmd_select_buffer(int f, int n)
 {
 	struct buffer *bp;
 	int s;
@@ -40,7 +40,7 @@ int usebuffer(int f, int n)
  *
  * int f, n;		default flag, numeric argument
  */
-int nextbuffer(int f, int n)
+int cmd_next_buffer(int f, int n)
 {
 	struct buffer *bp = NULL;		/* eligable buffer to switch to */
 	struct buffer *bbp;			/* eligable buffer to switch to */
@@ -116,7 +116,7 @@ int swbuffer(struct buffer *bp)
  * if the buffer has been changed). Then free the header
  * line and the buffer header. Bound to "C-X K".
  */
-int killbuffer(int f, int n)
+int cmd_delete_buffer(int f, int n)
 {
 	struct buffer *bp;
 	int s;
@@ -167,7 +167,7 @@ int zotbuf(struct buffer *bp)
  *
  * int f, n;		default Flag & Numeric arg
  */
-int namebuffer(int f, int n)
+int cmd_name_buffer(int f, int n)
 {
 	struct buffer *bp;			/* pointer to scan through all buffers */
 	char bufn[NBUFN];			/* buffer to hold buffer name */
@@ -352,7 +352,7 @@ int bclear(struct buffer *bp)
  *
  * int f, n;		unused command arguments
  */
-int unmark(int f, int n)
+int cmd_unmark_buffer(int f, int n)
 {
 	curbp->b_flag &= ~BFCHG;
 	curwp->w_flag |= WFMODE;

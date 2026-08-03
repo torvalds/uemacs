@@ -96,7 +96,7 @@ static void setbit(int bc, char *cclmap);
  *
  * int f, n;			default flag / numeric argument
  */
-int forwsearch(int f, int n)
+int cmd_search_forward(int f, int n)
 {
 	int status = TRUE;
 
@@ -104,7 +104,7 @@ int forwsearch(int f, int n)
 	 * Otherwise proceed by asking for the search string.
 	 */
 	if (n < 0)
-		return backsearch(f, -n);
+		return cmd_search_reverse(f, -n);
 
 	/* Ask the user for the text of a pattern.  If the
 	 * response is TRUE (responses other than FALSE are
@@ -138,12 +138,12 @@ int forwsearch(int f, int n)
  *
  * int f, n;		default flag / numeric argument
  */
-int forwhunt(int f, int n)
+int cmd_hunt_forward(int f, int n)
 {
 	int status = TRUE;
 
 	if (n < 0)				/* search backwards */
-		return backhunt(f, -n);
+		return cmd_hunt_backward(f, -n);
 
 	/* Make sure a pattern exists, or that we didn't switch
 	 * into MAGIC mode until after we entered the pattern.
@@ -187,7 +187,7 @@ int forwhunt(int f, int n)
  *
  * int f, n;		default flag / numeric argument
  */
-int backsearch(int f, int n)
+int cmd_search_reverse(int f, int n)
 {
 	int status = TRUE;
 
@@ -195,7 +195,7 @@ int backsearch(int f, int n)
 	 * Otherwise proceed by asking for the search string.
 	 */
 	if (n < 0)
-		return forwsearch(f, -n);
+		return cmd_search_forward(f, -n);
 
 	/* Ask the user for the text of a pattern.  If the
 	 * response is TRUE (responses other than FALSE are
@@ -230,12 +230,12 @@ int backsearch(int f, int n)
  *
  * int f, n;		default flag / numeric argument
  */
-int backhunt(int f, int n)
+int cmd_hunt_backward(int f, int n)
 {
 	int status = TRUE;
 
 	if (n < 0)
-		return forwhunt(f, -n);
+		return cmd_hunt_forward(f, -n);
 
 	/* Make sure a pattern exists, or that we didn't switch
 	 * into MAGIC mode until after we entered the pattern.
@@ -673,7 +673,7 @@ void rvstrcpy(char *rvstr, char *str)
  * int f;		default flag
  * int n;		# of repetitions wanted
  */
-int sreplace(int f, int n)
+int cmd_replace_string(int f, int n)
 {
 	return replaces(FALSE, f, n);
 }
@@ -684,7 +684,7 @@ int sreplace(int f, int n)
  * int f;		default flag
  * int n;		# of repetitions wanted
  */
-int qreplace(int f, int n)
+int cmd_query_replace_string(int f, int n)
 {
 	return replaces(TRUE, f, n);
 }
@@ -804,7 +804,7 @@ static int replaces(int kind, int f, int n)
 
 			case 'N':
 			case 'n':		/* no, onword */
-				forwchar(FALSE, 1);
+				cmd_forward_character(FALSE, 1);
 				continue;
 
 			case '!':		/* yes/stop asking */
@@ -829,7 +829,7 @@ static int replaces(int kind, int f, int n)
 
 				/* Delete the new string.
 				 */
-				backchar(FALSE, rlength);
+				cmd_backward_character(FALSE, rlength);
 				matchline = curwp->w_dotp;
 				matchoff = curwp->w_doto;
 				status = delins(rlength, patmatch, FALSE);
@@ -841,7 +841,7 @@ static int replaces(int kind, int f, int n)
 				 * reprompt.
 				 */
 				--numsub;
-				backchar(FALSE, mlenold);
+				cmd_backward_character(FALSE, mlenold);
 				matchline = curwp->w_dotp;
 				matchoff = curwp->w_doto;
 				goto pprompt;

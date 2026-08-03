@@ -24,13 +24,13 @@
  * @f: default flag.
  * @n: numeric argument.
  */
-int wrapword(int f, int n)
+int cmd_wrap_word(int f, int n)
 {
 	int cnt;				/* size of word wrapped to next line */
 	int c;					/* charector temporary */
 
 	/* backup from the <NL> 1 char */
-	if (!backchar(0, 1))
+	if (!cmd_backward_character(0, 1))
 		return FALSE;
 
 	/* back up until we aren't in a word,
@@ -39,17 +39,17 @@ int wrapword(int f, int n)
 	while (((c = lgetc(curwp->w_dotp, curwp->w_doto)) != ' ')
 	       && (c != '\t')) {
 		cnt++;
-		if (!backchar(0, 1))
+		if (!cmd_backward_character(0, 1))
 			return FALSE;
 		/* if we make it to the beginning, start a new line */
 		if (curwp->w_doto == 0) {
-			gotoeol(FALSE, 0);
+			cmd_end_of_line(FALSE, 0);
 			return lnewline();
 		}
 	}
 
 	/* delete the forward white space */
-	if (!forwdel(0, 1))
+	if (!cmd_delete_next_character(0, 1))
 		return FALSE;
 
 	/* put in a end of line */
@@ -58,7 +58,7 @@ int wrapword(int f, int n)
 
 	/* and past the first word */
 	while (cnt-- > 0) {
-		if (forwchar(FALSE, 1) == FALSE)
+		if (cmd_forward_character(FALSE, 1) == FALSE)
 			return FALSE;
 	}
 	return TRUE;
@@ -69,41 +69,41 @@ int wrapword(int f, int n)
  * performed by the "backchar" and "forwchar" routines. Error if you try to
  * move beyond the buffers.
  */
-int backword(int f, int n)
+int cmd_previous_word(int f, int n)
 {
 	if (n < 0)
-		return forwword(f, -n);
-	if (backchar(FALSE, 1) == FALSE)
+		return cmd_next_word(f, -n);
+	if (cmd_backward_character(FALSE, 1) == FALSE)
 		return FALSE;
 	while (n--) {
 		while (inword() == FALSE) {
-			if (backchar(FALSE, 1) == FALSE)
+			if (cmd_backward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 		while (inword() != FALSE) {
-			if (backchar(FALSE, 1) == FALSE)
+			if (cmd_backward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 	}
-	return forwchar(FALSE, 1);
+	return cmd_forward_character(FALSE, 1);
 }
 
 /*
  * Move the cursor forward by the specified number of words. All of the motion
  * is done by "forwchar". Error if you try and move beyond the buffer's end.
  */
-int forwword(int f, int n)
+int cmd_next_word(int f, int n)
 {
 	if (n < 0)
-		return backword(f, -n);
+		return cmd_previous_word(f, -n);
 	while (n--) {
 		while (inword() == TRUE) {
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 
 		while (inword() == FALSE) {
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 	}
@@ -115,7 +115,7 @@ int forwword(int f, int n)
  * convert any characters to upper case. Error if you try and move beyond the
  * end of the buffer. Bound to "M-U".
  */
-int upperword(int f, int n)
+int cmd_case_word_upper(int f, int n)
 {
 	int c;
 
@@ -125,7 +125,7 @@ int upperword(int f, int n)
 		return FALSE;
 	while (n--) {
 		while (inword() == FALSE) {
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 		while (inword() != FALSE) {
@@ -135,7 +135,7 @@ int upperword(int f, int n)
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
 			}
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 	}
@@ -147,7 +147,7 @@ int upperword(int f, int n)
  * convert characters to lower case. Error if you try and move over the end of
  * the buffer. Bound to "M-L".
  */
-int lowerword(int f, int n)
+int cmd_case_word_lower(int f, int n)
 {
 	int c;
 
@@ -157,7 +157,7 @@ int lowerword(int f, int n)
 		return FALSE;
 	while (n--) {
 		while (inword() == FALSE) {
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 		while (inword() != FALSE) {
@@ -167,7 +167,7 @@ int lowerword(int f, int n)
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
 			}
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 	}
@@ -180,7 +180,7 @@ int lowerword(int f, int n)
  * characters to lower case. Error if you try and move past the end of the
  * buffer. Bound to "M-C".
  */
-int capword(int f, int n)
+int cmd_case_word_capitalize(int f, int n)
 {
 	int c;
 
@@ -190,7 +190,7 @@ int capword(int f, int n)
 		return FALSE;
 	while (n--) {
 		while (inword() == FALSE) {
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 		}
 		if (inword() != FALSE) {
@@ -200,7 +200,7 @@ int capword(int f, int n)
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFHARD);
 			}
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 			while (inword() != FALSE) {
 				c = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -209,7 +209,7 @@ int capword(int f, int n)
 					lputc(curwp->w_dotp, curwp->w_doto, c);
 					lchange(WFHARD);
 				}
-				if (forwchar(FALSE, 1) == FALSE)
+				if (cmd_forward_character(FALSE, 1) == FALSE)
 					return FALSE;
 			}
 		}
@@ -223,7 +223,7 @@ int capword(int f, int n)
  * command for the right number of characters. With a zero argument, just
  * kill one word and no whitespace. Bound to "M-D".
  */
-int delfword(int f, int n)
+int cmd_delete_next_word(int f, int n)
 {
 	struct line *dotp;			/* original cursor line */
 	int doto;				/*      and row */
@@ -252,7 +252,7 @@ int delfword(int f, int n)
 
 	/* get us into a word.... */
 	while (inword() == FALSE) {
-		if (forwchar(FALSE, 1) == FALSE)
+		if (cmd_forward_character(FALSE, 1) == FALSE)
 			return FALSE;
 		++size;
 	}
@@ -260,7 +260,7 @@ int delfword(int f, int n)
 	if (n == 0) {
 		/* skip one word, no whitespace! */
 		while (inword() == TRUE) {
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
 			++size;
 		}
@@ -270,14 +270,14 @@ int delfword(int f, int n)
 
 			/* if we are at EOL; skip to the beginning of the next */
 			while (curwp->w_doto == llength(curwp->w_dotp)) {
-				if (forwchar(FALSE, 1) == FALSE)
+				if (cmd_forward_character(FALSE, 1) == FALSE)
 					return FALSE;
 				++size;
 			}
 
 			/* move forward till we are at the end of the word */
 			while (inword() == TRUE) {
-				if (forwchar(FALSE, 1) == FALSE)
+				if (cmd_forward_character(FALSE, 1) == FALSE)
 					return FALSE;
 				++size;
 			}
@@ -285,7 +285,7 @@ int delfword(int f, int n)
 			/* if there are more words, skip the interword stuff */
 			if (n != 0)
 				while (inword() == FALSE) {
-					if (forwchar(FALSE, 1) == FALSE)
+					if (cmd_forward_character(FALSE, 1) == FALSE)
 						return FALSE;
 					++size;
 				}
@@ -295,7 +295,7 @@ int delfword(int f, int n)
 		while ((curwp->w_doto == llength(curwp->w_dotp)) ||
 		       ((c = lgetc(curwp->w_dotp, curwp->w_doto)) == ' ')
 		       || (c == '\t')) {
-			if (forwchar(FALSE, 1) == FALSE)
+			if (cmd_forward_character(FALSE, 1) == FALSE)
 				break;
 			++size;
 		}
@@ -312,7 +312,7 @@ int delfword(int f, int n)
  * counting the characters. When dot is finally moved to its resting place,
  * fire off the kill command. Bound to "M-Rubout" and to "M-Backspace".
  */
-int delbword(int f, int n)
+int cmd_delete_previous_word(int f, int n)
 {
 	long size;
 
@@ -329,22 +329,22 @@ int delbword(int f, int n)
 		kdelete();
 	thisflag |= CFKILL;			/* this command is a kill */
 
-	if (backchar(FALSE, 1) == FALSE)
+	if (cmd_backward_character(FALSE, 1) == FALSE)
 		return FALSE;
 	size = 0;
 	while (n--) {
 		while (inword() == FALSE) {
-			if (backchar(FALSE, 1) == FALSE)
+			if (cmd_backward_character(FALSE, 1) == FALSE)
 				return FALSE;
 			++size;
 		}
 		while (inword() != FALSE) {
 			++size;
-			if (backchar(FALSE, 1) == FALSE)
+			if (cmd_backward_character(FALSE, 1) == FALSE)
 				goto bckdel;
 		}
 	}
-	if (forwchar(FALSE, 1) == FALSE)
+	if (cmd_forward_character(FALSE, 1) == FALSE)
 		return FALSE;
  bckdel:return ldelchar(size, TRUE);
 }
@@ -373,7 +373,7 @@ int inword(void)
  *
  * f and n - deFault flag and Numeric argument
  */
-int fillpara(int f, int n)
+int cmd_fill_paragraph(int f, int n)
 {
 	unicode_t c;				/* current char during scan    */
 	unicode_t wbuf[NSTRING];		/* buffer for current word      */
@@ -395,11 +395,11 @@ int fillpara(int f, int n)
 	justflag = FALSE;
 
 	/* record the pointer to the line just past the EOP */
-	gotoeop(FALSE, 1);
+	cmd_next_paragraph(FALSE, 1);
 	eopline = lforw(curwp->w_dotp);
 
 	/* and back top the beginning of the paragraph */
-	gotobop(FALSE, 1);
+	cmd_previous_paragraph(FALSE, 1);
 
 	/* initialize various info */
 	clength = curwp->w_doto;
@@ -469,7 +469,7 @@ int fillpara(int f, int n)
  *
  * int f, n;		deFault flag and Numeric argument
  */
-int justpara(int f, int n)
+int cmd_justify_paragraph(int f, int n)
 {
 	unicode_t c;				/* current char durring scan    */
 	unicode_t wbuf[NSTRING];		/* buffer for current word      */
@@ -497,11 +497,11 @@ int justpara(int f, int n)
 	}
 
 	/* record the pointer to the line just past the EOP */
-	gotoeop(FALSE, 1);
+	cmd_next_paragraph(FALSE, 1);
 	eopline = lforw(curwp->w_dotp);
 
 	/* and back top the beginning of the paragraph */
-	gotobop(FALSE, 1);
+	cmd_previous_paragraph(FALSE, 1);
 
 	/* initialize various info */
 	if (leftmarg < llength(curwp->w_dotp))
@@ -564,7 +564,7 @@ int justpara(int f, int n)
 	/* and add a last newline for the end of our new paragraph */
 	lnewline();
 
-	forwword(FALSE, 1);
+	cmd_next_word(FALSE, 1);
 	if (llength(curwp->w_dotp) > leftmarg)
 		curwp->w_doto = leftmarg;
 	else
@@ -580,25 +580,25 @@ int justpara(int f, int n)
  * int f	default flag
  * int n	# of paras to delete
  */
-int killpara(int f, int n)
+int cmd_kill_paragraph(int f, int n)
 {
 	int status;				/* returned status of functions */
 
 	while (n--) {				/* for each paragraph to delete */
 
 		/* mark out the end and beginning of the para to delete */
-		gotoeop(FALSE, 1);
+		cmd_next_paragraph(FALSE, 1);
 
 		/* set the mark here */
 		curwp->w_markp = curwp->w_dotp;
 		curwp->w_marko = curwp->w_doto;
 
 		/* go to the beginning of the paragraph */
-		gotobop(FALSE, 1);
+		cmd_previous_paragraph(FALSE, 1);
 		curwp->w_doto = 0;		/* force us to the beginning of line */
 
 		/* and delete it */
-		if ((status = killregion(FALSE, 1)) != TRUE)
+		if ((status = cmd_kill_region(FALSE, 1)) != TRUE)
 			return status;
 
 		/* and clean up the 2 extra lines */
@@ -614,7 +614,7 @@ int killpara(int f, int n)
  *
  * int f, n;		ignored numeric arguments
  */
-int wordcount(int f, int n)
+int cmd_count_words(int f, int n)
 {
 	struct line *lp;			/* current line to scan */
 	int offset;				/* current char to scan */
