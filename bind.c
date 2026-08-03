@@ -306,22 +306,22 @@ char *flook(char *fname, int hflag)
 			snprintf(fspec, sizeof(fspec), "%s/%s", home, fname);
 
 			/* and try it out */
-			if (ffropen(fspec) == FIOSUC) {
-				ffclose();
+			if (file_open_read(fspec) == FIOSUC) {
+				file_close();
 				return fspec;
 			}
 
 			snprintf(fspec, sizeof(fspec), "%s/lib/%s", home, fname);
-			if (ffropen(fspec) == FIOSUC) {
-				ffclose();
+			if (file_open_read(fspec) == FIOSUC) {
+				file_close();
 				return fspec;
 			}
 		}
 	}
 
 	/* always try the current directory first */
-	if (ffropen(fname) == FIOSUC) {
-		ffclose();
+	if (file_open_read(fname) == FIOSUC) {
+		file_close();
 		return fname;
 	}
 
@@ -342,8 +342,8 @@ char *flook(char *fname, int hflag)
 			strcat(fspec, fname);
 
 			/* and try it out */
-			if (ffropen(fspec) == FIOSUC) {
-				ffclose();
+			if (file_open_read(fspec) == FIOSUC) {
+				file_close();
 				return fspec;
 			}
 
@@ -357,8 +357,8 @@ char *flook(char *fname, int hflag)
 		strcat(fspec, fname);
 
 		/* and try it out */
-		if (ffropen(fspec) == FIOSUC) {
-			ffclose();
+		if (file_open_read(fspec) == FIOSUC) {
+			file_close();
 			return fspec;
 		}
 	}

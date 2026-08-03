@@ -244,7 +244,7 @@ int readin(char *fname, int lockfl)
 	/* let a user macro get hold of things...if he wants */
 	execute(META | SPEC | 'R', FALSE, 1);
 
-	if ((s = ffropen(fname)) == FIOERR)	/* Hard file open.      */
+	if ((s = file_open_read(fname)) == FIOERR)	/* Hard file open.      */
 		goto out;
 
 	if (s == FIOFNF) {			/* File not found.      */
@@ -255,7 +255,7 @@ int readin(char *fname, int lockfl)
 	/* read the file in */
 	mlwrite("(Reading file)");
 	nline = 0;
-	while ((s = ffgetline()) == FIOSUC) {
+	while ((s = file_get_line()) == FIOSUC) {
 		nbytes = strlen(fline);
 		if ((lp1 = lalloc(nbytes)) == NULL) {
 			s = FIOMEM;		/* Keep message on the  */
@@ -274,7 +274,7 @@ int readin(char *fname, int lockfl)
 			lputc(lp1, i, fline[i]);
 		++nline;
 	}
-	ffclose();				/* Ignore errors.       */
+	file_close();				/* Ignore errors.       */
 	strcpy(mesg, "(");
 	if (s == FIOERR) {
 		strcat(mesg, "I/O ERROR, ");
@@ -448,20 +448,20 @@ int writeout(char *fn)
 	struct line *lp;
 	int nline;
 
-	if ((s = ffwopen(fn)) != FIOSUC) {	/* Open writes message. */
+	if ((s = file_open_write(fn)) != FIOSUC) {	/* Open writes message. */
 		return FALSE;
 	}
 	mlwrite("(Writing...)");		/* tell us were writing */
 	lp = lforw(curbp->b_linep);		/* First line.          */
 	nline = 0;				/* Number of lines.     */
 	while (lp != curbp->b_linep) {
-		if ((s = ffputline(&lp->l_text[0], llength(lp))) != FIOSUC)
+		if ((s = file_put_line(&lp->l_text[0], llength(lp))) != FIOSUC)
 			break;
 		++nline;
 		lp = lforw(lp);
 	}
 	if (s == FIOSUC) {			/* No write error.      */
-		s = ffclose();
+		s = file_close();
 		if (s == FIOSUC) {		/* No close error.      */
 			if (nline == 1)
 				mlwrite("(Wrote 1 line)");
@@ -469,7 +469,7 @@ int writeout(char *fn)
 				mlwrite("(Wrote %d lines)", nline);
 		}
 	} else					/* Ignore close error   */
-		ffclose();			/* if a write error.    */
+		file_close();			/* if a write error.    */
 	if (s != FIOSUC)			/* Some sort of error.  */
 		return FALSE;
 	return TRUE;
@@ -522,7 +522,7 @@ int ifile(char *fname)
 	bp = curbp;				/* Cheap.               */
 	bp->b_flag |= BFCHG;			/* we have changed      */
 	bp->b_flag &= ~BFINVS;			/* and are not temporary */
-	if ((s = ffropen(fname)) == FIOERR)	/* Hard file open.      */
+	if ((s = file_open_read(fname)) == FIOERR)	/* Hard file open.      */
 		goto out;
 	if (s == FIOFNF) {			/* File not found.      */
 		mlwrite("(No such file)");
@@ -537,7 +537,7 @@ int ifile(char *fname)
 	curwp->w_marko = 0;
 
 	nline = 0;
-	while ((s = ffgetline()) == FIOSUC) {
+	while ((s = file_get_line()) == FIOSUC) {
 		nbytes = strlen(fline);
 		if ((lp1 = lalloc(nbytes)) == NULL) {
 			s = FIOMEM;		/* Keep message on the  */
@@ -558,7 +558,7 @@ int ifile(char *fname)
 			lputc(lp1, i, fline[i]);
 		++nline;
 	}
-	ffclose();				/* Ignore errors.       */
+	file_close();				/* Ignore errors.       */
 	curwp->w_markp = lforw(curwp->w_markp);
 	strcpy(mesg, "(");
 	if (s == FIOERR) {

@@ -17,7 +17,7 @@ static int eofflag;				/* end-of-file flag */
 /*
  * Open a file for reading.
  */
-int ffropen(char *fn)
+int file_open_read(char *fn)
 {
 	if ((ffp = fopen(fn, "r")) == NULL)
 		return FIOFNF;
@@ -29,7 +29,7 @@ int ffropen(char *fn)
  * Open a file for writing. Return TRUE if all is well, and FALSE on error
  * (cannot create).
  */
-int ffwopen(char *fn)
+int file_open_write(char *fn)
 {
 	if ((ffp = fopen(fn, "w")) == NULL) {
 		mlwrite("Cannot open file for writing");
@@ -41,7 +41,7 @@ int ffwopen(char *fn)
 /*
  * Close a file. Should look at the status in all systems.
  */
-int ffclose(void)
+int file_close(void)
 {
 	/* free this since we do not need it anymore */
 	if (fline) {
@@ -62,7 +62,7 @@ int ffclose(void)
  * and the "nbuf" is its length, less the free newline. Return the status.
  * Check only at the newline.
  */
-int ffputline(char *buf, int nbuf)
+int file_put_line(char *buf, int nbuf)
 {
 	int i;
 
@@ -85,7 +85,7 @@ int ffputline(char *buf, int nbuf)
  * at the end of the file that don't have a newline present. Check for I/O
  * errors too. Return status.
  */
-int ffgetline(void)
+int file_get_line(void)
 {
 	int c;					/* current character read */
 	int i;					/* current index into fline */
@@ -162,7 +162,7 @@ int ffgetline(void)
  *
  * char *fname;		file to check for existance
  */
-int fexist(char *fname)
+int file_exists(char *fname)
 {
 	FILE *fp;
 

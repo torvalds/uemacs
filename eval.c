@@ -145,7 +145,7 @@ char *gtfun(char *fname)
 	case UFBIND:
 		return transbind(arg1);
 	case UFEXIST:
-		return ltos(fexist(arg1));
+		return ltos(file_exists(arg1));
 	case UFFIND:
 		tsp = flook(arg1, TRUE);
 		return tsp == NULL ? "" : tsp;

@@ -214,12 +214,12 @@ extern int ifile(char *fname);
 extern int file_changed(struct buffer *bp, char *fn);
 
 /* fileio.c */
-extern int ffropen(char *fn);
-extern int ffwopen(char *fn);
-extern int ffclose(void);
-extern int ffputline(char *buf, int nbuf);
-extern int ffgetline(void);
-extern int fexist(char *fname);
+extern int file_open_read(char *fn);
+extern int file_open_write(char *fn);
+extern int file_close(void);
+extern int file_put_line(char *buf, int nbuf);
+extern int file_get_line(void);
+extern int file_exists(char *fname);
 
 /* exec.c */
 extern int namedcmd(int f, int n);
