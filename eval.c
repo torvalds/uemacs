@@ -306,16 +306,16 @@ static char *getkill(void)
 	int size;				/* max number of chars to return */
 	static char value[NSTRING];		/* temp buffer for value */
 
-	if (kbufh == NULL)
+	if (kill_head == NULL)
 		/* no kill buffer....just a null string */
 		value[0] = 0;
 	else {
 		/* copy in the contents... */
-		if (kused < NSTRING)
-			size = kused;
+		if (kill_used < NSTRING)
+			size = kill_used;
 		else
 			size = NSTRING - 1;
-		memcpy(value, kbufh->d_chunk, size);
+		memcpy(value, kill_head->d_chunk, size);
 		value[size] = 0;
 	}
 

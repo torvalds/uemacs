@@ -555,19 +555,19 @@ void kdelete(void)
 {
 	struct kill *kp;			/* ptr to scan kill buffer chunk list */
 
-	if (kbufh != NULL) {
+	if (kill_head != NULL) {
 
 		/* first, delete all the chunks */
-		kbufp = kbufh;
-		while (kbufp != NULL) {
-			kp = kbufp->d_next;
-			free(kbufp);
-			kbufp = kp;
+		kill_last = kill_head;
+		while (kill_last != NULL) {
+			kp = kill_last->d_next;
+			free(kill_last);
+			kill_last = kp;
 		}
 
 		/* and reset all the kill buffer pointers */
-		kbufh = kbufp = NULL;
-		kused = KBLOCK;
+		kill_head = kill_last = NULL;
+		kill_used = KBLOCK;
 	}
 }
 
@@ -582,20 +582,20 @@ int kinsert(int c)
 	struct kill *nchunk;			/* ptr to newly malloced chunk */
 
 	/* check to see if we need a new chunk */
-	if (kused >= KBLOCK) {
+	if (kill_used >= KBLOCK) {
 		if ((nchunk = (struct kill *)malloc(sizeof(struct kill))) == NULL)
 			return FALSE;
-		if (kbufh == NULL)		/* set head ptr if first time */
-			kbufh = nchunk;
-		if (kbufp != NULL)		/* point the current to this new one */
-			kbufp->d_next = nchunk;
-		kbufp = nchunk;
-		kbufp->d_next = NULL;
-		kused = 0;
+		if (kill_head == NULL)		/* set head ptr if first time */
+			kill_head = nchunk;
+		if (kill_last != NULL)		/* point the current to this new one */
+			kill_last->d_next = nchunk;
+		kill_last = nchunk;
+		kill_last->d_next = NULL;
+		kill_used = 0;
 	}
 
 	/* and now insert the character */
-	kbufp->d_chunk[kused++] = c;
+	kill_last->d_chunk[kill_used++] = c;
 	return TRUE;
 }
 
@@ -616,15 +616,15 @@ int cmd_yank(int f, int n)
 	if (n < 0)
 		return FALSE;
 	/* make sure there is something to yank */
-	if (kbufh == NULL)
+	if (kill_head == NULL)
 		return TRUE;			/* not an error, just nothing */
 
 	/* for each time.... */
 	while (n--) {
-		kp = kbufh;
+		kp = kill_head;
 		while (kp != NULL) {
 			if (kp->d_next == NULL)
-				i = kused;
+				i = kill_used;
 			else
 				i = KBLOCK;
 			sp = kp->d_chunk;

@@ -43,9 +43,9 @@ int abort_char = CONTROL | 'G';			/* current abort character */
 
 int quote_char = 0x11;				/* quote the next character, during ask_string() */
 int tabmask = 0x07;				/* tabulator mask */
-struct kill *kbufp = NULL;			/* current kill buffer chunk pointer    */
-struct kill *kbufh = NULL;			/* kill buffer header pointer           */
-int kused = KBLOCK;				/* # of bytes used in kill buffer       */
+struct kill *kill_last = NULL;			/* the chunk being filled, at the end of the list */
+struct kill *kill_head = NULL;			/* first chunk of the kill buffer, or NULL */
+int kill_used = KBLOCK;				/* bytes used in that last chunk */
 int *keyboard_macro_pos;			/* where replay or recording has got to */
 int *keyboard_macro_end = &keyboard_macro[0];	/* one past the last recorded keystroke */
 int keyboard_macro_mode = STOP;			/* STOP, PLAY or RECORD */

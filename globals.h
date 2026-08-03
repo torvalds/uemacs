@@ -60,9 +60,9 @@ extern int abort_char;				/* current abort character */
 
 extern int quote_char;				/* quote the next character, during ask_string() */
 extern int tabmask;
-extern struct kill *kbufp;			/* current kill buffer chunk pointer */
-extern struct kill *kbufh;			/* kill buffer header pointer   */
-extern int kused;				/* # of bytes used in KB        */
+extern struct kill *kill_last;			/* the chunk being filled, at the end of the list */
+extern struct kill *kill_head;			/* first chunk of the kill buffer, or NULL */
+extern int kill_used;				/* bytes used in that last chunk */
 extern int *keyboard_macro_pos;			/* where replay or recording has got to */
 extern int *keyboard_macro_end;			/* one past the last recorded keystroke */
 extern int keyboard_macro_mode;			/* STOP, PLAY or RECORD */
