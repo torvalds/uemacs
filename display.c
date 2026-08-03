@@ -39,11 +39,10 @@ static void paint_window(struct window *wp, bool check);
 static void modeline(struct window *wp);
 
 /*
- * Open the terminal.  The operating system's terminal I/O channel is set
- * up; there is nothing else to initialize, because the screen is painted
- * from the buffers and there is no image of it to allocate.
+ * Take the terminal over for editing.  There is nothing to allocate:
+ * the screen is painted from the buffers, and there is no image of it.
  */
-void vtinit(void)
+void display_open(void)
 {
 	tcapopen();				/* open the screen */
 	tcapkopen();				/* open the keyboard */
@@ -51,12 +50,11 @@ void vtinit(void)
 }
 
 /*
- * Clean up the virtual terminal system, in anticipation for a return to the
- * operating system. Move down to the last line and clear it out (the next
- * system prompt will be written in the line). Shut down the channel to the
- * terminal.
+ * Hand the terminal back, on the way out to the operating system.  Move
+ * down to the last line and clear it out, so the next system prompt has
+ * somewhere to go, and shut the channel down.
  */
-void vttidy(void)
+void display_close(void)
 {
 	mlerase();
 	movecursor(term.t_nrow, 0);
@@ -292,11 +290,10 @@ static void paint_window(struct window *wp, bool check)
 }
 
 /*
- * upscreen:
- *	user routine to force a screen update
- *	always finishes complete update
+ * The update-screen command: repaint whatever is on the screen, whether
+ * anything is thought to have changed or not.
  */
-int upscreen(int f, int n)
+int update_screen(int f, int n)
 {
 	update_now();
 	return TRUE;
@@ -688,7 +685,7 @@ static void modeline(struct window *wp)
 	ttcol = term.t_ncol;
 }
 
-void upmode(void)
+void update_modeline(void)
 {						/* update all the mode lines */
 	curwp->w_flag |= WFMODE;
 }

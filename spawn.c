@@ -45,7 +45,7 @@ int spawncli(int f, int n)
 
 int bktoshell(int f, int n)
 {						/* suspend MicroEMACS and wait to wake up */
-	vttidy();
+	display_close();
 /******************************
 	int pid;
 

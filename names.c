@@ -154,7 +154,7 @@ struct name_bind names[] = {
 	{ "unbind-key", unbindkey },
 	{ "universal-argument", unarg },
 	{ "unmark-buffer", unmark },
-	{ "update-screen", upscreen },
+	{ "update-screen", update_screen },
 	{ "view-file", viewfile },
 	{ "wrap-word", wrapword },
 	{ "write-file", filewrite },

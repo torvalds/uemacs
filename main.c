@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Initialize the editor. */
-	vtinit();				/* Display */
+	display_open();				/* Display */
 	edinit("main");				/* Buffers, windows */
 	varinit();				/* user variables */
 
@@ -462,7 +462,7 @@ int execute(int c, int f, int n)
 		if (curbp->b_mode & MDASAVE)
 			if (--gacount == 0) {
 				/* and save the file if needed */
-				upscreen(FALSE, 0);
+				update_screen(FALSE, 0);
 				filesave(FALSE, 0);
 				gacount = gasave;
 			}
@@ -524,7 +524,7 @@ int quit(int f, int n)
 	    || anycb() == FALSE			/* All buffers clean.   */
 	    /* User says it's OK.   */
 	    || (s = mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
-		vttidy();
+		display_close();
 		if (f)
 			exit(n);
 		else

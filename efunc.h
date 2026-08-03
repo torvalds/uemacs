@@ -103,12 +103,12 @@ extern int unarg(int f, int n);
 extern int cexit(int status);
 
 /* display.c */
-extern void vtinit(void);
-extern void vttidy(void);
-extern int upscreen(int f, int n);
+extern void display_open(void);
+extern void display_close(void);
+extern int update_screen(int f, int n);
 extern void update(void);
 extern void update_now(void);
-extern void upmode(void);
+extern void update_modeline(void);
 extern void movecursor(int row, int col);
 extern void mlerase(void);
 extern void mlwrite(const char *fmt, ...);

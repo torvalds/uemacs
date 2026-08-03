@@ -872,7 +872,7 @@ int adjustmode(int kind, int global)
 				curbp->b_mode &= ~(1 << i);
 			/* display new mode line */
 			if (global == 0)
-				upmode();
+				update_modeline();
 			mlerase();		/* erase the junk */
 			return TRUE;
 		}
