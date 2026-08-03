@@ -23,16 +23,6 @@
 #include "utf8.h"
 #include "util.h"
 
-struct video {
-	int v_flag;				/* Flags */
-	unicode_t v_text[1];			/* Screen data. */
-};
-
-#define VFCHG   0x0001				/* Changed flag                 */
-#define	VFEXT	0x0002				/* extended (beyond column 80)  */
-
-static struct video **vscreen;			/* Virtual screen. */
-
 static int displaying = TRUE;
 #include <signal.h>
 #include <sys/ioctl.h>
@@ -40,10 +30,8 @@ static int displaying = TRUE;
 int chg_width, chg_height;
 
 static int reframe(struct window *wp);
-static void updone(struct window *wp);
-static void updall(struct window *wp);
-static void updext(void);
-static int updateline(int row, struct video *vp);
+static void updpos(void);
+static void paint_window(struct window *wp, bool check);
 static void modeline(struct window *wp);
 static void mlputi(int i, int r);
 static void mlputli(long l, int r);
@@ -51,27 +39,15 @@ static void mlputf(int s);
 static int newscreensize(int h, int w);
 
 /*
- * Initialize the data structures used by the display code. The edge vectors
- * used to access the screens are set up. The operating system's terminal I/O
- * channel is set up. All the other things get initialized at compile time.
- * The original window has "WFCHG" set, so that it will get completely
- * redrawn on the first call to "update".
+ * Open the terminal.  The operating system's terminal I/O channel is set
+ * up; there is nothing else to initialize, because the screen is painted
+ * from the buffers and there is no image of it to allocate.
  */
 void vtinit(void)
 {
-	int i;
-	struct video *vp;
-
 	TTopen();				/* open the screen */
 	TTkopen();				/* open the keyboard */
 	TTrev(FALSE);
-	vscreen = xmalloc(term.t_mrow * sizeof(struct video *));
-
-	for (i = 0; i < term.t_mrow; ++i) {
-		vp = xmalloc(sizeof(struct video) + term.t_mcol * 4);
-		vp->v_flag = 0;
-		vscreen[i] = vp;
-	}
 }
 
 /*
@@ -90,86 +66,229 @@ void vttidy(void)
 	write(1, "\r", 1);
 }
 
-/*
- * Set the virtual cursor to the specified row and column on the virtual
- * screen. There is no checking for nonsense values; this might be a good
- * idea during the early stages.
- */
-void vtmove(int row, int col)
+static void TTputs(const char *s)
 {
-	vtrow = row;
-	vtcol = col;
+	for (char c; (c = *s) != 0; s++)
+		TTputc(c);
 }
 
 /*
- * Write a character to the virtual screen. The virtual row and
- * column are updated. If we are not yet on left edge, don't print
- * it yet. If the line is too long put a "$" in the last column.
+ * Painting a row.
  *
- * This routine only puts printing characters into the virtual
- * terminal buffers. Only column overflow is checked.
+ * 'col' counts columns in the line, which is not the same as columns on
+ * the screen: a line the cursor has run off the right of is shown
+ * scrolled sideways, and everything left of 'offset' is dropped on the
+ * floor on its way past.  'out' is what actually reached the terminal,
+ * which is where the cursor ends up.
  */
-static void vtputc(int c)
+struct paint {
+	int col;				/* column in the line */
+	int offset;				/* leftmost column shown */
+	int out;				/* columns actually painted */
+	bool overflow;				/* ran off the right edge */
+};
+
+/*
+ * One column.  Everything that expands to several of them comes through
+ * here one at a time, so the clipping and the counting are only written
+ * once.
+ */
+static void paint_raw(struct paint *p, unicode_t c)
 {
-	struct video *vp;			/* ptr to line being updated */
-
-	/* In case somebody passes us a signed char.. */
-	if (c < 0) {
-		c += 256;
-		if (c < 0)
-			return;
-	}
-
-	vp = vscreen[vtrow];
-
-	if (vtcol >= term.t_ncol) {
-		++vtcol;
-		vp->v_text[term.t_ncol - 1] = '$';
+	if (p->col >= p->offset + term.t_ncol) {
+		p->overflow = true;
+		p->col++;
 		return;
 	}
+	if (p->col >= p->offset) {
+		TTputc(c);
+		p->out++;
+	}
+	p->col++;
+}
 
+/*
+ * One character, expanded the way the screen shows it.  util.h's
+ * next_column() says how wide each of these comes out, and the two have
+ * to keep agreeing or the cursor lands in the wrong place.
+ */
+static void paint_char(struct paint *p, unicode_t c)
+{
 	if (c == '\t') {
 		do {
-			vtputc(' ');
-		} while (((vtcol + taboff) & tabmask) != 0);
+			paint_raw(p, ' ');
+		} while ((p->col & tabmask) != 0);
 		return;
 	}
 
 	if (c < 0x20) {
-		vtputc('^');
-		vtputc(c ^ 0x40);
+		paint_raw(p, '^');
+		paint_raw(p, c ^ 0x40);
 		return;
 	}
 
 	if (c == 0x7f) {
-		vtputc('^');
-		vtputc('?');
+		paint_raw(p, '^');
+		paint_raw(p, '?');
 		return;
 	}
 
 	if (c >= 0x80 && c <= 0xA0) {
 		static const char hex[] = "0123456789abcdef";
-		vtputc('\\');
-		vtputc(hex[c >> 4]);
-		vtputc(hex[c & 15]);
+		paint_raw(p, '\\');
+		paint_raw(p, hex[c >> 4]);
+		paint_raw(p, hex[c & 15]);
 		return;
 	}
 
-	if (vtcol >= 0)
-		vp->v_text[vtcol] = c;
-	++vtcol;
+	paint_raw(p, c);
+}
+
+static void paint_bytes(struct paint *p, char *text, int from, int to)
+{
+	while (from < to) {
+		unicode_t c;
+
+		from += utf8_to_unicode(text, from, to, &c);
+		paint_char(p, c);
+	}
 }
 
 /*
- * Erase from the end of the software cursor to the end of the line on which
- * the software cursor is located.
+ * Words are handed to hunspell as the UTF-8 they already are.  The
+ * buffer is only here because Hunspell_spell() wants a C string; 128
+ * bytes is about forty accented letters, and anything longer is called
+ * correct rather than guessed at.
  */
-static void vteeol(void)
+static bool word_ok(char *text, int from, int to)
 {
-	unicode_t *vcp = vscreen[vtrow]->v_text;
+	char word[128];
+	int len = to - from;
 
-	while (vtcol < term.t_ncol)
-		vcp[vtcol++] = ' ';
+	// We're not doing German or Finnish...
+	if (len >= sizeof(word))
+		return true;
+
+	memcpy(word, text + from, len);
+	word[len] = 0;
+	return spellcheck(word);
+}
+
+#define SPELLSTART "\033[1m"
+#define SPELLSTOP "\033[22m"
+
+static void paint_word(struct paint *p, char *text, int from, int to, bool check)
+{
+	bool bad = check && !word_ok(text, from, to);
+
+	if (bad)
+		TTputs(SPELLSTART);
+	paint_bytes(p, text, from, to);
+	if (bad)
+		TTputs(SPELLSTOP);
+}
+
+// A letter is any byte that is not something else.  That is the whole
+// trick: the bytes of a UTF-8 character are all >= 0x80, so words in
+// other alphabets fall out of a plain byte scan already encoded the way
+// hunspell wants them, without ever being decoded or re-encoded.
+static bool is_letter(unsigned char c)
+{
+	return c >= 0x80 || isalpha(c);
+}
+
+// Mixed letters and digits or underscores are hex numbers and variable
+// names rather than words, so the whole token goes unchecked.
+static bool is_notaword(unsigned char c)
+{
+	return c == '_' || (c >= '0' && c <= '9');
+}
+
+static bool is_token(unsigned char c)
+{
+	return is_letter(c) || is_notaword(c);
+}
+
+/*
+ * Paint one row of the screen, straight from the line it shows.
+ *
+ * 'lp' is NULL for a row past the end of the buffer, 'offset' is the
+ * first column to show, and 'check' asks for the spell checking.
+ *
+ * The word scanning walks the line's own UTF-8 rather than anything the
+ * layout has been through, so a tab or the right margin cannot break a
+ * word in half before hunspell sees it.
+ */
+static void paint_line(int row, struct line *lp, int offset, bool check)
+{
+	struct paint p = { .offset = offset };
+	char *text = lp ? lp->l_text : NULL;
+	int len = lp ? llength(lp) : 0;
+	int i = 0;
+
+	movecursor(row, 0);
+
+	while (i < len) {
+		if (!is_token(text[i])) {
+			paint_bytes(&p, text, i, i + 1);
+			i++;
+			continue;
+		}
+
+		int start = i;
+		bool word = true;
+
+		while (i < len) {
+			unsigned char c = text[i];
+
+			if (is_letter(c)) {
+				i++;
+			} else if (is_notaword(c)) {
+				word = false;
+				i++;
+			} else if (c == '\'' && word && i + 1 < len &&
+				   isalpha((unsigned char)text[i + 1])) {
+				i++;		/* an abbreviation, not an end */
+			} else
+				break;
+		}
+
+		paint_word(&p, text, start, i, check && word);
+	}
+
+	ttcol = p.out;
+	TTeeol();
+
+	/* the markers that say the line carries on past the edge */
+	if (p.overflow) {
+		movecursor(row, term.t_ncol - 1);
+		TTputc('$');
+		ttcol = term.t_ncol;
+	}
+	if (offset) {
+		movecursor(row, 0);
+		TTputc('$');
+		ttcol = 1;
+	}
+}
+
+/*
+ * Paint every row of the window, and the mode line under it.
+ */
+static void paint_window(struct window *wp, bool check)
+{
+	struct line *end = wp->w_bufp->b_linep;
+	struct line *lp = wp->w_linep;
+
+	for (int row = 0; row < term.t_nrow - 1; row++) {
+		bool eob = lp == end;
+
+		paint_line(row, eob ? NULL : lp,
+			   row == currow ? lbound : 0, check);
+		if (!eob)
+			lp = lforw(lp);
+	}
+	modeline(wp);
 }
 
 /*
@@ -184,56 +303,62 @@ int upscreen(int f, int n)
 }
 
 /*
- * Make sure that the display is right. This is a three part process. First,
- * scan through all of the windows looking for dirty ones. Check the framing,
- * and refresh the screen. Second, make sure that "currow" and "curcol" are
- * correct for the current window. Third, make the virtual and physical
- * screens the same.
+ * Make sure that the display is right. Check the framing, work out where
+ * the cursor has ended up, and paint whatever the change reaches.
+ *
+ * There is no image of the screen to compare against, so what gets
+ * painted is decided from the buffer alone: everything, unless the
+ * window flags say the change cannot have reached further than the line
+ * the cursor is on.
  *
  * int force;		force update past type ahead?
  */
 int update(int force)
 {
-	struct window *wp;
-	int domode = FALSE;			/* mode line wants repainting */
+	struct window *wp = curwp;
+	bool check = (wp->w_bufp->b_mode & MDSPELL) != 0;
+	int oldbound = lbound;
 
 	if (force == FALSE && kbdmode == PLAY)
 		return TRUE;
 
 	displaying = TRUE;
 
-	/* update any windows that need refreshing */
-	wp = curwp;
-	if (wp->w_flag) {
-		/* if the window has changed, service it */
-		reframe(wp);		/* check the framing */
-		if ((wp->w_flag & ~WFMODE) == WFEDIT)
-			updone(wp);	/* update EDITed line */
-		else if (wp->w_flag & ~WFMOVE)
-			updall(wp);	/* update all lines */
-		domode = wp->w_flag & WFMODE;
-		wp->w_flag = 0;
-		wp->w_force = 0;
-	}
+	if (wp->w_flag)
+		reframe(wp);			/* check the framing */
 
-	/* recalc the current hardware cursor location */
-	updpos();
+	updpos();				/* currow, curcol and lbound */
 
-	/* check for lines to de-extend */
-	upddex();
-
-	/* if screen is garbage, re-plot it */
 	if (sgarbf != FALSE) {
-		updgar();
-		domode = TRUE;		/* the erase took the mode line too */
-	}
-
-	/* update the virtual screen to the physical screen */
-	updupd(force);
-
-	/* the mode line paints itself, after any erase above */
-	if (domode)
+		/* the screen is not what we think it is; start over */
+		movecursor(0, 0);
+		TTeeop();
+		sgarbf = FALSE;
+		mpresf = FALSE;
+		paint_window(wp, check);
+	} else if ((wp->w_flag & ~WFMODE) == WFEDIT && !lbound && !oldbound) {
+		/*
+		 * The case that happens on every keystroke: a character
+		 * went into the line the cursor is on, the line count did
+		 * not change, and nothing is scrolled sideways.  No other
+		 * row can have moved, so no other row is worth painting.
+		 */
+		paint_line(currow, wp->w_dotp, 0, check);
+		if (wp->w_flag & WFMODE)
+			modeline(wp);
+	} else if (!(wp->w_flag & ~(WFMOVE | WFMODE)) && !lbound && !oldbound) {
+		/*
+		 * The dot moved and the frame did not have to follow it -
+		 * reframe() sets WFHARD when it does - so no text changed
+		 * and every row still says what it already said.  Only the
+		 * mode line can differ, and the cursor has to move.
+		 */
 		modeline(wp);
+	} else if (wp->w_flag || lbound != oldbound)
+		paint_window(wp, check);
+
+	wp->w_flag = 0;
+	wp->w_force = 0;
 
 	/* update the cursor and flush the buffers */
 	movecursor(currow, curcol - lbound);
@@ -317,81 +442,12 @@ static int reframe(struct window *wp)
 	return TRUE;
 }
 
-static void show_line(struct line *lp)
-{
-	int i = 0, len = llength(lp);
-
-	while (i < len) {
-		unicode_t c;
-		i += utf8_to_unicode(lp->l_text, i, len, &c);
-		vtputc(c);
-	}
-}
-
-/*
- * updone:
- *	update the current line	to the virtual screen
- *
- * struct window *wp;		window to update current line in
- */
-static void updone(struct window *wp)
-{
-	struct line *lp;			/* line to update */
-	int sline;				/* physical screen line to update */
-
-	/* search down the line we want */
-	lp = wp->w_linep;
-	sline = 0;
-	while (lp != wp->w_dotp) {
-		++sline;
-		lp = lforw(lp);
-	}
-
-	/* and update the virtual line */
-	vscreen[sline]->v_flag |= VFCHG;
-	vtmove(sline, 0);
-	show_line(lp);
-	vteeol();
-}
-
-/*
- * updall:
- *	update all the lines in a window on the virtual screen
- *
- * struct window *wp;		window to update lines in
- */
-static void updall(struct window *wp)
-{
-	struct line *lp;			/* line to update */
-	int sline;				/* physical screen line to update */
-
-	/* search down the lines, updating them */
-	lp = wp->w_linep;
-	sline = 0;
-	while (sline < term.t_nrow - 1) {
-
-		/* and update the virtual line */
-		vscreen[sline]->v_flag |= VFCHG;
-		vtmove(sline, 0);
-		if (lp != wp->w_bufp->b_linep) {
-			/* if we are not at the end */
-			show_line(lp);
-			lp = lforw(lp);
-		}
-
-		/* on to the next one */
-		vteeol();
-		++sline;
-	}
-
-}
-
 /*
  * updpos:
  *	update the position of the hardware cursor and handle extended
  *	lines. This is the only update for simple moves.
  */
-void updpos(void)
+static void updpos(void)
 {
 	struct line *lp;
 	int i;
@@ -416,259 +472,18 @@ void updpos(void)
 		curcol = next_column(curcol, c);
 	}
 
-	/* if extended, flag so and update the virtual line image */
+	/*
+	 * If the cursor has run off the right, scroll the line sideways
+	 * far enough to show it.  lbound is the leftmost column that
+	 * still fits, and paint_line() drops everything to the left of
+	 * it.
+	 */
 	if (curcol >= term.t_ncol - 1) {
-		vscreen[currow]->v_flag |= (VFEXT | VFCHG);
-		updext();
+		int rcursor = ((curcol - term.t_ncol) % term.t_scrsiz)
+			      + term.t_margin;
+		lbound = curcol - rcursor + 1;
 	} else
 		lbound = 0;
-}
-
-/*
- * upddex:
- *	de-extend any line that derserves it
- */
-void upddex(void)
-{
-	struct window *wp;
-	struct line *lp;
-	int i;
-
-	wp = curwp;
-	lp = wp->w_linep;
-	i = 0;
-
-	while (i < term.t_nrow - 1) {
-		if (vscreen[i]->v_flag & VFEXT) {
-			if ((wp != curwp) || (lp != wp->w_dotp) ||
-			    (curcol < term.t_ncol - 1)) {
-				vtmove(i, 0);
-				show_line(lp);
-				vteeol();
-
-				/* this line no longer is extended */
-				vscreen[i]->v_flag &= ~VFEXT;
-				vscreen[i]->v_flag |= VFCHG;
-			}
-		}
-		lp = lforw(lp);
-		++i;
-	}
-}
-
-/*
- * updgar:
- *	if the screen is garbage, clear the physical screen and
- *	the virtual screen and force a full update
- */
-void updgar(void)
-{
-	int i;
-
-	for (i = 0; i < term.t_nrow - 1; ++i)
-		vscreen[i]->v_flag |= VFCHG;
-
-	movecursor(0, 0);			/* Erase the screen. */
-	(*term.t_eeop) ();
-	sgarbf = FALSE;				/* Erase-page clears */
-	mpresf = FALSE;				/* the message area. */
-}
-
-/*
- * updupd:
- *	update the physical screen from the virtual screen
- *
- * int force;		forced update flag
- */
-int updupd(int force)
-{
-	struct video *vp1;
-	int i;
-
-	for (i = 0; i < term.t_nrow - 1; ++i) {
-		vp1 = vscreen[i];
-
-		/* for each line that needs to be updated */
-		if ((vp1->v_flag & VFCHG) != 0) {
-			updateline(i, vp1);
-		}
-	}
-	return TRUE;
-}
-
-/*
- * updext:
- *	update the extended line which the cursor is currently
- *	on at a column greater than the terminal width. The line
- *	will be scrolled right or left to let the user see where
- *	the cursor is
- */
-static void updext(void)
-{
-	int rcursor;				/* real cursor location */
-	struct line *lp;			/* pointer to current line */
-
-	/* calculate what column the real cursor will end up in */
-	rcursor = ((curcol - term.t_ncol) % term.t_scrsiz) + term.t_margin;
-	taboff = lbound = curcol - rcursor + 1;
-
-	/* scan through the line outputing characters to the virtual screen */
-	/* once we reach the left edge                                  */
-	vtmove(currow, -lbound);		/* start scanning offscreen */
-	lp = curwp->w_dotp;			/* line to output */
-	show_line(lp);
-
-	/* truncate the virtual line, restore tab offset */
-	vteeol();
-	taboff = 0;
-
-	/* and put a '$' in column 1 */
-	vscreen[currow]->v_text[0] = '$';
-}
-
-static void TTputs(const char *s)
-{
-	for (char c; (c = *s) != 0; s++)
-		TTputc(c);
-}
-
-static bool is_letter(unicode_t ch)
-{
-	return ch > 128 || isalpha(ch);
-}
-
-static bool is_notaword(unicode_t ch)
-{
-	return ch == '_' || (ch >= '0' && ch <= '9');
-}
-
-static int find_letter(unicode_t *line, size_t len, int pos)
-{
-	while (pos < len) {
-		if (is_letter(line[pos]))
-			return pos;
-		pos++;
-	}
-	return -1;
-}
-
-static int find_not_letter(unicode_t *line, size_t len, int pos)
-{
-	while (pos < len) {
-		if (!is_letter(line[pos]))
-			return pos;
-		pos++;
-	}
-	return len;
-}
-
-#define BAD_WORD_BEGIN 1
-#define BAD_WORD_END 2
-
-static size_t findwords(unicode_t *line, size_t len, unsigned char *result, size_t size)
-{
-	int pos = 0;
-
-	if (len < size)
-		size = len;
-	memset(result, 0, size);
-
-	while ((pos = find_letter(line, len, pos)) >= 0) {
-		int start = pos;
-		int end = find_not_letter(line, len, pos + 1);
-
-		// Special case: allow (one) apostrophe for abbreviations
-		if (end + 1 < len && line[end] == '\'' && is_letter(line[end + 1]))
-			end = find_not_letter(line, len, end + 2);
-
-		pos = end + 1;
-
-		// A word with adjacent numbers or underscores is
-		// not a word, it's a hex number or a variable name
-		if (start && is_notaword(line[start - 1]))
-			continue;
-		if (end < len && is_notaword(line[end]))
-			continue;
-
-		// We found something that may be a real word.
-		// Check it, and mark it in the result
-		if (end > size)
-			break;
-
-		char word_buffer[80];
-		int word_len = end - start;
-		if (word_len >= sizeof(word_buffer) - 1)
-			continue;
-		for (int i = 0; i < word_len; i++)
-			word_buffer[i] = line[start + i];
-		word_buffer[word_len] = 0;
-		if (spellcheck(word_buffer))
-			continue;
-
-		// We found something that hunspell doesn't like
-		result[start] = BAD_WORD_BEGIN;
-		result[end - 1] |= BAD_WORD_END;
-	}
-	return size;
-}
-
-/*
- * Update a single line. This does not know how to use insert or delete
- * character sequences; we are using VT52 functionality. Update the physical
- * row and column variables. It does try an exploit erase to end of line.
- */
-
-/*
- * updateline()
- *
- * int row;		row of screen to update
- * struct video *vp;	virtual screen image
- */
-static int updateline(int row, struct video *vp)
-{
-	int maxchar = 0, analyzed = 0;
-	unsigned char array[256];
-	bool spellcheck = curwp->w_bufp->b_mode & MDSPELL;
-
-	movecursor(row, 0);			/* Go to start of line. */
-
-	/* scan through the line and dump it to the the
-	   virtual screen array, finding where the last non-space is  */
-	for (int i = 0; i < term.t_ncol; i++) {
-		unicode_t ch = vp->v_text[i];
-		if (ch != ' ')
-			maxchar = i + 1;
-	}
-
-	if (spellcheck)
-		analyzed = findwords(vp->v_text, maxchar, array, sizeof(array));
-
-#define SPELLSTART "\033[1m"
-#define SPELLSTOP "\033[22m"
-
-	int started = 0;
-	for (int i = 0; i < maxchar; i++) {
-		if (i < analyzed && (array[i] & BAD_WORD_BEGIN)) {
-			started = 1;
-			TTputs(SPELLSTART);
-		}
-		TTputc(vp->v_text[i]);
-		if (i < analyzed && (array[i] & BAD_WORD_END)) {
-			TTputs(SPELLSTOP);
-			started = 0;
-		}
-	}
-	if (started)
-		TTputs(SPELLSTOP);
-	ttcol = term.t_ncol;
-
-	TTeeol();
-	/* turn rev video off */
-	TTrev(FALSE);
-
-	/* update the needed flags */
-	vp->v_flag &= ~VFCHG;
-	return TRUE;
 }
 
 /*

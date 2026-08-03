@@ -43,13 +43,10 @@ extern int mstore;				/* storing text to macro flag   */
 extern int discmd;				/* display command flag         */
 extern int disinp;				/* display input characters     */
 extern struct buffer *bstore;			/* buffer to store macro text to */
-extern int vtrow;				/* Row location of SW cursor */
-extern int vtcol;				/* Column location of SW cursor */
 extern int ttrow;				/* Row location of HW cursor */
 extern int ttcol;				/* Column location of HW cursor */
 extern int lbound;				/* leftmost column of current line
 						   being displayed */
-extern int taboff;				/* tab offset for display       */
 extern int metac;				/* current meta character */
 extern int ctlxc;				/* current control X prefix char */
 extern int reptc;				/* current universal repeat char */
