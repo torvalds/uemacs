@@ -117,6 +117,7 @@ extern void mlputs(const char *s);
 extern void mlputstr(const char *s);
 extern void getscreensize(int *widthp, int *heightp);
 extern void sizesignal(int signr);
+extern void checkwinsize(void);
 
 /* region.c */
 extern int killregion(int f, int n);

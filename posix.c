@@ -167,11 +167,6 @@ void ttpause(void)
 }
 
 /*
- * Read a character from the terminal, performing no editing and doing no echo
- * at all. More complex in VMS that almost anyplace else, which figures. Very
- * simple on CPM, because the system can do exactly what you want.
- */
-/*
  * One character of pushback.  The incremental search reads the
  * character that ended it, decides it was a command rather than part of
  * the pattern, and hands it back for the command loop to find.  A
@@ -186,6 +181,11 @@ void ttungetc(int c)
 		pushback = c;
 }
 
+/*
+ * Read a character from the terminal, performing no editing and doing no echo
+ * at all. More complex in VMS that almost anyplace else, which figures. Very
+ * simple on CPM, because the system can do exactly what you want.
+ */
 int ttgetc(void)
 {
 	unicode_t c;
@@ -198,11 +198,19 @@ int ttgetc(void)
 	}
 
 	count = TT.nr;
-	if (!count) {
+	while (!count) {
 		count = read(0, TT.buf, sizeof(TT.buf));
-		if (count <= 0)
-			return 0;
-		TT.nr = count;
+		if (count > 0) {
+			TT.nr = count;
+			break;
+		}
+		/* a signal, most likely the window changing size */
+		if (count < 0 && errno == EINTR) {
+			checkwinsize();
+			count = 0;
+			continue;
+		}
+		return 0;
 	}
 
 	c = (unsigned char)TT.buf[0];

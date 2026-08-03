@@ -13,8 +13,6 @@
 #include "efunc.h"
 
 #include        <signal.h>
-extern int chg_width, chg_height;
-extern void sizesignal(int);
 
 /*
  * Create a subjob with a copy of the command intrepreter in it. When the

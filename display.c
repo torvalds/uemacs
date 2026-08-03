@@ -23,11 +23,15 @@
 #include "utf8.h"
 #include "util.h"
 
-static int displaying = TRUE;
 #include <signal.h>
 #include <sys/ioctl.h>
-/* for window size changes */
-int chg_width, chg_height;
+
+/*
+ * A window size change, as noticed by the signal handler.  Nothing is
+ * done about it there; checkwinsize() picks it up from somewhere the
+ * editor is allowed to paint from.
+ */
+volatile sig_atomic_t chg_width, chg_height;
 
 static int reframe(struct window *wp);
 static void updpos(void);
@@ -36,7 +40,6 @@ static void modeline(struct window *wp);
 static void mlputi(int i, int r);
 static void mlputli(long l, int r);
 static void mlputf(int s);
-static int newscreensize(int h, int w);
 
 /*
  * Open the terminal.  The operating system's terminal I/O channel is set
@@ -330,8 +333,6 @@ void update_now(void)
 	bool check = (wp->w_bufp->b_mode & MDSPELL) != 0;
 	int oldbound = lbound;
 
-	displaying = TRUE;
-
 	if (wp->w_flag)
 		reframe(wp);			/* check the framing */
 
@@ -371,9 +372,10 @@ void update_now(void)
 	/* update the cursor and flush the buffers */
 	movecursor(currow, curcol - lbound);
 	TTflush();
-	displaying = FALSE;
+
+	/* a resize that arrived while we were painting */
 	while (chg_width || chg_height)
-		newscreensize(chg_height, chg_width);
+		checkwinsize();
 }
 
 /*
@@ -951,6 +953,16 @@ void getscreensize(int *widthp, int *heightp)
 	*heightp = size.ws_row;
 }
 
+/*
+ * The window changed size.  Write it down and get out: this is a signal
+ * handler, and everything the display does - newsize()'s mlwrite() on a
+ * silly size, TTputc(), the painter itself - would be running on top of
+ * whatever the editor was in the middle of.
+ *
+ * The handler is installed without SA_RESTART, so the read() the editor
+ * spends its life blocked in returns EINTR and ttgetc() services this
+ * straight away rather than at the next keystroke.
+ */
 void sizesignal(int signr)
 {
 	int w, h;
@@ -958,21 +970,25 @@ void sizesignal(int signr)
 
 	getscreensize(&w, &h);
 
-	if (h && w && (h - 1 != term.t_nrow || w != term.t_ncol))
-		newscreensize(h, w);
+	if (h && w && (h - 1 != term.t_nrow || w != term.t_ncol)) {
+		chg_width = w;
+		chg_height = h;
+	}
 
-	signal(SIGWINCH, sizesignal);
 	errno = old_errno;
 }
 
-static int newscreensize(int h, int w)
+/*
+ * Act on a size change the handler noticed, from a context that is
+ * allowed to paint.
+ */
+void checkwinsize(void)
 {
-	/* do the change later */
-	if (displaying) {
-		chg_width = w;
-		chg_height = h;
-		return FALSE;
-	}
+	int w = chg_width, h = chg_height;
+
+	if (!w && !h)
+		return;
+
 	chg_width = chg_height = 0;
 	if (h - 1 < term.t_mrow)
 		newsize(TRUE, h);
@@ -980,5 +996,4 @@ static int newscreensize(int h, int w)
 		newwidth(TRUE, w);
 
 	update_now();
-	return TRUE;
 }

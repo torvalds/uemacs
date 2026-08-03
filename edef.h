@@ -10,6 +10,7 @@
 #ifndef EDEF_H_
 #define EDEF_H_
 
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -43,6 +44,8 @@ extern int mstore;				/* storing text to macro flag   */
 extern int discmd;				/* display command flag         */
 extern int disinp;				/* display input characters     */
 extern struct buffer *bstore;			/* buffer to store macro text to */
+/* set by the SIGWINCH handler, acted on by checkwinsize() */
+extern volatile sig_atomic_t chg_width, chg_height;
 extern int ttrow;				/* Row location of HW cursor */
 extern int ttcol;				/* Column location of HW cursor */
 extern int lbound;				/* leftmost column of current line

@@ -130,7 +130,14 @@ int main(int argc, char **argv)
 		}
 	}
 
-	signal(SIGWINCH, sizesignal);
+	/*
+	 * Deliberately not SA_RESTART: a resize has to interrupt the
+	 * read() the editor spends its life in, or nothing acts on it
+	 * until the next keystroke.
+	 */
+	struct sigaction winch = { .sa_handler = sizesignal };
+	sigemptyset(&winch.sa_mask);
+	sigaction(SIGWINCH, &winch, NULL);
 	if (argc == 2) {
 		if (strcmp(argv[1], "--help") == 0) {
 			usage(EXIT_FAILURE);
