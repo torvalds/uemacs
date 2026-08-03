@@ -287,7 +287,7 @@ int main(int argc, char **argv)
 	c = getcmd();
 
 	/* if there is something on the command line, clear it */
-	if (mpresf != FALSE) {
+	if (message_present != FALSE) {
 		msg_erase();
 		update();
 	}

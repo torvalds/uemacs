@@ -146,7 +146,7 @@ void tcapkopen(void)
 	ttflush();
 	shown_row = 999;
 	shown_col = 999;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 }
 
 void tcapkclose(void)

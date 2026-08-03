@@ -35,7 +35,7 @@ int cmd_redraw_display(int f, int n)
 int cmd_clear_and_redraw(int f, int n)
 {
 	if (f == FALSE)
-		sgarbf = TRUE;
+		screen_garbage = TRUE;
 	else {
 		curwp->w_force = 0;		/* Center dot. */
 		curwp->w_flag |= WFFORCE;
@@ -73,7 +73,7 @@ int cmd_change_screen_size(int f, int n)
 
 	/* screen is garbage */
 	term.t_nrow = n - 1;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 	return TRUE;
 }
 
@@ -102,7 +102,7 @@ int cmd_change_screen_width(int f, int n)
 
 	/* force window to redraw */
 	curwp->w_flag |= WFHARD | WFMOVE | WFMODE;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 
 	return TRUE;
 }

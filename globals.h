@@ -40,8 +40,8 @@ extern int global_mode;				/* default modes for new buffers, the $gmode setting 
 extern int global_flags;			/* global control flags, the $gflags setting */
 extern int autosave_interval;			/* changes between autosaves, the $asave setting */
 extern int autosave_countdown;			/* changes left before one, the $acount setting */
-extern int sgarbf;				/* State of screen unknown      */
-extern int mpresf;				/* Stuff in message line        */
+extern int screen_garbage;			/* the screen is not what we think it is */
+extern int message_present;			/* something is showing on the message line */
 extern int clexec;				/* command line execution flag  */
 extern int storing_macro;			/* capturing command lines into a buffer */
 extern int display_commands;			/* echo commands, the $discmd setting */

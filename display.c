@@ -332,12 +332,12 @@ void update_now(void)
 
 	updpos();				/* currow, curcol and lbound */
 
-	if (sgarbf != FALSE) {
+	if (screen_garbage != FALSE) {
 		/* the screen is not what we think it is; start over */
 		movecursor(0, 0);
 		tcapeeop();
-		sgarbf = FALSE;
-		mpresf = FALSE;
+		screen_garbage = FALSE;
+		message_present = FALSE;
 		paint_window(wp, check);
 	} else if ((wp->w_flag & ~WFMODE) == WFEDIT && !left_column && !oldbound) {
 		/*
@@ -726,7 +726,7 @@ void msg_erase(void)
 		movecursor(term.t_nrow, 0);
 	}
 	ttflush();
-	mpresf = FALSE;
+	message_present = FALSE;
 }
 
 /*
@@ -757,7 +757,7 @@ static void msg_end(void)
 	if (eolexist == TRUE)
 		tcapeeol();
 	ttflush();
-	mpresf = TRUE;
+	message_present = TRUE;
 }
 
 /*

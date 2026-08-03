@@ -36,7 +36,7 @@ int cmd_interactive_shell(int f, int n)
 		system(cp);
 	else
 		system("exec /bin/sh");
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 	sleep(2);
 	tcapopen();
 	tcapkopen();
@@ -60,7 +60,7 @@ void rtfrmshell(void)
 {
 	tcapopen();
 	curwp->w_flag = WFHARD;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 }
 
 /*
@@ -93,7 +93,7 @@ int cmd_shell_command(int f, int n)
 		msg_append("\r\n");
 	}
 	tcapkopen();
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 	return TRUE;
 }
 
@@ -124,7 +124,7 @@ int cmd_execute_program(int f, int n)
 	msg_append("(End)");			/* Pause.               */
 	ttflush();
 	while ((s = tgetc()) != '\r' && s != ' ') ;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 	return TRUE;
 }
 
@@ -177,7 +177,7 @@ int cmd_filter_buffer(int f, int n)
 	tcapopen();
 	tcapkopen();
 	ttflush();
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 	s = TRUE;
 
 	/* on failure, escape gracefully */
