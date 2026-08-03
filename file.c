@@ -170,8 +170,8 @@ int getfile(char *fname, int lockfl)
 			swbuffer(bp);
 			lp = curwp->w_dotp;
 			i = (term.t_nrow - 1) / 2;
-			while (i-- && lback(lp) != curbp->b_linep)
-				lp = lback(lp);
+			while (i-- && line_prev(lp) != curbp->b_linep)
+				lp = line_prev(lp);
 			curwp->w_linep = lp;
 			curwp->w_flag |= WFMODE | WFHARD;
 			msg_printf("(Old buffer)");
@@ -257,7 +257,7 @@ int readin(char *fname, int lockfl)
 	nline = 0;
 	while ((s = file_get_line()) == FIOSUC) {
 		nbytes = strlen(fline);
-		if ((lp1 = lalloc(nbytes)) == NULL) {
+		if ((lp1 = line_alloc(nbytes)) == NULL) {
 			s = FIOMEM;		/* Keep message on the  */
 			break;			/* display.             */
 		}
@@ -265,7 +265,7 @@ int readin(char *fname, int lockfl)
 			s = FIOMEM;
 			break;
 		}
-		lp2 = lback(curbp->b_linep);
+		lp2 = line_prev(curbp->b_linep);
 		lp2->l_fp = lp1;
 		lp1->l_fp = curbp->b_linep;
 		lp1->l_bp = lp2;
@@ -299,8 +299,8 @@ int readin(char *fname, int lockfl)
 
 	wp = curwp;
 	if (wp->w_bufp == curbp) {
-		wp->w_linep = lforw(curbp->b_linep);
-		wp->w_dotp = lforw(curbp->b_linep);
+		wp->w_linep = line_next(curbp->b_linep);
+		wp->w_dotp = line_next(curbp->b_linep);
 		wp->w_doto = 0;
 		wp->w_markp = NULL;
 		wp->w_marko = 0;
@@ -452,13 +452,13 @@ int writeout(char *fn)
 		return FALSE;
 	}
 	msg_printf("(Writing...)");		/* tell us were writing */
-	lp = lforw(curbp->b_linep);		/* First line.          */
+	lp = line_next(curbp->b_linep);		/* First line.          */
 	nline = 0;				/* Number of lines.     */
 	while (lp != curbp->b_linep) {
-		if ((s = file_put_line(&lp->l_text[0], llength(lp))) != FIOSUC)
+		if ((s = file_put_line(&lp->l_text[0], line_length(lp))) != FIOSUC)
 			break;
 		++nline;
-		lp = lforw(lp);
+		lp = line_next(lp);
 	}
 	if (s == FIOSUC) {			/* No write error.      */
 		s = file_close();
@@ -531,7 +531,7 @@ int ifile(char *fname)
 	msg_printf("(Inserting file)");
 
 	/* back up a line and save the mark here */
-	curwp->w_dotp = lback(curwp->w_dotp);
+	curwp->w_dotp = line_prev(curwp->w_dotp);
 	curwp->w_doto = 0;
 	curwp->w_markp = curwp->w_dotp;
 	curwp->w_marko = 0;
@@ -539,7 +539,7 @@ int ifile(char *fname)
 	nline = 0;
 	while ((s = file_get_line()) == FIOSUC) {
 		nbytes = strlen(fline);
-		if ((lp1 = lalloc(nbytes)) == NULL) {
+		if ((lp1 = line_alloc(nbytes)) == NULL) {
 			s = FIOMEM;		/* Keep message on the  */
 			break;			/* display.             */
 		}
@@ -559,7 +559,7 @@ int ifile(char *fname)
 		++nline;
 	}
 	file_close();				/* Ignore errors.       */
-	curwp->w_markp = lforw(curwp->w_markp);
+	curwp->w_markp = line_next(curwp->w_markp);
 	strcpy(mesg, "(");
 	if (s == FIOERR) {
 		strcat(mesg, "I/O ERROR, ");
@@ -577,7 +577,7 @@ int ifile(char *fname)
 
  out:
 	/* advance to the next line and mark the window for changes */
-	curwp->w_dotp = lforw(curwp->w_dotp);
+	curwp->w_dotp = line_next(curwp->w_dotp);
 	curwp->w_flag |= WFHARD | WFMODE;
 
 	/* copy window parameters back to the buffer structure */

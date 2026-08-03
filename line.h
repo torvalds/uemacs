@@ -19,29 +19,29 @@ struct line {
 	char l_text[1];				/* A bunch of characters.       */
 };
 
-#define lforw(lp)       ((lp)->l_fp)
-#define lback(lp)       ((lp)->l_bp)
+#define line_next(lp)       ((lp)->l_fp)
+#define line_prev(lp)       ((lp)->l_bp)
 #define lgetc(lp, n)    ((lp)->l_text[(n)]&0xFF)
 #define lputc(lp, n, c) ((lp)->l_text[(n)]=(c))
-#define llength(lp)     ((lp)->l_used)
+#define line_length(lp)     ((lp)->l_used)
 
-extern void lfree(struct line *lp);
-extern void lchange(int flag);
+extern void line_free(struct line *lp);
+extern void buffer_changed(int flag);
 extern int cmd_insert_space(int f, int n);
-extern int linstr(char *instr);
-extern int linsert(int n, int c);
-extern int lowrite(int c);
-extern int lover(char *ostr);
-extern int lnewline(void);
-extern int ldelete(long n, int kflag);
-extern int ldelchar(long n, int kflag);
-extern int lgetchar(unicode_t *);
+extern int insert_string(char *instr);
+extern int insert_char(int n, int c);
+extern int overwrite_char(int c);
+extern int overwrite_string(char *ostr);
+extern int insert_newline(void);
+extern int delete_bytes(long n, int kflag);
+extern int delete_characters(long n, int kflag);
+extern int char_at_dot(unicode_t *);
 extern char *getctext(void);
 extern int putctext(char *iline);
-extern int ldelnewline(void);
+extern int delete_newline(void);
 extern void kdelete(void);
 extern int kinsert(int c);
 extern int cmd_yank(int f, int n);
-extern struct line *lalloc(int);		/* Allocate a line. */
+extern struct line *line_alloc(int);		/* Allocate a line. */
 
 #endif				/* LINE_H_ */

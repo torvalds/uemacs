@@ -13,7 +13,7 @@
  *	'end of line'.
  *
  *	Replacement metacharacters will have to wait for a re-write of
- *	the replaces function, and a new variation of ldelete().
+ *	the replaces function, and a new variation of delete_bytes().
  *
  *	For those curious as to my references, i made use of
  *	Kernighan & Plauger's "Software Tools."
@@ -379,7 +379,7 @@ static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *p
 	}
 
 	if (mcptr->mc_type == EOL) {
-		if (curoff != llength(curline))
+		if (curoff != line_length(curline))
 			return FALSE;
 		mcptr++;
 	}
@@ -437,7 +437,7 @@ static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *p
 			 * '^') match positions, not characters.
 			 */
 			if (mcptr->mc_type == BOL) {
-				if (curoff == llength(curline)) {
+				if (curoff == line_length(curline)) {
 					c = nextch(&curline, &curoff, direct ^ REVERSE);
 					goto success;
 				} else
@@ -780,7 +780,7 @@ static int replaces(int kind, int f, int n)
 
 		/* Check if we are on the last line.
 		 */
-		nlrepl = (lforw(curwp->w_dotp) == curwp->w_bufp->b_linep);
+		nlrepl = (line_next(curwp->w_dotp) == curwp->w_bufp->b_linep);
 
 		/* Check for query.
 		 */
@@ -906,19 +906,19 @@ int delins(int dlength, char *instr, int use_meta)
 	/* Zap what we gotta,
 	 * and insert its replacement.
 	 */
-	if ((status = ldelete((long)dlength, FALSE)) != TRUE)
+	if ((status = delete_bytes((long)dlength, FALSE)) != TRUE)
 		msg_printf("%%ERROR while deleting");
 	else if ((rmagical && use_meta) && (curwp->w_bufp->b_mode & MDMAGIC) != 0) {
 		rmcptr = &rmcpat[0];
 		while (rmcptr->mc_type != MCNIL && status == TRUE) {
 			if (rmcptr->mc_type == LITCHAR)
-				status = linstr(rmcptr->rstr);
+				status = insert_string(rmcptr->rstr);
 			else
-				status = linstr(patmatch);
+				status = insert_string(patmatch);
 			rmcptr++;
 		}
 	} else
-		status = linstr(instr);
+		status = insert_string(instr);
 
 	return status;
 }
@@ -991,9 +991,9 @@ int boundry(struct line *curline, int curoff, int dir)
 	int border;
 
 	if (dir == FORWARD) {
-		border = (curoff == llength(curline)) && (lforw(curline) == curbp->b_linep);
+		border = (curoff == line_length(curline)) && (line_next(curline) == curbp->b_linep);
 	} else {
-		border = (curoff == 0) && (lback(curline) == curbp->b_linep);
+		border = (curoff == 0) && (line_prev(curline) == curbp->b_linep);
 	}
 	return border;
 }
@@ -1016,8 +1016,8 @@ static int nextch(struct line **pcurline, int *pcuroff, int dir)
 	curoff = *pcuroff;
 
 	if (dir == FORWARD) {
-		if (curoff == llength(curline)) {	/* if at EOL */
-			curline = lforw(curline);	/* skip to next line */
+		if (curoff == line_length(curline)) {	/* if at EOL */
+			curline = line_next(curline);	/* skip to next line */
 			curoff = 0;
 			c = '\n';		/* and return a <NL> */
 		} else
@@ -1025,8 +1025,8 @@ static int nextch(struct line **pcurline, int *pcuroff, int dir)
 	} else {				/* Reverse. */
 
 		if (curoff == 0) {
-			curline = lback(curline);
-			curoff = llength(curline);
+			curline = line_prev(curline);
+			curoff = line_length(curline);
 			c = '\n';
 		} else
 			c = lgetc(curline, --curoff);

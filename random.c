@@ -48,7 +48,7 @@ int cmd_buffer_position(int f, int n)
 	int ecol;				/* column pos/end of current line */
 
 	/* starting at the beginning of the buffer */
-	lp = lforw(curbp->b_linep);
+	lp = line_next(curbp->b_linep);
 
 	/* start counting chars and lines */
 	numchars = 0;
@@ -61,15 +61,15 @@ int cmd_buffer_position(int f, int n)
 		if (lp == curwp->w_dotp) {
 			predlines = numlines;
 			predchars = numchars + curwp->w_doto;
-			if ((curwp->w_doto) == llength(lp))
+			if ((curwp->w_doto) == line_length(lp))
 				curchar = '\n';
 			else
 				curchar = lgetc(lp, curwp->w_doto);
 		}
 		/* on to the next line */
 		++numlines;
-		numchars += llength(lp) + 1;
-		lp = lforw(lp);
+		numchars += line_length(lp) + 1;
+		lp = line_next(lp);
 	}
 
 	/* if at end of file, record it */
@@ -82,7 +82,7 @@ int cmd_buffer_position(int f, int n)
 	/* Get real column and end-of-line column. */
 	col = getccol(FALSE);
 	savepos = curwp->w_doto;
-	curwp->w_doto = llength(curwp->w_dotp);
+	curwp->w_doto = line_length(curwp->w_dotp);
 	ecol = getccol(FALSE);
 	curwp->w_doto = savepos;
 
@@ -102,7 +102,7 @@ int getcline(void)
 	int numlines;				/* # of lines before point */
 
 	/* starting at the beginning of the buffer */
-	lp = lforw(curbp->b_linep);
+	lp = line_next(curbp->b_linep);
 
 	/* start counting lines */
 	numlines = 0;
@@ -111,7 +111,7 @@ int getcline(void)
 		if (lp == curwp->w_dotp)
 			break;
 		++numlines;
-		lp = lforw(lp);
+		lp = line_next(lp);
 	}
 
 	/* and return the resulting count */
@@ -130,7 +130,7 @@ int getccol(int bflg)
 	int i, col;
 	struct line *dlp = curwp->w_dotp;
 	int byte_offset = curwp->w_doto;
-	int len = llength(dlp);
+	int len = line_length(dlp);
 
 	col = i = 0;
 	while (i < byte_offset) {
@@ -157,7 +157,7 @@ int setccol(int pos)
 	int llen;				/* length of line in bytes */
 
 	col = 0;
-	llen = llength(curwp->w_dotp);
+	llen = line_length(curwp->w_dotp);
 
 	/* scan the line until we are at or past the target column */
 	for (i = 0; i < llen; ++i) {
@@ -199,7 +199,7 @@ int cmd_transpose_characters(int f, int n)
 		return rdonly();		/* we are in read only mode     */
 	dotp = curwp->w_dotp;
 	doto = curwp->w_doto;
-	if (doto == llength(dotp) && --doto < 0)
+	if (doto == line_length(dotp) && --doto < 0)
 		return FALSE;
 	cr = lgetc(dotp, doto);
 	if (--doto < 0)
@@ -207,7 +207,7 @@ int cmd_transpose_characters(int f, int n)
 	cl = lgetc(dotp, doto);
 	lputc(dotp, doto + 0, cr);
 	lputc(dotp, doto + 1, cl);
-	lchange(WFEDIT);
+	buffer_changed(WFEDIT);
 	return TRUE;
 }
 
@@ -231,11 +231,11 @@ int cmd_quote_character(int f, int n)
 		return TRUE;
 	if (c == '\n') {
 		do {
-			s = lnewline();
+			s = insert_newline();
 		} while (s == TRUE && --n);
 		return s;
 	}
-	return linsert(n, c);
+	return insert_char(n, c);
 }
 
 /*
@@ -254,8 +254,8 @@ int cmd_handle_tab(int f, int n)
 		return TRUE;
 	}
 	if (!tabsize)
-		return linsert(1, '\t');
-	return linsert(tabsize - (getccol(FALSE) % tabsize), ' ');
+		return insert_char(1, '\t');
+	return insert_char(tabsize - (getccol(FALSE) % tabsize), ' ');
 }
 
 /*
@@ -279,10 +279,10 @@ int cmd_detab_line(int f, int n)
 		curwp->w_doto = 0;		/* start at the beginning */
 
 		/* detab the entire current line */
-		while (curwp->w_doto < llength(curwp->w_dotp)) {
+		while (curwp->w_doto < line_length(curwp->w_dotp)) {
 			/* if we have a tab */
 			if (lgetc(curwp->w_dotp, curwp->w_doto) == '\t') {
-				ldelchar(1, FALSE);
+				delete_characters(1, FALSE);
 				cmd_insert_space(TRUE, (tabmask + 1) - (curwp->w_doto & tabmask));
 			}
 			cmd_forward_character(FALSE, 1);
@@ -294,7 +294,7 @@ int cmd_detab_line(int f, int n)
 	}
 	curwp->w_doto = 0;			/* to the begining of the line */
 	thisflag &= ~CFCPCN;			/* flag that this resets the goal column */
-	lchange(WFEDIT);			/* yes, we have made at least an edit */
+	buffer_changed(WFEDIT);			/* yes, we have made at least an edit */
 	return TRUE;
 }
 
@@ -324,7 +324,7 @@ int cmd_entab_line(int f, int n)
 		/* entab the entire current line */
 		fspace = -1;
 		ccol = 0;
-		while (curwp->w_doto < llength(curwp->w_dotp)) {
+		while (curwp->w_doto < line_length(curwp->w_dotp)) {
 			/* see if it is time to compress */
 			if ((fspace >= 0) && (nextab(fspace) <= ccol)) {
 				if (ccol - fspace < 2)
@@ -333,8 +333,8 @@ int cmd_entab_line(int f, int n)
 					/* there is a bug here dealing with mixed space/tabed
 					   lines.......it will get fixed                */
 					cmd_backward_character(TRUE, ccol - fspace);
-					ldelete((long)(ccol - fspace), FALSE);
-					linsert(1, '\t');
+					delete_bytes((long)(ccol - fspace), FALSE);
+					insert_char(1, '\t');
 					fspace = -1;
 				}
 			}
@@ -367,7 +367,7 @@ int cmd_entab_line(int f, int n)
 	}
 	curwp->w_doto = 0;			/* to the begining of the line */
 	thisflag &= ~CFCPCN;			/* flag that this resets the goal column */
-	lchange(WFEDIT);			/* yes, we have made at least an edit */
+	buffer_changed(WFEDIT);			/* yes, we have made at least an edit */
 	return TRUE;
 }
 
@@ -408,7 +408,7 @@ int cmd_trim_line(int f, int n)
 		cmd_next_line(TRUE, inc);
 		n -= inc;
 	}
-	lchange(WFEDIT);
+	buffer_changed(WFEDIT);
 	thisflag &= ~CFCPCN;			/* flag that this resets the goal column */
 	return TRUE;
 }
@@ -431,7 +431,7 @@ int cmd_open_line(int f, int n)
 		return TRUE;
 	i = n;					/* Insert newlines.     */
 	do {
-		s = lnewline();
+		s = insert_newline();
 	} while (s == TRUE && --i);
 	if (s == TRUE)				/* Then back up overtop */
 		s = cmd_backward_character(f, n);		/* of them all.         */
@@ -466,7 +466,7 @@ int cmd_newline(int f, int n)
 
 	/* insert some lines */
 	while (n--) {
-		if ((s = lnewline()) != TRUE)
+		if ((s = insert_newline()) != TRUE)
 			return s;
 	}
 	return TRUE;
@@ -497,11 +497,11 @@ int cinsert(void)
 	ichar[i] = 0;				/* terminate it */
 
 	/* put in the newline */
-	if (lnewline() == FALSE)
+	if (insert_newline() == FALSE)
 		return FALSE;
 
 	/* and the saved indentation */
-	linstr(ichar);
+	insert_string(ichar);
 
 	/* and one more tab for a brace */
 	if (bracef)
@@ -531,7 +531,7 @@ int insbrace(int n, int c)
 		for (i = curwp->w_doto - 1; i >= 0; --i) {
 			ch = lgetc(curwp->w_dotp, i);
 			if (ch != ' ' && ch != '\t')
-				return linsert(n, c);
+				return insert_char(n, c);
 		}
 
 	/* chercher le caractere oppose correspondant */
@@ -556,7 +556,7 @@ int insbrace(int n, int c)
 	cmd_backward_character(FALSE, 1);
 
 	while (count > 0) {
-		if (curwp->w_doto == llength(curwp->w_dotp))
+		if (curwp->w_doto == line_length(curwp->w_dotp))
 			ch = '\n';
 		else
 			ch = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -574,7 +574,7 @@ int insbrace(int n, int c)
 	if (count != 0) {			/* no match */
 		curwp->w_dotp = oldlp;
 		curwp->w_doto = oldoff;
-		return linsert(n, c);
+		return insert_char(n, c);
 	}
 
 	curwp->w_doto = 0;			/* debut de ligne */
@@ -593,13 +593,13 @@ int insbrace(int n, int c)
 				cmd_delete_previous_character(FALSE, 1);
 		else {				/* on doit en inserer */
 			while (target - getccol(FALSE) >= 8)
-				linsert(1, '\t');
-			linsert(target - getccol(FALSE), ' ');
+				insert_char(1, '\t');
+			insert_char(target - getccol(FALSE), ' ');
 		}
 	}
 
 	/* and insert the required brace(s) */
-	return linsert(n, c);
+	return insert_char(n, c);
 }
 
 int inspound(void)
@@ -609,13 +609,13 @@ int inspound(void)
 
 	/* if we are at the beginning of the line, no go */
 	if (curwp->w_doto == 0)
-		return linsert(1, '#');
+		return insert_char(1, '#');
 
 	/* scan to see if all space before this is white space */
 	for (i = curwp->w_doto - 1; i >= 0; --i) {
 		ch = lgetc(curwp->w_dotp, i);
 		if (ch != ' ' && ch != '\t')
-			return linsert(1, '#');
+			return insert_char(1, '#');
 	}
 
 	/* delete back first */
@@ -623,7 +623,7 @@ int inspound(void)
 		cmd_delete_previous_character(FALSE, 1);
 
 	/* and insert the required pound */
-	return linsert(1, '#');
+	return insert_char(1, '#');
 }
 
 /*
@@ -643,17 +643,17 @@ int cmd_delete_blank_lines(int f, int n)
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
 	lp1 = curwp->w_dotp;
-	while (llength(lp1) == 0 && (lp2 = lback(lp1)) != curbp->b_linep)
+	while (line_length(lp1) == 0 && (lp2 = line_prev(lp1)) != curbp->b_linep)
 		lp1 = lp2;
 	lp2 = lp1;
 	nld = 0;
-	while ((lp2 = lforw(lp2)) != curbp->b_linep && llength(lp2) == 0)
+	while ((lp2 = line_next(lp2)) != curbp->b_linep && line_length(lp2) == 0)
 		++nld;
 	if (nld == 0)
 		return TRUE;
-	curwp->w_dotp = lforw(lp1);
+	curwp->w_dotp = line_next(lp1);
 	curwp->w_doto = 0;
-	return ldelete(nld, FALSE);
+	return delete_bytes(nld, FALSE);
 }
 
 /*
@@ -676,7 +676,7 @@ int cmd_newline_and_indent(int f, int n)
 		return FALSE;
 	while (n--) {
 		nicol = 0;
-		for (i = 0; i < llength(curwp->w_dotp); ++i) {
+		for (i = 0; i < line_length(curwp->w_dotp); ++i) {
 			c = lgetc(curwp->w_dotp, i);
 			if (c != ' ' && c != '\t')
 				break;
@@ -684,8 +684,8 @@ int cmd_newline_and_indent(int f, int n)
 				nicol |= tabmask;
 			++nicol;
 		}
-		if (lnewline() == FALSE || ((i = nicol / 8) != 0 && linsert(i, '\t') == FALSE)
-		    || ((i = nicol % 8) != 0 && linsert(i, ' ') == FALSE))
+		if (insert_newline() == FALSE || ((i = nicol / 8) != 0 && insert_char(i, '\t') == FALSE)
+		    || ((i = nicol % 8) != 0 && insert_char(i, ' ') == FALSE))
 			return FALSE;
 	}
 	return TRUE;
@@ -708,7 +708,7 @@ int cmd_delete_next_character(int f, int n)
 			kdelete();
 		thisflag |= CFKILL;
 	}
-	return ldelchar((long)n, f);
+	return delete_characters((long)n, f);
 }
 
 /*
@@ -731,7 +731,7 @@ int cmd_delete_previous_character(int f, int n)
 		thisflag |= CFKILL;
 	}
 	if ((s = cmd_backward_character(f, n)) == TRUE)
-		s = ldelchar(n, f);
+		s = delete_characters(n, f);
 	return s;
 }
 
@@ -754,26 +754,26 @@ int cmd_kill_to_end_of_line(int f, int n)
 		kdelete();			/* last wasn't a kill.  */
 	thisflag |= CFKILL;
 	if (f == FALSE) {
-		chunk = llength(curwp->w_dotp) - curwp->w_doto;
+		chunk = line_length(curwp->w_dotp) - curwp->w_doto;
 		if (chunk == 0)
 			chunk = 1;
 	} else if (n == 0) {
 		chunk = curwp->w_doto;
 		curwp->w_doto = 0;
 	} else if (n > 0) {
-		chunk = llength(curwp->w_dotp) - curwp->w_doto + 1;
-		nextp = lforw(curwp->w_dotp);
+		chunk = line_length(curwp->w_dotp) - curwp->w_doto + 1;
+		nextp = line_next(curwp->w_dotp);
 		while (--n) {
 			if (nextp == curbp->b_linep)
 				return FALSE;
-			chunk += llength(nextp) + 1;
-			nextp = lforw(nextp);
+			chunk += line_length(nextp) + 1;
+			nextp = line_next(nextp);
 		}
 	} else {
 		msg_printf("neg kill");
 		return FALSE;
 	}
-	return ldelete(chunk, TRUE);
+	return delete_bytes(chunk, TRUE);
 }
 
 /*
@@ -933,7 +933,7 @@ int cmd_goto_matching_fence(int f, int n)
 	oldoff = curwp->w_doto;
 
 	/* get the current character */
-	if (oldoff == llength(oldlp))
+	if (oldoff == line_length(oldlp))
 		ch = '\n';
 	else
 		ch = lgetc(oldlp, oldoff);
@@ -978,7 +978,7 @@ int cmd_goto_matching_fence(int f, int n)
 
 	/* scan until we find it, or reach the end of file */
 	while (count > 0) {
-		if (curwp->w_doto == llength(curwp->w_dotp))
+		if (curwp->w_doto == line_length(curwp->w_dotp))
 			c = '\n';
 		else
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -1048,7 +1048,7 @@ int fmatch(int ch)
 
 	/* scan back until we find it, or reach past the top of the window */
 	while (count > 0 && curwp->w_dotp != toplp) {
-		if (curwp->w_doto == llength(curwp->w_dotp))
+		if (curwp->w_doto == line_length(curwp->w_dotp))
 			c = '\n';
 		else
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -1097,7 +1097,7 @@ int cmd_insert_string(int f, int n)
 		n = -n;
 
 	/* insert it */
-	while (n-- && (status = linstr(tstring))) ;
+	while (n-- && (status = insert_string(tstring))) ;
 	return status;
 }
 
@@ -1124,6 +1124,6 @@ int cmd_overwrite_string(int f, int n)
 		n = -n;
 
 	/* insert it */
-	while (n-- && (status = lover(tstring))) ;
+	while (n-- && (status = overwrite_string(tstring))) ;
 	return status;
 }

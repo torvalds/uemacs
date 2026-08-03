@@ -444,7 +444,7 @@ int execute(int c, int f, int n)
 		if (curwp->w_bufp->b_mode & MDOVER &&
 		    curwp->w_doto < curwp->w_dotp->l_used &&
 		    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' || (curwp->w_doto) % 8 == 7))
-			ldelchar(1, FALSE);
+			delete_characters(1, FALSE);
 
 		/* do the appropriate insertion */
 		if (c == '}' && (curbp->b_mode & MDCMOD) != 0)
@@ -452,7 +452,7 @@ int execute(int c, int f, int n)
 		else if (c == '#' && (curbp->b_mode & MDCMOD) != 0)
 			status = inspound();
 		else
-			status = linsert(n, c);
+			status = insert_char(n, c);
 
 		/* check for CMODE fence matching */
 		if ((c == '}' || c == ')' || c == ']') && (curbp->b_mode & MDCMOD) != 0)

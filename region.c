@@ -34,7 +34,7 @@ int cmd_kill_region(int f, int n)
 	thisflag |= CFKILL;			/* kill buffer stuff.   */
 	curwp->w_dotp = region.r_linep;
 	curwp->w_doto = region.r_offset;
-	return ldelete(region.r_size, TRUE);
+	return delete_bytes(region.r_size, TRUE);
 }
 
 /*
@@ -58,10 +58,10 @@ int cmd_copy_region(int f, int n)
 	linep = region.r_linep;			/* Current line.        */
 	loffs = region.r_offset;		/* Current offset.      */
 	while (region.r_size--) {
-		if (loffs == llength(linep)) {	/* End of line.         */
+		if (loffs == line_length(linep)) {	/* End of line.         */
 			if ((s = kinsert('\n')) != TRUE)
 				return s;
-			linep = lforw(linep);
+			linep = line_next(linep);
 			loffs = 0;
 		} else {			/* Middle of line.      */
 			if ((s = kinsert(lgetc(linep, loffs))) != TRUE)
@@ -77,7 +77,7 @@ int cmd_copy_region(int f, int n)
  * Lower case region. Zap all of the upper
  * case characters in the region to lower case. Use
  * the region code to set the limits. Scan the buffer,
- * doing the changes. Call "lchange" to ensure that
+ * doing the changes. Call "buffer_changed" to ensure that
  * redisplay is done in all buffers. Bound to
  * "C-X C-L".
  */
@@ -93,12 +93,12 @@ int cmd_case_region_lower(int f, int n)
 		return rdonly();		/* we are in read only mode     */
 	if ((s = getregion(&region)) != TRUE)
 		return s;
-	lchange(WFHARD);
+	buffer_changed(WFHARD);
 	linep = region.r_linep;
 	loffs = region.r_offset;
 	while (region.r_size--) {
-		if (loffs == llength(linep)) {
-			linep = lforw(linep);
+		if (loffs == line_length(linep)) {
+			linep = line_next(linep);
 			loffs = 0;
 		} else {
 			c = lgetc(linep, loffs);
@@ -114,7 +114,7 @@ int cmd_case_region_lower(int f, int n)
  * Upper case region. Zap all of the lower
  * case characters in the region to upper case. Use
  * the region code to set the limits. Scan the buffer,
- * doing the changes. Call "lchange" to ensure that
+ * doing the changes. Call "buffer_changed" to ensure that
  * redisplay is done in all buffers. Bound to
  * "C-X C-L".
  */
@@ -130,12 +130,12 @@ int cmd_case_region_upper(int f, int n)
 		return rdonly();		/* we are in read only mode     */
 	if ((s = getregion(&region)) != TRUE)
 		return s;
-	lchange(WFHARD);
+	buffer_changed(WFHARD);
 	linep = region.r_linep;
 	loffs = region.r_offset;
 	while (region.r_size--) {
-		if (loffs == llength(linep)) {
-			linep = lforw(linep);
+		if (loffs == line_length(linep)) {
+			linep = line_next(linep);
 			loffs = 0;
 		} else {
 			c = lgetc(linep, loffs);
@@ -183,21 +183,21 @@ int getregion(struct region *rp)
 	blp = curwp->w_dotp;
 	bsize = (long)curwp->w_doto;
 	flp = curwp->w_dotp;
-	fsize = (long)(llength(flp) - curwp->w_doto + 1);
-	while (flp != curbp->b_linep || lback(blp) != curbp->b_linep) {
+	fsize = (long)(line_length(flp) - curwp->w_doto + 1);
+	while (flp != curbp->b_linep || line_prev(blp) != curbp->b_linep) {
 		if (flp != curbp->b_linep) {
-			flp = lforw(flp);
+			flp = line_next(flp);
 			if (flp == curwp->w_markp) {
 				rp->r_linep = curwp->w_dotp;
 				rp->r_offset = curwp->w_doto;
 				rp->r_size = fsize + curwp->w_marko;
 				return TRUE;
 			}
-			fsize += llength(flp) + 1;
+			fsize += line_length(flp) + 1;
 		}
-		if (lback(blp) != curbp->b_linep) {
-			blp = lback(blp);
-			bsize += llength(blp) + 1;
+		if (line_prev(blp) != curbp->b_linep) {
+			blp = line_prev(blp);
+			bsize += line_length(blp) + 1;
 			if (blp == curwp->w_markp) {
 				rp->r_linep = blp;
 				rp->r_offset = curwp->w_marko;

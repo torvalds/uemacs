@@ -569,7 +569,7 @@ int dobuf(struct buffer *bp)
 		if (mstore) {
 			/* allocate the space for the line */
 			linlen = strlen(eline);
-			if ((mp = lalloc(linlen)) == NULL) {
+			if ((mp = line_alloc(linlen)) == NULL) {
 				msg_printf("Out of memory while storing macro");
 				return FALSE;
 			}

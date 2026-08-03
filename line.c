@@ -30,7 +30,7 @@
  * a pointer to the new block, or NULL if there isn't any memory left. Print a
  * message in the message line if no space.
  */
-struct line *lalloc(int used)
+struct line *line_alloc(int used)
 {
 	struct line *lp;
 	int size;
@@ -53,7 +53,7 @@ struct line *lalloc(int used)
  * might be in. Release the memory. The buffers are updated too; the magic
  * conditions described in the above comments don't hold here.
  */
-void lfree(struct line *lp)
+void line_free(struct line *lp)
 {
 	struct buffer *bp;
 	struct window *wp;
@@ -96,7 +96,7 @@ void lfree(struct line *lp)
  * displayed in more than 1 window we change EDIT t HARD. Set MODE if the
  * mode line needs to be updated (the "*" has to be set).
  */
-void lchange(int flag)
+void buffer_changed(int flag)
 {
 	struct window *wp;
 
@@ -118,23 +118,23 @@ void lchange(int flag)
  */
 int cmd_insert_space(int f, int n)
 {
-	linsert(n, ' ');
+	insert_char(n, ' ');
 	cmd_backward_character(f, n);
 	return TRUE;
 }
 
 /*
- * linstr -- Insert a string at the current point
+ * insert_string -- Insert a string at the current point
  */
 
-int linstr(char *instr)
+int insert_string(char *instr)
 {
 	int status = TRUE;
 	char tmpc;
 
 	if (instr != NULL)
 		while ((tmpc = *instr) && status == TRUE) {
-			status = (tmpc == '\n' ? lnewline() : linsert(1, tmpc));
+			status = (tmpc == '\n' ? insert_newline() : insert_char(1, tmpc));
 
 			/* Insertion error? */
 			if (status != TRUE) {
@@ -156,7 +156,7 @@ int linstr(char *instr)
  * well, and FALSE on errors.
  */
 
-static int linsert_byte(int n, int c)
+static int insert_byte(int n, int c)
 {
 	struct line *lp1;
 	struct line *lp2;
@@ -166,14 +166,14 @@ static int linsert_byte(int n, int c)
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
-	lchange(WFEDIT);
+	buffer_changed(WFEDIT);
 	lp1 = curwp->w_dotp;			/* Current line         */
 	if (lp1 == curbp->b_linep) {		/* At the end: special  */
 		if (curwp->w_doto != 0) {
-			msg_printf("bug: linsert");
+			msg_printf("bug: insert_char");
 			return FALSE;
 		}
-		if ((lp2 = lalloc(n)) == NULL)	/* Allocate new line        */
+		if ((lp2 = line_alloc(n)) == NULL)	/* Allocate new line        */
 			return FALSE;
 		lp3 = lp1->l_bp;		/* Previous line        */
 		lp3->l_fp = lp2;		/* Link in              */
@@ -187,7 +187,7 @@ static int linsert_byte(int n, int c)
 	}
 	doto = curwp->w_doto;			/* Save for later.      */
 	if (lp1->l_used + n > lp1->l_size) {	/* Hard: reallocate     */
-		if ((lp2 = lalloc(lp1->l_used + n)) == NULL)
+		if ((lp2 = line_alloc(lp1->l_used + n)) == NULL)
 			return FALSE;
 		memcpy(lp2->l_text, lp1->l_text, doto);
 		memcpy(lp2->l_text + doto + n, lp1->l_text + doto,
@@ -219,18 +219,18 @@ static int linsert_byte(int n, int c)
 	return TRUE;
 }
 
-int linsert(int n, int c)
+int insert_char(int n, int c)
 {
 	char utf8[6];
 	int bytes = unicode_to_utf8(c, utf8), i;
 
 	if (bytes == 1)
-		return linsert_byte(n, (unsigned char)utf8[0]);
+		return insert_byte(n, (unsigned char)utf8[0]);
 	for (i = 0; i < n; i++) {
 		int j;
 		for (j = 0; j < bytes; j++) {
 			unsigned char c = utf8[j];
-			if (!linsert_byte(1, c))
+			if (!insert_byte(1, c))
 				return FALSE;
 		}
 	}
@@ -242,25 +242,25 @@ int linsert(int n, int c)
  *
  * int c;	character to overwrite on current position
  */
-int lowrite(int c)
+int overwrite_char(int c)
 {
 	if (curwp->w_doto < curwp->w_dotp->l_used &&
 	    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' || ((curwp->w_doto) & tabmask) == tabmask))
-		ldelchar(1, FALSE);
-	return linsert(1, c);
+		delete_characters(1, FALSE);
+	return insert_char(1, c);
 }
 
 /*
- * lover -- Overwrite a string at the current point
+ * overwrite_string -- Overwrite a string at the current point
  */
-int lover(char *ostr)
+int overwrite_string(char *ostr)
 {
 	int status = TRUE;
 	char tmpc;
 
 	if (ostr != NULL)
 		while ((tmpc = *ostr) && status == TRUE) {
-			status = (tmpc == '\n' ? lnewline() : lowrite(tmpc));
+			status = (tmpc == '\n' ? insert_newline() : overwrite_char(tmpc));
 
 			/* Insertion error? */
 			if (status != TRUE) {
@@ -280,7 +280,7 @@ int lover(char *ostr)
  * update of dot and mark is a bit easier then in the above case, because the
  * split forces more updating.
  */
-int lnewline(void)
+int insert_newline(void)
 {
 	char *cp1;
 	char *cp2;
@@ -291,10 +291,10 @@ int lnewline(void)
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
-	lchange(WFHARD);
+	buffer_changed(WFHARD);
 	lp1 = curwp->w_dotp;			/* Get the address and  */
 	doto = curwp->w_doto;			/* offset of "."        */
-	if ((lp2 = lalloc(doto)) == NULL)	/* New first half line      */
+	if ((lp2 = line_alloc(doto)) == NULL)	/* New first half line      */
 		return FALSE;
 	cp1 = &lp1->l_text[0];			/* Shuffle text around  */
 	cp2 = &lp2->l_text[0];
@@ -326,25 +326,24 @@ int lnewline(void)
 	return TRUE;
 }
 
-int lgetchar(unicode_t *c)
+int char_at_dot(unicode_t *c)
 {
-	int len = llength(curwp->w_dotp);
+	int len = line_length(curwp->w_dotp);
 	char *buf = curwp->w_dotp->l_text;
 	return utf8_to_unicode(buf, curwp->w_doto, len, c);
 }
 
 /*
- * ldelete() really fundamentally works on bytes, not characters.
- * It is used for things like "scan 5 words forwards, and remove
- * the bytes we scanned".
- *
- * If you want to delete characters, use ldelchar().
+ * delete_bytes() is what to reach for when the count came from scanning
+ * the text - "scan 5 words forwards, and remove the bytes we scanned"
+ * is a byte count.  This one is for when you have a number of
+ * characters, and works out how many bytes each of them is.
  */
-int ldelchar(long n, int kflag)
+int delete_characters(long n, int kflag)
 {
 	while (n-- > 0) {
 		unicode_t c;
-		if (!ldelete(lgetchar(&c), kflag))
+		if (!delete_bytes(char_at_dot(&c), kflag))
 			return FALSE;
 	}
 	return TRUE;
@@ -359,7 +358,7 @@ int ldelchar(long n, int kflag)
  * long n;		# of chars to delete
  * int kflag;		 put killed text in kill buffer flag
  */
-int ldelete(long n, int kflag)
+int delete_bytes(long n, int kflag)
 {
 	char *cp1;
 	char *cp2;
@@ -379,13 +378,13 @@ int ldelete(long n, int kflag)
 		if (chunk > n)
 			chunk = n;
 		if (chunk == 0) {		/* End of line, merge.  */
-			lchange(WFHARD);
-			if (ldelnewline() == FALSE || (kflag != FALSE && kinsert('\n') == FALSE))
+			buffer_changed(WFHARD);
+			if (delete_newline() == FALSE || (kflag != FALSE && kinsert('\n') == FALSE))
 				return FALSE;
 			--n;
 			continue;
 		}
-		lchange(WFEDIT);
+		buffer_changed(WFEDIT);
 		cp1 = &dotp->l_text[doto];	/* Scrunch text.        */
 		cp2 = cp1 + chunk;
 		if (kflag != FALSE) {		/* Kill?                */
@@ -458,9 +457,9 @@ int putctext(char *iline)
 		return status;
 
 	/* insert the new line */
-	if ((status = linstr(iline)) != TRUE)
+	if ((status = insert_string(iline)) != TRUE)
 		return status;
-	status = lnewline();
+	status = insert_newline();
 	cmd_previous_line(TRUE, 1);
 	return status;
 }
@@ -472,9 +471,9 @@ int putctext(char *iline)
  * if nothing is done, and this makes the kill buffer work "right". Easy cases
  * can be done by shuffling data around. Hard cases require that lines be moved
  * about in memory. Return FALSE on error and TRUE if all looks ok. Called by
- * "ldelete" only.
+ * "delete_bytes" only.
  */
-int ldelnewline(void)
+int delete_newline(void)
 {
 	char *cp1;
 	char *cp2;
@@ -489,7 +488,7 @@ int ldelnewline(void)
 	lp2 = lp1->l_fp;
 	if (lp2 == curbp->b_linep) {		/* At the buffer end.   */
 		if (lp1->l_used == 0)		/* Blank line.              */
-			lfree(lp1);
+			line_free(lp1);
 		return TRUE;
 	}
 	if (lp2->l_used <= lp1->l_size - lp1->l_used) {
@@ -514,7 +513,7 @@ int ldelnewline(void)
 		free((char *)lp2);
 		return TRUE;
 	}
-	if ((lp3 = lalloc(lp1->l_used + lp2->l_used)) == NULL)
+	if ((lp3 = line_alloc(lp1->l_used + lp2->l_used)) == NULL)
 		return FALSE;
 	cp1 = &lp1->l_text[0];
 	cp2 = &lp3->l_text[0];
@@ -631,10 +630,10 @@ int cmd_yank(int f, int n)
 			sp = kp->d_chunk;
 			while (i--) {
 				if ((c = *sp++) == '\n') {
-					if (lnewline() == FALSE)
+					if (insert_newline() == FALSE)
 						return FALSE;
 				} else {
-					if (linsert_byte(1, c) == FALSE)
+					if (insert_byte(1, c) == FALSE)
 						return FALSE;
 				}
 			}

@@ -27,7 +27,7 @@ static int getgoal(struct line *dlp)
 {
 	int col;
 	int dbo;
-	int len = llength(dlp);
+	int len = line_length(dlp);
 
 	col = 0;
 	dbo = 0;
@@ -66,10 +66,10 @@ int cmd_backward_character(int f, int n)
 		return cmd_forward_character(f, -n);
 	while (n--) {
 		if (curwp->w_doto == 0) {
-			if ((lp = lback(curwp->w_dotp)) == curbp->b_linep)
+			if ((lp = line_prev(curwp->w_dotp)) == curbp->b_linep)
 				return FALSE;
 			curwp->w_dotp = lp;
-			curwp->w_doto = llength(lp);
+			curwp->w_doto = line_length(lp);
 			curwp->w_flag |= WFMOVE;
 		} else {
 			do {
@@ -89,7 +89,7 @@ int cmd_backward_character(int f, int n)
  */
 int cmd_end_of_line(int f, int n)
 {
-	curwp->w_doto = llength(curwp->w_dotp);
+	curwp->w_doto = line_length(curwp->w_dotp);
 	return TRUE;
 }
 
@@ -104,11 +104,11 @@ int cmd_forward_character(int f, int n)
 	if (n < 0)
 		return cmd_backward_character(f, -n);
 	while (n--) {
-		int len = llength(curwp->w_dotp);
+		int len = line_length(curwp->w_dotp);
 		if (curwp->w_doto == len) {
 			if (curwp->w_dotp == curbp->b_linep)
 				return FALSE;
-			curwp->w_dotp = lforw(curwp->w_dotp);
+			curwp->w_dotp = line_next(curwp->w_dotp);
 			curwp->w_doto = 0;
 			curwp->w_flag |= WFMOVE;
 		} else {
@@ -165,7 +165,7 @@ int cmd_goto_line(int f, int n)
  */
 int cmd_beginning_of_file(int f, int n)
 {
-	curwp->w_dotp = lforw(curbp->b_linep);
+	curwp->w_dotp = line_next(curbp->b_linep);
 	curwp->w_doto = 0;
 	curwp->w_flag |= WFHARD;
 	return TRUE;
@@ -212,7 +212,7 @@ int cmd_next_line(int f, int n)
 	/* and move the point down */
 	dlp = curwp->w_dotp;
 	while (n-- && dlp != curbp->b_linep)
-		dlp = lforw(dlp);
+		dlp = line_next(dlp);
 
 	/* reseting the current position */
 	curwp->w_dotp = dlp;
@@ -235,7 +235,7 @@ int cmd_previous_line(int f, int n)
 		return cmd_next_line(f, -n);
 
 	/* if we are on the last line as we start....fail the command */
-	if (lback(curwp->w_dotp) == curbp->b_linep)
+	if (line_prev(curwp->w_dotp) == curbp->b_linep)
 		return FALSE;
 
 	/* if the last command was not note a line move,
@@ -248,8 +248,8 @@ int cmd_previous_line(int f, int n)
 
 	/* and move the point up */
 	dlp = curwp->w_dotp;
-	while (n-- && lback(dlp) != curbp->b_linep)
-		dlp = lback(dlp);
+	while (n-- && line_prev(dlp) != curbp->b_linep)
+		dlp = line_prev(dlp);
 
 	/* reseting the current position */
 	curwp->w_dotp = dlp;
@@ -262,7 +262,7 @@ static int is_new_para(void)
 {
 	int i, len;
 
-	len = llength(curwp->w_dotp);
+	len = line_length(curwp->w_dotp);
 
 	for (i = 0; i < len; i++) {
 		int c = lgetc(curwp->w_dotp, i);
@@ -302,10 +302,10 @@ int cmd_previous_paragraph(int f, int n)
 
 		/* and scan back until we hit a <NL><NL> or <NL><TAB>
 		   or a <NL><SPACE>                                     */
-		while (lback(curwp->w_dotp) != curbp->b_linep) {
+		while (line_prev(curwp->w_dotp) != curbp->b_linep) {
 			if (is_new_para())
 				break;
-			curwp->w_dotp = lback(curwp->w_dotp);
+			curwp->w_dotp = line_prev(curwp->w_dotp);
 		}
 
 		/* and then forward until we are in a word */
@@ -338,14 +338,14 @@ int cmd_next_paragraph(int f, int n)
 			suc = cmd_forward_character(FALSE, 1);
 		curwp->w_doto = 0;		/* and go to the B-O-Line */
 		if (suc)			/* of next line if not at EOF */
-			curwp->w_dotp = lforw(curwp->w_dotp);
+			curwp->w_dotp = line_next(curwp->w_dotp);
 
 		/* and scan forword until we hit a <NL><NL> or <NL><TAB>
 		   or a <NL><SPACE>                                     */
 		while (curwp->w_dotp != curbp->b_linep) {
 			if (is_new_para())
 				break;
-			curwp->w_dotp = lforw(curwp->w_dotp);
+			curwp->w_dotp = line_next(curwp->w_dotp);
 		}
 
 		/* and then backward until we are in a word */
@@ -353,7 +353,7 @@ int cmd_next_paragraph(int f, int n)
 		while (suc && !inword()) {
 			suc = cmd_backward_character(FALSE, 1);
 		}
-		curwp->w_doto = llength(curwp->w_dotp);	/* and to the EOL */
+		curwp->w_doto = line_length(curwp->w_dotp);	/* and to the EOL */
 	}
 	curwp->w_flag |= WFMOVE;		/* force screen update */
 	return TRUE;
@@ -379,7 +379,7 @@ int cmd_next_page(int f, int n)
 		n *= term.t_nrow - 1;		/* To lines. */
 	lp = curwp->w_linep;
 	while (n-- && lp != curbp->b_linep)
-		lp = lforw(lp);
+		lp = line_next(lp);
 	curwp->w_linep = lp;
 	curwp->w_dotp = lp;
 	curwp->w_doto = 0;
@@ -409,15 +409,15 @@ int cmd_previous_page(int f, int n)
 	lp = curwp->w_linep;
 
 	/* if we are on the first line as we start... move cursor */
-	if (lback(lp) == curbp->b_linep) {
+	if (line_prev(lp) == curbp->b_linep) {
 		curwp->w_dotp = lp;
 		curwp->w_doto = 0;
 		curwp->w_flag |= WFMOVE;
 		return FALSE;
 	}
 
-	while (n-- && lback(lp) != curbp->b_linep)
-		lp = lback(lp);
+	while (n-- && line_prev(lp) != curbp->b_linep)
+		lp = line_prev(lp);
 	curwp->w_linep = lp;
 	curwp->w_dotp = lp;
 	curwp->w_doto = 0;

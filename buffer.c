@@ -90,7 +90,7 @@ int swbuffer(struct buffer *bp)
 	if (curbp->b_active != TRUE) {		/* buffer not active yet */
 		/* read it in and activate it */
 		readin(curbp->b_fname, TRUE);
-		curbp->b_dotp = lforw(curbp->b_linep);
+		curbp->b_dotp = line_next(curbp->b_linep);
 		curbp->b_doto = 0;
 		curbp->b_active = TRUE;
 		curbp->b_mode |= gmode;		/* P.K. */
@@ -219,7 +219,7 @@ int addline(char *text)
 	int ntext;
 
 	ntext = strlen(text);
-	if ((lp = lalloc(ntext)) == NULL)
+	if ((lp = line_alloc(ntext)) == NULL)
 		return FALSE;
 	for (i = 0; i < ntext; ++i)
 		lputc(lp, i, text[i]);
@@ -277,7 +277,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 	if (cflag != FALSE) {
 		if ((bp = (struct buffer *)malloc(sizeof(struct buffer))) == NULL)
 			return NULL;
-		if ((lp = lalloc(0)) == NULL) {
+		if ((lp = line_alloc(0)) == NULL) {
 			free((char *)bp);
 			return NULL;
 		}
@@ -338,8 +338,8 @@ int bclear(struct buffer *bp)
 	    && (s = ask_yesno("Discard changes")) != TRUE)
 		return s;
 	bp->b_flag &= ~BFCHG;			/* Not changed          */
-	while ((lp = lforw(bp->b_linep)) != bp->b_linep)
-		lfree(lp);
+	while ((lp = line_next(bp->b_linep)) != bp->b_linep)
+		line_free(lp);
 	bp->b_dotp = bp->b_linep;		/* Fix "."              */
 	bp->b_doto = 0;
 	bp->b_markp = NULL;			/* Invalidate "mark"    */

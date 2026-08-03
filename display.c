@@ -221,7 +221,7 @@ static void paint_line(int row, struct line *lp, int offset, bool check)
 {
 	struct paint p = { .offset = offset };
 	char *text = lp ? lp->l_text : NULL;
-	int len = lp ? llength(lp) : 0;
+	int len = lp ? line_length(lp) : 0;
 	int i = 0;
 
 	movecursor(row, 0);
@@ -284,7 +284,7 @@ static void paint_window(struct window *wp, bool check)
 		paint_line(row, eob ? NULL : lp,
 			   row == currow ? lbound : 0, check);
 		if (!eob)
-			lp = lforw(lp);
+			lp = line_next(lp);
 	}
 	modeline(wp);
 }
@@ -386,7 +386,7 @@ static int reframe(struct window *wp)
 	if ((wp->w_flag & WFFORCE) == 0) {
 		/* loop from one line above the window to one line after */
 		lp = wp->w_linep;
-		lp0 = lback(lp);
+		lp0 = line_prev(lp);
 		if (lp0 == wp->w_bufp->b_linep)
 			i = 0;
 		else {
@@ -408,7 +408,7 @@ static int reframe(struct window *wp)
 				break;
 
 			/* on to the next line */
-			lp = lforw(lp);
+			lp = line_next(lp);
 		}
 	}
 	if (i == -1) {				/* we're just above the window */
@@ -433,9 +433,9 @@ static int reframe(struct window *wp)
 
 	/* backup to new line at top of window */
 	lp = wp->w_dotp;
-	while (i != 0 && lback(lp) != wp->w_bufp->b_linep) {
+	while (i != 0 && line_prev(lp) != wp->w_bufp->b_linep) {
 		--i;
-		lp = lback(lp);
+		lp = line_prev(lp);
 	}
 
 	/* and reset the current line at top of window */
@@ -460,7 +460,7 @@ static void updpos(void)
 	currow = 0;
 	while (lp != curwp->w_dotp) {
 		++currow;
-		lp = lforw(lp);
+		lp = line_next(lp);
 	}
 
 	/* find the current column */
@@ -628,13 +628,13 @@ static void modeline(struct window *wp)
 
 		n -= 7;				/* strlen(" top ") plus a couple */
 		while (rows--) {
-			lp = lforw(lp);
+			lp = line_next(lp);
 			if (lp == wp->w_bufp->b_linep) {
 				msg = " Bot ";
 				break;
 			}
 		}
-		if (lback(wp->w_linep) == wp->w_bufp->b_linep) {
+		if (line_prev(wp->w_linep) == wp->w_bufp->b_linep) {
 			if (msg) {
 				if (wp->w_linep == wp->w_bufp->b_linep)
 					msg = " Emp ";
@@ -648,7 +648,7 @@ static void modeline(struct window *wp)
 			struct line *lp;
 			int numlines, predlines, ratio;
 
-			lp = lforw(bp->b_linep);
+			lp = line_next(bp->b_linep);
 			numlines = 0;
 			predlines = 0;
 			while (lp != bp->b_linep) {
@@ -656,7 +656,7 @@ static void modeline(struct window *wp)
 					predlines = numlines;
 				}
 				++numlines;
-				lp = lforw(lp);
+				lp = line_next(lp);
 			}
 			if (wp->w_dotp == bp->b_linep) {
 				msg = " Bot ";

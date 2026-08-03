@@ -44,7 +44,7 @@ int cmd_wrap_word(int f, int n)
 		/* if we make it to the beginning, start a new line */
 		if (curwp->w_doto == 0) {
 			cmd_end_of_line(FALSE, 0);
-			return lnewline();
+			return insert_newline();
 		}
 	}
 
@@ -53,7 +53,7 @@ int cmd_wrap_word(int f, int n)
 		return FALSE;
 
 	/* put in a end of line */
-	if (!lnewline())
+	if (!insert_newline())
 		return FALSE;
 
 	/* and past the first word */
@@ -133,7 +133,7 @@ int cmd_case_word_upper(int f, int n)
 			if (islower(c)) {
 				c -= 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
-				lchange(WFHARD);
+				buffer_changed(WFHARD);
 			}
 			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
@@ -165,7 +165,7 @@ int cmd_case_word_lower(int f, int n)
 			if (isupper(c)) {
 				c += 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
-				lchange(WFHARD);
+				buffer_changed(WFHARD);
 			}
 			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
@@ -198,7 +198,7 @@ int cmd_case_word_capitalize(int f, int n)
 			if (islower(c)) {
 				c -= 'a' - 'A';
 				lputc(curwp->w_dotp, curwp->w_doto, c);
-				lchange(WFHARD);
+				buffer_changed(WFHARD);
 			}
 			if (cmd_forward_character(FALSE, 1) == FALSE)
 				return FALSE;
@@ -207,7 +207,7 @@ int cmd_case_word_capitalize(int f, int n)
 				if (isupper(c)) {
 					c += 'a' - 'A';
 					lputc(curwp->w_dotp, curwp->w_doto, c);
-					lchange(WFHARD);
+					buffer_changed(WFHARD);
 				}
 				if (cmd_forward_character(FALSE, 1) == FALSE)
 					return FALSE;
@@ -269,7 +269,7 @@ int cmd_delete_next_word(int f, int n)
 		while (n--) {
 
 			/* if we are at EOL; skip to the beginning of the next */
-			while (curwp->w_doto == llength(curwp->w_dotp)) {
+			while (curwp->w_doto == line_length(curwp->w_dotp)) {
 				if (cmd_forward_character(FALSE, 1) == FALSE)
 					return FALSE;
 				++size;
@@ -292,7 +292,7 @@ int cmd_delete_next_word(int f, int n)
 		}
 
 		/* skip whitespace and newlines */
-		while ((curwp->w_doto == llength(curwp->w_dotp)) ||
+		while ((curwp->w_doto == line_length(curwp->w_dotp)) ||
 		       ((c = lgetc(curwp->w_dotp, curwp->w_doto)) == ' ')
 		       || (c == '\t')) {
 			if (cmd_forward_character(FALSE, 1) == FALSE)
@@ -304,7 +304,7 @@ int cmd_delete_next_word(int f, int n)
 	/* restore the original position and delete the words */
 	curwp->w_dotp = dotp;
 	curwp->w_doto = doto;
-	return ldelete(size, TRUE);
+	return delete_bytes(size, TRUE);
 }
 
 /*
@@ -346,7 +346,7 @@ int cmd_delete_previous_word(int f, int n)
 	}
 	if (cmd_forward_character(FALSE, 1) == FALSE)
 		return FALSE;
- bckdel:return ldelchar(size, TRUE);
+ bckdel:return delete_characters(size, TRUE);
 }
 
 /*
@@ -357,7 +357,7 @@ int inword(void)
 {
 	int c;
 
-	if (curwp->w_doto == llength(curwp->w_dotp))
+	if (curwp->w_doto == line_length(curwp->w_dotp))
 		return FALSE;
 	c = lgetc(curwp->w_dotp, curwp->w_doto);
 	if (isletter(c))
@@ -396,7 +396,7 @@ int cmd_fill_paragraph(int f, int n)
 
 	/* record the pointer to the line just past the EOP */
 	cmd_next_paragraph(FALSE, 1);
-	eopline = lforw(curwp->w_dotp);
+	eopline = line_next(curwp->w_dotp);
 
 	/* and back top the beginning of the paragraph */
 	cmd_previous_paragraph(FALSE, 1);
@@ -415,15 +415,15 @@ int cmd_fill_paragraph(int f, int n)
 		int bytes = 1;
 
 		/* get the next character in the paragraph */
-		if (curwp->w_doto == llength(curwp->w_dotp)) {
+		if (curwp->w_doto == line_length(curwp->w_dotp)) {
 			c = ' ';
-			if (lforw(curwp->w_dotp) == eopline)
+			if (line_next(curwp->w_dotp) == eopline)
 				eopflag = TRUE;
 		} else
-			bytes = lgetchar(&c);
+			bytes = char_at_dot(&c);
 
 		/* and then delete it */
-		ldelete(bytes, FALSE);
+		delete_bytes(bytes, FALSE);
 
 		/* if not a separator, just add it in */
 		if (c != ' ' && c != '\t') {
@@ -437,30 +437,30 @@ int cmd_fill_paragraph(int f, int n)
 			if (newlength <= fillcol) {
 				/* add word to current line */
 				if (!firstflag) {
-					linsert(1, ' ');	/* the space */
+					insert_char(1, ' ');	/* the space */
 					++clength;
 				}
 				firstflag = FALSE;
 			} else {
 				/* start a new line */
-				lnewline();
+				insert_newline();
 				clength = 0;
 			}
 
 			/* and add the word in in either case */
 			for (i = 0; i < wordlen; i++) {
-				linsert(1, wbuf[i]);
+				insert_char(1, wbuf[i]);
 				++clength;
 			}
 			if (dotflag) {
-				linsert(1, ' ');
+				insert_char(1, ' ');
 				++clength;
 			}
 			wordlen = 0;
 		}
 	}
 	/* and add a last newline for the end of our new paragraph */
-	lnewline();
+	insert_newline();
 	return TRUE;
 }
 
@@ -498,13 +498,13 @@ int cmd_justify_paragraph(int f, int n)
 
 	/* record the pointer to the line just past the EOP */
 	cmd_next_paragraph(FALSE, 1);
-	eopline = lforw(curwp->w_dotp);
+	eopline = line_next(curwp->w_dotp);
 
 	/* and back top the beginning of the paragraph */
 	cmd_previous_paragraph(FALSE, 1);
 
 	/* initialize various info */
-	if (leftmarg < llength(curwp->w_dotp))
+	if (leftmarg < line_length(curwp->w_dotp))
 		curwp->w_doto = leftmarg;
 
 	clength = curwp->w_doto;
@@ -520,15 +520,15 @@ int cmd_justify_paragraph(int f, int n)
 		int bytes = 1;
 
 		/* get the next character in the paragraph */
-		if (curwp->w_doto == llength(curwp->w_dotp)) {
+		if (curwp->w_doto == line_length(curwp->w_dotp)) {
 			c = ' ';
-			if (lforw(curwp->w_dotp) == eopline)
+			if (line_next(curwp->w_dotp) == eopline)
 				eopflag = TRUE;
 		} else
-			bytes = lgetchar(&c);
+			bytes = char_at_dot(&c);
 
 		/* and then delete it */
-		ldelete(bytes, FALSE);
+		delete_bytes(bytes, FALSE);
 
 		/* if not a separator, just add it in */
 		if (c != ' ' && c != '\t') {
@@ -541,34 +541,34 @@ int cmd_justify_paragraph(int f, int n)
 			if (newlength <= fillcol) {
 				/* add word to current line */
 				if (!firstflag) {
-					linsert(1, ' ');	/* the space */
+					insert_char(1, ' ');	/* the space */
 					++clength;
 				}
 				firstflag = FALSE;
 			} else {
 				/* start a new line */
-				lnewline();
+				insert_newline();
 				for (i = 0; i < leftmarg; i++)
-					linsert(1, ' ');
+					insert_char(1, ' ');
 				clength = leftmarg;
 			}
 
 			/* and add the word in in either case */
 			for (i = 0; i < wordlen; i++) {
-				linsert(1, wbuf[i]);
+				insert_char(1, wbuf[i]);
 				++clength;
 			}
 			wordlen = 0;
 		}
 	}
 	/* and add a last newline for the end of our new paragraph */
-	lnewline();
+	insert_newline();
 
 	cmd_next_word(FALSE, 1);
-	if (llength(curwp->w_dotp) > leftmarg)
+	if (line_length(curwp->w_dotp) > leftmarg)
 		curwp->w_doto = leftmarg;
 	else
-		curwp->w_doto = llength(curwp->w_dotp);
+		curwp->w_doto = line_length(curwp->w_dotp);
 
 	justflag = FALSE;
 	return TRUE;
@@ -602,7 +602,7 @@ int cmd_kill_paragraph(int f, int n)
 			return status;
 
 		/* and clean up the 2 extra lines */
-		ldelete(2L, TRUE);
+		delete_bytes(2L, TRUE);
 	}
 	return TRUE;
 }
@@ -644,9 +644,9 @@ int cmd_count_words(int f, int n)
 	while (size--) {
 
 		/* get the current character */
-		if (offset == llength(lp)) {	/* end of line */
+		if (offset == line_length(lp)) {	/* end of line */
 			ch = '\n';
-			lp = lforw(lp);
+			lp = line_next(lp);
 			offset = 0;
 			++nlines;
 		} else {

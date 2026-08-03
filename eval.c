@@ -279,7 +279,7 @@ char *gtenv(char *vname)
 	case EVPENDING:
 		return ltos(typahead());
 	case EVLWIDTH:
-		return itoa(llength(curwp->w_dotp));
+		return itoa(line_length(curwp->w_dotp));
 	case EVLINE:
 		return getctext();
 	case EVGFLAGS:
@@ -509,12 +509,12 @@ int svar(struct variable_description *var, char *value)
 			lastkey = atoi(value);
 			break;
 		case EVCURCHAR:
-			ldelchar(1, FALSE);	/* delete 1 char */
+			delete_characters(1, FALSE);	/* delete 1 char */
 			c = atoi(value);
 			if (c == '\n')
-				lnewline();
+				insert_newline();
 			else
-				linsert(1, c);
+				insert_char(1, c);
 			cmd_backward_character(FALSE, 1);
 			break;
 		case EVDISCMD:

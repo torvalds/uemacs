@@ -277,8 +277,8 @@ int checknext(char chr, char *patrn, int dir)
 	curoff = curwp->w_doto;			/* Get the offset within that line    */
 
 	if (dir > 0) {				/* If searching forward                 */
-		if (curoff == llength(curline)) {	/* If at end of line                    */
-			curline = lforw(curline);	/* Skip to the next line              */
+		if (curoff == line_length(curline)) {	/* If at end of line                    */
+			curline = line_next(curline);	/* Skip to the next line              */
 			if (curline == curbp->b_linep)
 				return FALSE;	/* Abort if at end of buffer          */
 			curoff = 0;		/* Start at the beginning of the line */
@@ -351,8 +351,8 @@ int match_pat(char *patrn)
 	/* top of per character compare loop: */
 
 	for (i = 0; i < strlen(patrn); i++) {	/* Loop for all characters in patrn   */
-		if (curoff == llength(curline)) {	/* If at end of line                    */
-			curline = lforw(curline);	/* Skip to the next line              */
+		if (curoff == line_length(curline)) {	/* If at end of line                    */
+			curline = line_next(curline);	/* Skip to the next line              */
 			curoff = 0;		/* Start at the beginning of the line */
 			if (curline == curbp->b_linep)
 				return FALSE;	/* Abort if at end of buffer          */
