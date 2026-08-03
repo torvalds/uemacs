@@ -40,15 +40,6 @@ int spawncli(int f, int n)
 	sleep(2);
 	TTopen();
 	TTkopen();
-
-/*
- * This fools the update routines to force a full
- * redraw with complete window size checking.
- *		-lbt
- */
-	chg_width = term.t_ncol;
-	chg_height = term.t_nrow + 1;
-	term.t_nrow = term.t_ncol = 0;
 	return TRUE;
 }
 
