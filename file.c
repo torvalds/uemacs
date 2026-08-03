@@ -256,7 +256,7 @@ int readin(char *fname, int lockfl)
 	msg_printf("(Reading file)");
 	nline = 0;
 	while ((s = file_get_line()) == FIOSUC) {
-		nbytes = strlen(fline);
+		nbytes = strlen(file_line);
 		if ((lp1 = line_alloc(nbytes)) == NULL) {
 			s = FIOMEM;		/* Keep message on the  */
 			break;			/* display.             */
@@ -271,7 +271,7 @@ int readin(char *fname, int lockfl)
 		lp1->l_bp = lp2;
 		curbp->b_linep->l_bp = lp1;
 		for (i = 0; i < nbytes; ++i)
-			lputc(lp1, i, fline[i]);
+			lputc(lp1, i, file_line[i]);
 		++nline;
 	}
 	file_close();				/* Ignore errors.       */
@@ -538,7 +538,7 @@ int ifile(char *fname)
 
 	nline = 0;
 	while ((s = file_get_line()) == FIOSUC) {
-		nbytes = strlen(fline);
+		nbytes = strlen(file_line);
 		if ((lp1 = line_alloc(nbytes)) == NULL) {
 			s = FIOMEM;		/* Keep message on the  */
 			break;			/* display.             */
@@ -555,7 +555,7 @@ int ifile(char *fname)
 		/* and advance and write out the current line */
 		curwp->w_dotp = lp1;
 		for (i = 0; i < nbytes; ++i)
-			lputc(lp1, i, fline[i]);
+			lputc(lp1, i, file_line[i]);
 		++nline;
 	}
 	file_close();				/* Ignore errors.       */

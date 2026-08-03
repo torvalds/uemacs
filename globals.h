@@ -75,8 +75,8 @@ extern char truem[];				/* true literal                 */
 extern char falsem[];				/* false litereal               */
 extern int command_status;			/* last command status, the $status setting */
 extern int saveflag;				/* Flags, saved with the $target var */
-extern char *fline;				/* dynamic return line */
-extern int flen;				/* current length of fline */
+extern char *file_line;				/* buffer file_get_line() reads a line into */
+extern int file_line_size;			/* how big that allocation is, not the length in it */
 extern int rval;				/* return value of a subprocess */
 extern int nullflag;
 extern int justflag;				/* justify, don't fill */

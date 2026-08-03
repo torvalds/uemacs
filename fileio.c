@@ -44,9 +44,9 @@ int file_open_write(char *fn)
 int file_close(void)
 {
 	/* free this since we do not need it anymore */
-	if (fline) {
-		free(fline);
-		fline = NULL;
+	if (file_line) {
+		free(file_line);
+		file_line = NULL;
 	}
 	eofflag = FALSE;
 
@@ -96,26 +96,26 @@ int file_get_line(void)
 		return FIOEOF;
 
 	/* dump fline if it ended up too big */
-	if (flen > NSTRING) {
-		free(fline);
-		fline = NULL;
+	if (file_line_size > NSTRING) {
+		free(file_line);
+		file_line = NULL;
 	}
 
 	/* if we don't have an fline, allocate one */
-	if (fline == NULL)
-		if ((fline = malloc(flen = NSTRING)) == NULL)
+	if (file_line == NULL)
+		if ((file_line = malloc(file_line_size = NSTRING)) == NULL)
 			return FIOMEM;
 
 	/* read the line in */
 	if (!nullflag) {
-		if (fgets(fline, NSTRING, ffp) == (char *)NULL) {	/* EOF ? */
+		if (fgets(file_line, NSTRING, ffp) == (char *)NULL) {	/* EOF ? */
 			i = 0;
 			c = EOF;
 		} else {
-			i = strlen(fline);
+			i = strlen(file_line);
 			c = 0;
 			if (i > 0) {
-				c = fline[i - 1];
+				c = file_line[i - 1];
 				i--;
 			}
 		}
@@ -125,15 +125,15 @@ int file_get_line(void)
 	}
 	while (c != EOF && c != '\n') {
 		if (c) {
-			fline[i++] = c;
+			file_line[i++] = c;
 			/* if it's longer, get more room */
-			if (i >= flen) {
-				if ((tmpline = malloc(flen + NSTRING)) == NULL)
+			if (i >= file_line_size) {
+				if ((tmpline = malloc(file_line_size + NSTRING)) == NULL)
 					return FIOMEM;
-				strncpy(tmpline, fline, flen);
-				flen += NSTRING;
-				free(fline);
-				fline = tmpline;
+				strncpy(tmpline, file_line, file_line_size);
+				file_line_size += NSTRING;
+				free(file_line);
+				file_line = tmpline;
 			}
 		}
 		c = fgetc(ffp);
@@ -153,7 +153,7 @@ int file_get_line(void)
 	}
 
 	/* terminate and decrypt the string */
-	fline[i] = 0;
+	file_line[i] = 0;
 	return FIOSUC;
 }
 
