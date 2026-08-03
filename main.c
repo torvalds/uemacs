@@ -541,14 +541,14 @@ int cmd_exit_emacs(int f, int n)
  */
 int cmd_begin_macro(int f, int n)
 {
-	if (kbdmode != STOP) {
+	if (keyboard_macro_mode != STOP) {
 		msg_printf("%%Macro already active");
 		return FALSE;
 	}
 	msg_printf("(Start macro)");
-	kbdptr = &kbdm[0];
-	kbdend = kbdptr;
-	kbdmode = RECORD;
+	keyboard_macro_pos = &keyboard_macro[0];
+	keyboard_macro_end = keyboard_macro_pos;
+	keyboard_macro_mode = RECORD;
 	return TRUE;
 }
 
@@ -558,13 +558,13 @@ int cmd_begin_macro(int f, int n)
  */
 int cmd_end_macro(int f, int n)
 {
-	if (kbdmode == STOP) {
+	if (keyboard_macro_mode == STOP) {
 		msg_printf("%%Macro not active");
 		return FALSE;
 	}
-	if (kbdmode == RECORD) {
+	if (keyboard_macro_mode == RECORD) {
 		msg_printf("(End macro)");
-		kbdmode = STOP;
+		keyboard_macro_mode = STOP;
 	}
 	return TRUE;
 }
@@ -576,15 +576,15 @@ int cmd_end_macro(int f, int n)
  */
 int cmd_execute_macro(int f, int n)
 {
-	if (kbdmode != STOP) {
+	if (keyboard_macro_mode != STOP) {
 		msg_printf("%%Macro already active");
 		return FALSE;
 	}
 	if (n <= 0)
 		return TRUE;
-	kbdrep = n;				/* remember how many times to execute */
-	kbdmode = PLAY;				/* start us in play mode */
-	kbdptr = &kbdm[0];			/*    at the beginning */
+	keyboard_macro_repeat = n;				/* remember how many times to execute */
+	keyboard_macro_mode = PLAY;				/* start us in play mode */
+	keyboard_macro_pos = &keyboard_macro[0];			/*    at the beginning */
 	return TRUE;
 }
 
@@ -596,7 +596,7 @@ int cmd_execute_macro(int f, int n)
 int cmd_abort_command(int f, int n)
 {
 	tcapbeep();
-	kbdmode = STOP;
+	keyboard_macro_mode = STOP;
 	msg_printf("(Aborted)");
 	return ABORT;
 }

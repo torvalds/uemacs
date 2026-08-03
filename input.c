@@ -229,22 +229,22 @@ int tgetc(void)
 	int c;					/* fetched character */
 
 	/* if we are playing a keyboard macro back, */
-	if (kbdmode == PLAY) {
+	if (keyboard_macro_mode == PLAY) {
 
 		/* if there is some left... */
-		if (kbdptr < kbdend)
-			return (int)*kbdptr++;
+		if (keyboard_macro_pos < keyboard_macro_end)
+			return (int)*keyboard_macro_pos++;
 
 		/* at the end of last repitition? */
-		if (--kbdrep < 1) {
-			kbdmode = STOP;
+		if (--keyboard_macro_repeat < 1) {
+			keyboard_macro_mode = STOP;
 			/* force a screen update after all is done */
 			update();
 		} else {
 
 			/* reset the macro to the begining for the next rep */
-			kbdptr = &kbdm[0];
-			return (int)*kbdptr++;
+			keyboard_macro_pos = &keyboard_macro[0];
+			return (int)*keyboard_macro_pos++;
 		}
 	}
 
@@ -255,13 +255,13 @@ int tgetc(void)
 	last_key = c;
 
 	/* save it if we need to */
-	if (kbdmode == RECORD) {
-		*kbdptr++ = c;
-		kbdend = kbdptr;
+	if (keyboard_macro_mode == RECORD) {
+		*keyboard_macro_pos++ = c;
+		keyboard_macro_end = keyboard_macro_pos;
 
 		/* don't overrun the buffer */
-		if (kbdptr == &kbdm[NKBDM - 1]) {
-			kbdmode = STOP;
+		if (keyboard_macro_pos == &keyboard_macro[NKBDM - 1]) {
+			keyboard_macro_mode = STOP;
 			tcapbeep();
 		}
 	}

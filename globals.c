@@ -4,7 +4,7 @@
 /* initialized global definitions */
 
 int fill_column = 72;				/* fill column, the $fillcol setting */
-int kbdm[NKBDM];				/* Macro                        */
+int keyboard_macro[NKBDM];			/* the recorded keystrokes */
 char *execstr = NULL;				/* pointer to string to execute */
 char golabel[NPAT] = "";			/* current line to go to        */
 int execlevel = 0;				/* execution IF level           */
@@ -46,10 +46,10 @@ int tabmask = 0x07;				/* tabulator mask */
 struct kill *kbufp = NULL;			/* current kill buffer chunk pointer    */
 struct kill *kbufh = NULL;			/* kill buffer header pointer           */
 int kused = KBLOCK;				/* # of bytes used in kill buffer       */
-int *kbdptr;					/* current position in keyboard buf */
-int *kbdend = &kbdm[0];				/* ptr to end of the keyboard */
-int kbdmode = STOP;				/* current keyboard macro mode  */
-int kbdrep = 0;					/* number of repetitions        */
+int *keyboard_macro_pos;			/* where replay or recording has got to */
+int *keyboard_macro_end = &keyboard_macro[0];	/* one past the last recorded keystroke */
+int keyboard_macro_mode = STOP;			/* STOP, PLAY or RECORD */
+int keyboard_macro_repeat = 0;			/* how many times left to replay */
 int restflag = FALSE;				/* restricted use?              */
 int last_key = 0;				/* last keystroke, the $lastkey setting */
 int random_seed = 0;				/* random number seed, the $seed setting */

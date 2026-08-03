@@ -23,7 +23,7 @@ typedef int (*fn_t)(int, int);
 /* Initialized global external declarations. */
 
 extern int fill_column;				/* fill column, the $fillcol setting */
-extern int kbdm[];				/* Holds kayboard macro data    */
+extern int keyboard_macro[];			/* the recorded keystrokes */
 extern char pat[];				/* Search pattern               */
 extern char rpat[];				/* Replacement pattern          */
 extern char *execstr;				/* pointer to string to execute */
@@ -63,10 +63,10 @@ extern int tabmask;
 extern struct kill *kbufp;			/* current kill buffer chunk pointer */
 extern struct kill *kbufh;			/* kill buffer header pointer   */
 extern int kused;				/* # of bytes used in KB        */
-extern int *kbdptr;				/* current position in keyboard buf */
-extern int *kbdend;				/* ptr to end of the keyboard */
-extern int kbdmode;				/* current keyboard macro mode  */
-extern int kbdrep;				/* number of repetitions        */
+extern int *keyboard_macro_pos;			/* where replay or recording has got to */
+extern int *keyboard_macro_end;			/* one past the last recorded keystroke */
+extern int keyboard_macro_mode;			/* STOP, PLAY or RECORD */
+extern int keyboard_macro_repeat;		/* how many times left to replay */
 extern int restflag;				/* restricted use?              */
 extern int last_key;				/* last keystroke, the $lastkey setting */
 extern int random_seed;				/* random number seed, the $seed setting */

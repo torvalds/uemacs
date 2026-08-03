@@ -307,7 +307,7 @@ int cmd_update_screen(int f, int n)
  */
 void update(void)
 {
-	if (kbdmode == PLAY)
+	if (keyboard_macro_mode == PLAY)
 		return;
 	update_now();
 }
