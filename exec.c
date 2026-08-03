@@ -281,8 +281,8 @@ int cmd_store_macro(int f, int n)
 	bclear(bp);
 
 	/* and set the macro store pointers to it */
-	mstore = TRUE;
-	bstore = bp;
+	storing_macro = TRUE;
+	store_buffer = bp;
 	return TRUE;
 }
 
@@ -322,8 +322,8 @@ int cmd_store_procedure(int f, int n)
 	bclear(bp);
 
 	/* and set the macro store pointers to it */
-	mstore = TRUE;
-	bstore = bp;
+	storing_macro = TRUE;
+	store_buffer = bp;
 	return TRUE;
 }
 
@@ -556,8 +556,8 @@ int dobuf(struct buffer *bp)
 
 			/* service only the !ENDM macro here */
 			if (dirnum == DENDM) {
-				mstore = FALSE;
-				bstore = NULL;
+				storing_macro = FALSE;
+				store_buffer = NULL;
 				goto onward;
 			}
 
@@ -566,7 +566,7 @@ int dobuf(struct buffer *bp)
 		}
 
 		/* if macro store is on, just salt this away */
-		if (mstore) {
+		if (storing_macro) {
 			/* allocate the space for the line */
 			linlen = strlen(eline);
 			if ((mp = line_alloc(linlen)) == NULL) {
@@ -579,10 +579,10 @@ int dobuf(struct buffer *bp)
 				lputc(mp, i, eline[i]);
 
 			/* attach the line to the end of the buffer */
-			bstore->b_linep->l_bp->l_fp = mp;
-			mp->l_bp = bstore->b_linep->l_bp;
-			bstore->b_linep->l_bp = mp;
-			mp->l_fp = bstore->b_linep;
+			store_buffer->b_linep->l_bp->l_fp = mp;
+			mp->l_bp = store_buffer->b_linep->l_bp;
+			store_buffer->b_linep->l_bp = mp;
+			mp->l_fp = store_buffer->b_linep;
 			goto onward;
 		}
 

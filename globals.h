@@ -43,10 +43,10 @@ extern int autosave_countdown;			/* changes left before one, the $acount setting
 extern int sgarbf;				/* State of screen unknown      */
 extern int mpresf;				/* Stuff in message line        */
 extern int clexec;				/* command line execution flag  */
-extern int mstore;				/* storing text to macro flag   */
+extern int storing_macro;			/* capturing command lines into a buffer */
 extern int display_commands;			/* echo commands, the $discmd setting */
 extern int display_input;			/* echo input, the $disinp setting */
-extern struct buffer *bstore;			/* buffer to store macro text to */
+extern struct buffer *store_buffer;		/* the buffer they are being captured into */
 /* set by the SIGWINCH handler, acted on by checkwinsize() */
 extern volatile sig_atomic_t chg_width, chg_height;
 extern int ttrow;				/* Row location of HW cursor */
