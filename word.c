@@ -668,6 +668,7 @@ int wordcount(int f, int n)
 	else
 		avgch = 0;
 
-	mlwrite("Words %D Chars %D Lines %d Avg chars/word %f", nwords, nchars, nlines + 1, avgch);
+	mlwrite("Words %ld Chars %ld Lines %d Avg chars/word %d.%02d",
+		nwords, nchars, nlines + 1, avgch / 100, avgch % 100);
 	return TRUE;
 }

@@ -37,9 +37,6 @@ static int reframe(struct window *wp);
 static void updpos(void);
 static void paint_window(struct window *wp, bool check);
 static void modeline(struct window *wp);
-static void mlputi(int i, int r);
-static void mlputli(long l, int r);
-static void mlputf(int s);
 
 /*
  * Open the terminal.  The operating system's terminal I/O channel is set
@@ -780,63 +777,26 @@ void mlputstr(const char *s)
 }
 
 /*
- * Write a message into the message line. Keep track of the physical cursor
- * position. A small class of printf like format items is handled. Set the
- * "message line" flag TRUE.
+ * Write a message into the message line.  The format is a printf one
+ * and had better be a literal: anything built at run time goes to
+ * mlputstr() instead.
  *
- * The format string had better be one: anything built at run time goes
- * to mlputstr() instead.
- *
- * char *fmt;		format string for output
- * char *arg;		pointer to first argument to print
+ * A message longer than the screen could ever show is cut off rather
+ * than wrapped.
  */
 void mlwrite(const char *fmt, ...)
 {
-	int c;					/* current char in format string */
+	char buf[MAXCOL];
 	va_list ap;
 
 	if (!ml_open())
 		return;
 
 	va_start(ap, fmt);
-	while ((c = *fmt++) != 0) {
-		if (c != '%') {
-			ttputc(c);
-			++ttcol;
-		} else {
-			c = *fmt++;
-			switch (c) {
-			case 'd':
-				mlputi(va_arg(ap, int), 10);
-				break;
-
-			case 'o':
-				mlputi(va_arg(ap, int), 8);
-				break;
-
-			case 'x':
-				mlputi(va_arg(ap, int), 16);
-				break;
-
-			case 'D':
-				mlputli(va_arg(ap, long), 10);
-				break;
-
-			case 's':
-				mlputs(va_arg(ap, char *));
-				break;
-
-			case 'f':
-				mlputf(va_arg(ap, int));
-				break;
-
-			default:
-				ttputc(c);
-				++ttcol;
-			}
-		}
-	}
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
+
+	mlputs(buf);
 	ml_close();
 }
 
@@ -870,72 +830,6 @@ void mlputs(const char *s)
 		ttputc(c);
 		++ttcol;
 	}
-}
-
-/*
- * Write out an integer, in the specified radix. Update the physical cursor
- * position.
- */
-static void mlputi(int i, int r)
-{
-	int q;
-	static char hexdigits[] = "0123456789ABCDEF";
-
-	if (i < 0) {
-		i = -i;
-		ttputc('-');
-	}
-
-	q = i / r;
-
-	if (q != 0)
-		mlputi(q, r);
-
-	ttputc(hexdigits[i % r]);
-	++ttcol;
-}
-
-/*
- * do the same except as a long integer.
- */
-static void mlputli(long l, int r)
-{
-	long q;
-
-	if (l < 0) {
-		l = -l;
-		ttputc('-');
-	}
-
-	q = l / r;
-
-	if (q != 0)
-		mlputli(q, r);
-
-	ttputc((int)(l % r) + '0');
-	++ttcol;
-}
-
-/*
- * write out a scaled integer with two decimal places
- *
- * int s;		scaled integer to output
- */
-static void mlputf(int s)
-{
-	int i;					/* integer portion of number */
-	int f;					/* fractional portion of number */
-
-	/* break it up */
-	i = s / 100;
-	f = s % 100;
-
-	/* send out the integer portion */
-	mlputi(i, 10);
-	ttputc('.');
-	ttputc((f / 10) + '0');
-	ttputc((f % 10) + '0');
-	ttcol += 3;
 }
 
 /* Get terminal size from system.
