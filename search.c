@@ -818,7 +818,7 @@ static int replaces(int kind, int f, int n)
 				if (lastline == NULL) {
 					/* There is nothing to undo.
 					 */
-					TTbeep();
+					tcapbeep();
 					goto pprompt;
 				}
 				curwp->w_dotp = lastline;
@@ -856,7 +856,7 @@ static int replaces(int kind, int f, int n)
 				return FALSE;
 
 			default:		/* bitch and beep */
-				TTbeep();
+				tcapbeep();
 
 			case '?':		/* help me */
 				mlwrite

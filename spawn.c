@@ -29,17 +29,17 @@ int spawncli(int f, int n)
 		return resterr();
 
 	movecursor(term.t_nrow, 0);		/* Seek to last line.   */
-	TTflush();
-	TTclose();				/* stty to old settings */
-	TTkclose();				/* Close "keyboard" */
+	ttflush();
+	tcapclose();				/* stty to old settings */
+	tcapkclose();				/* Close "keyboard" */
 	if ((cp = getenv("SHELL")) != NULL && *cp != '\0')
 		system(cp);
 	else
 		system("exec /bin/sh");
 	sgarbf = TRUE;
 	sleep(2);
-	TTopen();
-	TTkopen();
+	tcapopen();
+	tcapkopen();
 	return TRUE;
 }
 
@@ -58,7 +58,7 @@ int bktoshell(int f, int n)
 
 void rtfrmshell(void)
 {
-	TTopen();
+	tcapopen();
 	curwp->w_flag = WFHARD;
 	sgarbf = TRUE;
 }
@@ -79,20 +79,20 @@ int spawn(int f, int n)
 
 	if ((s = mlreply("!", line, NLINE)) != TRUE)
 		return s;
-	TTflush();
-	TTclose();				/* stty to old modes    */
-	TTkclose();
+	ttflush();
+	tcapclose();				/* stty to old modes    */
+	tcapkclose();
 	system(line);
 	fflush(stdout);				/* to be sure P.K.      */
-	TTopen();
+	tcapopen();
 
 	if (clexec == FALSE) {
 		mlputs("(End)");		/* Pause.               */
-		TTflush();
+		ttflush();
 		while ((s = tgetc()) != '\r' && s != ' ') ;
 		mlputs("\r\n");
 	}
-	TTkopen();
+	tcapkopen();
 	sgarbf = TRUE;
 	return TRUE;
 }
@@ -114,15 +114,15 @@ int execprg(int f, int n)
 
 	if ((s = mlreply("!", line, NLINE)) != TRUE)
 		return s;
-	TTputc('\n');				/* Already have '\r'    */
-	TTflush();
-	TTclose();				/* stty to old modes    */
-	TTkclose();
+	ttputc('\n');				/* Already have '\r'    */
+	ttflush();
+	tcapclose();				/* stty to old modes    */
+	tcapkclose();
 	system(line);
 	fflush(stdout);				/* to be sure P.K.      */
-	TTopen();
+	tcapopen();
 	mlputs("(End)");			/* Pause.               */
-	TTflush();
+	ttflush();
 	while ((s = tgetc()) != '\r' && s != ' ') ;
 	sgarbf = TRUE;
 	return TRUE;
@@ -168,15 +168,15 @@ int filter_buffer(int f, int n)
 		bp->b_fstate = tmpstate;
 		return FALSE;
 	}
-	TTputc('\n');				/* Already have '\r'    */
-	TTflush();
-	TTclose();				/* stty to old modes    */
-	TTkclose();
+	ttputc('\n');				/* Already have '\r'    */
+	ttflush();
+	tcapclose();				/* stty to old modes    */
+	tcapkclose();
 	strcat(line, " <fltinp >fltout");
 	system(line);
-	TTopen();
-	TTkopen();
-	TTflush();
+	tcapopen();
+	tcapkopen();
+	ttflush();
 	sgarbf = TRUE;
 	s = TRUE;
 

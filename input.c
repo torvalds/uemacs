@@ -126,29 +126,29 @@ fn_t getname(void)
 
 		} else if (c == ectoc(abortc)) {	/* Bell, abort */
 			ctrlg(FALSE, 0);
-			TTflush();
+			ttflush();
 			return NULL;
 
 		} else if (c == 0x7F || c == 0x08) {	/* rubout/erase */
 			if (cpos != 0) {
-				TTputc('\b');
-				TTputc(' ');
-				TTputc('\b');
+				ttputc('\b');
+				ttputc(' ');
+				ttputc('\b');
 				--ttcol;
 				--cpos;
-				TTflush();
+				ttflush();
 			}
 
 		} else if (c == 0x15) {		/* C-U, kill */
 			while (cpos != 0) {
-				TTputc('\b');
-				TTputc(' ');
-				TTputc('\b');
+				ttputc('\b');
+				ttputc(' ');
+				ttputc('\b');
 				--cpos;
 				--ttcol;
 			}
 
-			TTflush();
+			ttflush();
 
 		} else if (c == ' ' || c == 0x1b || c == 0x09) {
 /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
@@ -164,8 +164,8 @@ fn_t getname(void)
 						/* no...we match, print it */
 						sp = ffp->n_name + cpos;
 						while (*sp)
-							TTputc(*sp++);
-						TTflush();
+							ttputc(*sp++);
+						ttflush();
 						return ffp->n_func;
 					} else {
 /* << << << << << << << << << << << << << << << << << */
@@ -196,7 +196,7 @@ fn_t getname(void)
 							}
 
 							/* add the character */
-							TTputc(buf[cpos++]);
+							ttputc(buf[cpos++]);
 						}
 /* << << << << << << << << << << << << << << << << << */
 					}
@@ -205,18 +205,18 @@ fn_t getname(void)
 			}
 
 			/* no match.....beep and onward */
-			TTbeep();
+			tcapbeep();
  onward:		;
-			TTflush();
+			ttflush();
 /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 		} else {
 			if (cpos < NSTRING - 1 && c > ' ') {
 				buf[cpos++] = c;
-				TTputc(c);
+				ttputc(c);
 			}
 
 			++ttcol;
-			TTflush();
+			ttflush();
 		}
 	}
 }
@@ -249,7 +249,7 @@ int tgetc(void)
 	}
 
 	/* fetch a character from the terminal driver */
-	c = TTgetc();
+	c = ttgetc();
 
 	/* record it for $lastkey */
 	lastkey = c;
@@ -262,7 +262,7 @@ int tgetc(void)
 		/* don't overrun the buffer */
 		if (kbdptr == &kbdm[NKBDM - 1]) {
 			kbdmode = STOP;
-			TTbeep();
+			tcapbeep();
 		}
 	}
 
@@ -421,7 +421,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 
 			/* clear the message line */
 			mlwrite("");
-			TTflush();
+			ttflush();
 
 			/* if we default the buffer, return FALSE */
 			if (buf[0] == 0)
@@ -436,7 +436,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 		if (c == ectoc(abortc) && quotef == FALSE) {
 			/* Abort the input? */
 			ctrlg(FALSE, 0);
-			TTflush();
+			ttflush();
 			return ABORT;
 		} else if ((c == 0x7F || c == 0x08) && quotef == FALSE) {
 			/* rubout/erase */
@@ -453,7 +453,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 					ttcol -= 2;
 				}
 
-				TTflush();
+				ttflush();
 			}
 
 		} else if (c == 0x15 && quotef == FALSE) {
@@ -471,7 +471,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 					ttcol -= 2;
 				}
 			}
-			TTflush();
+			ttflush();
 
 		} else if ((c == 0x09 || c == ' ') && quotef == FALSE && ffile) {
 			/* TAB, complete file name */
@@ -495,7 +495,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 				if (buf[cpos] == '*' || buf[cpos] == '?')
 					iswild = 1;
 			}
-			TTflush();
+			ttflush();
 			if (nskip < 0) {
 				buf[ocpos] = 0;
 				if (tmpf != NULL)
@@ -519,7 +519,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			nskip++;
 
 			if (c != ' ') {
-				TTbeep();
+				tcapbeep();
 				nskip = 0;
 			}
 
@@ -529,7 +529,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			}
 
 			if (c == '*')
-				TTbeep();
+				tcapbeep();
 
 			for (n = 0; n < cpos; n++) {
 				c = buf[n];
@@ -541,14 +541,14 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 
 				if (c != '\n') {
 					if (disinp)
-						TTputc(c);
+						ttputc(c);
 				} else {	/* put out <NL> for <ret> */
 					outstring("<NL>");
 					ttcol += 3;
 				}
 				++ttcol;
 			}
-			TTflush();
+			ttflush();
 			rewind(tmpf);
 			unlink(tmp);
 
@@ -567,13 +567,13 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 
 				if (c != '\n') {
 					if (disinp)
-						TTputc(c);
+						ttputc(c);
 				} else {	/* put out <NL> for <ret> */
 					outstring("<NL>");
 					ttcol += 3;
 				}
 				++ttcol;
-				TTflush();
+				ttflush();
 			}
 		}
 	}
@@ -588,7 +588,7 @@ void outstring(char *s)
 {
 	if (disinp)
 		while (*s)
-			TTputc(*s++);
+			ttputc(*s++);
 }
 
 /*
@@ -600,5 +600,5 @@ void ostring(char *s)
 {
 	if (discmd)
 		while (*s)
-			TTputc(*s++);
+			ttputc(*s++);
 }

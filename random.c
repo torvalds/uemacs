@@ -965,7 +965,7 @@ int getfence(int f, int n)
 		sdir = REVERSE;
 		break;
 	default:
-		TTbeep();
+		tcapbeep();
 		return FALSE;
 	}
 
@@ -1007,7 +1007,7 @@ int getfence(int f, int n)
 	/* restore the current position */
 	curwp->w_dotp = oldlp;
 	curwp->w_doto = oldoff;
-	TTbeep();
+	tcapbeep();
 	return FALSE;
 }
 

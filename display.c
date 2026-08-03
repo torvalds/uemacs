@@ -48,9 +48,9 @@ static void mlputf(int s);
  */
 void vtinit(void)
 {
-	TTopen();				/* open the screen */
-	TTkopen();				/* open the keyboard */
-	TTrev(FALSE);
+	tcapopen();				/* open the screen */
+	tcapkopen();				/* open the keyboard */
+	tcaprev(FALSE);
 }
 
 /*
@@ -63,16 +63,16 @@ void vttidy(void)
 {
 	mlerase();
 	movecursor(term.t_nrow, 0);
-	TTflush();
-	TTclose();
-	TTkclose();
+	ttflush();
+	tcapclose();
+	tcapkclose();
 	write(1, "\r", 1);
 }
 
-static void TTputs(const char *s)
+static void ttputs(const char *s)
 {
 	for (char c; (c = *s) != 0; s++)
-		TTputc(c);
+		ttputc(c);
 }
 
 /*
@@ -104,7 +104,7 @@ static void paint_raw(struct paint *p, unicode_t c)
 		return;
 	}
 	if (p->col >= p->offset) {
-		TTputc(c);
+		ttputc(c);
 		p->out++;
 	}
 	p->col++;
@@ -185,10 +185,10 @@ static void paint_word(struct paint *p, char *text, int from, int to, bool check
 	bool bad = check && !word_ok(text, from, to);
 
 	if (bad)
-		TTputs(SPELLSTART);
+		ttputs(SPELLSTART);
 	paint_bytes(p, text, from, to);
 	if (bad)
-		TTputs(SPELLSTOP);
+		ttputs(SPELLSTOP);
 }
 
 // A letter is any byte that is not something else.  That is the whole
@@ -260,17 +260,17 @@ static void paint_line(int row, struct line *lp, int offset, bool check)
 	}
 
 	ttcol = p.out;
-	TTeeol();
+	tcapeeol();
 
 	/* the markers that say the line carries on past the edge */
 	if (p.overflow) {
 		movecursor(row, term.t_ncol - 1);
-		TTputc('$');
+		ttputc('$');
 		ttcol = term.t_ncol;
 	}
 	if (offset) {
 		movecursor(row, 0);
-		TTputc('$');
+		ttputc('$');
 		ttcol = 1;
 	}
 }
@@ -341,7 +341,7 @@ void update_now(void)
 	if (sgarbf != FALSE) {
 		/* the screen is not what we think it is; start over */
 		movecursor(0, 0);
-		TTeeop();
+		tcapeeop();
 		sgarbf = FALSE;
 		mpresf = FALSE;
 		paint_window(wp, check);
@@ -371,7 +371,7 @@ void update_now(void)
 
 	/* update the cursor and flush the buffers */
 	movecursor(currow, curcol - lbound);
-	TTflush();
+	ttflush();
 
 	/* a resize that arrived while we were painting */
 	while (chg_width || chg_height)
@@ -684,10 +684,10 @@ static void modeline(struct window *wp)
 
 	/* and paint it, in reverse video across the full width */
 	movecursor(term.t_nrow - 1, 0);
-	TTrev(TRUE);
+	tcaprev(TRUE);
 	for (i = 0; i < term.t_ncol; i++)
-		TTputc(mline[i]);
-	TTrev(FALSE);
+		ttputc(mline[i]);
+	tcaprev(FALSE);
 	ttcol = term.t_ncol;
 }
 
@@ -706,7 +706,7 @@ void movecursor(int row, int col)
 	if (row != ttrow || col != ttcol) {
 		ttrow = row;
 		ttcol = col;
-		TTmove(row, col);
+		tcapmove(row, col);
 	}
 }
 
@@ -724,14 +724,14 @@ void mlerase(void)
 		return;
 
 	if (eolexist == TRUE)
-		TTeeol();
+		tcapeeol();
 	else {
 		for (i = 0; i < term.t_ncol - 1; i++)
-			TTputc(' ');
+			ttputc(' ');
 		movecursor(term.t_nrow, 1);	/* force the move! */
 		movecursor(term.t_nrow, 0);
 	}
-	TTflush();
+	ttflush();
 	mpresf = FALSE;
 }
 
@@ -750,7 +750,7 @@ static int ml_open(void)
 	/* if we can not erase to end-of-line, do it manually */
 	if (eolexist == FALSE) {
 		mlerase();
-		TTflush();
+		ttflush();
 	}
 
 	movecursor(term.t_nrow, 0);
@@ -761,8 +761,8 @@ static void ml_close(void)
 {
 	/* if we can, erase to the end of screen */
 	if (eolexist == TRUE)
-		TTeeol();
-	TTflush();
+		tcapeeol();
+	ttflush();
 	mpresf = TRUE;
 }
 
@@ -801,7 +801,7 @@ void mlwrite(const char *fmt, ...)
 	va_start(ap, fmt);
 	while ((c = *fmt++) != 0) {
 		if (c != '%') {
-			TTputc(c);
+			ttputc(c);
 			++ttcol;
 		} else {
 			c = *fmt++;
@@ -831,7 +831,7 @@ void mlwrite(const char *fmt, ...)
 				break;
 
 			default:
-				TTputc(c);
+				ttputc(c);
 				++ttcol;
 			}
 		}
@@ -867,7 +867,7 @@ void mlputs(const char *s)
 	int c;
 
 	while ((c = *s++) != 0) {
-		TTputc(c);
+		ttputc(c);
 		++ttcol;
 	}
 }
@@ -883,7 +883,7 @@ static void mlputi(int i, int r)
 
 	if (i < 0) {
 		i = -i;
-		TTputc('-');
+		ttputc('-');
 	}
 
 	q = i / r;
@@ -891,7 +891,7 @@ static void mlputi(int i, int r)
 	if (q != 0)
 		mlputi(q, r);
 
-	TTputc(hexdigits[i % r]);
+	ttputc(hexdigits[i % r]);
 	++ttcol;
 }
 
@@ -904,7 +904,7 @@ static void mlputli(long l, int r)
 
 	if (l < 0) {
 		l = -l;
-		TTputc('-');
+		ttputc('-');
 	}
 
 	q = l / r;
@@ -912,7 +912,7 @@ static void mlputli(long l, int r)
 	if (q != 0)
 		mlputli(q, r);
 
-	TTputc((int)(l % r) + '0');
+	ttputc((int)(l % r) + '0');
 	++ttcol;
 }
 
@@ -932,9 +932,9 @@ static void mlputf(int s)
 
 	/* send out the integer portion */
 	mlputi(i, 10);
-	TTputc('.');
-	TTputc((f / 10) + '0');
-	TTputc((f % 10) + '0');
+	ttputc('.');
+	ttputc((f / 10) + '0');
+	ttputc((f % 10) + '0');
 	ttcol += 3;
 }
 
@@ -956,7 +956,7 @@ void getscreensize(int *widthp, int *heightp)
 /*
  * The window changed size.  Write it down and get out: this is a signal
  * handler, and everything the display does - newsize()'s mlwrite() on a
- * silly size, TTputc(), the painter itself - would be running on top of
+ * silly size, ttputc(), the painter itself - would be running on top of
  * whatever the editor was in the middle of.
  *
  * The handler is installed without SA_RESTART, so the read() the editor

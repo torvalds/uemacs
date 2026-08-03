@@ -242,8 +242,8 @@ int isearch(int f, int n)
 		pat[cpos] = 0;			/* null terminate the buffer  */
 		col = echo_char(c, col);	/* Echo the character         */
 		if (!status) {			/* If we lost last time       */
-			TTputc(BELL);		/* Feep again                 */
-			TTflush();		/* see that the feep feeps    */
+			ttputc(BELL);		/* Feep again                 */
+			ttflush();		/* see that the feep feeps    */
 		} else /* Otherwise, we must have won */ if (!(status = checknext(c, pat, n)))	/* See if match         */
 			status = scanmore(pat, n);	/*  or find the next match    */
 		c = ectoc(expc = get_char());	/* Get the next char          */
@@ -318,8 +318,8 @@ int scanmore(char *patrn, int dir)
 		sts = scanner(patrn, FORWARD, PTEND);	/* Nope. Go forward   */
 
 	if (!sts) {
-		TTputc(BELL);			/* Feep if search fails       */
-		TTflush();			/* see that the feep feeps    */
+		ttputc(BELL);			/* Feep if search fails       */
+		ttflush();			/* see that the feep feeps    */
 	}
 
 	return sts;				/* else, don't even try       */
@@ -396,36 +396,36 @@ static int echo_char(int c, int col)
 	if ((c < ' ') || (c == 0x7F)) {		/* Control character?           */
 		switch (c) {			/* Yes, dispatch special cases */
 		case '\n':			/* Newline                    */
-			TTputc('<');
-			TTputc('N');
-			TTputc('L');
-			TTputc('>');
+			ttputc('<');
+			ttputc('N');
+			ttputc('L');
+			ttputc('>');
 			col += 3;
 			break;
 
 		case '\t':			/* Tab                        */
-			TTputc('<');
-			TTputc('T');
-			TTputc('A');
-			TTputc('B');
-			TTputc('>');
+			ttputc('<');
+			ttputc('T');
+			ttputc('A');
+			ttputc('B');
+			ttputc('>');
 			col += 4;
 			break;
 
 		case 0x7F:			/* Rubout:                    */
-			TTputc('^');		/* Output a funny looking     */
-			TTputc('?');		/*  indication of Rubout      */
+			ttputc('^');		/* Output a funny looking     */
+			ttputc('?');		/*  indication of Rubout      */
 			col++;			/* Count the extra char       */
 			break;
 
 		default:			/* Vanilla control char       */
-			TTputc('^');		/* Yes, output prefix         */
-			TTputc(c + 0x40);	/* Make it "^X"               */
+			ttputc('^');		/* Yes, output prefix         */
+			ttputc(c + 0x40);	/* Make it "^X"               */
 			col++;			/* Count this char            */
 		}
 	} else
-		TTputc(c);			/* Otherwise, output raw char */
-	TTflush();				/* Flush the output           */
+		ttputc(c);			/* Otherwise, output raw char */
+	ttflush();				/* Flush the output           */
 	return ++col;				/* return the new column no   */
 }
 

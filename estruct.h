@@ -263,22 +263,6 @@ struct terminal {
 	int t_pause;				/* # times thru update to pause */
 };
 
-/*	What the terminal is asked to do.  These are the names the code
-	has always used for it; there is one terminal, so they are the
-	functions themselves rather than a way of reaching them.	*/
-
-#define	TTopen		tcapopen
-#define	TTclose		tcapclose
-#define	TTkopen		tcapkopen
-#define	TTkclose	tcapkclose
-#define	TTgetc		ttgetc
-#define	TTputc		ttputc
-#define	TTflush		ttflush
-#define	TTmove		tcapmove
-#define	TTeeol		tcapeeol
-#define	TTeeop		tcapeeop
-#define	TTbeep		tcapbeep
-#define	TTrev		tcaprev
 
 /* Structure for the table of initial key bindings. */
 struct key_tab {

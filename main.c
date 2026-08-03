@@ -470,7 +470,7 @@ int execute(int c, int f, int n)
 		lastflag = thisflag;
 		return status;
 	}
-	TTbeep();
+	tcapbeep();
 	mlwrite("(Key not bound)");		/* complain             */
 	lastflag = 0;				/* Fake last flags.     */
 	return FALSE;
@@ -595,7 +595,7 @@ int ctlxe(int f, int n)
  */
 int ctrlg(int f, int n)
 {
-	TTbeep();
+	tcapbeep();
 	kbdmode = STOP;
 	mlwrite("(Aborted)");
 	return ABORT;
@@ -607,14 +607,14 @@ int ctrlg(int f, int n)
  */
 int rdonly(void)
 {
-	TTbeep();
+	tcapbeep();
 	mlwrite("(Key illegal in VIEW mode)");
 	return FALSE;
 }
 
 int resterr(void)
 {
-	TTbeep();
+	tcapbeep();
 	mlwrite("(That command is RESTRICTED)");
 	return FALSE;
 }
