@@ -30,7 +30,6 @@ struct video {
 
 #define VFCHG   0x0001				/* Changed flag                 */
 #define	VFEXT	0x0002				/* extended (beyond column 80)  */
-#define	VFREQ	0x0008				/* reverse video request        */
 
 static struct video **vscreen;			/* Virtual screen. */
 
@@ -196,6 +195,7 @@ int upscreen(int f, int n)
 int update(int force)
 {
 	struct window *wp;
+	int domode = FALSE;			/* mode line wants repainting */
 
 	if (force == FALSE && kbdmode == PLAY)
 		return TRUE;
@@ -211,8 +211,7 @@ int update(int force)
 			updone(wp);	/* update EDITed line */
 		else if (wp->w_flag & ~WFMOVE)
 			updall(wp);	/* update all lines */
-		if (wp->w_flag & WFMODE)
-			modeline(wp);	/* update modeline */
+		domode = wp->w_flag & WFMODE;
 		wp->w_flag = 0;
 		wp->w_force = 0;
 	}
@@ -224,11 +223,17 @@ int update(int force)
 	upddex();
 
 	/* if screen is garbage, re-plot it */
-	if (sgarbf != FALSE)
+	if (sgarbf != FALSE) {
 		updgar();
+		domode = TRUE;		/* the erase took the mode line too */
+	}
 
 	/* update the virtual screen to the physical screen */
 	updupd(force);
+
+	/* the mode line paints itself, after any erase above */
+	if (domode)
+		modeline(wp);
 
 	/* update the cursor and flush the buffers */
 	movecursor(currow, curcol - lbound);
@@ -344,7 +349,6 @@ static void updone(struct window *wp)
 
 	/* and update the virtual line */
 	vscreen[sline]->v_flag |= VFCHG;
-	vscreen[sline]->v_flag &= ~VFREQ;
 	vtmove(sline, 0);
 	show_line(lp);
 	vteeol();
@@ -368,7 +372,6 @@ static void updall(struct window *wp)
 
 		/* and update the virtual line */
 		vscreen[sline]->v_flag |= VFCHG;
-		vscreen[sline]->v_flag &= ~VFREQ;
 		vtmove(sline, 0);
 		if (lp != wp->w_bufp->b_linep) {
 			/* if we are not at the end */
@@ -462,7 +465,7 @@ void updgar(void)
 {
 	int i;
 
-	for (i = 0; i < term.t_nrow; ++i)
+	for (i = 0; i < term.t_nrow - 1; ++i)
 		vscreen[i]->v_flag |= VFCHG;
 
 	movecursor(0, 0);			/* Erase the screen. */
@@ -482,7 +485,7 @@ int updupd(int force)
 	struct video *vp1;
 	int i;
 
-	for (i = 0; i < term.t_nrow; ++i) {
+	for (i = 0; i < term.t_nrow - 1; ++i) {
 		vp1 = vscreen[i];
 
 		/* for each line that needs to be updated */
@@ -637,13 +640,6 @@ static int updateline(int row, struct video *vp)
 			maxchar = i + 1;
 	}
 
-	/* set rev video if needed, and fill all the way */
-	if (vp->v_flag & VFREQ) {
-		maxchar = term.t_ncol;
-		TTrev(TRUE);
-		spellcheck = false;
-	}
-
 	if (spellcheck)
 		analyzed = findwords(vp->v_text, maxchar, array, sizeof(array));
 
@@ -676,6 +672,56 @@ static int updateline(int row, struct video *vp)
 }
 
 /*
+ * Add one character to the mode line image, expanding it the way the
+ * screen would, and marking an overlong line with a '$' in the last
+ * column.  The column counter is carried in *np.
+ */
+static void mladd(unsigned char *mline, int *np, int c)
+{
+	/* In case somebody passes us a signed char.. */
+	if (c < 0) {
+		c += 256;
+		if (c < 0)
+			return;
+	}
+
+	if (*np >= term.t_ncol) {
+		mline[term.t_ncol - 1] = '$';
+		(*np)++;
+		return;
+	}
+
+	if (c == '\t') {
+		do {
+			mladd(mline, np, ' ');
+		} while ((*np & tabmask) != 0);
+		return;
+	}
+
+	if (c < 0x20) {
+		mladd(mline, np, '^');
+		mladd(mline, np, c ^ 0x40);
+		return;
+	}
+
+	if (c == 0x7f) {
+		mladd(mline, np, '^');
+		mladd(mline, np, '?');
+		return;
+	}
+
+	if (c >= 0x80 && c <= 0xA0) {
+		static const char hex[] = "0123456789abcdef";
+		mladd(mline, np, '\\');
+		mladd(mline, np, hex[c >> 4]);
+		mladd(mline, np, hex[c & 15]);
+		return;
+	}
+
+	mline[(*np)++] = c;
+}
+
+/*
  * Redisplay the mode line for the window pointed to by the "wp". This is the
  * only routine that has any idea of how the modeline is formatted. You can
  * change the modeline format by hacking at this routine. Called by "update"
@@ -691,10 +737,10 @@ static void modeline(struct window *wp)
 	int lchar;				/* character to draw line in buffer with */
 	int firstm;				/* is this the first mode? */
 	char tline[NLINE];			/* buffer for part of mode line */
+	unsigned char mline[MAXCOL];		/* the assembled mode line */
 
-	n = term.t_nrow - 1;			/* Location. */
-	vscreen[n]->v_flag |= VFCHG | VFREQ;		/* Redraw next time. */
-	vtmove(n, 0);				/* Seek to right line. */
+	memset(mline, ' ', sizeof(mline));
+	n = 0;
 	if (wp == curwp)			/* mark the current buffer */
 		lchar = '-';
 	else if (revexist)
@@ -703,14 +749,12 @@ static void modeline(struct window *wp)
 		lchar = '-';
 
 	bp = wp->w_bufp;
-	vtputc(lchar);
+	mladd(mline, &n, lchar);
 
 	if ((bp->b_flag & BFCHG) != 0)		/* "*" if changed. */
-		vtputc('*');
+		mladd(mline, &n, '*');
 	else
-		vtputc(lchar);
-
-	n = 2;
+		mladd(mline, &n, lchar);
 
 	strcpy(tline, " ");
 	strcat(tline, PROGRAM_NAME_LONG);
@@ -718,16 +762,12 @@ static void modeline(struct window *wp)
 	strcat(tline, VERSION);
 	strcat(tline, ": ");
 	cp = &tline[0];
-	while ((c = *cp++) != 0) {
-		vtputc(c);
-		++n;
-	}
+	while ((c = *cp++) != 0)
+		mladd(mline, &n, c);
 
 	cp = &bp->b_bname[0];
-	while ((c = *cp++) != 0) {
-		vtputc(c);
-		++n;
-	}
+	while ((c = *cp++) != 0)
+		mladd(mline, &n, c);
 
 	strcpy(tline, " (");
 
@@ -748,34 +788,27 @@ static void modeline(struct window *wp)
 	strcat(tline, ") ");
 
 	cp = &tline[0];
-	while ((c = *cp++) != 0) {
-		vtputc(c);
-		++n;
-	}
+	while ((c = *cp++) != 0)
+		mladd(mline, &n, c);
 
 	if (bp->b_fname[0] != 0 && strcmp(bp->b_bname, bp->b_fname) != 0) {
 		cp = &bp->b_fname[0];
 
-		while ((c = *cp++) != 0) {
-			vtputc(c);
-			++n;
-		}
+		while ((c = *cp++) != 0)
+			mladd(mline, &n, c);
 
-		vtputc(' ');
-		++n;
+		mladd(mline, &n, ' ');
 	}
 
-	while (n < term.t_ncol) {		/* Pad to full width. */
-		vtputc(lchar);
-		++n;
-	}
+	while (n < term.t_ncol)			/* Pad to full width. */
+		mladd(mline, &n, lchar);
 
 	{					/* determine if top line, bottom line, or both are visible */
 		struct line *lp = wp->w_linep;
 		int rows = term.t_nrow - 1;
 		char *msg = NULL;
 
-		vtcol = n - 7;			/* strlen(" top ") plus a couple */
+		n -= 7;				/* strlen(" top ") plus a couple */
 		while (rows--) {
 			lp = lforw(lp);
 			if (lp == wp->w_bufp->b_linep) {
@@ -821,11 +854,17 @@ static void modeline(struct window *wp)
 		}
 
 		cp = msg;
-		while ((c = *cp++) != 0) {
-			vtputc(c);
-			++n;
-		}
+		while ((c = *cp++) != 0)
+			mladd(mline, &n, c);
 	}
+
+	/* and paint it, in reverse video across the full width */
+	movecursor(term.t_nrow - 1, 0);
+	TTrev(TRUE);
+	for (i = 0; i < term.t_ncol; i++)
+		TTputc(mline[i]);
+	TTrev(FALSE);
+	ttcol = term.t_ncol;
 }
 
 void upmode(void)
