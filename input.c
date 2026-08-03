@@ -107,7 +107,7 @@ fn_t getname(void)
 	cpos = 0;
 
 	/* if we are executing a command line get the next arg and match it */
-	if (clexec) {
+	if (executing_command_line) {
 		if (macarg(buf) != TRUE)
 			return NULL;
 		return fncmatch(&buf[0]);

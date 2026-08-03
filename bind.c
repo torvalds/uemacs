@@ -248,7 +248,7 @@ unsigned int getckey(int mflag)
 	char tok[NSTRING];			/* command incoming */
 
 	/* check to see if we are executing a command line */
-	if (clexec) {
+	if (executing_command_line) {
 		macarg(tok);			/* get the next token */
 		return stock(tok);
 	}

@@ -378,7 +378,7 @@ int promptpattern(char *prompt)
 	mystrscat(tpat, ")<Meta>: ", sizeof(tpat));
 
 	/* check to see if we are executing a command line */
-	if (!clexec) {
+	if (!executing_command_line) {
 		msg_puts(tpat);
 	}
 	return strlen(tpat);

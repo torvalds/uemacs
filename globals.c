@@ -5,9 +5,9 @@
 
 int fill_column = 72;				/* fill column, the $fillcol setting */
 int keyboard_macro[NKBDM];			/* the recorded keystrokes */
-char *execstr = NULL;				/* pointer to string to execute */
-char golabel[NPAT] = "";			/* current line to go to        */
-int execlevel = 0;				/* execution IF level           */
+char *command_string = NULL;			/* the command line being executed, or NULL */
+char goto_label[NPAT] = "";			/* the label a !goto is looking for */
+int if_level = 0;				/* !if levels being skipped; 0 means executing */
 int can_erase_to_eol = TRUE;			/* terminal has an erase-to-end-of-line */
 int can_reverse_video = FALSE;			/* terminal has reverse video */
 char *modename[] = {				/* name of modes                */
@@ -27,7 +27,7 @@ int autosave_interval = 256;			/* changes between autosaves, the $asave setting 
 int autosave_countdown = 256;			/* changes left before one, the $acount setting */
 int screen_garbage = TRUE;			/* the screen is not what we think it is */
 int message_present = FALSE;			/* something is showing on the message line */
-int clexec = FALSE;				/* command line execution flag  */
+int executing_command_line = FALSE;		/* running a command line, not reading keys */
 int storing_macro = FALSE;			/* capturing command lines into a buffer */
 int display_commands = TRUE;			/* echo commands, the $discmd setting */
 int display_input = TRUE;			/* echo input, the $disinp setting */

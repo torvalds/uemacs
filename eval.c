@@ -337,13 +337,13 @@ int cmd_set(int f, int n)
 	char value[NSTRING];			/* value to set variable to */
 
 	/* first get the variable to set.. */
-	if (clexec == FALSE) {
+	if (executing_command_line == FALSE) {
 		status = ask_string("Variable to set: ", &var[0], NVSIZE);
 		if (status != TRUE)
 			return status;
 	} else {				/* macro line argument */
 		/* grab token and skip it */
-		execstr = token(execstr, var, NVSIZE + 1);
+		command_string = token(command_string, var, NVSIZE + 1);
 	}
 
 	/* check the legality and find the var */
@@ -418,7 +418,7 @@ void findvar(char *var, struct variable_description *vd, int size)
 		var[4] = 0;
 		if (strcmp(&var[1], "ind") == 0) {
 			/* grab token, and eval it */
-			execstr = token(execstr, var, size);
+			command_string = token(command_string, var, size);
 			getval(var, var, size);
 			goto fvar;
 		}

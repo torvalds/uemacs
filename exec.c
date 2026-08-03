@@ -51,7 +51,7 @@ int cmd_execute_command_line(int f, int n)
 	if ((status = ask_string(": ", cmdstr, NSTRING)) != TRUE)
 		return status;
 
-	execlevel = 0;
+	if_level = 0;
 	return docmd(cmdstr);
 }
 
@@ -79,11 +79,11 @@ int docmd(char *cline)
 	char tkn[NSTRING];			/* next token off of command line */
 
 	/* if we are scanning and not executing..go back here */
-	if (execlevel)
+	if (if_level)
 		return TRUE;
 
-	oldestr = execstr;			/* save last ptr to string to execute */
-	execstr = cline;			/* and set this one as current */
+	oldestr = command_string;			/* save last ptr to string to execute */
+	command_string = cline;			/* and set this one as current */
 
 	/* first set up the default command values */
 	f = FALSE;
@@ -92,7 +92,7 @@ int docmd(char *cline)
 	thisflag = 0;
 
 	if ((status = macarg(tkn)) != TRUE) {	/* and grab the first token */
-		execstr = oldestr;
+		command_string = oldestr;
 		return status;
 	}
 
@@ -104,7 +104,7 @@ int docmd(char *cline)
 
 		/* and now get the command to execute */
 		if ((status = macarg(tkn)) != TRUE) {
-			execstr = oldestr;
+			command_string = oldestr;
 			return status;
 		}
 	}
@@ -112,17 +112,17 @@ int docmd(char *cline)
 	/* and match the token to see if it exists */
 	if ((fnc = fncmatch(tkn)) == NULL) {
 		msg_printf("(No such Function)");
-		execstr = oldestr;
+		command_string = oldestr;
 		return FALSE;
 	}
 
 	/* save the arguments and go execute the command */
-	oldcle = clexec;			/* save old clexec flag */
-	clexec = TRUE;				/* in cline execution */
+	oldcle = executing_command_line;			/* save old clexec flag */
+	executing_command_line = TRUE;				/* in cline execution */
 	status = (*fnc) (f, n);			/* call the function */
 	command_status = status;			/* save the status */
-	clexec = oldcle;			/* restore clexec flag */
-	execstr = oldestr;
+	executing_command_line = oldcle;			/* restore clexec flag */
+	command_string = oldestr;
 	return status;
 }
 
@@ -211,10 +211,10 @@ int macarg(char *tok)
 	int savcle;				/* buffer to store original clexec */
 	int status;
 
-	savcle = clexec;			/* save execution mode */
-	clexec = TRUE;				/* get the argument */
+	savcle = executing_command_line;			/* save execution mode */
+	executing_command_line = TRUE;				/* get the argument */
 	status = nextarg("", tok, NSTRING, ctoec('\n'));
-	clexec = savcle;			/* restore execution mode */
+	executing_command_line = savcle;			/* restore execution mode */
 	return status;
 }
 
@@ -230,11 +230,11 @@ int macarg(char *tok)
 int nextarg(char *prompt, char *buffer, int size, int terminator)
 {
 	/* if we are interactive, go get it! */
-	if (clexec == FALSE)
+	if (executing_command_line == FALSE)
 		return getstring(prompt, buffer, size, terminator);
 
 	/* grab token and advance past */
-	execstr = token(execstr, buffer, size);
+	command_string = token(command_string, buffer, size);
 
 	/* evaluate it */
 	getval(buffer, buffer, size);
@@ -432,7 +432,7 @@ int dobuf(struct buffer *bp)
 	char tkn[NSTRING];			/* buffer to evaluate an expresion in */
 
 	/* clear IF level flags/while ptr */
-	execlevel = 0;
+	if_level = 0;
 	whlist = NULL;
 	scanner = NULL;
 
@@ -597,23 +597,23 @@ int dobuf(struct buffer *bp)
 			/* skip past the directive */
 			while (*eline && *eline != ' ' && *eline != '\t')
 				++eline;
-			execstr = eline;
+			command_string = eline;
 
 			switch (dirnum) {
 			case DIF:		/* IF directive */
 				/* grab the value of the logical exp */
-				if (execlevel == 0) {
+				if (if_level == 0) {
 					if (macarg(tkn) != TRUE)
 						goto eexec;
 					if (stol(tkn) == FALSE)
-						++execlevel;
+						++if_level;
 				} else
-					++execlevel;
+					++if_level;
 				goto onward;
 
 			case DWHILE:		/* WHILE directive */
 				/* grab the value of the logical exp */
-				if (execlevel == 0) {
+				if (if_level == 0) {
 					if (macarg(tkn) != TRUE)
 						goto eexec;
 					if (stol(tkn) == TRUE)
@@ -622,7 +622,7 @@ int dobuf(struct buffer *bp)
 				/* drop down and act just like !BREAK */
 
 			case DBREAK:		/* BREAK directive */
-				if (dirnum == DBREAK && execlevel)
+				if (dirnum == DBREAK && if_level)
 					goto onward;
 
 				/* jump down to the endwhile */
@@ -645,29 +645,29 @@ int dobuf(struct buffer *bp)
 				goto onward;
 
 			case DELSE:		/* ELSE directive */
-				if (execlevel == 1)
-					--execlevel;
-				else if (execlevel == 0)
-					++execlevel;
+				if (if_level == 1)
+					--if_level;
+				else if (if_level == 0)
+					++if_level;
 				goto onward;
 
 			case DENDIF:		/* ENDIF directive */
-				if (execlevel)
-					--execlevel;
+				if (if_level)
+					--if_level;
 				goto onward;
 
 			case DGOTO:		/* GOTO directive */
 				/* .....only if we are currently executing */
-				if (execlevel == 0) {
+				if (if_level == 0) {
 
 					/* grab label to jump to */
-					eline = token(eline, golabel, NPAT);
-					linlen = strlen(golabel);
+					eline = token(eline, goto_label, NPAT);
+					linlen = strlen(goto_label);
 					glp = hlp->l_fp;
 					while (glp != hlp) {
 						if (*glp->l_text == '*' &&
 						    (strncmp
-						     (&glp->l_text[1], golabel, linlen) == 0)) {
+						     (&glp->l_text[1], goto_label, linlen) == 0)) {
 							lp = glp;
 							goto onward;
 						}
@@ -680,13 +680,13 @@ int dobuf(struct buffer *bp)
 				goto onward;
 
 			case DRETURN:		/* RETURN directive */
-				if (execlevel == 0)
+				if (if_level == 0)
 					goto eexec;
 				goto onward;
 
 			case DENDWHILE:	/* ENDWHILE directive */
-				if (execlevel) {
-					--execlevel;
+				if (if_level) {
+					--if_level;
 					goto onward;
 				} else {
 					/* find the right while loop */
@@ -734,7 +734,7 @@ int dobuf(struct buffer *bp)
 			bp->b_dotp = lp;
 			bp->b_doto = 0;
 			free(einit);
-			execlevel = 0;
+			if_level = 0;
 			freewhile(whlist);
 			return status;
 		}
@@ -745,7 +745,7 @@ int dobuf(struct buffer *bp)
 	}
 
  eexec:					/* exit the current function */
-	execlevel = 0;
+	if_level = 0;
 	freewhile(whlist);
 	return TRUE;
 }

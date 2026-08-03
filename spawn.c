@@ -86,7 +86,7 @@ int cmd_shell_command(int f, int n)
 	fflush(stdout);				/* to be sure P.K.      */
 	tcapopen();
 
-	if (clexec == FALSE) {
+	if (executing_command_line == FALSE) {
 		msg_append("(End)");		/* Pause.               */
 		ttflush();
 		while ((s = tgetc()) != '\r' && s != ' ') ;

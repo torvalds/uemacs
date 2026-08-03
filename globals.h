@@ -26,9 +26,9 @@ extern int fill_column;				/* fill column, the $fillcol setting */
 extern int keyboard_macro[];			/* the recorded keystrokes */
 extern char pat[];				/* Search pattern               */
 extern char rpat[];				/* Replacement pattern          */
-extern char *execstr;				/* pointer to string to execute */
-extern char golabel[];				/* current line to go to        */
-extern int execlevel;				/* execution IF level           */
+extern char *command_string;			/* the command line being executed, or NULL */
+extern char goto_label[];			/* the label a !goto is looking for */
+extern int if_level;				/* !if levels being skipped; 0 means executing */
 extern int can_erase_to_eol;			/* terminal has an erase-to-end-of-line */
 extern int can_reverse_video;			/* terminal has reverse video */
 extern char *modename[];			/* text names of modes          */
@@ -42,7 +42,7 @@ extern int autosave_interval;			/* changes between autosaves, the $asave setting
 extern int autosave_countdown;			/* changes left before one, the $acount setting */
 extern int screen_garbage;			/* the screen is not what we think it is */
 extern int message_present;			/* something is showing on the message line */
-extern int clexec;				/* command line execution flag  */
+extern int executing_command_line;		/* running a command line, not reading keys */
 extern int storing_macro;			/* capturing command lines into a buffer */
 extern int display_commands;			/* echo commands, the $discmd setting */
 extern int display_input;			/* echo input, the $disinp setting */
