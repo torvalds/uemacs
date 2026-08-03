@@ -727,23 +727,15 @@ void mlerase(void)
 }
 
 /*
- * Write a message into the message line. Keep track of the physical cursor
- * position. A small class of printf like format items is handled. Assumes the
- * stack grows down; this assumption is made by the "++" in the argument scan
- * loop. Set the "message line" flag TRUE.
- *
- * char *fmt;		format string for output
- * char *arg;		pointer to first argument to print
+ * The framing every message shares: get to the message line, and tidy
+ * up behind whatever was written there.
  */
-void mlwrite(const char *fmt, ...)
+static int ml_open(void)
 {
-	int c;					/* current char in format string */
-	va_list ap;
-
 	/* if we are not currently echoing on the command line, abort this */
 	if (discmd == FALSE) {
 		movecursor(term.t_nrow, 0);
-		return;
+		return FALSE;
 	}
 
 	/* if we can not erase to end-of-line, do it manually */
@@ -753,6 +745,50 @@ void mlwrite(const char *fmt, ...)
 	}
 
 	movecursor(term.t_nrow, 0);
+	return TRUE;
+}
+
+static void ml_close(void)
+{
+	/* if we can, erase to the end of screen */
+	if (eolexist == TRUE)
+		TTeeol();
+	TTflush();
+	mpresf = TRUE;
+}
+
+/*
+ * Write a string to the message line.  The string is text, not a
+ * format - which is what a caller with a run-time string wants, and
+ * saves it from having to double any '%' the user typed.
+ */
+void mlputstr(const char *s)
+{
+	if (!ml_open())
+		return;
+	mlputs(s);
+	ml_close();
+}
+
+/*
+ * Write a message into the message line. Keep track of the physical cursor
+ * position. A small class of printf like format items is handled. Set the
+ * "message line" flag TRUE.
+ *
+ * The format string had better be one: anything built at run time goes
+ * to mlputstr() instead.
+ *
+ * char *fmt;		format string for output
+ * char *arg;		pointer to first argument to print
+ */
+void mlwrite(const char *fmt, ...)
+{
+	int c;					/* current char in format string */
+	va_list ap;
+
+	if (!ml_open())
+		return;
+
 	va_start(ap, fmt);
 	while ((c = *fmt++) != 0) {
 		if (c != '%') {
@@ -792,12 +828,7 @@ void mlwrite(const char *fmt, ...)
 		}
 	}
 	va_end(ap);
-
-	/* if we can, erase to the end of screen */
-	if (eolexist == TRUE)
-		TTeeol();
-	TTflush();
-	mpresf = TRUE;
+	ml_close();
 }
 
 /*
@@ -813,7 +844,7 @@ void mlforce(char *s)
 
 	oldcmd = discmd;			/* save the discmd value */
 	discmd = TRUE;				/* and turn display on */
-	mlwrite(s);				/* write the string out */
+	mlputstr(s);				/* write the string out */
 	discmd = oldcmd;			/* and restore the original setting */
 }
 
@@ -822,7 +853,7 @@ void mlforce(char *s)
  * the characters in the string all have width "1"; if this is not the case
  * things will get screwed up a little.
  */
-void mlputs(char *s)
+void mlputs(const char *s)
 {
 	int c;
 

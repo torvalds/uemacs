@@ -786,7 +786,7 @@ static int replaces(int kind, int f, int n)
 		if (kind) {
 			/* Get the query.
 			 */
- pprompt:		mlwrite(&tpat[0], &pat[0], &rpat[0]);
+ pprompt:		mlputstr(tpat);
  qprompt:
 			update(TRUE);		/* show the proposed place to change */
 			c = tgetc();		/* and input */
@@ -945,10 +945,6 @@ int expandp(char *srcstr, char *deststr, int maxlength)
 		} else if ((c > 0 && c < 0x20) || c == 0x7f) {	/* control character */
 			*deststr++ = '^';
 			*deststr++ = c ^ 0x40;
-			maxlength -= 2;
-		} else if (c == '%') {
-			*deststr++ = '%';
-			*deststr++ = '%';
 			maxlength -= 2;
 		} else {			/* any other character */
 

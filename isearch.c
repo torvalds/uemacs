@@ -380,7 +380,7 @@ int promptpattern(char *prompt)
 
 	/* check to see if we are executing a command line */
 	if (!clexec) {
-		mlwrite(tpat);
+		mlputstr(tpat);
 	}
 	return strlen(tpat);
 }

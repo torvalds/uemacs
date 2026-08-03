@@ -902,27 +902,14 @@ int clrmes(int f, int n)
  */
 int writemsg(int f, int n)
 {
-	char *sp;				/* pointer into buf to expand %s */
-	char *np;				/* ptr into nbuf */
 	int status;
 	char buf[NPAT];				/* buffer to recieve message into */
-	char nbuf[NPAT * 2];			/* buffer to expand string into */
 
 	if ((status = mlreply("Message to write: ", buf, NPAT - 1)) != TRUE)
 		return status;
 
-	/* expand all '%' to "%%" so mlwrite won't expect arguments */
-	sp = buf;
-	np = nbuf;
-	while (*sp) {
-		*np++ = *sp;
-		if (*sp++ == '%')
-			*np++ = '%';
-	}
-	*np = '\0';
-
 	/* write the message out */
-	mlforce(nbuf);
+	mlforce(buf);
 	return TRUE;
 }
 

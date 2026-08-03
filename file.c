@@ -288,7 +288,7 @@ int readin(char *fname, int lockfl)
 	if (nline != 1)
 		strcat(mesg, "s");
 	strcat(mesg, ")");
-	mlwrite(mesg);
+	mlputstr(mesg);
 
  out:
 	/* The buffer now matches the file, whatever the file turned out
@@ -573,7 +573,7 @@ int ifile(char *fname)
 	if (nline > 1)
 		strcat(mesg, "s");
 	strcat(mesg, ")");
-	mlwrite(mesg);
+	mlputstr(mesg);
 
  out:
 	/* advance to the next line and mark the window for changes */

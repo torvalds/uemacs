@@ -28,7 +28,7 @@ int mlyesno(char *prompt)
 		/* build and prompt the user */
 		strcpy(buf, prompt);
 		strcat(buf, " (y/n)? ");
-		mlwrite(buf);
+		mlputstr(buf);
 
 		/* get the responce */
 		c = tgetc();
@@ -402,7 +402,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 	quotef = FALSE;
 
 	/* prompt the user for the input string */
-	mlwrite(prompt);
+	mlputstr(prompt);
 
 	for (;;) {
 		if (!didtry)
