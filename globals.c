@@ -1,5 +1,5 @@
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 
 /* initialized global definitions */
 

@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 
 /*

@@ -21,7 +21,7 @@ SRC=	basic.c bind.c buffer.c display.c eval.c exec.c file.c fileio.c \
 
 OBJ=	$(SRC:.c=.o)
 
-HDR=	ebind.h edef.h efunc.h epath.h estruct.h evar.h line.h usage.h \
+HDR=	ebind.h efunc.h epath.h estruct.h evar.h globals.h line.h usage.h \
 	utf8.h util.h version.h wrapper.h
 
 CC=gcc

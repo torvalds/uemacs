@@ -59,7 +59,7 @@
 #define	maindef
 
 #include "estruct.h"				/* Global structures and defines. */
-#include "edef.h"				/* Global definitions. */
+#include "globals.h"				/* Global definitions. */
 #include "efunc.h"				/* Function declarations and name table. */
 #include "ebind.h"				/* Default key bindings. */
 #include "version.h"

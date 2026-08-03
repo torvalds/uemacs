@@ -1,14 +1,17 @@
-/*	edef.h
+/*	globals.h
  *
- *	Global variable definitions
+ *	Declarations for the editor's global variables; globals.c has
+ *	the definitions.  It was edef.h, and before commit 8967dfc
+ *	("Fix ugly \"definitions in header file\" crud") it really was
+ *	the definitions too, behind a #ifdef maindef.
  *
  *	written by Dave G. Conroy
  *	modified by Steve Wilhite, George Jones
  *	greatly modified by Daniel Lawrence
  *	modified by Petri Kutvonen
  */
-#ifndef EDEF_H_
-#define EDEF_H_
+#ifndef GLOBALS_H_
+#define GLOBALS_H_
 
 #include <signal.h>
 #include <stdlib.h>
@@ -108,4 +111,4 @@ extern char *dname[];				/* Directive name table.        */
 /* Terminal table defined only in term.c */
 extern struct terminal term;
 
-#endif				/* EDEF_H_ */
+#endif				/* GLOBALS_H_ */

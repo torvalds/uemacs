@@ -17,7 +17,7 @@
 #include <term.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 
 #include <signal.h>
