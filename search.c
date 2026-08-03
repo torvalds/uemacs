@@ -63,6 +63,7 @@
 #include "edef.h"
 #include "efunc.h"
 #include "line.h"
+#include "util.h"
 
 /*
  * The variables magical and rmagical determine if there
@@ -588,10 +589,10 @@ static int readpattern(char *prompt, char *apat, int srch)
 	int status;
 	char tpat[NPAT + 20];
 
-	strcpy(tpat, prompt);			/* copy prompt to output string */
-	strcat(tpat, " (");			/* build new prompt string */
-	expandp(&apat[0], &tpat[strlen(tpat)], NPAT / 2);	/* add old pattern */
-	strcat(tpat, ")<Meta>: ");
+	mystrscpy(tpat, prompt, sizeof(tpat));	/* copy prompt to output string */
+	mystrscat(tpat, " (", sizeof(tpat));	/* build new prompt string */
+	expandp(&apat[0], tpat + strlen(tpat), NPAT / 2);	/* add old pattern */
+	mystrscat(tpat, ")<Meta>: ", sizeof(tpat));
 
 	/* Read a pattern.  Either we get one,
 	 * or we just get the META charater, and use the previous pattern.
@@ -743,11 +744,11 @@ static int replaces(int kind, int f, int n)
 	if (kind) {
 		/* Build query replace question string.
 		 */
-		strcpy(tpat, "Replace '");
-		expandp(&pat[0], &tpat[strlen(tpat)], NPAT / 3);
-		strcat(tpat, "' with '");
-		expandp(&rpat[0], &tpat[strlen(tpat)], NPAT / 3);
-		strcat(tpat, "'? ");
+		mystrscpy(tpat, "Replace '", sizeof(tpat));
+		expandp(&pat[0], tpat + strlen(tpat), NPAT / 3);
+		mystrscat(tpat, "' with '", sizeof(tpat));
+		expandp(&rpat[0], tpat + strlen(tpat), NPAT / 3);
+		mystrscat(tpat, "'? ", sizeof(tpat));
 
 		/* Initialize last replaced pointers.
 		 */
@@ -929,35 +930,50 @@ int delins(int dlength, char *instr, int use_meta)
  * char *deststr;		destination of expanded string
  * int maxlength;		maximum chars in destination
  */
-int expandp(char *srcstr, char *deststr, int maxlength)
+int expandp(char *srcstr, char *deststr, int size)
 {
 	unsigned char c;			/* current char to translate */
+
+	if (size < 2) {				/* no room even for the '$' */
+		if (size > 0)
+			*deststr = '\0';
+		return FALSE;
+	}
+
+	/*
+	 * Keep a byte back, so that the '$' that says "there was more"
+	 * always has somewhere to go.  Everything below can then treat
+	 * 'size' as the room for the text and its terminator.
+	 */
+	size--;
 
 	/* Scan through the string.
 	 */
 	while ((c = *srcstr++) != 0) {
-		if (c == '\n') {		/* it's a newline */
-			*deststr++ = '<';
-			*deststr++ = 'N';
-			*deststr++ = 'L';
-			*deststr++ = '>';
-			maxlength -= 4;
-		} else if ((c > 0 && c < 0x20) || c == 0x7f) {	/* control character */
-			*deststr++ = '^';
-			*deststr++ = c ^ 0x40;
-			maxlength -= 2;
-		} else {			/* any other character */
+		char piece[4];
+		int len;
 
-			*deststr++ = c;
-			maxlength--;
+		if (c == '\n') {		/* it's a newline */
+			memcpy(piece, "<NL>", 4);
+			len = 4;
+		} else if ((c > 0 && c < 0x20) || c == 0x7f) {	/* control character */
+			piece[0] = '^';
+			piece[1] = c ^ 0x40;
+			len = 2;
+		} else {			/* any other character */
+			piece[0] = c;
+			len = 1;
 		}
 
-		/* check for maxlength */
-		if (maxlength < 4) {
+		/* room for it and the terminator, or say we ran out */
+		if (len + 1 > size) {
 			*deststr++ = '$';
 			*deststr = '\0';
 			return FALSE;
 		}
+		memcpy(deststr, piece, len);
+		deststr += len;
+		size -= len;
 	}
 	*deststr = '\0';
 	return TRUE;

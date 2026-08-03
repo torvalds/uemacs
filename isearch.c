@@ -372,10 +372,10 @@ int promptpattern(char *prompt)
 {
 	char tpat[NPAT + 20];
 
-	strcpy(tpat, prompt);			/* copy prompt to output string */
-	strcat(tpat, " (");			/* build new prompt string */
-	expandp(pat, &tpat[strlen(tpat)], NPAT / 2);	/* add old pattern */
-	strcat(tpat, ")<Meta>: ");
+	mystrscpy(tpat, prompt, sizeof(tpat));	/* copy prompt to output string */
+	mystrscat(tpat, " (", sizeof(tpat));	/* build new prompt string */
+	expandp(pat, tpat + strlen(tpat), NPAT / 2);	/* add old pattern */
+	mystrscat(tpat, ")<Meta>: ", sizeof(tpat));
 
 	/* check to see if we are executing a command line */
 	if (!clexec) {
