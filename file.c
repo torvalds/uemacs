@@ -85,7 +85,7 @@ int cmd_read_file(int f, int n)
 
 	if (restflag)				/* don't allow this command if restricted */
 		return resterr();
-	if ((s = mlreply("Read file: ", fname, NFILEN)) != TRUE)
+	if ((s = ask_string("Read file: ", fname, NFILEN)) != TRUE)
 		return s;
 	return readin(fname, TRUE);
 }
@@ -106,7 +106,7 @@ int cmd_insert_file(int f, int n)
 		return resterr();
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
-	if ((s = mlreply("Insert file: ", fname, NFILEN)) != TRUE)
+	if ((s = ask_string("Insert file: ", fname, NFILEN)) != TRUE)
 		return s;
 	if ((s = ifile(fname)) != TRUE)
 		return s;
@@ -129,7 +129,7 @@ int cmd_find_file(int f, int n)
 
 	if (restflag)				/* don't allow this command if restricted */
 		return resterr();
-	if ((s = mlreply("Find file: ", fname, NFILEN)) != TRUE)
+	if ((s = ask_string("Find file: ", fname, NFILEN)) != TRUE)
 		return s;
 	return getfile(fname, TRUE);
 }
@@ -141,7 +141,7 @@ int cmd_view_file(int f, int n)
 
 	if (restflag)				/* don't allow this command if restricted */
 		return resterr();
-	if ((s = mlreply("View file: ", fname, NFILEN)) != TRUE)
+	if ((s = ask_string("View file: ", fname, NFILEN)) != TRUE)
 		return s;
 	s = getfile(fname, FALSE);
 	if (s) {				/* if we succeed, put it in view mode */
@@ -174,14 +174,14 @@ int getfile(char *fname, int lockfl)
 				lp = lback(lp);
 			curwp->w_linep = lp;
 			curwp->w_flag |= WFMODE | WFHARD;
-			mlwrite("(Old buffer)");
+			msg_printf("(Old buffer)");
 			return TRUE;
 		}
 	}
 	makename(bname, fname);			/* New buffer name.     */
 	while ((bp = bfind(bname, FALSE, 0)) != NULL) {
 		/* old buffer name conflict code */
-		s = mlreply("Buffer name: ", bname, NBUFN);
+		s = ask_string("Buffer name: ", bname, NBUFN);
 		if (s == ABORT)			/* ^G to just quit      */
 			return s;
 		if (s == FALSE) {		/* CR to clobber it     */
@@ -190,7 +190,7 @@ int getfile(char *fname, int lockfl)
 		}
 	}
 	if (bp == NULL && (bp = bfind(bname, TRUE, 0)) == NULL) {
-		mlwrite("Cannot create buffer");
+		msg_printf("Cannot create buffer");
 		return FALSE;
 	}
 	if (--curbp->b_nwnd == 0) {		/* Undisplay.           */
@@ -248,12 +248,12 @@ int readin(char *fname, int lockfl)
 		goto out;
 
 	if (s == FIOFNF) {			/* File not found.      */
-		mlwrite("(New file)");
+		msg_printf("(New file)");
 		goto out;
 	}
 
 	/* read the file in */
-	mlwrite("(Reading file)");
+	msg_printf("(Reading file)");
 	nline = 0;
 	while ((s = file_get_line()) == FIOSUC) {
 		nbytes = strlen(fline);
@@ -288,7 +288,7 @@ int readin(char *fname, int lockfl)
 	if (nline != 1)
 		strcat(mesg, "s");
 	strcat(mesg, ")");
-	mlputstr(mesg);
+	msg_puts(mesg);
 
  out:
 	/* The buffer now matches the file, whatever the file turned out
@@ -376,7 +376,7 @@ int cmd_write_file(int f, int n)
 
 	if (restflag)				/* don't allow this command if restricted */
 		return resterr();
-	if ((s = mlreply("Write file: ", fname, NFILEN)) != TRUE)
+	if ((s = ask_string("Write file: ", fname, NFILEN)) != TRUE)
 		return s;
 	if ((s = writeout(fname)) == TRUE) {
 		strcpy(curbp->b_fname, fname);
@@ -406,22 +406,22 @@ int cmd_save_file(int f, int n)
 	if ((curbp->b_flag & BFCHG) == 0)	/* Return, no changes.  */
 		return TRUE;
 	if (curbp->b_fname[0] == 0) {		/* Must have a name.    */
-		mlwrite("No file name");
+		msg_printf("No file name");
 		return FALSE;
 	}
 
 	/* complain about truncated files */
 	if ((curbp->b_flag & BFTRUNC) != 0) {
-		if (mlyesno("Truncated file ... write it out") == FALSE) {
-			mlwrite("(Aborted)");
+		if (ask_yesno("Truncated file ... write it out") == FALSE) {
+			msg_printf("(Aborted)");
 			return FALSE;
 		}
 	}
 
 	/* Somebody else may have been at it while we had it open */
 	if (file_changed(curbp, curbp->b_fname)) {
-		if (mlyesno("File changed on disk, overwrite") != TRUE) {
-			mlwrite("(Aborted)");
+		if (ask_yesno("File changed on disk, overwrite") != TRUE) {
+			msg_printf("(Aborted)");
 			return FALSE;
 		}
 	}
@@ -451,7 +451,7 @@ int writeout(char *fn)
 	if ((s = file_open_write(fn)) != FIOSUC) {	/* Open writes message. */
 		return FALSE;
 	}
-	mlwrite("(Writing...)");		/* tell us were writing */
+	msg_printf("(Writing...)");		/* tell us were writing */
 	lp = lforw(curbp->b_linep);		/* First line.          */
 	nline = 0;				/* Number of lines.     */
 	while (lp != curbp->b_linep) {
@@ -464,9 +464,9 @@ int writeout(char *fn)
 		s = file_close();
 		if (s == FIOSUC) {		/* No close error.      */
 			if (nline == 1)
-				mlwrite("(Wrote 1 line)");
+				msg_printf("(Wrote 1 line)");
 			else
-				mlwrite("(Wrote %d lines)", nline);
+				msg_printf("(Wrote %d lines)", nline);
 		}
 	} else					/* Ignore close error   */
 		file_close();			/* if a write error.    */
@@ -491,7 +491,7 @@ int cmd_change_file_name(int f, int n)
 
 	if (restflag)				/* don't allow this command if restricted */
 		return resterr();
-	if ((s = mlreply("Name: ", fname, NFILEN)) == ABORT)
+	if ((s = ask_string("Name: ", fname, NFILEN)) == ABORT)
 		return s;
 	if (s == FALSE)
 		strcpy(curbp->b_fname, "");
@@ -525,10 +525,10 @@ int ifile(char *fname)
 	if ((s = file_open_read(fname)) == FIOERR)	/* Hard file open.      */
 		goto out;
 	if (s == FIOFNF) {			/* File not found.      */
-		mlwrite("(No such file)");
+		msg_printf("(No such file)");
 		return FALSE;
 	}
-	mlwrite("(Inserting file)");
+	msg_printf("(Inserting file)");
 
 	/* back up a line and save the mark here */
 	curwp->w_dotp = lback(curwp->w_dotp);
@@ -573,7 +573,7 @@ int ifile(char *fname)
 	if (nline > 1)
 		strcat(mesg, "s");
 	strcat(mesg, ")");
-	mlputstr(mesg);
+	msg_puts(mesg);
 
  out:
 	/* advance to the next line and mark the window for changes */

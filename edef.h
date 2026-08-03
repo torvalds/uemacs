@@ -55,7 +55,7 @@ extern int ctlxc;				/* current control X prefix char */
 extern int reptc;				/* current universal repeat char */
 extern int abortc;				/* current abort command char   */
 
-extern int quotec;				/* quote char during mlreply() */
+extern int quotec;				/* quote char during ask_string() */
 extern int tabmask;
 extern struct kill *kbufp;			/* current kill buffer chunk pointer */
 extern struct kill *kbufh;			/* kill buffer header pointer   */

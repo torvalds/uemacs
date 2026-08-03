@@ -23,7 +23,7 @@ int cmd_describe_key(int f, int n)
 	char outseq[NSTRING];			/* output buffer for command sequence */
 
 	/* prompt the user to type us a key to describe */
-	mlwrite(": describe-key ");
+	msg_printf(": describe-key ");
 
 	/* get the command sequence to describe
 	   change it to something we can print as well */
@@ -57,12 +57,12 @@ int cmd_bind_to_key(int f, int n)
 	char outseq[80];			/* output buffer for keystroke sequence */
 
 	/* prompt the user to type in a key to bind */
-	mlwrite(": bind-to-key ");
+	msg_printf(": bind-to-key ");
 
 	/* get the function name to bind it to */
 	kfunc = getname();
 	if (kfunc == NULL) {
-		mlwrite("(No such function)");
+		msg_printf("(No such function)");
 		return FALSE;
 	}
 	ostring(" ");
@@ -115,7 +115,7 @@ int cmd_bind_to_key(int f, int n)
 	} else {				/* otherwise we need to add it to the end */
 		/* if we run out of binding room, bitch */
 		if (ktp >= &keytab[NBINDS]) {
-			mlwrite("Binding table FULL!");
+			msg_printf("Binding table FULL!");
 			return FALSE;
 		}
 
@@ -140,7 +140,7 @@ int cmd_unbind_key(int f, int n)
 	char outseq[80];			/* output buffer for keystroke sequence */
 
 	/* prompt the user to type in a key to unbind */
-	mlwrite(": unbind-key ");
+	msg_printf(": unbind-key ");
 
 	/* get the command sequence to unbind */
 	c = getckey(FALSE);			/* get a command sequence */
@@ -153,7 +153,7 @@ int cmd_unbind_key(int f, int n)
 
 	/* if it isn't bound, bitch */
 	if (unbindchar(c) == FALSE) {
-		mlwrite("(Key not bound)");
+		msg_printf("(Key not bound)");
 		return FALSE;
 	}
 	return TRUE;

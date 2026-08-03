@@ -56,7 +56,7 @@ void display_open(void)
  */
 void display_close(void)
 {
-	mlerase();
+	msg_erase();
 	movecursor(term.t_nrow, 0);
 	ttflush();
 	tcapclose();
@@ -494,7 +494,7 @@ static void updpos(void)
  * screen would, and marking an overlong line with a '$' in the last
  * column.  The column counter is carried in *np.
  */
-static void mladd(unsigned char *mline, int *np, int c)
+static void modeline_putc(unsigned char *mline, int *np, int c)
 {
 	/* In case somebody passes us a signed char.. */
 	if (c < 0) {
@@ -511,28 +511,28 @@ static void mladd(unsigned char *mline, int *np, int c)
 
 	if (c == '\t') {
 		do {
-			mladd(mline, np, ' ');
+			modeline_putc(mline, np, ' ');
 		} while ((*np & tabmask) != 0);
 		return;
 	}
 
 	if (c < 0x20) {
-		mladd(mline, np, '^');
-		mladd(mline, np, c ^ 0x40);
+		modeline_putc(mline, np, '^');
+		modeline_putc(mline, np, c ^ 0x40);
 		return;
 	}
 
 	if (c == 0x7f) {
-		mladd(mline, np, '^');
-		mladd(mline, np, '?');
+		modeline_putc(mline, np, '^');
+		modeline_putc(mline, np, '?');
 		return;
 	}
 
 	if (c >= 0x80 && c <= 0xA0) {
 		static const char hex[] = "0123456789abcdef";
-		mladd(mline, np, '\\');
-		mladd(mline, np, hex[c >> 4]);
-		mladd(mline, np, hex[c & 15]);
+		modeline_putc(mline, np, '\\');
+		modeline_putc(mline, np, hex[c >> 4]);
+		modeline_putc(mline, np, hex[c & 15]);
 		return;
 	}
 
@@ -567,12 +567,12 @@ static void modeline(struct window *wp)
 		lchar = '-';
 
 	bp = wp->w_bufp;
-	mladd(mline, &n, lchar);
+	modeline_putc(mline, &n, lchar);
 
 	if ((bp->b_flag & BFCHG) != 0)		/* "*" if changed. */
-		mladd(mline, &n, '*');
+		modeline_putc(mline, &n, '*');
 	else
-		mladd(mline, &n, lchar);
+		modeline_putc(mline, &n, lchar);
 
 	strcpy(tline, " ");
 	strcat(tline, PROGRAM_NAME_LONG);
@@ -581,11 +581,11 @@ static void modeline(struct window *wp)
 	strcat(tline, ": ");
 	cp = &tline[0];
 	while ((c = *cp++) != 0)
-		mladd(mline, &n, c);
+		modeline_putc(mline, &n, c);
 
 	cp = &bp->b_bname[0];
 	while ((c = *cp++) != 0)
-		mladd(mline, &n, c);
+		modeline_putc(mline, &n, c);
 
 	strcpy(tline, " (");
 
@@ -607,19 +607,19 @@ static void modeline(struct window *wp)
 
 	cp = &tline[0];
 	while ((c = *cp++) != 0)
-		mladd(mline, &n, c);
+		modeline_putc(mline, &n, c);
 
 	if (bp->b_fname[0] != 0 && strcmp(bp->b_bname, bp->b_fname) != 0) {
 		cp = &bp->b_fname[0];
 
 		while ((c = *cp++) != 0)
-			mladd(mline, &n, c);
+			modeline_putc(mline, &n, c);
 
-		mladd(mline, &n, ' ');
+		modeline_putc(mline, &n, ' ');
 	}
 
 	while (n < term.t_ncol)			/* Pad to full width. */
-		mladd(mline, &n, lchar);
+		modeline_putc(mline, &n, lchar);
 
 	{					/* determine if top line, bottom line, or both are visible */
 		struct line *lp = wp->w_linep;
@@ -673,7 +673,7 @@ static void modeline(struct window *wp)
 
 		cp = msg;
 		while ((c = *cp++) != 0)
-			mladd(mline, &n, c);
+			modeline_putc(mline, &n, c);
 	}
 
 	/* and paint it, in reverse video across the full width */
@@ -709,7 +709,7 @@ void movecursor(int row, int col)
  * is not considered to be part of the virtual screen. It always works
  * immediately; the terminal buffer is flushed via a call to the flusher.
  */
-void mlerase(void)
+void msg_erase(void)
 {
 	int i;
 
@@ -733,7 +733,7 @@ void mlerase(void)
  * The framing every message shares: get to the message line, and tidy
  * up behind whatever was written there.
  */
-static int ml_open(void)
+static int msg_begin(void)
 {
 	/* if we are not currently echoing on the command line, abort this */
 	if (discmd == FALSE) {
@@ -743,7 +743,7 @@ static int ml_open(void)
 
 	/* if we can not erase to end-of-line, do it manually */
 	if (eolexist == FALSE) {
-		mlerase();
+		msg_erase();
 		ttflush();
 	}
 
@@ -751,7 +751,7 @@ static int ml_open(void)
 	return TRUE;
 }
 
-static void ml_close(void)
+static void msg_end(void)
 {
 	/* if we can, erase to the end of screen */
 	if (eolexist == TRUE)
@@ -765,36 +765,36 @@ static void ml_close(void)
  * format - which is what a caller with a run-time string wants, and
  * saves it from having to double any '%' the user typed.
  */
-void mlputstr(const char *s)
+void msg_puts(const char *s)
 {
-	if (!ml_open())
+	if (!msg_begin())
 		return;
-	mlputs(s);
-	ml_close();
+	msg_append(s);
+	msg_end();
 }
 
 /*
  * Write a message into the message line.  The format is a printf one
  * and had better be a literal: anything built at run time goes to
- * mlputstr() instead.
+ * msg_puts() instead.
  *
  * A message longer than the screen could ever show is cut off rather
  * than wrapped.
  */
-void mlwrite(const char *fmt, ...)
+void msg_printf(const char *fmt, ...)
 {
 	char buf[MAXCOL];
 	va_list ap;
 
-	if (!ml_open())
+	if (!msg_begin())
 		return;
 
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-	mlputs(buf);
-	ml_close();
+	msg_append(buf);
+	msg_end();
 }
 
 /*
@@ -804,13 +804,13 @@ void mlwrite(const char *fmt, ...)
  *
  * char *s;		string to force out
  */
-void mlforce(char *s)
+void msg_force(char *s)
 {
 	int oldcmd;				/* original command display flag */
 
 	oldcmd = discmd;			/* save the discmd value */
 	discmd = TRUE;				/* and turn display on */
-	mlputstr(s);				/* write the string out */
+	msg_puts(s);				/* write the string out */
 	discmd = oldcmd;			/* and restore the original setting */
 }
 
@@ -819,7 +819,7 @@ void mlforce(char *s)
  * the characters in the string all have width "1"; if this is not the case
  * things will get screwed up a little.
  */
-void mlputs(const char *s)
+void msg_append(const char *s)
 {
 	int c;
 
@@ -846,7 +846,7 @@ void getscreensize(int *widthp, int *heightp)
 
 /*
  * The window changed size.  Write it down and get out: this is a signal
- * handler, and everything the display does - newsize()'s mlwrite() on a
+ * handler, and everything the display does - newsize()'s msg_printf() on a
  * silly size, ttputc(), the painter itself - would be running on top of
  * whatever the editor was in the middle of.
  *

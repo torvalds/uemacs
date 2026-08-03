@@ -136,8 +136,8 @@ int cmd_goto_line(int f, int n)
 
 	/* Get an argument if one doesnt exist. */
 	if (f == FALSE) {
-		if ((status = mlreply("Line to GOTO: ", arg, NSTRING)) != TRUE) {
-			mlwrite("(Aborted)");
+		if ((status = ask_string("Line to GOTO: ", arg, NSTRING)) != TRUE) {
+			msg_printf("(Aborted)");
 			return status;
 		}
 		n = atoi(arg);
@@ -433,7 +433,7 @@ int cmd_set_mark(int f, int n)
 {
 	curwp->w_markp = curwp->w_dotp;
 	curwp->w_marko = curwp->w_doto;
-	mlwrite("(Mark set)");
+	msg_printf("(Mark set)");
 	return TRUE;
 }
 
@@ -449,7 +449,7 @@ int cmd_exchange_point_and_mark(int f, int n)
 	int odoto;
 
 	if (curwp->w_markp == NULL) {
-		mlwrite("No mark in this window");
+		msg_printf("No mark in this window");
 		return FALSE;
 	}
 	odotp = curwp->w_dotp;

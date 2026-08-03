@@ -19,7 +19,7 @@
  * ABORT. The ABORT status is returned if the user bumps out of the question
  * with a ^G. Used any time a confirmation is required.
  */
-int mlyesno(char *prompt)
+int ask_yesno(char *prompt)
 {
 	char c;					/* input character */
 	char buf[NPAT];				/* prompt to user */
@@ -28,7 +28,7 @@ int mlyesno(char *prompt)
 		/* build and prompt the user */
 		strcpy(buf, prompt);
 		strcat(buf, " (y/n)? ");
-		mlputstr(buf);
+		msg_puts(buf);
 
 		/* get the responce */
 		c = tgetc();
@@ -52,12 +52,12 @@ int mlyesno(char *prompt)
  * return. Handle erase, kill, and abort keys.
  */
 
-int mlreply(char *prompt, char *buf, int nbuf)
+int ask_string(char *prompt, char *buf, int nbuf)
 {
 	return nextarg(prompt, buf, nbuf, ctoec('\n'));
 }
 
-int mlreplyt(char *prompt, char *buf, int nbuf, int eolchar)
+int ask_string_until(char *prompt, char *buf, int nbuf, int eolchar)
 {
 	return nextarg(prompt, buf, nbuf, eolchar);
 }
@@ -402,7 +402,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 	quotef = FALSE;
 
 	/* prompt the user for the input string */
-	mlputstr(prompt);
+	msg_puts(prompt);
 
 	for (;;) {
 		if (!didtry)
@@ -420,7 +420,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			buf[cpos++] = 0;
 
 			/* clear the message line */
-			mlwrite("");
+			msg_printf("");
 			ttflush();
 
 			/* if we default the buffer, return FALSE */

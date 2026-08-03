@@ -64,10 +64,10 @@ int cmd_reverse_incremental_search(int f, int n)
 		curwp->w_doto = curoff;		/*  and the offset to original value  */
 		curwp->w_flag |= WFMOVE;	/* Say we've moved                    */
 		update();
-		mlwrite("(search failed)");	/* Say we died                        */
+		msg_printf("(search failed)");	/* Say we died                        */
 		matchlen = strlen(pat);
 	} else
-		mlerase();			/* If happy, just erase the cmd line  */
+		msg_erase();			/* If happy, just erase the cmd line  */
 	matchlen = strlen(pat);
 	return TRUE;
 }
@@ -92,10 +92,10 @@ int cmd_incremental_search(int f, int n)
 		curwp->w_doto = curoff;		/*  and the offset to original value  */
 		curwp->w_flag |= WFMOVE;	/* Say we've moved                    */
 		update();
-		mlwrite("(search failed)");	/* Say we died                        */
+		msg_printf("(search failed)");	/* Say we died                        */
 		matchlen = strlen(pat);
 	} else
-		mlerase();			/* If happy, just erase the cmd line  */
+		msg_erase();			/* If happy, just erase the cmd line  */
 	matchlen = strlen(pat);
 	return TRUE;
 }
@@ -236,7 +236,7 @@ int isearch(int f, int n)
 
 		pat[cpos++] = c;		/* put the char in the buffer */
 		if (cpos >= NPAT) {		/* too many chars in string?  *//* Yup.  Complain about it    */
-			mlwrite("? Search string too long");
+			msg_printf("? Search string too long");
 			return TRUE;		/* Return an error            */
 		}
 		pat[cpos] = 0;			/* null terminate the buffer  */
@@ -379,7 +379,7 @@ int promptpattern(char *prompt)
 
 	/* check to see if we are executing a command line */
 	if (!clexec) {
-		mlputstr(tpat);
+		msg_puts(tpat);
 	}
 	return strlen(tpat);
 }
@@ -450,7 +450,7 @@ int get_char(void)
 	cmd_reexecute = -1;			/* Say we're in real mode again       */
 	update();				/* Pretty up the screen               */
 	if (cmd_offset >= CMDBUFLEN - 1) {	/* If we're getting too big ...         */
-		mlwrite("? command too long");	/* Complain loudly and bitterly       */
+		msg_printf("? command too long");	/* Complain loudly and bitterly       */
 		return metac;			/* And force a quit                   */
 	}
 	c = get1key();				/* Get the next character             */

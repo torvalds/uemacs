@@ -77,7 +77,7 @@ int lockchk(char *fname)
 
 	/* if we have a full locking table, bitch and leave */
 	if (numlocks == NLOCKS) {
-		mlwrite("LOCK ERROR: Lock table full");
+		msg_printf("LOCK ERROR: Lock table full");
 		close(fd);
 		return ABORT;
 	}
@@ -95,7 +95,7 @@ int lockchk(char *fname)
 			return TRUE;
 
 		/* someone else has it....override? */
-		if (mlyesno("File in use, override") == TRUE)
+		if (ask_yesno("File in use, override") == TRUE)
 			return TRUE;
 		return ABORT;
 	}

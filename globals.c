@@ -42,7 +42,7 @@ int ctlxc = CONTROL | 'X';			/* current control X prefix char */
 int reptc = CONTROL | 'U';			/* current universal repeat char */
 int abortc = CONTROL | 'G';			/* current abort command char   */
 
-int quotec = 0x11;				/* quote char during mlreply() */
+int quotec = 0x11;				/* quote char during ask_string() */
 int tabmask = 0x07;				/* tabulator mask */
 struct kill *kbufp = NULL;			/* current kill buffer chunk pointer    */
 struct kill *kbufh = NULL;			/* kill buffer header pointer           */

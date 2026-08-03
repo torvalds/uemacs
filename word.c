@@ -389,7 +389,7 @@ int cmd_fill_paragraph(int f, int n)
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
 	if (fillcol == 0) {			/* no fill column set */
-		mlwrite("No fill column set");
+		msg_printf("No fill column set");
 		return FALSE;
 	}
 	justflag = FALSE;
@@ -485,14 +485,14 @@ int cmd_justify_paragraph(int f, int n)
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
 	if (fillcol == 0) {			/* no fill column set */
-		mlwrite("No fill column set");
+		msg_printf("No fill column set");
 		return FALSE;
 	}
 	justflag = TRUE;
 	leftmarg = curwp->w_doto;
 	if (leftmarg + 10 > fillcol) {
 		leftmarg = 0;
-		mlwrite("Column too narrow");
+		msg_printf("Column too narrow");
 		return FALSE;
 	}
 
@@ -668,7 +668,7 @@ int cmd_count_words(int f, int n)
 	else
 		avgch = 0;
 
-	mlwrite("Words %ld Chars %ld Lines %d Avg chars/word %d.%02d",
+	msg_printf("Words %ld Chars %ld Lines %d Avg chars/word %d.%02d",
 		nwords, nchars, nlines + 1, avgch / 100, avgch % 100);
 	return TRUE;
 }

@@ -262,11 +262,11 @@ int main(int argc, char **argv)
 	/* Deal with startup gotos and searches */
 	if (gotoflag && searchflag) {
 		update();
-		mlwrite("(Can not search and goto at the same time!)");
+		msg_printf("(Can not search and goto at the same time!)");
 	} else if (gotoflag) {
 		if (cmd_goto_line(TRUE, gline) == FALSE) {
 			update();
-			mlwrite("(Bogus goto argument)");
+			msg_printf("(Bogus goto argument)");
 		}
 	} else if (searchflag) {
 		if (cmd_hunt_forward(FALSE, 0) == FALSE)
@@ -288,7 +288,7 @@ int main(int argc, char **argv)
 
 	/* if there is something on the command line, clear it */
 	if (mpresf != FALSE) {
-		mlerase();
+		msg_erase();
 		update();
 	}
 	f = FALSE;
@@ -312,9 +312,9 @@ int main(int argc, char **argv)
 				n = n * 10 + (c - '0');
 			}
 			if ((n == 0) && (mflag == -1))	/* lonely - */
-				mlwrite("Arg:");
+				msg_printf("Arg:");
 			else
-				mlwrite("Arg: %d", n * mflag);
+				msg_printf("Arg: %d", n * mflag);
 
 			c = getcmd();		/* get the next key */
 		}
@@ -327,7 +327,7 @@ int main(int argc, char **argv)
 		f = TRUE;
 		n = 4;				/* with argument of 4 */
 		mflag = 0;			/* that can be discarded. */
-		mlwrite("Arg: 4");
+		msg_printf("Arg: 4");
 		while (((c = getcmd()) >= '0' && c <= '9') || c == reptc || c == '-') {
 			if (c == reptc)
 				if ((n > 0) == ((n * 4) > 0))
@@ -355,7 +355,7 @@ int main(int argc, char **argv)
 				}
 				n = 10 * n + c - '0';
 			}
-			mlwrite("Arg: %d", (mflag >= 0) ? n : (n ? -n : -1));
+			msg_printf("Arg: %d", (mflag >= 0) ? n : (n ? -n : -1));
 		}
 		/*
 		 * Make arguments preceded by a minus sign negative and change
@@ -471,7 +471,7 @@ int execute(int c, int f, int n)
 		return status;
 	}
 	tcapbeep();
-	mlwrite("(Key not bound)");		/* complain             */
+	msg_printf("(Key not bound)");		/* complain             */
 	lastflag = 0;				/* Fake last flags.     */
 	return FALSE;
 }
@@ -494,7 +494,7 @@ int cmd_quick_exit(int f, int n)
 		    && (bp->b_flag & BFTRUNC) == 0	/* Not truncated P.K.   */
 		    && (bp->b_flag & BFINVS) == 0) {	/* Real.                */
 			curbp = bp;		/* make that buffer cur */
-			mlwrite("(Saving %s)", bp->b_fname);
+			msg_printf("(Saving %s)", bp->b_fname);
 			if ((status = cmd_save_file(f, n)) != TRUE) {
 				curbp = oldcb;	/* restore curbp */
 				return status;
@@ -523,14 +523,14 @@ int cmd_exit_emacs(int f, int n)
 	if (f != FALSE				/* Argument forces it.  */
 	    || anycb() == FALSE			/* All buffers clean.   */
 	    /* User says it's OK.   */
-	    || (s = mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
+	    || (s = ask_yesno("Modified buffers exist. Leave anyway")) == TRUE) {
 		display_close();
 		if (f)
 			exit(n);
 		else
 			exit(0);
 	}
-	mlwrite("");
+	msg_printf("");
 	return s;
 }
 
@@ -542,10 +542,10 @@ int cmd_exit_emacs(int f, int n)
 int cmd_begin_macro(int f, int n)
 {
 	if (kbdmode != STOP) {
-		mlwrite("%%Macro already active");
+		msg_printf("%%Macro already active");
 		return FALSE;
 	}
-	mlwrite("(Start macro)");
+	msg_printf("(Start macro)");
 	kbdptr = &kbdm[0];
 	kbdend = kbdptr;
 	kbdmode = RECORD;
@@ -559,11 +559,11 @@ int cmd_begin_macro(int f, int n)
 int cmd_end_macro(int f, int n)
 {
 	if (kbdmode == STOP) {
-		mlwrite("%%Macro not active");
+		msg_printf("%%Macro not active");
 		return FALSE;
 	}
 	if (kbdmode == RECORD) {
-		mlwrite("(End macro)");
+		msg_printf("(End macro)");
 		kbdmode = STOP;
 	}
 	return TRUE;
@@ -577,7 +577,7 @@ int cmd_end_macro(int f, int n)
 int cmd_execute_macro(int f, int n)
 {
 	if (kbdmode != STOP) {
-		mlwrite("%%Macro already active");
+		msg_printf("%%Macro already active");
 		return FALSE;
 	}
 	if (n <= 0)
@@ -597,7 +597,7 @@ int cmd_abort_command(int f, int n)
 {
 	tcapbeep();
 	kbdmode = STOP;
-	mlwrite("(Aborted)");
+	msg_printf("(Aborted)");
 	return ABORT;
 }
 
@@ -608,14 +608,14 @@ int cmd_abort_command(int f, int n)
 int rdonly(void)
 {
 	tcapbeep();
-	mlwrite("(Key illegal in VIEW mode)");
+	msg_printf("(Key illegal in VIEW mode)");
 	return FALSE;
 }
 
 int resterr(void)
 {
 	tcapbeep();
-	mlwrite("(That command is RESTRICTED)");
+	msg_printf("(That command is RESTRICTED)");
 	return FALSE;
 }
 

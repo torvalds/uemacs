@@ -60,7 +60,7 @@ int cmd_change_screen_size(int f, int n)
 
 	/* make sure it's in range */
 	if (n < 3 || n > term.t_mrow + 1) {
-		mlwrite("%%Screen size out of range");
+		msg_printf("%%Screen size out of range");
 		return FALSE;
 	}
 
@@ -91,7 +91,7 @@ int cmd_change_screen_width(int f, int n)
 
 	/* make sure it's in range */
 	if (n < 10 || n > term.t_mcol) {
-		mlwrite("%%Screen width out of range");
+		msg_printf("%%Screen width out of range");
 		return FALSE;
 	}
 

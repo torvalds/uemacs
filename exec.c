@@ -22,12 +22,12 @@ int cmd_execute_named_command(int f, int n)
 	fn_t kfunc;				/* ptr to the requexted function to bind to */
 
 	/* prompt the user to type a named command */
-	mlwrite(": ");
+	msg_printf(": ");
 
 	/* and now get the function name to execute */
 	kfunc = getname();
 	if (kfunc == NULL) {
-		mlwrite("(No such function)");
+		msg_printf("(No such function)");
 		return FALSE;
 	}
 
@@ -48,7 +48,7 @@ int cmd_execute_command_line(int f, int n)
 	char cmdstr[NSTRING];			/* string holding command to execute */
 
 	/* get the line wanted */
-	if ((status = mlreply(": ", cmdstr, NSTRING)) != TRUE)
+	if ((status = ask_string(": ", cmdstr, NSTRING)) != TRUE)
 		return status;
 
 	execlevel = 0;
@@ -111,7 +111,7 @@ int docmd(char *cline)
 
 	/* and match the token to see if it exists */
 	if ((fnc = fncmatch(tkn)) == NULL) {
-		mlwrite("(No such Function)");
+		msg_printf("(No such Function)");
 		execstr = oldestr;
 		return FALSE;
 	}
@@ -256,13 +256,13 @@ int cmd_store_macro(int f, int n)
 
 	/* must have a numeric argument to this function */
 	if (f == FALSE) {
-		mlwrite("No macro specified");
+		msg_printf("No macro specified");
 		return FALSE;
 	}
 
 	/* range check the macro number */
 	if (n < 1 || n > 40) {
-		mlwrite("Macro number out of range");
+		msg_printf("Macro number out of range");
 		return FALSE;
 	}
 
@@ -273,7 +273,7 @@ int cmd_store_macro(int f, int n)
 
 	/* set up the new macro buffer */
 	if ((bp = bfind(bname, TRUE, BFINVS)) == NULL) {
-		mlwrite("Can not create macro");
+		msg_printf("Can not create macro");
 		return FALSE;
 	}
 
@@ -305,7 +305,7 @@ int cmd_store_procedure(int f, int n)
 		return cmd_store_macro(f, n);
 
 	/* get the name of the procedure */
-	if ((status = mlreply("Procedure name: ", &bname[1], NBUFN - 2)) != TRUE)
+	if ((status = ask_string("Procedure name: ", &bname[1], NBUFN - 2)) != TRUE)
 		return status;
 
 	/* construct the macro buffer name */
@@ -314,7 +314,7 @@ int cmd_store_procedure(int f, int n)
 
 	/* set up the new macro buffer */
 	if ((bp = bfind(bname, TRUE, BFINVS)) == NULL) {
-		mlwrite("Can not create macro");
+		msg_printf("Can not create macro");
 		return FALSE;
 	}
 
@@ -340,7 +340,7 @@ int cmd_execute_procedure(int f, int n)
 	char bufn[NBUFN + 2];			/* name of buffer to execute */
 
 	/* find out what buffer the user wants to execute */
-	if ((status = mlreply("Execute procedure: ", &bufn[1], NBUFN)) != TRUE)
+	if ((status = ask_string("Execute procedure: ", &bufn[1], NBUFN)) != TRUE)
 		return status;
 
 	/* construct the buffer name */
@@ -349,7 +349,7 @@ int cmd_execute_procedure(int f, int n)
 
 	/* find the pointer to that buffer */
 	if ((bp = bfind(bufn, FALSE, 0)) == NULL) {
-		mlwrite("No such procedure");
+		msg_printf("No such procedure");
 		return FALSE;
 	}
 
@@ -373,12 +373,12 @@ int cmd_execute_buffer(int f, int n)
 	char bufn[NSTRING];			/* name of buffer to execute */
 
 	/* find out what buffer the user wants to execute */
-	if ((status = mlreply("Execute buffer: ", bufn, NBUFN)) != TRUE)
+	if ((status = ask_string("Execute buffer: ", bufn, NBUFN)) != TRUE)
 		return status;
 
 	/* find the pointer to that buffer */
 	if ((bp = bfind(bufn, FALSE, 0)) == NULL) {
-		mlwrite("No such buffer");
+		msg_printf("No such buffer");
 		return FALSE;
 	}
 
@@ -457,7 +457,7 @@ int dobuf(struct buffer *bp)
 			whtemp = (struct while_block *)
 			    malloc(sizeof(struct while_block));
 			if (whtemp == NULL) {
- noram:			mlwrite("%%Out of memory during while scan");
+ noram:			msg_printf("%%Out of memory during while scan");
  failexit:			freewhile(scanner);
 				freewhile(whlist);
 				return FALSE;
@@ -471,7 +471,7 @@ int dobuf(struct buffer *bp)
 		/* if is a BREAK directive, make a block... */
 		if (eline[0] == '!' && eline[1] == 'b' && eline[2] == 'r') {
 			if (scanner == NULL) {
-				mlwrite("%%!BREAK outside of any !WHILE loop");
+				msg_printf("%%!BREAK outside of any !WHILE loop");
 				goto failexit;
 			}
 			whtemp = (struct while_block *)
@@ -487,7 +487,7 @@ int dobuf(struct buffer *bp)
 		/* if it is an endwhile directive, record the spot... */
 		if (eline[0] == '!' && strncmp(&eline[1], "endw", 4) == 0) {
 			if (scanner == NULL) {
-				mlwrite
+				msg_printf
 				    ("%%!ENDWHILE with no preceding !WHILE in '%s'", bp->b_bname);
 				goto failexit;
 			}
@@ -509,7 +509,7 @@ int dobuf(struct buffer *bp)
 
 	/* while and endwhile should match! */
 	if (scanner != NULL) {
-		mlwrite("%%!WHILE with no matching !ENDWHILE in '%s'", bp->b_bname);
+		msg_printf("%%!WHILE with no matching !ENDWHILE in '%s'", bp->b_bname);
 		goto failexit;
 	}
 
@@ -523,7 +523,7 @@ int dobuf(struct buffer *bp)
 		/* allocate eline and copy macro line to it */
 		linlen = lp->l_used;
 		if ((einit = eline = malloc(linlen + 1)) == NULL) {
-			mlwrite("%%Out of Memory during macro execution");
+			msg_printf("%%Out of Memory during macro execution");
 			freewhile(whlist);
 			return FALSE;
 		}
@@ -549,7 +549,7 @@ int dobuf(struct buffer *bp)
 
 			/* and bitch if it's illegal */
 			if (dirnum == NUMDIRS) {
-				mlwrite("%%Unknown Directive");
+				msg_printf("%%Unknown Directive");
 				freewhile(whlist);
 				return FALSE;
 			}
@@ -570,7 +570,7 @@ int dobuf(struct buffer *bp)
 			/* allocate the space for the line */
 			linlen = strlen(eline);
 			if ((mp = lalloc(linlen)) == NULL) {
-				mlwrite("Out of memory while storing macro");
+				msg_printf("Out of memory while storing macro");
 				return FALSE;
 			}
 
@@ -635,7 +635,7 @@ int dobuf(struct buffer *bp)
 				}
 
 				if (whtemp == NULL) {
-					mlwrite("%%Internal While loop error");
+					msg_printf("%%Internal While loop error");
 					freewhile(whlist);
 					return FALSE;
 				}
@@ -673,7 +673,7 @@ int dobuf(struct buffer *bp)
 						}
 						glp = glp->l_fp;
 					}
-					mlwrite("%%No such label");
+					msg_printf("%%No such label");
 					freewhile(whlist);
 					return FALSE;
 				}
@@ -699,7 +699,7 @@ int dobuf(struct buffer *bp)
 					}
 
 					if (whtemp == NULL) {
-						mlwrite("%%Internal While loop error");
+						msg_printf("%%Internal While loop error");
 						freewhile(whlist);
 						return FALSE;
 					}
@@ -775,7 +775,7 @@ int cmd_execute_file(int f, int n)
 	char fname[NSTRING];			/* name of file to execute */
 	char *fspec;				/* full file spec */
 
-	if ((status = mlreply("File to execute: ", fname, NSTRING - 1)) != TRUE)
+	if ((status = ask_string("File to execute: ", fname, NSTRING - 1)) != TRUE)
 		return status;
 
 	/* look up the path for the file */
@@ -851,7 +851,7 @@ int cbuf(int f, int n, int bufnum)
 
 	/* find the pointer to that buffer */
 	if ((bp = bfind(bufname, FALSE, 0)) == NULL) {
-		mlwrite("Macro not defined");
+		msg_printf("Macro not defined");
 		return FALSE;
 	}
 

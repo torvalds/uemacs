@@ -32,7 +32,7 @@ int file_open_read(char *fn)
 int file_open_write(char *fn)
 {
 	if ((ffp = fopen(fn, "w")) == NULL) {
-		mlwrite("Cannot open file for writing");
+		msg_printf("Cannot open file for writing");
 		return FIOERR;
 	}
 	return FIOSUC;
@@ -51,7 +51,7 @@ int file_close(void)
 	eofflag = FALSE;
 
 	if (fclose(ffp) != FALSE) {
-		mlwrite("Error closing file");
+		msg_printf("Error closing file");
 		return FIOERR;
 	}
 	return FIOSUC;
@@ -72,7 +72,7 @@ int file_put_line(char *buf, int nbuf)
 	fputc('\n', ffp);
 
 	if (ferror(ffp)) {
-		mlwrite("Write I/O error");
+		msg_printf("Write I/O error");
 		return FIOERR;
 	}
 
@@ -142,7 +142,7 @@ int file_get_line(void)
 	/* test for any errors that may have occured */
 	if (c == EOF) {
 		if (ferror(ffp)) {
-			mlwrite("File read error");
+			msg_printf("File read error");
 			return FIOERR;
 		}
 

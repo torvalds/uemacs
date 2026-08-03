@@ -39,7 +39,7 @@ struct line *lalloc(int used)
 	if (size == 0)				/* Assume that is an empty. */
 		size = BLOCK_SIZE;		/* Line is for type-in. */
 	if ((lp = (struct line *)malloc(sizeof(struct line) + size)) == NULL) {
-		mlwrite("(OUT OF MEMORY)");
+		msg_printf("(OUT OF MEMORY)");
 		return NULL;
 	}
 	lp->l_size = size;
@@ -138,7 +138,7 @@ int linstr(char *instr)
 
 			/* Insertion error? */
 			if (status != TRUE) {
-				mlwrite("%%Out of memory while inserting");
+				msg_printf("%%Out of memory while inserting");
 				break;
 			}
 			instr++;
@@ -170,7 +170,7 @@ static int linsert_byte(int n, int c)
 	lp1 = curwp->w_dotp;			/* Current line         */
 	if (lp1 == curbp->b_linep) {		/* At the end: special  */
 		if (curwp->w_doto != 0) {
-			mlwrite("bug: linsert");
+			msg_printf("bug: linsert");
 			return FALSE;
 		}
 		if ((lp2 = lalloc(n)) == NULL)	/* Allocate new line        */
@@ -264,7 +264,7 @@ int lover(char *ostr)
 
 			/* Insertion error? */
 			if (status != TRUE) {
-				mlwrite("%%Out of memory while overwriting");
+				msg_printf("%%Out of memory while overwriting");
 				break;
 			}
 			ostr++;

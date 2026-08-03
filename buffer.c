@@ -28,7 +28,7 @@ int cmd_select_buffer(int f, int n)
 	int s;
 	char bufn[NBUFN];
 
-	if ((s = mlreply("Use buffer: ", bufn, NBUFN)) != TRUE)
+	if ((s = ask_string("Use buffer: ", bufn, NBUFN)) != TRUE)
 		return s;
 	if ((bp = bfind(bufn, TRUE, 0)) == NULL)
 		return FALSE;
@@ -122,7 +122,7 @@ int cmd_delete_buffer(int f, int n)
 	int s;
 	char bufn[NBUFN];
 
-	if ((s = mlreply("Kill buffer: ", bufn, NBUFN)) != TRUE)
+	if ((s = ask_string("Kill buffer: ", bufn, NBUFN)) != TRUE)
 		return s;
 	if ((bp = bfind(bufn, FALSE, 0)) == NULL)	/* Easy if unknown.     */
 		return TRUE;
@@ -141,7 +141,7 @@ int zotbuf(struct buffer *bp)
 	int s;
 
 	if (bp->b_nwnd != 0) {			/* Error if on screen.  */
-		mlwrite("Buffer is being displayed");
+		msg_printf("Buffer is being displayed");
 		return FALSE;
 	}
 	if ((s = bclear(bp)) != TRUE)		/* Blow text away.      */
@@ -173,7 +173,7 @@ int cmd_name_buffer(int f, int n)
 	char bufn[NBUFN];			/* buffer to hold buffer name */
 
 	/* prompt for and get the new buffer name */
- ask:	if (mlreply("Change buffer name to: ", bufn, NBUFN) != TRUE)
+ ask:	if (ask_string("Change buffer name to: ", bufn, NBUFN) != TRUE)
 		return FALSE;
 
 	/* and check for duplicates */
@@ -189,7 +189,7 @@ int cmd_name_buffer(int f, int n)
 
 	strcpy(curbp->b_bname, bufn);		/* copy buffer name to structure */
 	curwp->w_flag |= WFMODE;		/* make mode line replot */
-	mlerase();
+	msg_erase();
 	return TRUE;
 }
 
@@ -335,7 +335,7 @@ int bclear(struct buffer *bp)
 
 	if ((bp->b_flag & BFINVS) == 0		/* Not scratch buffer.  */
 	    && (bp->b_flag & BFCHG) != 0	/* Something changed    */
-	    && (s = mlyesno("Discard changes")) != TRUE)
+	    && (s = ask_yesno("Discard changes")) != TRUE)
 		return s;
 	bp->b_flag &= ~BFCHG;			/* Not changed          */
 	while ((lp = lforw(bp->b_linep)) != bp->b_linep)

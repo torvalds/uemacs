@@ -77,7 +77,7 @@ int cmd_shell_command(int f, int n)
 	if (restflag)
 		return resterr();
 
-	if ((s = mlreply("!", line, NLINE)) != TRUE)
+	if ((s = ask_string("!", line, NLINE)) != TRUE)
 		return s;
 	ttflush();
 	tcapclose();				/* stty to old modes    */
@@ -87,10 +87,10 @@ int cmd_shell_command(int f, int n)
 	tcapopen();
 
 	if (clexec == FALSE) {
-		mlputs("(End)");		/* Pause.               */
+		msg_append("(End)");		/* Pause.               */
 		ttflush();
 		while ((s = tgetc()) != '\r' && s != ' ') ;
-		mlputs("\r\n");
+		msg_append("\r\n");
 	}
 	tcapkopen();
 	sgarbf = TRUE;
@@ -112,7 +112,7 @@ int cmd_execute_program(int f, int n)
 	if (restflag)
 		return resterr();
 
-	if ((s = mlreply("!", line, NLINE)) != TRUE)
+	if ((s = ask_string("!", line, NLINE)) != TRUE)
 		return s;
 	ttputc('\n');				/* Already have '\r'    */
 	ttflush();
@@ -121,7 +121,7 @@ int cmd_execute_program(int f, int n)
 	system(line);
 	fflush(stdout);				/* to be sure P.K.      */
 	tcapopen();
-	mlputs("(End)");			/* Pause.               */
+	msg_append("(End)");			/* Pause.               */
 	ttflush();
 	while ((s = tgetc()) != '\r' && s != ' ') ;
 	sgarbf = TRUE;
@@ -152,7 +152,7 @@ int cmd_filter_buffer(int f, int n)
 		return rdonly();		/* we are in read only mode     */
 
 	/* get the filter name and its args */
-	if ((s = mlreply("#", line, NLINE)) != TRUE)
+	if ((s = ask_string("#", line, NLINE)) != TRUE)
 		return s;
 
 	/* setup the proper file names */
@@ -163,7 +163,7 @@ int cmd_filter_buffer(int f, int n)
 
 	/* write it out, checking for errors */
 	if (writeout(filnam1) != TRUE) {
-		mlwrite("(Cannot write filter file)");
+		msg_printf("(Cannot write filter file)");
 		strcpy(bp->b_fname, tmpnam);
 		bp->b_fstate = tmpstate;
 		return FALSE;
@@ -182,7 +182,7 @@ int cmd_filter_buffer(int f, int n)
 
 	/* on failure, escape gracefully */
 	if (s != TRUE || (readin(filnam2, FALSE) == FALSE)) {
-		mlwrite("(Execution failed)");
+		msg_printf("(Execution failed)");
 		strcpy(bp->b_fname, tmpnam);
 		bp->b_fstate = tmpstate;
 		unlink(filnam1);

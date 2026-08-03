@@ -23,7 +23,7 @@ int tabsize;					/* Tab size (0: use real tabs) */
 int cmd_set_fill_column(int f, int n)
 {
 	fillcol = n;
-	mlwrite("(Fill column is %d)", n);
+	msg_printf("(Fill column is %d)", n);
 	return TRUE;
 }
 
@@ -91,7 +91,7 @@ int cmd_buffer_position(int f, int n)
 		ratio = (100L * predchars) / numchars;
 
 	/* summarize and report the info */
-	mlwrite("Line %d/%d Col %d/%d Char %ld/%ld (%d%%) char = 0x%x",
+	msg_printf("Line %d/%d Col %d/%d Char %ld/%ld (%d%%) char = 0x%x",
 		predlines + 1, numlines + 1, col, ecol, predchars, numchars, ratio, curchar);
 	return TRUE;
 }
@@ -770,7 +770,7 @@ int cmd_kill_to_end_of_line(int f, int n)
 			nextp = lforw(nextp);
 		}
 	} else {
-		mlwrite("neg kill");
+		msg_printf("neg kill");
 		return FALSE;
 	}
 	return ldelete(chunk, TRUE);
@@ -843,7 +843,7 @@ int adjustmode(int kind, int global)
 
 	/* prompt the user and get an answer */
 
-	status = mlreply(prompt, cbuf, NPAT - 1);
+	status = ask_string(prompt, cbuf, NPAT - 1);
 	if (status != TRUE)
 		return status;
 
@@ -873,12 +873,12 @@ int adjustmode(int kind, int global)
 			/* display new mode line */
 			if (global == 0)
 				update_modeline();
-			mlerase();		/* erase the junk */
+			msg_erase();		/* erase the junk */
 			return TRUE;
 		}
 	}
 
-	mlwrite("No such mode!");
+	msg_printf("No such mode!");
 	return FALSE;
 }
 
@@ -890,7 +890,7 @@ int adjustmode(int kind, int global)
  */
 int cmd_clear_message_line(int f, int n)
 {
-	mlforce("");
+	msg_force("");
 	return TRUE;
 }
 
@@ -905,11 +905,11 @@ int cmd_write_message(int f, int n)
 	int status;
 	char buf[NPAT];				/* buffer to recieve message into */
 
-	if ((status = mlreply("Message to write: ", buf, NPAT - 1)) != TRUE)
+	if ((status = ask_string("Message to write: ", buf, NPAT - 1)) != TRUE)
 		return status;
 
 	/* write the message out */
-	mlforce(buf);
+	msg_force(buf);
 	return TRUE;
 }
 
@@ -1086,7 +1086,7 @@ int cmd_insert_string(int f, int n)
 	char tstring[NPAT + 1];			/* string to add */
 
 	/* ask for string to insert */
-	status = mlreplyt("String to insert<META>: ", tstring, NPAT, metac);
+	status = ask_string_until("String to insert<META>: ", tstring, NPAT, metac);
 	if (status != TRUE)
 		return status;
 
@@ -1113,7 +1113,7 @@ int cmd_overwrite_string(int f, int n)
 	char tstring[NPAT + 1];			/* string to add */
 
 	/* ask for string to insert */
-	status = mlreplyt("String to overwrite<META>: ", tstring, NPAT, metac);
+	status = ask_string_until("String to overwrite<META>: ", tstring, NPAT, metac);
 	if (status != TRUE)
 		return status;
 

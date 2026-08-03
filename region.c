@@ -69,7 +69,7 @@ int cmd_copy_region(int f, int n)
 			++loffs;
 		}
 	}
-	mlwrite("(region copied)");
+	msg_printf("(region copied)");
 	return TRUE;
 }
 
@@ -166,7 +166,7 @@ int getregion(struct region *rp)
 	long bsize;
 
 	if (curwp->w_markp == NULL) {
-		mlwrite("No mark set in this window");
+		msg_printf("No mark set in this window");
 		return FALSE;
 	}
 	if (curwp->w_dotp == curwp->w_markp) {
@@ -206,6 +206,6 @@ int getregion(struct region *rp)
 			}
 		}
 	}
-	mlwrite("Bug: lost mark");
+	msg_printf("Bug: lost mark");
 	return FALSE;
 }

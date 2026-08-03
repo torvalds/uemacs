@@ -338,7 +338,7 @@ int cmd_set(int f, int n)
 
 	/* first get the variable to set.. */
 	if (clexec == FALSE) {
-		status = mlreply("Variable to set: ", &var[0], NVSIZE);
+		status = ask_string("Variable to set: ", &var[0], NVSIZE);
 		if (status != TRUE)
 			return status;
 	} else {				/* macro line argument */
@@ -351,7 +351,7 @@ int cmd_set(int f, int n)
 
 	/* if its not legal....bitch */
 	if (vd.v_type == -1) {
-		mlwrite("%%No such variable as '%s'", var);
+		msg_printf("%%No such variable as '%s'", var);
 		return FALSE;
 	}
 
@@ -359,7 +359,7 @@ int cmd_set(int f, int n)
 	if (f == TRUE)
 		strcpy(value, itoa(n));
 	else {
-		status = mlreply("Value: ", &value[0], NSTRING);
+		status = ask_string("Value: ", &value[0], NSTRING);
 		if (status != TRUE)
 			return status;
 	}
