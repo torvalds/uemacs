@@ -1027,7 +1027,7 @@ int fmatch(int ch)
 	char c;					/* current character in scan */
 
 	/* first get the display update out there */
-	update(FALSE);
+	update();
 
 	/* save the original cursor position */
 	oldlp = curwp->w_dotp;
@@ -1064,7 +1064,7 @@ int fmatch(int ch)
 	/* if count is zero, we have a match, display the sucker */
 	if (count == 0) {
 		forwchar(FALSE, 1);
-		update(FALSE);
+		update();
 		ttpause();
 	}
 

@@ -254,16 +254,16 @@ int main(int argc, char **argv)
 
 	/* Deal with startup gotos and searches */
 	if (gotoflag && searchflag) {
-		update(FALSE);
+		update();
 		mlwrite("(Can not search and goto at the same time!)");
 	} else if (gotoflag) {
 		if (gotoline(TRUE, gline) == FALSE) {
-			update(FALSE);
+			update();
 			mlwrite("(Bogus goto argument)");
 		}
 	} else if (searchflag) {
 		if (forwhunt(FALSE, 0) == FALSE)
-			update(FALSE);
+			update();
 	}
 
 	/* Setup to process commands. */
@@ -276,13 +276,13 @@ int main(int argc, char **argv)
 	lastflag = saveflag;
 
 	if (curwp->w_flag || !typahead())
-		update(FALSE);
+		update();
 	c = getcmd();
 
 	/* if there is something on the command line, clear it */
 	if (mpresf != FALSE) {
 		mlerase();
-		update(FALSE);
+		update();
 	}
 	f = FALSE;
 	n = 1;

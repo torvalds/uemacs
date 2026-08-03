@@ -239,7 +239,7 @@ int tgetc(void)
 		if (--kbdrep < 1) {
 			kbdmode = STOP;
 			/* force a screen update after all is done */
-			update(FALSE);
+			update();
 		} else {
 
 			/* reset the macro to the begining for the next rep */

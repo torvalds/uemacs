@@ -298,8 +298,21 @@ static void paint_window(struct window *wp, bool check)
  */
 int upscreen(int f, int n)
 {
-	update(TRUE);
+	update_now();
 	return TRUE;
+}
+
+/*
+ * Refresh the screen, unless a keyboard macro is replaying - the
+ * intermediate states of a macro are not worth painting, since what was
+ * asked for is the state it finishes in.  Anything that has to be seen
+ * whatever is going on calls update_now() instead.
+ */
+void update(void)
+{
+	if (kbdmode == PLAY)
+		return;
+	update_now();
 }
 
 /*
@@ -310,17 +323,12 @@ int upscreen(int f, int n)
  * painted is decided from the buffer alone: everything, unless the
  * window flags say the change cannot have reached further than the line
  * the cursor is on.
- *
- * int force;		force update past type ahead?
  */
-int update(int force)
+void update_now(void)
 {
 	struct window *wp = curwp;
 	bool check = (wp->w_bufp->b_mode & MDSPELL) != 0;
 	int oldbound = lbound;
-
-	if (force == FALSE && kbdmode == PLAY)
-		return TRUE;
 
 	displaying = TRUE;
 
@@ -366,7 +374,6 @@ int update(int force)
 	displaying = FALSE;
 	while (chg_width || chg_height)
 		newscreensize(chg_height, chg_width);
-	return TRUE;
 }
 
 /*
@@ -972,6 +979,6 @@ static int newscreensize(int h, int w)
 	if (w < term.t_mcol)
 		newwidth(TRUE, w);
 
-	update(TRUE);
+	update_now();
 	return TRUE;
 }

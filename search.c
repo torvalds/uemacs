@@ -788,7 +788,7 @@ static int replaces(int kind, int f, int n)
 			 */
  pprompt:		mlputstr(tpat);
  qprompt:
-			update(TRUE);		/* show the proposed place to change */
+			update_now();		/* show the proposed place to change */
 			c = tgetc();		/* and input */
 			mlwrite("");		/* and clear it */
 

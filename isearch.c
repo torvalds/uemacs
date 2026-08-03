@@ -65,7 +65,7 @@ int risearch(int f, int n)
 		curwp->w_dotp = curline;	/* Reset the line pointer             */
 		curwp->w_doto = curoff;		/*  and the offset to original value  */
 		curwp->w_flag |= WFMOVE;	/* Say we've moved                    */
-		update(FALSE);			/* And force an update                */
+		update();
 		mlwrite("(search failed)");	/* Say we died                        */
 		matchlen = strlen(pat);
 	} else
@@ -93,7 +93,7 @@ int fisearch(int f, int n)
 		curwp->w_dotp = curline;	/* Reset the line pointer             */
 		curwp->w_doto = curoff;		/*  and the offset to original value  */
 		curwp->w_flag |= WFMOVE;	/* Say we've moved                    */
-		update(FALSE);			/* And force an update                */
+		update();
 		mlwrite("(search failed)");	/* Say we died                        */
 		matchlen = strlen(pat);
 	} else
@@ -450,7 +450,7 @@ int get_char(void)
 	/* We're not re-executing (or aren't any more).  Try for a real char      */
 
 	cmd_reexecute = -1;			/* Say we're in real mode again       */
-	update(FALSE);				/* Pretty up the screen               */
+	update();				/* Pretty up the screen               */
 	if (cmd_offset >= CMDBUFLEN - 1) {	/* If we're getting too big ...         */
 		mlwrite("? command too long");	/* Complain loudly and bitterly       */
 		return metac;			/* And force a quit                   */
