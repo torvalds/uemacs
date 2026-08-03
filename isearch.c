@@ -34,8 +34,6 @@ static int echo_char(int c, int col);
 
 /* A couple of "own" variables for re-eat */
 
-static int (*saved_get_char)(void);		/* Get character routine */
-static int eaten_char = -1;			/* Re-eaten char */
 
 /* A couple more "own" variables for the command string */
 
@@ -229,7 +227,7 @@ int isearch(int f, int n)
 
 		default:			/* All other chars            */
 			if (c < ' ') {		/* Is it printable?             *//* Nope.                      */
-				reeat(c);	/* Re-eat the char            */
+				ttungetc(c);	/* Hand the char back         */
 				return TRUE;	/* And return the last status */
 			}
 		}				/* Switch */
@@ -468,21 +466,3 @@ int get_char(void)
 
 /* Come here on the next term.t_getchar call: */
 
-int uneat(void)
-{
-	int c;
-
-	term.t_getchar = saved_get_char;	/* restore the routine address        */
-	c = eaten_char;				/* Get the re-eaten char              */
-	eaten_char = -1;			/* Clear the old char                 */
-	return c;				/* and return the last char           */
-}
-
-void reeat(int c)
-{
-	if (eaten_char != -1)			/* If we've already been here             */
-		return /*(NULL) */ ;		/* Don't do it again                  */
-	eaten_char = c;				/* Else, save the char for later      */
-	saved_get_char = term.t_getchar;	/* Save the char get routine          */
-	term.t_getchar = uneat;			/* Replace it with ours               */
-}

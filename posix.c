@@ -171,10 +171,31 @@ void ttpause(void)
  * at all. More complex in VMS that almost anyplace else, which figures. Very
  * simple on CPM, because the system can do exactly what you want.
  */
+/*
+ * One character of pushback.  The incremental search reads the
+ * character that ended it, decides it was a command rather than part of
+ * the pattern, and hands it back for the command loop to find.  A
+ * second pushback with one still pending is dropped, which is what the
+ * caller has always relied on.
+ */
+static int pushback = -1;
+
+void ttungetc(int c)
+{
+	if (pushback < 0)
+		pushback = c;
+}
+
 int ttgetc(void)
 {
 	unicode_t c;
 	int count, bytes = 1, expected;
+
+	if (pushback >= 0) {
+		c = pushback;
+		pushback = -1;
+		return c;
+	}
 
 	count = TT.nr;
 	if (!count) {

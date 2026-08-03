@@ -250,13 +250,8 @@ struct region {
 };
 
 /*
- * The editor communicates with the display using a high level interface. A
- * "TERM" structure holds useful variables, and indirect pointers to routines
- * that do useful operations. The low level get and put routines are here too.
- * This lets a terminal, in addition to having non standard commands, have
- * funny get and put character code too. The calls might get changed to
- * "termp->t_field" style in the future, to make it possible to run more than
- * one terminal type.
+ * What the editor knows about the terminal it is talking to: how big it
+ * is, and how far a long line may be scrolled sideways.
  */
 struct terminal {
 	short t_mrow;				/* max number of rows allowable */
@@ -266,35 +261,24 @@ struct terminal {
 	short t_margin;				/* min margin for extended lines */
 	short t_scrsiz;				/* size of scroll region "      */
 	int t_pause;				/* # times thru update to pause */
-	void (*t_open)(void);			/* Open terminal at the start.  */
-	void (*t_close)(void);			/* Close terminal at end.       */
-	void (*t_kopen)(void);			/* Open keyboard                */
-	void (*t_kclose)(void);			/* close keyboard               */
-	int (*t_getchar)(void);			/* Get character from keyboard. */
-	int (*t_putchar)(int);			/* Put character to display.    */
-	void (*t_flush)(void);			/* Flush output buffers.        */
-	void (*t_move)(int, int);		/* Move the cursor, origin 0.   */
-	void (*t_eeol)(void);			/* Erase to end of line.        */
-	void (*t_eeop)(void);			/* Erase to end of page.        */
-	void (*t_beep)(void);			/* Beep.                        */
-	void (*t_rev)(int);			/* set reverse video state      */
 };
 
-/*	TEMPORARY macros for terminal I/O  (to be placed in a machine
-					    dependant place later)	*/
+/*	What the terminal is asked to do.  These are the names the code
+	has always used for it; there is one terminal, so they are the
+	functions themselves rather than a way of reaching them.	*/
 
-#define	TTopen		(*term.t_open)
-#define	TTclose		(*term.t_close)
-#define	TTkopen		(*term.t_kopen)
-#define	TTkclose	(*term.t_kclose)
-#define	TTgetc		(*term.t_getchar)
-#define	TTputc		(*term.t_putchar)
-#define	TTflush		(*term.t_flush)
-#define	TTmove		(*term.t_move)
-#define	TTeeol		(*term.t_eeol)
-#define	TTeeop		(*term.t_eeop)
-#define	TTbeep		(*term.t_beep)
-#define	TTrev		(*term.t_rev)
+#define	TTopen		tcapopen
+#define	TTclose		tcapclose
+#define	TTkopen		tcapkopen
+#define	TTkclose	tcapkclose
+#define	TTgetc		ttgetc
+#define	TTputc		ttputc
+#define	TTflush		ttflush
+#define	TTmove		tcapmove
+#define	TTeeol		tcapeeol
+#define	TTeeop		tcapeeop
+#define	TTbeep		tcapbeep
+#define	TTrev		tcaprev
 
 /* Structure for the table of initial key bindings. */
 struct key_tab {

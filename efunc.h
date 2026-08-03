@@ -125,6 +125,17 @@ extern int lowerregion(int f, int n);
 extern int upperregion(int f, int n);
 extern int getregion(struct region *rp);
 
+/* tcap.c */
+extern void tcapopen(void);
+extern void tcapclose(void);
+extern void tcapkopen(void);
+extern void tcapkclose(void);
+extern void tcapmove(int row, int col);
+extern void tcapeeol(void);
+extern void tcapeeop(void);
+extern void tcapbeep(void);
+extern void tcaprev(int state);
+
 /* posix.c */
 extern void ttopen(void);
 extern void ttclose(void);
@@ -132,6 +143,7 @@ extern int ttputc(int c);
 extern void ttflush(void);
 extern void ttpause(void);
 extern int ttgetc(void);
+extern void ttungetc(int c);
 extern int typahead(void);
 
 /* input.c */
@@ -303,8 +315,6 @@ extern int scanmore(char *patrn, int dir);
 extern int match_pat(char *patrn);
 extern int promptpattern(char *prompt);
 extern int get_char(void);
-extern int uneat(void);
-extern void reeat(int c);
 
 /* eval.c */
 extern void varinit(void);
