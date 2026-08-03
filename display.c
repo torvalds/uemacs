@@ -561,7 +561,7 @@ static void modeline(struct window *wp)
 	n = 0;
 	if (wp == curwp)			/* mark the current buffer */
 		lchar = '-';
-	else if (revexist)
+	else if (can_reverse_video)
 		lchar = ' ';
 	else
 		lchar = '-';
@@ -717,7 +717,7 @@ void msg_erase(void)
 	if (display_commands == FALSE)
 		return;
 
-	if (eolexist == TRUE)
+	if (can_erase_to_eol == TRUE)
 		tcapeeol();
 	else {
 		for (i = 0; i < term.t_ncol - 1; i++)
@@ -742,7 +742,7 @@ static int msg_begin(void)
 	}
 
 	/* if we can not erase to end-of-line, do it manually */
-	if (eolexist == FALSE) {
+	if (can_erase_to_eol == FALSE) {
 		msg_erase();
 		ttflush();
 	}
@@ -754,7 +754,7 @@ static int msg_begin(void)
 static void msg_end(void)
 {
 	/* if we can, erase to the end of screen */
-	if (eolexist == TRUE)
+	if (can_erase_to_eol == TRUE)
 		tcapeeol();
 	ttflush();
 	message_present = TRUE;

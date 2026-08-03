@@ -107,10 +107,10 @@ void tcapopen(void)
 	SE = tgetstr("se", &p);
 	SO = tgetstr("so", &p);
 	if (SO != NULL)
-		revexist = TRUE;
+		can_reverse_video = TRUE;
 
 	if (tgetnum("sg") > 0) {		/* can reverse be used? P.K. */
-		revexist = FALSE;
+		can_reverse_video = FALSE;
 		SE = NULL;
 		SO = NULL;
 	}
@@ -123,7 +123,7 @@ void tcapopen(void)
 	}
 
 	if (CE == NULL)				/* will we be able to use clear to EOL? */
-		eolexist = FALSE;
+		can_erase_to_eol = FALSE;
 
 	if (p >= &tcapbuf[TCAPSLEN]) {
 		puts("Terminal description too big!\n");

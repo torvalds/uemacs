@@ -29,8 +29,8 @@ extern char rpat[];				/* Replacement pattern          */
 extern char *execstr;				/* pointer to string to execute */
 extern char golabel[];				/* current line to go to        */
 extern int execlevel;				/* execution IF level           */
-extern int eolexist;				/* does clear to EOL exist?     */
-extern int revexist;				/* does reverse video exist?    */
+extern int can_erase_to_eol;			/* terminal has an erase-to-end-of-line */
+extern int can_reverse_video;			/* terminal has reverse video */
 extern char *modename[];			/* text names of modes          */
 extern char *mode2name[];			/* text names of modes          */
 extern char modecode[];				/* letters to represent modes   */

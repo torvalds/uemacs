@@ -8,8 +8,8 @@ int keyboard_macro[NKBDM];			/* the recorded keystrokes */
 char *execstr = NULL;				/* pointer to string to execute */
 char golabel[NPAT] = "";			/* current line to go to        */
 int execlevel = 0;				/* execution IF level           */
-int eolexist = TRUE;				/* does clear to EOL exist      */
-int revexist = FALSE;				/* does reverse video exist?    */
+int can_erase_to_eol = TRUE;			/* terminal has an erase-to-end-of-line */
+int can_reverse_video = FALSE;			/* terminal has reverse video */
 char *modename[] = {				/* name of modes                */
 	"WRAP", "CMODE", "SPELL", "EXACT", "VIEW", "OVER",
 	"MAGIC", "ASAVE", "UTF-8"
