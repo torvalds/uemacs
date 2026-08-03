@@ -388,7 +388,7 @@ int cmd_fill_paragraph(int f, int n)
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
-	if (fillcol == 0) {			/* no fill column set */
+	if (fill_column == 0) {			/* no fill column set */
 		msg_printf("No fill column set");
 		return FALSE;
 	}
@@ -434,7 +434,7 @@ int cmd_fill_paragraph(int f, int n)
 			/* at a word break with a word waiting */
 			/* calculate tentitive new length with word added */
 			newlength = clength + 1 + wordlen;
-			if (newlength <= fillcol) {
+			if (newlength <= fill_column) {
 				/* add word to current line */
 				if (!firstflag) {
 					insert_char(1, ' ');	/* the space */
@@ -484,13 +484,13 @@ int cmd_justify_paragraph(int f, int n)
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
 		return rdonly();		/* we are in read only mode     */
-	if (fillcol == 0) {			/* no fill column set */
+	if (fill_column == 0) {			/* no fill column set */
 		msg_printf("No fill column set");
 		return FALSE;
 	}
 	justflag = TRUE;
 	leftmarg = curwp->w_doto;
-	if (leftmarg + 10 > fillcol) {
+	if (leftmarg + 10 > fill_column) {
 		leftmarg = 0;
 		msg_printf("Column too narrow");
 		return FALSE;
@@ -538,7 +538,7 @@ int cmd_justify_paragraph(int f, int n)
 			/* at a word break with a word waiting */
 			/* calculate tentitive new length with word added */
 			newlength = clength + 1 + wordlen;
-			if (newlength <= fillcol) {
+			if (newlength <= fill_column) {
 				/* add word to current line */
 				if (!firstflag) {
 					insert_char(1, ' ');	/* the space */

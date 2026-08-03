@@ -22,7 +22,7 @@ typedef int (*fn_t)(int, int);
 
 /* Initialized global external declarations. */
 
-extern int fillcol;				/* Fill column                  */
+extern int fill_column;				/* fill column, the $fillcol setting */
 extern int kbdm[];				/* Holds kayboard macro data    */
 extern char pat[];				/* Search pattern               */
 extern char rpat[];				/* Replacement pattern          */
@@ -36,16 +36,16 @@ extern char *mode2name[];			/* text names of modes          */
 extern char modecode[];				/* letters to represent modes   */
 extern struct key_tab keytab[];			/* key bind to functions table  */
 extern struct name_bind names[];		/* name to function table */
-extern int gmode;				/* global editor mode           */
-extern int gflags;				/* global control flag          */
-extern int gasave;				/* global ASAVE size            */
-extern int gacount;				/* count until next ASAVE       */
+extern int global_mode;				/* default modes for new buffers, the $gmode setting */
+extern int global_flags;			/* global control flags, the $gflags setting */
+extern int autosave_interval;			/* changes between autosaves, the $asave setting */
+extern int autosave_countdown;			/* changes left before one, the $acount setting */
 extern int sgarbf;				/* State of screen unknown      */
 extern int mpresf;				/* Stuff in message line        */
 extern int clexec;				/* command line execution flag  */
 extern int mstore;				/* storing text to macro flag   */
-extern int discmd;				/* display command flag         */
-extern int disinp;				/* display input characters     */
+extern int display_commands;			/* echo commands, the $discmd setting */
+extern int display_input;			/* echo input, the $disinp setting */
 extern struct buffer *bstore;			/* buffer to store macro text to */
 /* set by the SIGWINCH handler, acted on by checkwinsize() */
 extern volatile sig_atomic_t chg_width, chg_height;
@@ -68,13 +68,13 @@ extern int *kbdend;				/* ptr to end of the keyboard */
 extern int kbdmode;				/* current keyboard macro mode  */
 extern int kbdrep;				/* number of repetitions        */
 extern int restflag;				/* restricted use?              */
-extern int lastkey;				/* last keystoke                */
-extern int seed;				/* random number seed           */
-extern int macbug;				/* macro debuging flag          */
+extern int last_key;				/* last keystroke, the $lastkey setting */
+extern int random_seed;				/* random number seed, the $seed setting */
+extern int macro_debug;				/* trace macros, the $debug setting */
 extern char errorm[];				/* error literal                */
 extern char truem[];				/* true literal                 */
 extern char falsem[];				/* false litereal               */
-extern int cmdstatus;				/* last command status          */
+extern int command_status;			/* last command status, the $status setting */
 extern int saveflag;				/* Flags, saved with the $target var */
 extern char *fline;				/* dynamic return line */
 extern int flen;				/* current length of fline */
@@ -82,7 +82,7 @@ extern int rval;				/* return value of a subprocess */
 extern int nullflag;
 extern int justflag;				/* justify, don't fill */
 extern int overlap;				/* line overlap in forw/back page */
-extern int scrollcount;				/* number of lines to scroll */
+extern int scroll_lines;			/* lines a scroll moves, the $jump setting */
 
 /* Uninitialized global external declarations. */
 

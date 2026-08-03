@@ -412,9 +412,9 @@ static int reframe(struct window *wp)
 		}
 	}
 	if (i == -1) {				/* we're just above the window */
-		i = scrollcount;		/* put dot at first line */
+		i = scroll_lines;		/* put dot at first line */
 	} else if (i == term.t_nrow - 1) {	/* we're just below the window */
-		i = -scrollcount;		/* put dot at last line */
+		i = -scroll_lines;		/* put dot at last line */
 	} else					/* put dot where requested */
 		i = wp->w_force;		/* (is 0, unless reposition() was called) */
 
@@ -714,7 +714,7 @@ void msg_erase(void)
 	int i;
 
 	movecursor(term.t_nrow, 0);
-	if (discmd == FALSE)
+	if (display_commands == FALSE)
 		return;
 
 	if (eolexist == TRUE)
@@ -736,7 +736,7 @@ void msg_erase(void)
 static int msg_begin(void)
 {
 	/* if we are not currently echoing on the command line, abort this */
-	if (discmd == FALSE) {
+	if (display_commands == FALSE) {
 		movecursor(term.t_nrow, 0);
 		return FALSE;
 	}
@@ -808,10 +808,10 @@ void msg_force(char *s)
 {
 	int oldcmd;				/* original command display flag */
 
-	oldcmd = discmd;			/* save the discmd value */
-	discmd = TRUE;				/* and turn display on */
+	oldcmd = display_commands;			/* save the discmd value */
+	display_commands = TRUE;				/* and turn display on */
 	msg_puts(s);				/* write the string out */
-	discmd = oldcmd;			/* and restore the original setting */
+	display_commands = oldcmd;			/* and restore the original setting */
 }
 
 /*

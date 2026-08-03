@@ -3,7 +3,7 @@
 
 /* initialized global definitions */
 
-int fillcol = 72;				/* Current fill column          */
+int fill_column = 72;				/* fill column, the $fillcol setting */
 int kbdm[NKBDM];				/* Macro                        */
 char *execstr = NULL;				/* pointer to string to execute */
 char golabel[NPAT] = "";			/* current line to go to        */
@@ -21,16 +21,16 @@ char *mode2name[] = {				/* name of modes                */
 };
 
 char modecode[] = "WCSEVOMYAU";			/* letters to represent modes   */
-int gmode = 0;					/* global editor mode           */
-int gflags = GFREAD;				/* global control flag          */
-int gasave = 256;				/* global ASAVE size            */
-int gacount = 256;				/* count until next ASAVE       */
+int global_mode = 0;				/* default modes for new buffers, the $gmode setting */
+int global_flags = GFREAD;			/* global control flags, the $gflags setting */
+int autosave_interval = 256;			/* changes between autosaves, the $asave setting */
+int autosave_countdown = 256;			/* changes left before one, the $acount setting */
 int sgarbf = TRUE;				/* TRUE if screen is garbage    */
 int mpresf = FALSE;				/* TRUE if message in last line */
 int clexec = FALSE;				/* command line execution flag  */
 int mstore = FALSE;				/* storing text to macro flag   */
-int discmd = TRUE;				/* display command flag         */
-int disinp = TRUE;				/* display input characters     */
+int display_commands = TRUE;			/* echo commands, the $discmd setting */
+int display_input = TRUE;			/* echo input, the $disinp setting */
 struct buffer *bstore = NULL;			/* buffer to store macro text to */
 int ttrow = HUGE;				/* Row location of HW cursor */
 int ttcol = HUGE;				/* Column location of HW cursor */
@@ -51,13 +51,13 @@ int *kbdend = &kbdm[0];				/* ptr to end of the keyboard */
 int kbdmode = STOP;				/* current keyboard macro mode  */
 int kbdrep = 0;					/* number of repetitions        */
 int restflag = FALSE;				/* restricted use?              */
-int lastkey = 0;				/* last keystoke                */
-int seed = 0;					/* random number seed           */
-int macbug = FALSE;				/* macro debuging flag          */
+int last_key = 0;				/* last keystroke, the $lastkey setting */
+int random_seed = 0;				/* random number seed, the $seed setting */
+int macro_debug = FALSE;			/* trace macros, the $debug setting */
 char errorm[] = "ERROR";			/* error literal                */
 char truem[] = "TRUE";				/* true literal                 */
 char falsem[] = "FALSE";			/* false litereal               */
-int cmdstatus = TRUE;				/* last command status          */
+int command_status = TRUE;			/* last command status, the $status setting */
 int saveflag = 0;				/* Flags, saved with the $target var */
 char *fline = NULL;				/* dynamic return line */
 int flen = 0;					/* current length of fline */
@@ -65,7 +65,7 @@ int rval = 0;					/* return value of a subprocess */
 int nullflag = FALSE;				/* accept null characters */
 int justflag = FALSE;				/* justify, don't fill */
 int overlap = 0;				/* line overlap in forw/back page */
-int scrollcount = 1;				/* number of lines to scroll */
+int scroll_lines = 1;				/* lines a scroll moves, the $jump setting */
 
 /* uninitialized global definitions */
 

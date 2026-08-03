@@ -249,15 +249,15 @@ int main(int argc, char **argv)
 		startup("");
 		startflag = TRUE;
 	}
-	discmd = TRUE;				/* P.K. */
+	display_commands = TRUE;				/* P.K. */
 
 	/* if there are any files to read, read the first one! */
 	bp = bfind("main", FALSE, 0);
-	if (firstfile == FALSE && (gflags & GFREAD)) {
+	if (firstfile == FALSE && (global_flags & GFREAD)) {
 		swbuffer(firstbp);
 		zotbuf(bp);
 	} else
-		bp->b_mode |= gmode;
+		bp->b_mode |= global_mode;
 
 	/* Deal with startup gotos and searches */
 	if (gotoflag && searchflag) {
@@ -426,8 +426,8 @@ int execute(int c, int f, int n)
 	 * negative, wrap mode is enabled, and we are now past fill column,
 	 * and we are not read-only, perform word wrap.
 	 */
-	if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fillcol > 0 &&
-	    n >= 0 && getccol(FALSE) > fillcol && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
+	if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fill_column > 0 &&
+	    n >= 0 && getccol(FALSE) > fill_column && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
 		execute(META | SPEC | 'W', FALSE, 1);
 
 	if ((c >= 0x20 && c <= 0x7E)		/* Self inserting.      */
@@ -460,11 +460,11 @@ int execute(int c, int f, int n)
 
 		/* check auto-save mode */
 		if (curbp->b_mode & MDASAVE)
-			if (--gacount == 0) {
+			if (--autosave_countdown == 0) {
 				/* and save the file if needed */
 				cmd_update_screen(FALSE, 0);
 				cmd_save_file(FALSE, 0);
-				gacount = gasave;
+				autosave_countdown = autosave_interval;
 			}
 
 		lastflag = thisflag;

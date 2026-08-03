@@ -252,7 +252,7 @@ int tgetc(void)
 	c = ttgetc();
 
 	/* record it for $lastkey */
-	lastkey = c;
+	last_key = c;
 
 	/* save it if we need to */
 	if (kbdmode == RECORD) {
@@ -540,7 +540,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 				}
 
 				if (c != '\n') {
-					if (disinp)
+					if (display_input)
 						ttputc(c);
 				} else {	/* put out <NL> for <ret> */
 					outstring("<NL>");
@@ -566,7 +566,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 				}
 
 				if (c != '\n') {
-					if (disinp)
+					if (display_input)
 						ttputc(c);
 				} else {	/* put out <NL> for <ret> */
 					outstring("<NL>");
@@ -586,7 +586,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
  */
 void outstring(char *s)
 {
-	if (disinp)
+	if (display_input)
 		while (*s)
 			ttputc(*s++);
 }
@@ -598,7 +598,7 @@ void outstring(char *s)
  */
 void ostring(char *s)
 {
-	if (discmd)
+	if (display_commands)
 		while (*s)
 			ttputc(*s++);
 }

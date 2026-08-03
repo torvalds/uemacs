@@ -120,7 +120,7 @@ int docmd(char *cline)
 	oldcle = clexec;			/* save old clexec flag */
 	clexec = TRUE;				/* in cline execution */
 	status = (*fnc) (f, n);			/* call the function */
-	cmdstatus = status;			/* save the status */
+	command_status = status;			/* save the status */
 	clexec = oldcle;			/* restore clexec flag */
 	execstr = oldestr;
 	return status;

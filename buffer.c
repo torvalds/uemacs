@@ -93,7 +93,7 @@ int swbuffer(struct buffer *bp)
 		curbp->b_dotp = line_next(curbp->b_linep);
 		curbp->b_doto = 0;
 		curbp->b_active = TRUE;
-		curbp->b_mode |= gmode;		/* P.K. */
+		curbp->b_mode |= global_mode;		/* P.K. */
 	}
 	curwp->w_bufp = bp;
 	curwp->w_linep = bp->b_linep;		/* For macros, ignored. */
@@ -306,7 +306,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 		bp->b_markp = NULL;
 		bp->b_marko = 0;
 		bp->b_flag = bflag;
-		bp->b_mode = gmode;
+		bp->b_mode = global_mode;
 		bp->b_nwnd = 0;
 		bp->b_linep = lp;
 		bp->b_fstate.fs_what = FSTATE_UNKNOWN;

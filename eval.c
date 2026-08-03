@@ -215,7 +215,7 @@ char *gtenv(char *vname)
 	/* otherwise, fetch the appropriate value */
 	switch (vnum) {
 	case EVFILLCOL:
-		return itoa(fillcol);
+		return itoa(fill_column);
 	case EVPAGELEN:
 		return itoa(term.t_nrow + 1);
 	case EVCURCOL:
@@ -235,30 +235,30 @@ char *gtenv(char *vname)
 	case EVSRES:
 		return "NORMAL";
 	case EVDEBUG:
-		return ltos(macbug);
+		return ltos(macro_debug);
 	case EVSTATUS:
-		return ltos(cmdstatus);
+		return ltos(command_status);
 	case EVPALETTE:
 		return "";
 	case EVASAVE:
-		return itoa(gasave);
+		return itoa(autosave_interval);
 	case EVACOUNT:
-		return itoa(gacount);
+		return itoa(autosave_countdown);
 	case EVLASTKEY:
-		return itoa(lastkey);
+		return itoa(last_key);
 	case EVCURCHAR:
 		return (curwp->w_dotp->l_used ==
 			curwp->w_doto ? itoa('\n') : itoa(lgetc(curwp->w_dotp, curwp->w_doto)));
 	case EVDISCMD:
-		return ltos(discmd);
+		return ltos(display_commands);
 	case EVVERSION:
 		return VERSION;
 	case EVPROGNAME:
 		return PROGRAM_NAME_LONG;
 	case EVSEED:
-		return itoa(seed);
+		return itoa(random_seed);
 	case EVDISINP:
-		return ltos(disinp);
+		return ltos(display_input);
 	case EVTARGET:
 		saveflag = lastflag;
 		return itoa(curgoal);
@@ -273,7 +273,7 @@ char *gtenv(char *vname)
 	case EVCMODE:
 		return itoa(curbp->b_mode);
 	case EVGMODE:
-		return itoa(gmode);
+		return itoa(global_mode);
 	case EVTPAUSE:
 		return itoa(term.t_pause);
 	case EVPENDING:
@@ -283,7 +283,7 @@ char *gtenv(char *vname)
 	case EVLINE:
 		return getctext();
 	case EVGFLAGS:
-		return itoa(gflags);
+		return itoa(global_flags);
 	case EVRVAL:
 		return itoa(rval);
 	case EVTAB:
@@ -291,7 +291,7 @@ char *gtenv(char *vname)
 	case EVOVERLAP:
 		return itoa(overlap);
 	case EVSCROLLCOUNT:
-		return itoa(scrollcount);
+		return itoa(scroll_lines);
 	case EVSCROLL:
 		return ltos(0);
 	}
@@ -465,7 +465,7 @@ int svar(struct variable_description *var, char *value)
 		status = TRUE;			/* by default */
 		switch (vnum) {
 		case EVFILLCOL:
-			fillcol = atoi(value);
+			fill_column = atoi(value);
 			break;
 		case EVPAGELEN:
 			status = cmd_change_screen_size(TRUE, atoi(value));
@@ -494,19 +494,19 @@ int svar(struct variable_description *var, char *value)
 		case EVSRES:
 			break;
 		case EVDEBUG:
-			macbug = stol(value);
+			macro_debug = stol(value);
 			break;
 		case EVSTATUS:
-			cmdstatus = stol(value);
+			command_status = stol(value);
 			break;
 		case EVASAVE:
-			gasave = atoi(value);
+			autosave_interval = atoi(value);
 			break;
 		case EVACOUNT:
-			gacount = atoi(value);
+			autosave_countdown = atoi(value);
 			break;
 		case EVLASTKEY:
-			lastkey = atoi(value);
+			last_key = atoi(value);
 			break;
 		case EVCURCHAR:
 			delete_characters(1, FALSE);	/* delete 1 char */
@@ -518,17 +518,17 @@ int svar(struct variable_description *var, char *value)
 			cmd_backward_character(FALSE, 1);
 			break;
 		case EVDISCMD:
-			discmd = stol(value);
+			display_commands = stol(value);
 			break;
 		case EVVERSION:
 			break;
 		case EVPROGNAME:
 			break;
 		case EVSEED:
-			seed = atoi(value);
+			random_seed = atoi(value);
 			break;
 		case EVDISINP:
-			disinp = stol(value);
+			display_input = stol(value);
 			break;
 		case EVTARGET:
 			curgoal = atoi(value);
@@ -551,7 +551,7 @@ int svar(struct variable_description *var, char *value)
 			curwp->w_flag |= WFMODE;
 			break;
 		case EVGMODE:
-			gmode = atoi(value);
+			global_mode = atoi(value);
 			break;
 		case EVTPAUSE:
 			term.t_pause = atoi(value);
@@ -563,7 +563,7 @@ int svar(struct variable_description *var, char *value)
 		case EVLINE:
 			putctext(value);
 		case EVGFLAGS:
-			gflags = atoi(value);
+			global_flags = atoi(value);
 			break;
 		case EVRVAL:
 			break;
@@ -577,7 +577,7 @@ int svar(struct variable_description *var, char *value)
 			overlap = atoi(value);
 			break;
 		case EVSCROLLCOUNT:
-			scrollcount = atoi(value);
+			scroll_lines = atoi(value);
 			break;
 		case EVSCROLL:
 			break;
@@ -688,10 +688,10 @@ static char *internal_getval(char *token)
 
 	case TKARG:				/* interactive argument */
 		getval(token + 1, token, -1);
-		distmp = discmd;		/* echo it always! */
-		discmd = TRUE;
+		distmp = display_commands;		/* echo it always! */
+		display_commands = TRUE;
 		status = getstring(token, buf, NSTRING, ctoec('\n'));
-		discmd = distmp;
+		display_commands = distmp;
 		if (status == ABORT)
 			return errorm;
 		return buf;
@@ -843,8 +843,8 @@ int abs(int x)
  */
 int ernd(void)
 {
-	seed = abs(seed * 1721 + 10007);
-	return seed;
+	random_seed = abs(random_seed * 1721 + 10007);
+	return random_seed;
 }
 
 /*

@@ -22,7 +22,7 @@ int tabsize;					/* Tab size (0: use real tabs) */
  */
 int cmd_set_fill_column(int f, int n)
 {
-	fillcol = n;
+	fill_column = n;
 	msg_printf("(Fill column is %d)", n);
 	return TRUE;
 }
@@ -460,8 +460,8 @@ int cmd_newline(int f, int n)
 	 * negative, wrap mode is enabled, and we are now past fill column,
 	 * and we are not read-only, perform word wrap.
 	 */
-	if ((curwp->w_bufp->b_mode & MDWRAP) && fillcol > 0 &&
-	    getccol(FALSE) > fillcol && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
+	if ((curwp->w_bufp->b_mode & MDWRAP) && fill_column > 0 &&
+	    getccol(FALSE) > fill_column && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
 		execute(META | SPEC | 'W', FALSE, 1);
 
 	/* insert some lines */
@@ -863,11 +863,11 @@ int adjustmode(int kind, int global)
 			/* finding a match, we process it */
 			if (kind == TRUE)
 				if (global)
-					gmode |= (1 << i);
+					global_mode |= (1 << i);
 				else
 					curbp->b_mode |= (1 << i);
 			else if (global)
-				gmode &= ~(1 << i);
+				global_mode &= ~(1 << i);
 			else
 				curbp->b_mode &= ~(1 << i);
 			/* display new mode line */
