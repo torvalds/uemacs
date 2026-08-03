@@ -49,10 +49,9 @@ extern int display_input;			/* echo input, the $disinp setting */
 extern struct buffer *store_buffer;		/* the buffer they are being captured into */
 /* set by the SIGWINCH handler, acted on by checkwinsize() */
 extern volatile sig_atomic_t chg_width, chg_height;
-extern int ttrow;				/* Row location of HW cursor */
-extern int ttcol;				/* Column location of HW cursor */
-extern int lbound;				/* leftmost column of current line
-						   being displayed */
+extern int shown_row;				/* where the terminal is actually showing it */
+extern int shown_col;				/* and its column, so a move can be skipped */
+extern int left_column;				/* leftmost column shown of a sideways-scrolled line */
 extern int meta_char;				/* current meta character */
 extern int ctlx_char;				/* current control-X prefix character */
 extern int repeat_key;				/* current universal repeat key */
@@ -86,8 +85,8 @@ extern int scroll_lines;			/* lines a scroll moves, the $jump setting */
 
 /* Uninitialized global external declarations. */
 
-extern int currow;				/* Cursor row                   */
-extern int curcol;				/* Cursor column                */
+extern int cursor_row;				/* where the cursor belongs, worked out from dot */
+extern int cursor_col;				/* and its column, counting from the line start */
 extern int thisflag;				/* Flags, this command          */
 extern int lastflag;				/* Flags, last command          */
 extern int curgoal;				/* Goal for C-P, C-N            */

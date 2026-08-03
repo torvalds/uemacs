@@ -134,7 +134,7 @@ fn_t getname(void)
 				ttputc('\b');
 				ttputc(' ');
 				ttputc('\b');
-				--ttcol;
+				--shown_col;
 				--cpos;
 				ttflush();
 			}
@@ -145,7 +145,7 @@ fn_t getname(void)
 				ttputc(' ');
 				ttputc('\b');
 				--cpos;
-				--ttcol;
+				--shown_col;
 			}
 
 			ttflush();
@@ -215,7 +215,7 @@ fn_t getname(void)
 				ttputc(c);
 			}
 
-			++ttcol;
+			++shown_col;
 			ttflush();
 		}
 	}
@@ -442,15 +442,15 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			/* rubout/erase */
 			if (cpos != 0) {
 				outstring("\b \b");
-				--ttcol;
+				--shown_col;
 
 				if (buf[--cpos] < 0x20) {
 					outstring("\b \b");
-					--ttcol;
+					--shown_col;
 				}
 				if (buf[cpos] == '\n') {
 					outstring("\b\b  \b\b");
-					ttcol -= 2;
+					shown_col -= 2;
 				}
 
 				ttflush();
@@ -460,15 +460,15 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			/* C-U, kill */
 			while (cpos != 0) {
 				outstring("\b \b");
-				--ttcol;
+				--shown_col;
 
 				if (buf[--cpos] < 0x20) {
 					outstring("\b \b");
-					--ttcol;
+					--shown_col;
 				}
 				if (buf[cpos] == '\n') {
 					outstring("\b\b  \b\b");
-					ttcol -= 2;
+					shown_col -= 2;
 				}
 			}
 			ttflush();
@@ -482,15 +482,15 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			ocpos = cpos;
 			while (cpos != 0) {
 				outstring("\b \b");
-				--ttcol;
+				--shown_col;
 
 				if (buf[--cpos] < 0x20) {
 					outstring("\b \b");
-					--ttcol;
+					--shown_col;
 				}
 				if (buf[cpos] == '\n') {
 					outstring("\b\b  \b\b");
-					ttcol -= 2;
+					shown_col -= 2;
 				}
 				if (buf[cpos] == '*' || buf[cpos] == '?')
 					iswild = 1;
@@ -535,7 +535,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 				c = buf[n];
 				if ((c < ' ') && (c != '\n')) {
 					outstring("^");
-					++ttcol;
+					++shown_col;
 					c ^= 0x40;
 				}
 
@@ -544,9 +544,9 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 						ttputc(c);
 				} else {	/* put out <NL> for <ret> */
 					outstring("<NL>");
-					ttcol += 3;
+					shown_col += 3;
 				}
-				++ttcol;
+				++shown_col;
 			}
 			ttflush();
 			rewind(tmpf);
@@ -561,7 +561,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 
 				if ((c < ' ') && (c != '\n')) {
 					outstring("^");
-					++ttcol;
+					++shown_col;
 					c ^= 0x40;
 				}
 
@@ -570,9 +570,9 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 						ttputc(c);
 				} else {	/* put out <NL> for <ret> */
 					outstring("<NL>");
-					ttcol += 3;
+					shown_col += 3;
 				}
-				++ttcol;
+				++shown_col;
 				ttflush();
 			}
 		}

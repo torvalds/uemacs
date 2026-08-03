@@ -32,10 +32,9 @@ int storing_macro = FALSE;			/* capturing command lines into a buffer */
 int display_commands = TRUE;			/* echo commands, the $discmd setting */
 int display_input = TRUE;			/* echo input, the $disinp setting */
 struct buffer *store_buffer = NULL;		/* the buffer they are being captured into */
-int ttrow = HUGE;				/* Row location of HW cursor */
-int ttcol = HUGE;				/* Column location of HW cursor */
-int lbound = 0;					/* leftmost column of current line
-						   being displayed */
+int shown_row = HUGE;				/* where the terminal is actually showing it */
+int shown_col = HUGE;				/* and its column, so a move can be skipped */
+int left_column = 0;				/* leftmost column shown of a sideways-scrolled line */
 int meta_char = CONTROL | '[';			/* current meta character */
 int ctlx_char = CONTROL | 'X';			/* current control-X prefix character */
 int repeat_key = CONTROL | 'U';		/* current universal repeat key */
@@ -69,8 +68,8 @@ int scroll_lines = 1;				/* lines a scroll moves, the $jump setting */
 
 /* uninitialized global definitions */
 
-int currow;					/* Cursor row                   */
-int curcol;					/* Cursor column                */
+int cursor_row;					/* where the cursor belongs, worked out from dot */
+int cursor_col;					/* and its column, counting from the line start */
 int thisflag;					/* Flags, this command          */
 int lastflag;					/* Flags, last command          */
 int curgoal;					/* Goal for C-P, C-N            */

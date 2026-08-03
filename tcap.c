@@ -144,8 +144,8 @@ void tcapkopen(void)
 {
 	putpad(TI);
 	ttflush();
-	ttrow = 999;
-	ttcol = 999;
+	shown_row = 999;
+	shown_col = 999;
 	sgarbf = TRUE;
 }
 

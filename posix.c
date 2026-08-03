@@ -74,8 +74,8 @@ void ttopen(void)
 
 	/* on all screens we are not sure of the initial position
 	   of the cursor                                        */
-	ttrow = 999;
-	ttcol = 999;
+	shown_row = 999;
+	shown_col = 999;
 }
 
 /*

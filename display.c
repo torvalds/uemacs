@@ -254,19 +254,19 @@ static void paint_line(int row, struct line *lp, int offset, bool check)
 		paint_word(&p, text, start, i, check && word);
 	}
 
-	ttcol = p.out;
+	shown_col = p.out;
 	tcapeeol();
 
 	/* the markers that say the line carries on past the edge */
 	if (p.overflow) {
 		movecursor(row, term.t_ncol - 1);
 		ttputc('$');
-		ttcol = term.t_ncol;
+		shown_col = term.t_ncol;
 	}
 	if (offset) {
 		movecursor(row, 0);
 		ttputc('$');
-		ttcol = 1;
+		shown_col = 1;
 	}
 }
 
@@ -282,7 +282,7 @@ static void paint_window(struct window *wp, bool check)
 		bool eob = lp == end;
 
 		paint_line(row, eob ? NULL : lp,
-			   row == currow ? lbound : 0, check);
+			   row == cursor_row ? left_column : 0, check);
 		if (!eob)
 			lp = line_next(lp);
 	}
@@ -325,7 +325,7 @@ void update_now(void)
 {
 	struct window *wp = curwp;
 	bool check = (wp->w_bufp->b_mode & MDSPELL) != 0;
-	int oldbound = lbound;
+	int oldbound = left_column;
 
 	if (wp->w_flag)
 		reframe(wp);			/* check the framing */
@@ -339,17 +339,17 @@ void update_now(void)
 		sgarbf = FALSE;
 		mpresf = FALSE;
 		paint_window(wp, check);
-	} else if ((wp->w_flag & ~WFMODE) == WFEDIT && !lbound && !oldbound) {
+	} else if ((wp->w_flag & ~WFMODE) == WFEDIT && !left_column && !oldbound) {
 		/*
 		 * The case that happens on every keystroke: a character
 		 * went into the line the cursor is on, the line count did
 		 * not change, and nothing is scrolled sideways.  No other
 		 * row can have moved, so no other row is worth painting.
 		 */
-		paint_line(currow, wp->w_dotp, 0, check);
+		paint_line(cursor_row, wp->w_dotp, 0, check);
 		if (wp->w_flag & WFMODE)
 			modeline(wp);
-	} else if (!(wp->w_flag & ~(WFMOVE | WFMODE)) && !lbound && !oldbound) {
+	} else if (!(wp->w_flag & ~(WFMOVE | WFMODE)) && !left_column && !oldbound) {
 		/*
 		 * The dot moved and the frame did not have to follow it -
 		 * reframe() sets WFHARD when it does - so no text changed
@@ -357,14 +357,14 @@ void update_now(void)
 		 * mode line can differ, and the cursor has to move.
 		 */
 		modeline(wp);
-	} else if (wp->w_flag || lbound != oldbound)
+	} else if (wp->w_flag || left_column != oldbound)
 		paint_window(wp, check);
 
 	wp->w_flag = 0;
 	wp->w_force = 0;
 
 	/* update the cursor and flush the buffers */
-	movecursor(currow, curcol - lbound);
+	movecursor(cursor_row, cursor_col - left_column);
 	ttflush();
 
 	/* a resize that arrived while we were painting */
@@ -457,14 +457,14 @@ static void updpos(void)
 
 	/* find the current row */
 	lp = curwp->w_linep;
-	currow = 0;
+	cursor_row = 0;
 	while (lp != curwp->w_dotp) {
-		++currow;
+		++cursor_row;
 		lp = line_next(lp);
 	}
 
 	/* find the current column */
-	curcol = 0;
+	cursor_col = 0;
 	i = 0;
 	while (i < curwp->w_doto) {
 		unicode_t c;
@@ -472,7 +472,7 @@ static void updpos(void)
 
 		bytes = utf8_to_unicode(lp->l_text, i, curwp->w_doto, &c);
 		i += bytes;
-		curcol = next_column(curcol, c);
+		cursor_col = next_column(cursor_col, c);
 	}
 
 	/*
@@ -481,12 +481,12 @@ static void updpos(void)
 	 * still fits, and paint_line() drops everything to the left of
 	 * it.
 	 */
-	if (curcol >= term.t_ncol - 1) {
-		int rcursor = ((curcol - term.t_ncol) % term.t_scrsiz)
+	if (cursor_col >= term.t_ncol - 1) {
+		int rcursor = ((cursor_col - term.t_ncol) % term.t_scrsiz)
 			      + term.t_margin;
-		lbound = curcol - rcursor + 1;
+		left_column = cursor_col - rcursor + 1;
 	} else
-		lbound = 0;
+		left_column = 0;
 }
 
 /*
@@ -682,7 +682,7 @@ static void modeline(struct window *wp)
 	for (i = 0; i < term.t_ncol; i++)
 		ttputc(mline[i]);
 	tcaprev(FALSE);
-	ttcol = term.t_ncol;
+	shown_col = term.t_ncol;
 }
 
 void update_modeline(void)
@@ -697,9 +697,9 @@ void update_modeline(void)
  */
 void movecursor(int row, int col)
 {
-	if (row != ttrow || col != ttcol) {
-		ttrow = row;
-		ttcol = col;
+	if (row != shown_row || col != shown_col) {
+		shown_row = row;
+		shown_col = col;
 		tcapmove(row, col);
 	}
 }
@@ -825,7 +825,7 @@ void msg_append(const char *s)
 
 	while ((c = *s++) != 0) {
 		ttputc(c);
-		++ttcol;
+		++shown_col;
 	}
 }
 
