@@ -182,7 +182,7 @@ int isearch(int f, int n)
 		/* Check for special characters first: */
 		/* Most cases here change the search */
 
-		if (expc == metac)		/* Want to quit searching?    */
+		if (expc == meta_char)		/* Want to quit searching?    */
 			return TRUE;		/* Quit searching now         */
 
 		switch (c) {			/* dispatch on the input char */
@@ -451,7 +451,7 @@ int get_char(void)
 	update();				/* Pretty up the screen               */
 	if (cmd_offset >= CMDBUFLEN - 1) {	/* If we're getting too big ...         */
 		msg_printf("? command too long");	/* Complain loudly and bitterly       */
-		return metac;			/* And force a quit                   */
+		return meta_char;			/* And force a quit                   */
 	}
 	c = get1key();				/* Get the next character             */
 	cmd_buff[cmd_offset++] = c;		/* Save the char for next time        */

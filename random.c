@@ -1086,7 +1086,7 @@ int cmd_insert_string(int f, int n)
 	char tstring[NPAT + 1];			/* string to add */
 
 	/* ask for string to insert */
-	status = ask_string_until("String to insert<META>: ", tstring, NPAT, metac);
+	status = ask_string_until("String to insert<META>: ", tstring, NPAT, meta_char);
 	if (status != TRUE)
 		return status;
 
@@ -1113,7 +1113,7 @@ int cmd_overwrite_string(int f, int n)
 	char tstring[NPAT + 1];			/* string to add */
 
 	/* ask for string to insert */
-	status = ask_string_until("String to overwrite<META>: ", tstring, NPAT, metac);
+	status = ask_string_until("String to overwrite<META>: ", tstring, NPAT, meta_char);
 	if (status != TRUE)
 		return status;
 

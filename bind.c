@@ -90,13 +90,13 @@ int cmd_bind_to_key(int f, int n)
 
 		/* reset the appropriate global prefix variable */
 		if (kfunc == cmd_meta_prefix)
-			metac = c;
+			meta_char = c;
 		if (kfunc == cmd_ctlx_prefix)
-			ctlxc = c;
+			ctlx_char = c;
 		if (kfunc == cmd_universal_argument)
-			reptc = c;
+			repeat_key = c;
 		if (kfunc == cmd_abort_command)
-			abortc = c;
+			abort_char = c;
 	}
 
 	/* search the table to see if it exists */

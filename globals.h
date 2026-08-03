@@ -53,12 +53,12 @@ extern int ttrow;				/* Row location of HW cursor */
 extern int ttcol;				/* Column location of HW cursor */
 extern int lbound;				/* leftmost column of current line
 						   being displayed */
-extern int metac;				/* current meta character */
-extern int ctlxc;				/* current control X prefix char */
-extern int reptc;				/* current universal repeat char */
-extern int abortc;				/* current abort command char   */
+extern int meta_char;				/* current meta character */
+extern int ctlx_char;				/* current control-X prefix character */
+extern int repeat_key;				/* current universal repeat key */
+extern int abort_char;				/* current abort character */
 
-extern int quotec;				/* quote char during ask_string() */
+extern int quote_char;				/* quote the next character, during ask_string() */
 extern int tabmask;
 extern struct kill *kbufp;			/* current kill buffer chunk pointer */
 extern struct kill *kbufh;			/* kill buffer header pointer   */

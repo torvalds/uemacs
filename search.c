@@ -599,7 +599,7 @@ static int readpattern(char *prompt, char *apat, int srch)
 	 * Then, if it's the search string, make a reversed pattern.
 	 * *Then*, make the meta-pattern, if we are defined that way.
 	 */
-	if ((status = ask_string_until(tpat, tpat, NPAT, metac)) == TRUE) {
+	if ((status = ask_string_until(tpat, tpat, NPAT, meta_char)) == TRUE) {
 		strcpy(apat, tpat);
 		if (srch) {			/* If we are doing the search string. */
 			/* Reverse string copy, and remember

@@ -36,12 +36,12 @@ int ttrow = HUGE;				/* Row location of HW cursor */
 int ttcol = HUGE;				/* Column location of HW cursor */
 int lbound = 0;					/* leftmost column of current line
 						   being displayed */
-int metac = CONTROL | '[';			/* current meta character */
-int ctlxc = CONTROL | 'X';			/* current control X prefix char */
-int reptc = CONTROL | 'U';			/* current universal repeat char */
-int abortc = CONTROL | 'G';			/* current abort command char   */
+int meta_char = CONTROL | '[';			/* current meta character */
+int ctlx_char = CONTROL | 'X';			/* current control-X prefix character */
+int repeat_key = CONTROL | 'U';		/* current universal repeat key */
+int abort_char = CONTROL | 'G';			/* current abort character */
 
-int quotec = 0x11;				/* quote char during ask_string() */
+int quote_char = 0x11;				/* quote the next character, during ask_string() */
 int tabmask = 0x07;				/* tabulator mask */
 struct kill *kbufp = NULL;			/* current kill buffer chunk pointer    */
 struct kill *kbufh = NULL;			/* kill buffer header pointer           */

@@ -323,13 +323,13 @@ int main(int argc, char **argv)
 
 	/* do ^U repeat argument processing */
 
-	if (c == reptc) {			/* ^U, start argument   */
+	if (c == repeat_key) {			/* ^U, start argument   */
 		f = TRUE;
 		n = 4;				/* with argument of 4 */
 		mflag = 0;			/* that can be discarded. */
 		msg_printf("Arg: 4");
-		while (((c = getcmd()) >= '0' && c <= '9') || c == reptc || c == '-') {
-			if (c == reptc)
+		while (((c = getcmd()) >= '0' && c <= '9') || c == repeat_key || c == '-') {
+			if (c == repeat_key)
 				if ((n > 0) == ((n * 4) > 0))
 					n = n * 4;
 				else

@@ -33,7 +33,7 @@ int ask_yesno(char *prompt)
 		/* get the responce */
 		c = tgetc();
 
-		if (c == ectoc(abortc))		/* Bail out! */
+		if (c == ectoc(abort_char))		/* Bail out! */
 			return ABORT;
 
 		if (c == 'y' || c == 'Y')
@@ -124,7 +124,7 @@ fn_t getname(void)
 			/* and match it off */
 			return fncmatch(&buf[0]);
 
-		} else if (c == ectoc(abortc)) {	/* Bell, abort */
+		} else if (c == ectoc(abort_char)) {	/* Bell, abort */
 			cmd_abort_command(FALSE, 0);
 			ttflush();
 			return NULL;
@@ -330,7 +330,7 @@ int getcmd(void)
 			if (d != '~')		/* eat tilde P.K. */
 				get1key();
 			if (c == 'i') {		/* DO key    P.K. */
-				c = ctlxc;
+				c = ctlx_char;
 				goto proc_ctlxc;
 			} else if (c == 'c')	/* ESC key   P.K. */
 				c = get1key();
@@ -346,7 +346,7 @@ int getcmd(void)
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
 			c = CONTROL | (c + '@');
 		return META | c;
-	} else if (c == metac) {
+	} else if (c == meta_char) {
 		c = get1key();
 		if (c == (CONTROL | '[')) {
 			cmask = META;
@@ -361,7 +361,7 @@ int getcmd(void)
 
  proc_ctlxc:
 	/* process CTLX prefix */
-	if (c == ctlxc) {
+	if (c == ctlx_char) {
 		c = get1key();
 		if (c == (CONTROL | '[')) {
 			cmask = CTLX;
@@ -433,7 +433,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 		/* change from command form back to character form */
 		c = ectoc(c);
 
-		if (c == ectoc(abortc) && quotef == FALSE) {
+		if (c == ectoc(abort_char) && quotef == FALSE) {
 			/* Abort the input? */
 			cmd_abort_command(FALSE, 0);
 			ttflush();
@@ -552,7 +552,7 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			rewind(tmpf);
 			unlink(tmp);
 
-		} else if ((c == quotec || c == 0x16) && quotef == FALSE) {
+		} else if ((c == quote_char || c == 0x16) && quotef == FALSE) {
 			quotef = TRUE;
 		} else {
 			quotef = FALSE;
