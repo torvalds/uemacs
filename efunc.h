@@ -162,13 +162,10 @@ extern void outstring(char *s);
 extern void ostring(char *s);
 
 /* bind.c */
-extern int help(int f, int n);
 extern int deskey(int f, int n);
 extern int bindtokey(int f, int n);
 extern int unbindkey(int f, int n);
 extern int unbindchar(int c);
-extern int desbind(int f, int n);
-extern int apro(int f, int n);
 extern int buildlist(int type, char *mstring);
 extern int strinc(char *source, char *sub);
 extern unsigned int getckey(int mflag);
