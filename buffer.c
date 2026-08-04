@@ -103,6 +103,25 @@ int swbuffer(struct buffer *bp)
 		curwp->w_doto = bp->b_doto;
 		curwp->w_markp = bp->b_markp;
 		curwp->w_marko = bp->b_marko;
+	} else {
+		struct window *wp;
+
+		/*
+		 * Somebody else is already showing this buffer, so start
+		 * where they are looking rather than where the buffer was
+		 * left the last time nobody had it on the screen.
+		 */
+		wp = window_head;
+		while (wp != NULL) {
+			if (wp != curwp && wp->w_bufp == bp) {
+				curwp->w_dotp = wp->w_dotp;
+				curwp->w_doto = wp->w_doto;
+				curwp->w_markp = wp->w_markp;
+				curwp->w_marko = wp->w_marko;
+				break;
+			}
+			wp = wp->w_wndp;
+		}
 	}
 	shown_buffer_changed();
 	return TRUE;

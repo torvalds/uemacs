@@ -151,6 +151,7 @@
  * character.
  */
 struct window {
+	struct window *w_wndp;			/* Next window                  */
 	struct buffer *w_bufp;			/* Buffer displayed in window   */
 	struct line *w_linep;			/* Top line in the window       */
 	struct line *w_dotp;			/* Line containing "."          */

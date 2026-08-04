@@ -145,8 +145,16 @@ int cmd_view_file(int f, int n)
 		return s;
 	s = getfile(fname, FALSE);
 	if (s) {				/* if we succeed, put it in view mode */
+		struct window *wp;
+
 		curwp->w_bufp->b_mode |= MDVIEW;
-		curwp->w_flag = WFMODE;
+
+		/* scan through and update mode lines of all windows */
+		wp = window_head;
+		while (wp != NULL) {
+			wp->w_flag |= WFMODE;
+			wp = wp->w_wndp;
+		}
 	}
 	return s;
 }
@@ -299,14 +307,17 @@ int readin(char *fname, int lockfl)
 	if (bp->b_fname[0])
 		record_fstate(bp, bp->b_fname);
 
-	wp = curwp;
-	if (wp->w_bufp == curbp) {
-		wp->w_linep = line_next(curbp->b_linep);
-		wp->w_dotp = line_next(curbp->b_linep);
-		wp->w_doto = 0;
-		wp->w_markp = NULL;
-		wp->w_marko = 0;
-		wp->w_flag |= WFMODE | WFHARD;
+	wp = window_head;
+	while (wp != NULL) {
+		if (wp->w_bufp == curbp) {
+			wp->w_linep = line_next(curbp->b_linep);
+			wp->w_dotp = line_next(curbp->b_linep);
+			wp->w_doto = 0;
+			wp->w_markp = NULL;
+			wp->w_marko = 0;
+			wp->w_flag |= WFMODE | WFHARD;
+		}
+		wp = wp->w_wndp;
 	}
 	if (s == FIOERR || s == FIOFNF)		/* False if error.      */
 		return FALSE;
@@ -384,9 +395,12 @@ int cmd_write_file(int f, int n)
 		strcpy(curbp->b_fname, fname);
 		record_fstate(curbp, fname);	/* This is our file now */
 		curbp->b_flag &= ~BFCHG;
-		wp = curwp;			/* Update mode line.    */
-		if (wp->w_bufp == curbp)
-			wp->w_flag |= WFMODE;
+		wp = window_head;		/* Update mode lines.   */
+		while (wp != NULL) {
+			if (wp->w_bufp == curbp)
+				wp->w_flag |= WFMODE;
+			wp = wp->w_wndp;
+		}
 	}
 	return s;
 }
