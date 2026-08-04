@@ -361,8 +361,8 @@ int cmd_next_paragraph(int f, int n)
 
 /*
  * Scroll forward by a specified number of lines, or by a full page if no
- * argument. Bound to "C-V". The "2" in the arithmetic on the window size is
- * the overlap; this value is the default overlap value in ITS EMACS. Because
+ * argument. Bound to "C-V". A page is two thirds of the window, so that a
+ * third of what was being read is still on the screen afterwards. Because
  * this zaps the top line in the display window, we have to do a hard update.
  */
 int cmd_next_page(int f, int n)
@@ -370,9 +370,9 @@ int cmd_next_page(int f, int n)
 	struct line *lp;
 
 	if (f == FALSE) {
-		n = term.t_nrow - 3;		/* Default scroll. */
-		if (n <= 0)			/* Forget the overlap. */
-			n = 1;			/* If tiny window. */
+		n = (term.t_nrow - 1) / 3 * 2;	/* Default scroll. */
+		if (n <= 0)			/* Don't blow up if the */
+			n = 1;			/* window is tiny. */
 	} else if (n < 0)
 		return cmd_previous_page(f, -n);
 	else					/* Convert from pages. */
@@ -388,17 +388,16 @@ int cmd_next_page(int f, int n)
 }
 
 /*
- * This command is like "forwpage", but it goes backwards. The "2", like
- * above, is the overlap between the two windows. The value is from the ITS
- * EMACS manual. Bound to "M-V". We do a hard update for exactly the same
- * reason.
+ * This command is like "cmd_next_page", but it goes backwards, and by the
+ * same two thirds of a window. Bound to "M-V". We do a hard update for
+ * exactly the same reason.
  */
 int cmd_previous_page(int f, int n)
 {
 	struct line *lp;
 
 	if (f == FALSE) {
-		n = term.t_nrow - 3;		/* Default scroll. */
+		n = (term.t_nrow - 1) / 3 * 2;	/* Default scroll. */
 		if (n <= 0)			/* Don't blow up if the. */
 			n = 1;			/* Window is tiny. */
 	} else if (n < 0)
