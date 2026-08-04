@@ -217,10 +217,10 @@ int main(int argc, char **argv)
 
 			/* set up a buffer for this file */
 			makename(bname, argv[carg]);
-			unqname(bname);
+			unique_buffer_name(bname);
 
 			/* set this to inactive */
-			bp = bfind(bname, TRUE, 0);
+			bp = find_buffer(bname, TRUE, 0);
 			strcpy(bp->b_fname, argv[carg]);
 			bp->b_active = FALSE;
 			if (firstfile) {
@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 	display_commands = TRUE;				/* P.K. */
 
 	/* if there are any files to read, read the first one! */
-	bp = bfind("main", FALSE, 0);
+	bp = find_buffer("main", FALSE, 0);
 	if (firstfile == FALSE && (global_flags & GFREAD)) {
 		swbuffer(firstbp);
 		zotbuf(bp);
@@ -383,8 +383,8 @@ void edinit(char *bname)
 	struct buffer *bp;
 	struct window *wp;
 
-	bp = bfind(bname, TRUE, 0);		/* First buffer         */
-	list_buffer = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
+	bp = find_buffer(bname, TRUE, 0);		/* First buffer         */
+	list_buffer = find_buffer("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
 	wp = (struct window *)malloc(sizeof(struct window));	/* First window         */
 	if (bp == NULL || wp == NULL || list_buffer == NULL)
 		exit(1);
@@ -525,7 +525,7 @@ int cmd_exit_emacs(int f, int n)
 	int s;
 
 	if (f != FALSE				/* Argument forces it.  */
-	    || anycb() == FALSE			/* All buffers clean.   */
+	    || any_changed_buffers() == FALSE			/* All buffers clean.   */
 	    /* User says it's OK.   */
 	    || (s = ask_yesno("Modified buffers exist. Leave anyway")) == TRUE) {
 		display_close();

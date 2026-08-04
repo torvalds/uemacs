@@ -32,7 +32,7 @@ int cmd_help(int f, int n)
 	char *fname = NULL;
 
 	/* already read in once? */
-	bp = bfind("emacs.hlp", FALSE, BFINVS);
+	bp = find_buffer("emacs.hlp", FALSE, BFINVS);
 	if (bp == NULL) {
 		fname = flook(pathname[1], TRUE);
 		if (fname == NULL) {
@@ -74,8 +74,8 @@ static int build_binding_list(char *match)
 	char outseq[NSTRING];
 	int cpos;
 
-	bp = bfind("*Binding list*", TRUE, BFINVS);
-	if (bp == NULL || bclear(bp) == FALSE) {
+	bp = find_buffer("*Binding list*", TRUE, BFINVS);
+	if (bp == NULL || clear_buffer(bp) == FALSE) {
 		msg_printf("Can not display binding list");
 		return FALSE;
 	}

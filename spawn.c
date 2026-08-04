@@ -175,7 +175,7 @@ int cmd_pipe_command(int f, int n)
 		return s;
 
 	/* if the last one is still around, get it off the screen and go */
-	bp = bfind(bname, FALSE, 0);
+	bp = find_buffer(bname, FALSE, 0);
 	if (bp != NULL) {
 		for (wp = window_head; wp != NULL; wp = wp->w_wndp) {
 			if (wp->w_bufp != bp)

@@ -30,7 +30,7 @@ int cmd_select_buffer(int f, int n)
 
 	if ((s = ask_string("Use buffer: ", bufn, NBUFN)) != TRUE)
 		return s;
-	if ((bp = bfind(bufn, TRUE, 0)) == NULL)
+	if ((bp = find_buffer(bufn, TRUE, 0)) == NULL)
 		return FALSE;
 	return swbuffer(bp);
 }
@@ -156,7 +156,7 @@ int cmd_delete_buffer(int f, int n)
 
 	if ((s = ask_string("Kill buffer: ", bufn, NBUFN)) != TRUE)
 		return s;
-	if ((bp = bfind(bufn, FALSE, 0)) == NULL)	/* Easy if unknown.     */
+	if ((bp = find_buffer(bufn, FALSE, 0)) == NULL)	/* Easy if unknown.     */
 		return TRUE;
 	if (bp->b_flag & BFINVS)		/* Deal with special buffers        */
 		return TRUE;			/* by doing nothing.    */
@@ -176,7 +176,7 @@ int zotbuf(struct buffer *bp)
 		msg_printf("Buffer is being displayed");
 		return FALSE;
 	}
-	if ((s = bclear(bp)) != TRUE)		/* Blow text away.      */
+	if ((s = clear_buffer(bp)) != TRUE)		/* Blow text away.      */
 		return s;
 	free((char *)bp->b_linep);		/* Release header line. */
 	bp1 = NULL;				/* Find the header.     */
@@ -285,7 +285,7 @@ int makelist(int iflag)
 	char line[MAXCOL];
 
 	list_buffer->b_flag &= ~BFCHG;		/* Don't complain!      */
-	if ((s = bclear(list_buffer)) != TRUE)	/* Blow old text away   */
+	if ((s = clear_buffer(list_buffer)) != TRUE)	/* Blow old text away   */
 		return s;
 	strcpy(list_buffer->b_fname, "");
 	if (addline(list_buffer, "ACT MODES        Size Buffer        File") == FALSE
@@ -420,7 +420,7 @@ int cmd_list_buffers(int f, int n)
  * Return FALSE if no buffers
  * have been changed.
  */
-int anycb(void)
+int any_changed_buffers(void)
 {
 	struct buffer *bp;
 
@@ -440,7 +440,7 @@ int anycb(void)
  * and the "cflag" is TRUE, create it. The "bflag" is
  * the settings for the flags in in buffer.
  */
-struct buffer *bfind(char *bname, int cflag, int bflag)
+struct buffer *find_buffer(char *bname, int cflag, int bflag)
 {
 	struct buffer *bp;
 	struct buffer *sb;			/* buffer to insert after */
@@ -506,7 +506,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
  * that are required. Return TRUE if everything
  * looks good.
  */
-int bclear(struct buffer *bp)
+int clear_buffer(struct buffer *bp)
 {
 	struct line *lp;
 	int s;

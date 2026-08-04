@@ -188,7 +188,7 @@ int getfile(char *fname, int lockfl)
 		}
 	}
 	makename(bname, fname);			/* New buffer name.     */
-	while ((bp = bfind(bname, FALSE, 0)) != NULL) {
+	while ((bp = find_buffer(bname, FALSE, 0)) != NULL) {
 		/* old buffer name conflict code */
 		s = ask_string("Buffer name: ", bname, NBUFN);
 		if (s == ABORT)			/* ^G to just quit      */
@@ -198,7 +198,7 @@ int getfile(char *fname, int lockfl)
 			break;
 		}
 	}
-	if (bp == NULL && (bp = bfind(bname, TRUE, 0)) == NULL) {
+	if (bp == NULL && (bp = find_buffer(bname, TRUE, 0)) == NULL) {
 		msg_printf("Cannot create buffer");
 		return FALSE;
 	}
@@ -246,7 +246,7 @@ int readin(char *fname, int lockfl)
 		goto out;
 	}
 	bp = curbp;				/* Cheap.               */
-	if ((s = bclear(bp)) != TRUE)		/* Might be old.        */
+	if ((s = clear_buffer(bp)) != TRUE)		/* Might be old.        */
 		return s;
 	bp->b_flag &= ~(BFINVS | BFCHG);
 	mystrscpy(bp->b_fname, fname, NFILEN);
@@ -353,12 +353,12 @@ void makename(char *bname, char *fname)
  *
  * char *name;		name to check on
  */
-void unqname(char *name)
+void unique_buffer_name(char *name)
 {
 	char *sp;
 
 	/* check to see if it is in the buffer list */
-	while (bfind(name, 0, FALSE) != NULL) {
+	while (find_buffer(name, 0, FALSE) != NULL) {
 
 		/* go to the end of the name */
 		sp = name;

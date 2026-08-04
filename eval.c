@@ -700,7 +700,7 @@ static char *internal_getval(char *token)
 
 		/* grab the right buffer */
 		getval(token + 1, token, -1);
-		bp = bfind(token, FALSE, 0);
+		bp = find_buffer(token, FALSE, 0);
 		if (bp == NULL)
 			return error_text;
 

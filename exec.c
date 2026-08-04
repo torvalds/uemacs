@@ -272,13 +272,13 @@ int cmd_store_macro(int f, int n)
 	bname[8] = '0' + (n % 10);
 
 	/* set up the new macro buffer */
-	if ((bp = bfind(bname, TRUE, BFINVS)) == NULL) {
+	if ((bp = find_buffer(bname, TRUE, BFINVS)) == NULL) {
 		msg_printf("Can not create macro");
 		return FALSE;
 	}
 
 	/* and make sure it is empty */
-	bclear(bp);
+	clear_buffer(bp);
 
 	/* and set the macro store pointers to it */
 	storing_macro = TRUE;
@@ -313,13 +313,13 @@ int cmd_store_procedure(int f, int n)
 	strcat(bname, "*");
 
 	/* set up the new macro buffer */
-	if ((bp = bfind(bname, TRUE, BFINVS)) == NULL) {
+	if ((bp = find_buffer(bname, TRUE, BFINVS)) == NULL) {
 		msg_printf("Can not create macro");
 		return FALSE;
 	}
 
 	/* and make sure it is empty */
-	bclear(bp);
+	clear_buffer(bp);
 
 	/* and set the macro store pointers to it */
 	storing_macro = TRUE;
@@ -348,7 +348,7 @@ int cmd_execute_procedure(int f, int n)
 	strcat(bufn, "*");
 
 	/* find the pointer to that buffer */
-	if ((bp = bfind(bufn, FALSE, 0)) == NULL) {
+	if ((bp = find_buffer(bufn, FALSE, 0)) == NULL) {
 		msg_printf("No such procedure");
 		return FALSE;
 	}
@@ -377,7 +377,7 @@ int cmd_execute_buffer(int f, int n)
 		return status;
 
 	/* find the pointer to that buffer */
-	if ((bp = bfind(bufn, FALSE, 0)) == NULL) {
+	if ((bp = find_buffer(bufn, FALSE, 0)) == NULL) {
 		msg_printf("No such buffer");
 		return FALSE;
 	}
@@ -811,8 +811,8 @@ int dofile(char *fname)
 	char bname[NBUFN];			/* name of buffer */
 
 	makename(bname, fname);			/* derive the name of the buffer */
-	unqname(bname);				/* make sure we don't stomp things */
-	if ((bp = bfind(bname, TRUE, 0)) == NULL)	/* get the needed buffer */
+	unique_buffer_name(bname);				/* make sure we don't stomp things */
+	if ((bp = find_buffer(bname, TRUE, 0)) == NULL)	/* get the needed buffer */
 		return FALSE;
 
 	bp->b_mode = MDVIEW;			/* mark the buffer as read only */
@@ -853,7 +853,7 @@ int cbuf(int f, int n, int bufnum)
 	bufname[8] = '0' + (bufnum % 10);
 
 	/* find the pointer to that buffer */
-	if ((bp = bfind(bufname, FALSE, 0)) == NULL) {
+	if ((bp = find_buffer(bufname, FALSE, 0)) == NULL) {
 		msg_printf("Macro not defined");
 		return FALSE;
 	}

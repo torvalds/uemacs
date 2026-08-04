@@ -205,11 +205,11 @@ extern int makelist(int iflag);
 extern int cmd_list_buffers(int f, int n);
 extern void ltoa(char *buf, int width, long num);
 extern int addline(struct buffer *bp, char *text);
-extern int anycb(void);
-extern int bclear(struct buffer *bp);
+extern int any_changed_buffers(void);
+extern int clear_buffer(struct buffer *bp);
 extern int cmd_unmark_buffer(int f, int n);
 /* Lookup a buffer by name. */
-extern struct buffer *bfind(char *bname, int cflag, int bflag);
+extern struct buffer *find_buffer(char *bname, int cflag, int bflag);
 
 /* file.c */
 extern int cmd_read_file(int f, int n);
@@ -219,7 +219,7 @@ extern int cmd_view_file(int f, int n);
 extern int getfile(char *fname, int lockfl);
 extern int readin(char *fname, int lockfl);
 extern void makename(char *bname, char *fname);
-extern void unqname(char *name);
+extern void unique_buffer_name(char *name);
 extern int cmd_write_file(int f, int n);
 extern int cmd_save_file(int f, int n);
 extern int writeout(char *fn);
