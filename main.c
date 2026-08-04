@@ -406,6 +406,34 @@ void edinit(char *bname)
 }
 
 /*
+ * Save the buffer because it is time to, rather than because anybody
+ * asked.  cmd_save_file() asks before overwriting a file that changed
+ * under us and before writing one that was truncated on the way in, and
+ * a question here would arrive in the middle of somebody typing and eat
+ * the keystroke that answered it.  So the cases it would ask about are
+ * the cases this declines to write, and says why on the message line.
+ */
+static void autosave(void)
+{
+	if (curbp->b_mode & MDVIEW)		/* nothing to save */
+		return;
+	if (curbp->b_fname[0] == 0) {
+		msg_printf("(No file name, not autosaving)");
+		return;
+	}
+	if (curbp->b_flag & BFTRUNC) {
+		msg_printf("(%s was truncated, not autosaving)", curbp->b_fname);
+		return;
+	}
+	if (file_changed(curbp, curbp->b_fname)) {
+		msg_printf("(%s changed on disk, not autosaving)", curbp->b_fname);
+		return;
+	}
+	cmd_update_screen(FALSE, 0);
+	cmd_save_file(FALSE, 0);
+}
+
+/*
  * This is the general command execution routine. It handles the fake binding
  * of all the keys to "self-insert". It also clears out the "thisflag" word,
  * and arranges to move it to the "lastflag", so that the next command can
@@ -465,9 +493,7 @@ int execute(int c, int f, int n)
 		/* check auto-save mode */
 		if (curbp->b_mode & MDASAVE)
 			if (--autosave_countdown == 0) {
-				/* and save the file if needed */
-				cmd_update_screen(FALSE, 0);
-				cmd_save_file(FALSE, 0);
+				autosave();
 				autosave_countdown = autosave_interval;
 			}
 
