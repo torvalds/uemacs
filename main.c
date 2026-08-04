@@ -255,7 +255,7 @@ int main(int argc, char **argv)
 	bp = find_buffer("main", FALSE, 0);
 	if (firstfile == FALSE && (global_flags & GFREAD)) {
 		swbuffer(firstbp);
-		zotbuf(bp);
+		destroy_buffer(bp);
 	} else
 		bp->b_mode |= global_mode;
 
@@ -609,14 +609,14 @@ int cmd_abort_command(int f, int n)
  * tell the user that this command is illegal while we are in
  * VIEW (read-only) mode
  */
-int rdonly(void)
+int readonly_error(void)
 {
 	tcapbeep();
 	msg_printf("(Key illegal in VIEW mode)");
 	return FALSE;
 }
 
-int resterr(void)
+int restricted_error(void)
 {
 	tcapbeep();
 	msg_printf("(That command is RESTRICTED)");

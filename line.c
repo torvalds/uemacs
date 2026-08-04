@@ -171,7 +171,7 @@ static int insert_byte(int n, int c)
 	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	buffer_changed(WFEDIT);
 	lp1 = curwp->w_dotp;			/* Current line         */
 	if (lp1 == curbp->b_linep) {		/* At the end: special  */
@@ -299,7 +299,7 @@ int insert_newline(void)
 	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	buffer_changed(WFHARD);
 	lp1 = curwp->w_dotp;			/* Get the address and  */
 	doto = curwp->w_doto;			/* offset of "."        */
@@ -380,7 +380,7 @@ int delete_bytes(long n, int kflag)
 	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	while (n != 0) {
 		dotp = curwp->w_dotp;
 		doto = curwp->w_doto;
@@ -498,7 +498,7 @@ int delete_newline(void)
 	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	lp1 = curwp->w_dotp;
 	lp2 = lp1->l_fp;
 	if (lp2 == curbp->b_linep) {		/* At the buffer end.   */
@@ -633,7 +633,7 @@ int cmd_yank(int f, int n)
 	struct kill *kp;			/* pointer into kill buffer */
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	/* make sure there is something to yank */

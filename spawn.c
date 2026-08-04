@@ -43,7 +43,7 @@ int cmd_interactive_shell(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	movecursor(term.t_nrow, 0);		/* Seek to last line.   */
 	ttflush();
@@ -92,7 +92,7 @@ int cmd_shell_command(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	if ((s = ask_string("!", line, NLINE)) != TRUE)
 		return s;
@@ -127,7 +127,7 @@ int cmd_execute_program(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	if ((s = ask_string("!", line, NLINE)) != TRUE)
 		return s;
@@ -169,7 +169,7 @@ int cmd_pipe_command(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	if ((s = ask_string("@", line, NLINE)) != TRUE)
 		return s;
@@ -186,7 +186,7 @@ int cmd_pipe_command(int f, int n)
 				cmd_delete_other_windows(FALSE, 1);
 			break;
 		}
-		if (zotbuf(bp) != TRUE)
+		if (destroy_buffer(bp) != TRUE)
 			return FALSE;
 	}
 
@@ -232,10 +232,10 @@ int cmd_filter_buffer(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 
 	/* get the filter name and its args */
 	if ((s = ask_string("#", line, NLINE)) != TRUE)

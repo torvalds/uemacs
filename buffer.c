@@ -160,13 +160,13 @@ int cmd_delete_buffer(int f, int n)
 		return TRUE;
 	if (bp->b_flag & BFINVS)		/* Deal with special buffers        */
 		return TRUE;			/* by doing nothing.    */
-	return zotbuf(bp);
+	return destroy_buffer(bp);
 }
 
 /*
  * kill the buffer pointed to by bp
  */
-int zotbuf(struct buffer *bp)
+int destroy_buffer(struct buffer *bp)
 {
 	struct buffer *bp1;
 	struct buffer *bp2;

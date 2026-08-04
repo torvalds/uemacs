@@ -196,7 +196,7 @@ int cmd_transpose_characters(int f, int n)
 	int cr;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	dotp = curwp->w_dotp;
 	doto = curwp->w_doto;
 	if (doto == line_length(dotp) && --doto < 0)
@@ -223,7 +223,7 @@ int cmd_quote_character(int f, int n)
 	int c;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	c = tgetc();
 	if (n < 0)
 		return FALSE;
@@ -268,7 +268,7 @@ int cmd_detab_line(int f, int n)
 	int inc;				/* increment to next line [sgn(n)] */
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 
 	if (f == FALSE)
 		n = 1;
@@ -311,7 +311,7 @@ int cmd_entab_line(int f, int n)
 	char cchar;				/* current character */
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 
 	if (f == FALSE)
 		n = 1;
@@ -384,7 +384,7 @@ int cmd_trim_line(int f, int n)
 	int inc;				/* increment to next line [sgn(n)] */
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 
 	if (f == FALSE)
 		n = 1;
@@ -424,7 +424,7 @@ int cmd_open_line(int f, int n)
 	int s;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	if (n == 0)
@@ -447,7 +447,7 @@ int cmd_newline(int f, int n)
 	int s;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 
@@ -567,7 +567,7 @@ int insbrace(int n, int c)
 			--count;
 
 		cmd_backward_character(FALSE, 1);
-		if (boundry(curwp->w_dotp, curwp->w_doto, REVERSE))
+		if (at_buffer_end(curwp->w_dotp, curwp->w_doto, REVERSE))
 			break;
 	}
 
@@ -641,7 +641,7 @@ int cmd_delete_blank_lines(int f, int n)
 	long nld;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	lp1 = curwp->w_dotp;
 	while (line_length(lp1) == 0 && (lp2 = line_prev(lp1)) != curbp->b_linep)
 		lp1 = lp2;
@@ -671,7 +671,7 @@ int cmd_newline_and_indent(int f, int n)
 	int i;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	while (n--) {
@@ -700,7 +700,7 @@ int cmd_newline_and_indent(int f, int n)
 int cmd_delete_next_character(int f, int n)
 {
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return cmd_delete_previous_character(f, -n);
 	if (f != FALSE) {			/* Really a kill.       */
@@ -722,7 +722,7 @@ int cmd_delete_previous_character(int f, int n)
 	int s;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return cmd_delete_next_character(f, -n);
 	if (f != FALSE) {			/* Really a kill.       */
@@ -749,7 +749,7 @@ int cmd_kill_to_end_of_line(int f, int n)
 	long chunk;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if ((lastflag & CFKILL) == 0)		/* Clear kill buffer if */
 		kdelete();			/* last wasn't a kill.  */
 	thisflag |= CFKILL;
@@ -990,7 +990,7 @@ int cmd_goto_matching_fence(int f, int n)
 			cmd_forward_character(FALSE, 1);
 		else
 			cmd_backward_character(FALSE, 1);
-		if (boundry(curwp->w_dotp, curwp->w_doto, sdir))
+		if (at_buffer_end(curwp->w_dotp, curwp->w_doto, sdir))
 			break;
 	}
 

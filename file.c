@@ -84,7 +84,7 @@ int cmd_read_file(int f, int n)
 	char fname[NFILEN];
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("Read file: ", fname, NFILEN)) != TRUE)
 		return s;
 	return readin(fname, TRUE);
@@ -103,9 +103,9 @@ int cmd_insert_file(int f, int n)
 	char fname[NFILEN];
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if ((s = ask_string("Insert file: ", fname, NFILEN)) != TRUE)
 		return s;
 	if ((s = insert_file(fname)) != TRUE)
@@ -128,7 +128,7 @@ int cmd_find_file(int f, int n)
 	int s;					/* status return */
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("Find file: ", fname, NFILEN)) != TRUE)
 		return s;
 	return getfile(fname, TRUE);
@@ -140,7 +140,7 @@ int cmd_view_file(int f, int n)
 	int s;					/* status return */
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("View file: ", fname, NFILEN)) != TRUE)
 		return s;
 	s = getfile(fname, FALSE);
@@ -388,7 +388,7 @@ int cmd_write_file(int f, int n)
 	char fname[NFILEN];
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("Write file: ", fname, NFILEN)) != TRUE)
 		return s;
 	if ((s = writeout(fname)) == TRUE) {
@@ -418,7 +418,7 @@ int cmd_save_file(int f, int n)
 	int s;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if ((curbp->b_flag & BFCHG) == 0)	/* Return, no changes.  */
 		return TRUE;
 	if (curbp->b_fname[0] == 0) {		/* Must have a name.    */
@@ -506,7 +506,7 @@ int cmd_change_file_name(int f, int n)
 	char fname[NFILEN];
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("Name: ", fname, NFILEN)) == ABORT)
 		return s;
 	if (s == FALSE)

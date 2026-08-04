@@ -605,7 +605,7 @@ int dobuf(struct buffer *bp)
 				if (if_level == 0) {
 					if (macarg(tkn) != TRUE)
 						goto eexec;
-					if (stol(tkn) == FALSE)
+					if (truth_value(tkn) == FALSE)
 						++if_level;
 				} else
 					++if_level;
@@ -616,7 +616,7 @@ int dobuf(struct buffer *bp)
 				if (if_level == 0) {
 					if (macarg(tkn) != TRUE)
 						goto eexec;
-					if (stol(tkn) == TRUE)
+					if (truth_value(tkn) == TRUE)
 						goto onward;
 				}
 				/* drop down and act just like !BREAK */
@@ -831,7 +831,7 @@ int dofile(char *fname)
 
 	/* if not displayed, remove the now unneeded buffer and exit */
 	if (bp->b_nwnd == 0)
-		zotbuf(bp);
+		destroy_buffer(bp);
 	return TRUE;
 }
 

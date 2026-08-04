@@ -306,7 +306,7 @@ int mcscanner(struct magic *mcpatrn, int direct, int beg_or_end)
 
 	/* Scan each character until we hit the head link record.
 	 */
-	while (!boundry(curline, curoff, direct)) {
+	while (!at_buffer_end(curline, curoff, direct)) {
 		/* Save the current position in case we need to
 		 * restore it on a match, and initialize matchlen to
 		 * zero in case we are doing a search for replacement.
@@ -506,7 +506,7 @@ int scanner(const char *patrn, int direct, int beg_or_end)
 
 	/* Scan each character until we hit the head link record.
 	 */
-	while (!boundry(curline, curoff, direct)) {
+	while (!at_buffer_end(curline, curoff, direct)) {
 		/* Save the current position in case we match
 		 * the search string at this point.
 		 */
@@ -713,7 +713,7 @@ static int replaces(int kind, int f, int n)
 	int lastoff;				/* offset (for 'u' query option) */
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 
 	/* Check for negative repetitions.
 	 */
@@ -980,13 +980,12 @@ int expandp(char *srcstr, char *deststr, int size)
 }
 
 /*
- * boundry -- Return information depending on whether we may search no
- *	further.  Beginning of file and end of file are the obvious
- *	cases, but we may want to add further optional boundry restrictions
- *	in future, a' la VMS EDT.  At the moment, just return TRUE or
- *	FALSE depending on if a boundry is hit (ouch).
+ * at_buffer_end -- Is there anywhere further to search in this
+ *	direction?  The beginning and the end of the buffer are the only
+ *	things that stop a search now; a region to search within, the way
+ *	VMS EDT had, would also stop one here.
  */
-int boundry(struct line *curline, int curoff, int dir)
+int at_buffer_end(struct line *curline, int curoff, int dir)
 {
 	int border;
 

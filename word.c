@@ -120,7 +120,7 @@ int cmd_case_word_upper(int f, int n)
 	int c;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	while (n--) {
@@ -152,7 +152,7 @@ int cmd_case_word_lower(int f, int n)
 	int c;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	while (n--) {
@@ -185,7 +185,7 @@ int cmd_case_word_capitalize(int f, int n)
 	int c;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	while (n--) {
@@ -232,7 +232,7 @@ int cmd_delete_next_word(int f, int n)
 
 	/* don't allow this command if we are in read only mode */
 	if (curbp->b_mode & MDVIEW)
-		return rdonly();
+		return readonly_error();
 
 	/* ignore the command if there is a negative argument */
 	if (n < 0)
@@ -318,7 +318,7 @@ int cmd_delete_previous_word(int f, int n)
 
 	/* don't allow this command if we are in read only mode */
 	if (curbp->b_mode & MDVIEW)
-		return rdonly();
+		return readonly_error();
 
 	/* ignore the command if there is a nonpositive argument */
 	if (n <= 0)
@@ -387,7 +387,7 @@ int cmd_fill_paragraph(int f, int n)
 	int dotflag;				/* was the last char a period?  */
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (fill_column == 0) {			/* no fill column set */
 		msg_printf("No fill column set");
 		return FALSE;
@@ -483,7 +483,7 @@ int cmd_justify_paragraph(int f, int n)
 	int leftmarg;				/* left marginal */
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (fill_column == 0) {			/* no fill column set */
 		msg_printf("No fill column set");
 		return FALSE;
