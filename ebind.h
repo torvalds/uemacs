@@ -44,6 +44,7 @@ struct key_tab keytab[NBINDS] = {
 	{ CONTROL | 'Y', cmd_yank },
 	{ CONTROL | 'Z', cmd_previous_page },
 	{ CONTROL | ']', cmd_meta_prefix },
+	{ CTLX | CONTROL | 'B', cmd_list_buffers },
 	{ CTLX | CONTROL | 'C', cmd_exit_emacs },		/* Hard quit.           */
 	{ CTLX | CONTROL | 'A', cmd_detab_line },
 	{ CTLX | CONTROL | 'D', cmd_save_file },	/* alternative          */

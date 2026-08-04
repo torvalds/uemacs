@@ -233,6 +233,152 @@ int addline(char *text)
 }
 
 /*
+ * Rebuild the text in the *List* buffer: a line per buffer, saying
+ * whether it has been read in, whether it has changed, what modes it
+ * is in, how big it is, and what file it came from.
+ *
+ * int iflag;		list the invisible buffers too
+ */
+int makelist(int iflag)
+{
+	char *cp1;
+	char *cp2;
+	int c;
+	struct buffer *bp;
+	struct line *lp;
+	int s;
+	int i;
+	long nbytes;				/* # of bytes in current buffer */
+	char b[7 + 1];
+	char line[MAXCOL];
+
+	list_buffer->b_flag &= ~BFCHG;		/* Don't complain!      */
+	if ((s = bclear(list_buffer)) != TRUE)	/* Blow old text away   */
+		return s;
+	strcpy(list_buffer->b_fname, "");
+	if (addline("ACT MODES        Size Buffer        File") == FALSE
+	    || addline("--- -----        ---- ------        ----") == FALSE)
+		return FALSE;
+	bp = buffer_head;			/* For all buffers      */
+
+	/* build line to report global mode settings */
+	cp1 = &line[0];
+	*cp1++ = ' ';
+	*cp1++ = ' ';
+	*cp1++ = ' ';
+	*cp1++ = ' ';
+
+	/* output the mode codes */
+	for (i = 0; i < NUMMODES; i++)
+		if (global_mode & (1 << i))
+			*cp1++ = modecode[i];
+		else
+			*cp1++ = '.';
+	strcpy(cp1, "         Global Modes");
+	if (addline(line) == FALSE)
+		return FALSE;
+
+	/* output the list of buffers */
+	while (bp != NULL) {
+		/* skip invisable buffers if iflag is false */
+		if (((bp->b_flag & BFINVS) != 0) && (iflag != TRUE)) {
+			bp = bp->b_bufp;
+			continue;
+		}
+		cp1 = &line[0];			/* Start at left edge   */
+
+		/* output status of ACTIVE flag (has the file been read in? */
+		if (bp->b_active == TRUE)	/* "@" if activated       */
+			*cp1++ = '@';
+		else
+			*cp1++ = ' ';
+
+		/* output status of changed flag */
+		if ((bp->b_flag & BFCHG) != 0)	/* "*" if changed       */
+			*cp1++ = '*';
+		else
+			*cp1++ = ' ';
+
+		/* report if the file is truncated */
+		if ((bp->b_flag & BFTRUNC) != 0)
+			*cp1++ = '#';
+		else
+			*cp1++ = ' ';
+
+		*cp1++ = ' ';			/* space */
+
+		/* output the mode codes */
+		for (i = 0; i < NUMMODES; i++) {
+			if (bp->b_mode & (1 << i))
+				*cp1++ = modecode[i];
+			else
+				*cp1++ = '.';
+		}
+		*cp1++ = ' ';			/* Gap.                 */
+		nbytes = 0L;			/* Count bytes in buf.  */
+		lp = line_next(bp->b_linep);
+		while (lp != bp->b_linep) {
+			nbytes += (long)line_length(lp) + 1L;
+			lp = line_next(lp);
+		}
+		ltoa(b, 7, nbytes);		/* 6 digit buffer size. */
+		cp2 = &b[0];
+		while ((c = *cp2++) != 0)
+			*cp1++ = c;
+		*cp1++ = ' ';			/* Gap.                 */
+		cp2 = &bp->b_bname[0];		/* Buffer name          */
+		while ((c = *cp2++) != 0)
+			*cp1++ = c;
+		cp2 = &bp->b_fname[0];		/* File name            */
+		if (*cp2 != 0) {
+			while (cp1 < &line[3 + 1 + 5 + 1 + 6 + 4 + NBUFN])
+				*cp1++ = ' ';
+			while ((c = *cp2++) != 0) {
+				if (cp1 < &line[MAXCOL - 1])
+					*cp1++ = c;
+			}
+		}
+		*cp1 = 0;			/* Add to the buffer.   */
+		if (addline(line) == FALSE)
+			return FALSE;
+		bp = bp->b_bufp;
+	}
+	return TRUE;				/* All done             */
+}
+
+/*
+ * The list-buffers command: rebuild the listing and go and look at it.
+ * With an argument, the invisible buffers are listed too.
+ *
+ * This used to put the listing in a second window and leave you in the
+ * first.  With one window we simply switch to it, and you come back
+ * with C-x b the way you would from any other buffer.
+ *
+ * The dot has to be put back by hand rather than left to swbuffer():
+ * makelist() has just thrown away every line the window was pointing
+ * at, so if we were already looking at *List* the window's idea of
+ * where it was is a pointer to freed memory.
+ */
+int cmd_list_buffers(int f, int n)
+{
+	int s;
+
+	if ((s = makelist(f)) != TRUE)
+		return s;
+
+	if (curwp->w_bufp != list_buffer && (s = swbuffer(list_buffer)) != TRUE)
+		return s;
+
+	curwp->w_linep = line_next(list_buffer->b_linep);
+	curwp->w_dotp = line_next(list_buffer->b_linep);
+	curwp->w_doto = 0;
+	curwp->w_markp = NULL;
+	curwp->w_marko = 0;
+	curwp->w_flag |= WFMODE | WFHARD;
+	return TRUE;
+}
+
+/*
  * Look through the list of
  * buffers. Return TRUE if there
  * are any changed buffers. Buffers

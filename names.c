@@ -112,6 +112,7 @@ struct name_bind names[] = {
 	{ "insert-string", cmd_insert_string },
 	{ "justify-paragraph", cmd_justify_paragraph },
 	{ "kill-paragraph", cmd_kill_paragraph },
+	{ "list-buffers", cmd_list_buffers },
 	{ "kill-region", cmd_kill_region },
 	{ "kill-to-end-of-line", cmd_kill_to_end_of_line },
 	{ "meta-prefix", cmd_meta_prefix },

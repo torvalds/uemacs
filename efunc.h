@@ -186,6 +186,7 @@ extern int cmd_delete_buffer(int f, int n);
 extern int zotbuf(struct buffer *bp);
 extern int cmd_name_buffer(int f, int n);
 extern int makelist(int iflag);
+extern int cmd_list_buffers(int f, int n);
 extern void ltoa(char *buf, int width, long num);
 extern int addline(char *text);
 extern int anycb(void);
