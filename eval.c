@@ -285,7 +285,7 @@ char *gtenv(char *vname)
 	case EVGFLAGS:
 		return itoa(global_flags);
 	case EVRVAL:
-		return itoa(rval);
+		return itoa(subprocess_status);
 	case EVTAB:
 		return itoa(tabmask + 1);
 	case EVOVERLAP:

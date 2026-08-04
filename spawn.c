@@ -7,12 +7,29 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include "estruct.h"
 #include "globals.h"
 #include "efunc.h"
 
 #include        <signal.h>
+
+/*
+ * Remember what a subprocess exited with, for $rval.  system() hands
+ * back a wait status rather than an exit code, so report it the way a
+ * shell reports $? - the exit status, or 128 plus the signal that
+ * killed it.
+ */
+static void record_status(int status)
+{
+	if (status < 0)				/* system() itself failed */
+		subprocess_status = -1;
+	else if (WIFEXITED(status))
+		subprocess_status = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status))
+		subprocess_status = 128 + WTERMSIG(status);
+}
 
 /*
  * Create a subjob with a copy of the command intrepreter in it. When the
@@ -33,9 +50,9 @@ int cmd_interactive_shell(int f, int n)
 	tcapclose();				/* stty to old settings */
 	tcapkclose();				/* Close "keyboard" */
 	if ((cp = getenv("SHELL")) != NULL && *cp != '\0')
-		system(cp);
+		record_status(system(cp));
 	else
-		system("exec /bin/sh");
+		record_status(system("exec /bin/sh"));
 	screen_garbage = TRUE;
 	sleep(2);
 	tcapopen();
@@ -82,7 +99,7 @@ int cmd_shell_command(int f, int n)
 	ttflush();
 	tcapclose();				/* stty to old modes    */
 	tcapkclose();
-	system(line);
+	record_status(system(line));
 	fflush(stdout);				/* to be sure P.K.      */
 	tcapopen();
 
@@ -118,7 +135,7 @@ int cmd_execute_program(int f, int n)
 	ttflush();
 	tcapclose();				/* stty to old modes    */
 	tcapkclose();
-	system(line);
+	record_status(system(line));
 	fflush(stdout);				/* to be sure P.K.      */
 	tcapopen();
 	msg_append("(End)");			/* Pause.               */
@@ -173,7 +190,7 @@ int cmd_filter_buffer(int f, int n)
 	tcapclose();				/* stty to old modes    */
 	tcapkclose();
 	strcat(line, " <fltinp >fltout");
-	system(line);
+	record_status(system(line));
 	tcapopen();
 	tcapkopen();
 	ttflush();

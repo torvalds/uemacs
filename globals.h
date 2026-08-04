@@ -77,7 +77,7 @@ extern int command_status;			/* last command status, the $status setting */
 extern int saveflag;				/* Flags, saved with the $target var */
 extern char *file_line;				/* buffer file_get_line() reads a line into */
 extern int file_line_size;			/* how big that allocation is, not the length in it */
-extern int rval;				/* return value of a subprocess */
+extern int subprocess_status;			/* what the last shell command exited with, the $rval setting */
 extern int nullflag;
 extern int justflag;				/* justify, don't fill */
 extern int overlap;				/* line overlap in forw/back page */
