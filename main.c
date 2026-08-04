@@ -90,11 +90,11 @@ int spellcheck(const char *word)
 	return Hunspell_spell(hunhandle, word);
 }
 
-static void local_dictionary(Hunhandle *handle, const char *cmd_change_file_name)
+static void local_dictionary(Hunhandle *handle, const char *filename)
 {
 	struct stat st;
-	if (!stat(cmd_change_file_name, &st) && S_ISREG(st.st_mode))
-		Hunspell_add_dic(handle, cmd_change_file_name);
+	if (!stat(filename, &st) && S_ISREG(st.st_mode))
+		Hunspell_add_dic(handle, filename);
 }
 
 int main(int argc, char **argv)
