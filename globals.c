@@ -20,7 +20,7 @@ char *mode2name[] = {				/* name of modes                */
 	"Magic", "Asave", "utf-8"
 };
 
-char modecode[] = "WCSEVOMYAU";			/* letters to represent modes   */
+char modecode[] = "WCSEVOMAU";			/* letters to represent modes   */
 int global_mode = 0;				/* default modes for new buffers, the $gmode setting */
 int global_flags = GFREAD;			/* global control flags, the $gflags setting */
 int autosave_interval = 256;			/* changes between autosaves, the $asave setting */
