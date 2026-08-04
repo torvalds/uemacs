@@ -397,6 +397,8 @@ void edinit(char *bname)
 	wp->w_doto = 0;
 	wp->w_markp = NULL;
 	wp->w_marko = 0;
+	wp->w_toprow = 0;
+	wp->w_ntrows = term.t_nrow - 1;		/* "-1" for the mode line */
 	wp->w_force = 0;
 	wp->w_flag = WFMODE | WFHARD;		/* Full.                */
 }

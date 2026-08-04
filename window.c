@@ -69,6 +69,8 @@ int cmd_change_screen_size(int f, int n)
 
 	/* Update the current window as needed */
 	wp = curwp;
+	wp->w_toprow = 0;
+	wp->w_ntrows = n - 2;			/* less the mode line */
 	wp->w_flag |= WFHARD | WFMODE;
 
 	/* screen is garbage */

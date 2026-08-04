@@ -288,7 +288,8 @@ static void paint_window(struct window *wp, bool check)
 	struct line *end = wp->w_bufp->b_linep;
 	struct line *lp = wp->w_linep;
 
-	for (int row = 0; row < term.t_nrow - 1; row++) {
+	for (int i = 0; i < wp->w_ntrows; i++) {
+		int row = wp->w_toprow + i;
 		bool eob = lp == end;
 
 		paint_line(row, eob ? NULL : lp,
@@ -404,11 +405,11 @@ static int reframe(struct window *wp)
 			i = -1;
 			lp = lp0;
 		}
-		for (; i < term.t_nrow; i++) {
+		for (; i <= wp->w_ntrows; i++) {
 			/* if the line is in the window, no reframe */
 			if (lp == wp->w_dotp) {
 				/* if not _quite_ in, we'll reframe gently */
-				if (i < 0 || i == term.t_nrow - 1) {
+				if (i < 0 || i == wp->w_ntrows) {
 					break;
 				}
 				return TRUE;
@@ -424,7 +425,7 @@ static int reframe(struct window *wp)
 	}
 	if (i == -1) {				/* we're just above the window */
 		i = scroll_lines;		/* put dot at first line */
-	} else if (i == term.t_nrow - 1) {	/* we're just below the window */
+	} else if (i == wp->w_ntrows) {		/* we're just below the window */
 		i = -scroll_lines;		/* put dot at last line */
 	} else					/* put dot where requested */
 		i = wp->w_force;		/* (is 0, unless reposition() was called) */
@@ -433,14 +434,14 @@ static int reframe(struct window *wp)
 
 	/* how far back to reframe? */
 	if (i > 0) {				/* only one screen worth of lines max */
-		if (--i >= term.t_nrow - 1)
-			i = term.t_nrow - 2;
+		if (--i >= wp->w_ntrows)
+			i = wp->w_ntrows - 1;
 	} else if (i < 0) {			/* negative update???? */
-		i += term.t_nrow - 1;
+		i += wp->w_ntrows;
 		if (i < 0)
 			i = 0;
 	} else
-		i = (term.t_nrow - 1) / 2;
+		i = wp->w_ntrows / 2;
 
 	/* backup to new line at top of window */
 	lp = wp->w_dotp;
@@ -466,9 +467,9 @@ static void updpos(void)
 	struct line *lp;
 	int i;
 
-	/* find the current row */
+	/* find the current row, counting from the top of the screen */
 	lp = curwp->w_linep;
-	cursor_row = 0;
+	cursor_row = curwp->w_toprow;
 	while (lp != curwp->w_dotp) {
 		++cursor_row;
 		lp = line_next(lp);
@@ -634,7 +635,7 @@ static void modeline(struct window *wp)
 
 	{					/* determine if top line, bottom line, or both are visible */
 		struct line *lp = wp->w_linep;
-		int rows = term.t_nrow - 1;
+		int rows = wp->w_ntrows;
 		char *msg = NULL;
 
 		n -= 7;				/* strlen(" top ") plus a couple */
@@ -695,7 +696,7 @@ static void modeline(struct window *wp)
 	shown_modeline_len = term.t_ncol;
 
 	/* and paint it, in reverse video across the full width */
-	movecursor(term.t_nrow - 1, 0);
+	movecursor(wp->w_toprow + wp->w_ntrows, 0);
 	tcaprev(TRUE);
 	for (i = 0; i < term.t_ncol; i++)
 		ttputc(mline[i]);

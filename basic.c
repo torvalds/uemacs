@@ -370,13 +370,13 @@ int cmd_next_page(int f, int n)
 	struct line *lp;
 
 	if (f == FALSE) {
-		n = (term.t_nrow - 1) / 3 * 2;	/* Default scroll. */
+		n = curwp->w_ntrows / 3 * 2;	/* Default scroll. */
 		if (n <= 0)			/* Don't blow up if the */
 			n = 1;			/* window is tiny. */
 	} else if (n < 0)
 		return cmd_previous_page(f, -n);
 	else					/* Convert from pages. */
-		n *= term.t_nrow - 1;		/* To lines. */
+		n *= curwp->w_ntrows;		/* To lines. */
 	lp = curwp->w_linep;
 	while (n-- && lp != curbp->b_linep)
 		lp = line_next(lp);
@@ -397,13 +397,13 @@ int cmd_previous_page(int f, int n)
 	struct line *lp;
 
 	if (f == FALSE) {
-		n = (term.t_nrow - 1) / 3 * 2;	/* Default scroll. */
+		n = curwp->w_ntrows / 3 * 2;	/* Default scroll. */
 		if (n <= 0)			/* Don't blow up if the. */
 			n = 1;			/* Window is tiny. */
 	} else if (n < 0)
 		return cmd_next_page(f, -n);
 	else					/* Convert from pages. */
-		n *= term.t_nrow - 1;		/* To lines. */
+		n *= curwp->w_ntrows;		/* To lines. */
 
 	lp = curwp->w_linep;
 
