@@ -185,7 +185,7 @@ extern int unbindchar(int c);
 extern int strinc(char *source, char *sub);
 extern unsigned int getckey(int mflag);
 extern int startup(char *sfname);
-extern char *flook(char *fname, int hflag);
+extern char *lookup_file(char *fname, int try_home);
 extern void cmdstr(int c, char *seq);
 extern fn_t getbind(int c);
 extern char *getfname(fn_t);
@@ -224,7 +224,7 @@ extern int cmd_write_file(int f, int n);
 extern int cmd_save_file(int f, int n);
 extern int writeout(char *fn);
 extern int cmd_change_file_name(int f, int n);
-extern int ifile(char *fname);
+extern int insert_file(char *fname);
 extern int file_changed(struct buffer *bp, char *fn);
 
 /* fileio.c */

@@ -108,7 +108,7 @@ int cmd_insert_file(int f, int n)
 		return rdonly();		/* we are in read only mode     */
 	if ((s = ask_string("Insert file: ", fname, NFILEN)) != TRUE)
 		return s;
-	if ((s = ifile(fname)) != TRUE)
+	if ((s = insert_file(fname)) != TRUE)
 		return s;
 	return cmd_redraw_display(TRUE, -1);
 }
@@ -523,7 +523,7 @@ int cmd_change_file_name(int f, int n)
  * buffer, Called by insert file command. Return the final
  * status of the read.
  */
-int ifile(char *fname)
+int insert_file(char *fname)
 {
 	struct line *lp0;
 	struct line *lp1;

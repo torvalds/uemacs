@@ -20,9 +20,9 @@
  * Show the help file, in a window of its own and in view mode.  Bound to
  * "M-?".
  *
- * The lookup asks flook() to try $HOME and $HOME/lib, which is the whole
+ * The lookup asks lookup_file() to try $HOME and $HOME/lib, which is the whole
  * reason this works at all: the Makefile installs emacs.hlp into
- * $(HOME)/lib, and that is the one place the old FALSE here told flook
+ * $(HOME)/lib, and that is the one place the old FALSE here told lookup_file
  * not to look.  Unless you happened to be sitting in a directory with a
  * copy of the file in it, help had nothing to show.
  */
@@ -34,7 +34,7 @@ int cmd_help(int f, int n)
 	/* already read in once? */
 	bp = find_buffer("emacs.hlp", FALSE, BFINVS);
 	if (bp == NULL) {
-		fname = flook(pathname[1], TRUE);
+		fname = lookup_file(pathname[1], TRUE);
 		if (fname == NULL) {
 			msg_printf("(Help file is not online)");
 			return FALSE;
@@ -401,9 +401,9 @@ int startup(char *sfname)
 
 	/* look up the startup file */
 	if (*sfname != 0)
-		fname = flook(sfname, TRUE);
+		fname = lookup_file(sfname, TRUE);
 	else
-		fname = flook(pathname[0], TRUE);
+		fname = lookup_file(pathname[0], TRUE);
 
 	/* if it isn't around, don't sweat it */
 	if (fname == NULL)
@@ -419,9 +419,9 @@ int startup(char *sfname)
  * asked and possible
  *
  * char *fname;		base file name to search for
- * int hflag;		Look in the HOME environment variable first?
+ * int try_home;		Look in the HOME environment variable first?
  */
-char *flook(char *fname, int hflag)
+char *lookup_file(char *fname, int try_home)
 {
 	char *home;				/* path to home directory */
 	char *path;				/* environmental PATH variable */
@@ -429,7 +429,7 @@ char *flook(char *fname, int hflag)
 	int i;					/* index */
 	static char fspec[NSTRING];		/* full path spec to search */
 
-	if (hflag) {
+	if (try_home) {
 		home = getenv("HOME");
 		if (home != NULL) {
 			snprintf(fspec, sizeof(fspec), "%s/%s", home, fname);

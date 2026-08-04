@@ -147,7 +147,7 @@ char *eval_function(char *fname)
 	case UFEXIST:
 		return ltos(file_exists(arg1));
 	case UFFIND:
-		tsp = flook(arg1, TRUE);
+		tsp = lookup_file(arg1, TRUE);
 		return tsp == NULL ? "" : tsp;
 	case UFBAND:
 		return itoa(atoi(arg1) & atoi(arg2));

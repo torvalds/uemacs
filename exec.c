@@ -782,7 +782,7 @@ int cmd_execute_file(int f, int n)
 		return status;
 
 	/* look up the path for the file */
-	fspec = flook(fname, FALSE);		/* used to by TRUE, P.K. */
+	fspec = lookup_file(fname, FALSE);		/* used to by TRUE, P.K. */
 
 	/* if it isn't around */
 	if (fspec == NULL)
