@@ -39,14 +39,20 @@ static void paint_window(struct window *wp, bool check);
 static void modeline(struct window *wp);
 
 /*
- * What the mode line says at the moment.  The dot moving is the commonest
- * thing that happens and almost never changes it, so this is worth knowing:
- * it is the whole of the screen image the display keeps, one row of it.
- * A length of -1 means the screen was cleared under us and nothing is known
- * about that row any more.
+ * What the mode line says at the moment, and which row it is on.  The dot
+ * moving is the commonest thing that happens and almost never changes it,
+ * so this is worth knowing: it is the whole of the screen image the display
+ * keeps, one row of it.  A row of -1 means the screen was cleared under us
+ * and nothing is known about any of it any more.
+ *
+ * With several windows there are several mode lines and this only holds the
+ * one painted last, so the saving goes to whichever window is being worked
+ * in and the others simply repaint.  Remembering all of them would be a
+ * screen image again, for a case that does not repeat the way a single
+ * window's mode line does.
  */
 static unsigned char shown_modeline[MAXCOL];
-static int shown_modeline_len = -1;
+static int shown_modeline_row = -1;
 
 /*
  * Take the terminal over for editing.  There is nothing to allocate:
@@ -292,8 +298,15 @@ static void paint_window(struct window *wp, bool check)
 		int row = wp->w_toprow + i;
 		bool eob = lp == end;
 
+		/*
+		 * Only the window the cursor is in can be scrolled
+		 * sideways: updpos() works left_column out from the
+		 * current dot, and cursor_row is a screen row that means
+		 * nothing anywhere else.
+		 */
 		paint_line(row, eob ? NULL : lp,
-			   row == cursor_row ? left_column : 0, check);
+			   wp == curwp && row == cursor_row ? left_column : 0,
+			   check);
 		if (!eob)
 			lp = line_next(lp);
 	}
@@ -332,14 +345,52 @@ void update(void)
  * window flags say the change cannot have reached further than the line
  * the cursor is on.
  */
+static void update_window(struct window *wp, int oldbound)
+{
+	bool check = (wp->w_bufp->b_mode & MDSPELL) != 0;
+	/*
+	 * Sideways scrolling is the current window's business and nobody
+	 * else's: updpos() works left_column out from the current dot.
+	 */
+	int bound = wp == curwp ? left_column : 0;
+	int oldb = wp == curwp ? oldbound : 0;
+
+	if (wp == curwp && (wp->w_flag & ~WFMODE) == WFEDIT
+	    && !bound && !oldb) {
+		/*
+		 * The case that happens on every keystroke: a character
+		 * went into the line the cursor is on, the line count did
+		 * not change, and nothing is scrolled sideways.  No other
+		 * row can have moved, so no other row is worth painting.
+		 *
+		 * Only ever the current window: buffer_changed() promotes
+		 * the flag to WFHARD as soon as a second window is showing
+		 * the buffer, exactly so that nobody has to paint one
+		 * window's edit at another window's dot.
+		 */
+		paint_line(cursor_row, wp->w_dotp, 0, check);
+		if (wp->w_flag & WFMODE)
+			modeline(wp);
+	} else if (!(wp->w_flag & ~(WFMOVE | WFMODE)) && !bound && !oldb) {
+		/*
+		 * The dot moved and the frame did not have to follow it -
+		 * reframe() sets WFHARD when it does - so no text changed
+		 * and every row still says what it already said.  Only the
+		 * mode line can differ, and the cursor has to move.
+		 */
+		modeline(wp);
+	} else if (wp->w_flag || bound != oldb)
+		paint_window(wp, check);
+}
+
 void update_now(void)
 {
-	struct window *wp = curwp;
-	bool check = (wp->w_bufp->b_mode & MDSPELL) != 0;
+	struct window *wp;
 	int oldbound = left_column;
 
-	if (wp->w_flag)
-		reframe(wp);			/* check the framing */
+	for (wp = window_head; wp != NULL; wp = wp->w_wndp)
+		if (wp->w_flag)
+			reframe(wp);		/* check the framing */
 
 	updpos();				/* currow, curcol and lbound */
 
@@ -349,31 +400,25 @@ void update_now(void)
 		tcapeeop();
 		screen_garbage = FALSE;
 		message_present = FALSE;
-		shown_modeline_len = -1;	/* the mode line went with it */
-		paint_window(wp, check);
-	} else if ((wp->w_flag & ~WFMODE) == WFEDIT && !left_column && !oldbound) {
+		shown_modeline_row = -1;	/* the mode line went with it */
+		for (wp = window_head; wp != NULL; wp = wp->w_wndp)
+			paint_window(wp, (wp->w_bufp->b_mode & MDSPELL) != 0);
+	} else {
 		/*
-		 * The case that happens on every keystroke: a character
-		 * went into the line the cursor is on, the line count did
-		 * not change, and nothing is scrolled sideways.  No other
-		 * row can have moved, so no other row is worth painting.
+		 * The current window is looked at whether it says anything
+		 * changed or not, because its mode line carries where the
+		 * dot is; the others are only worth the visit when they
+		 * have asked for one.
 		 */
-		paint_line(cursor_row, wp->w_dotp, 0, check);
-		if (wp->w_flag & WFMODE)
-			modeline(wp);
-	} else if (!(wp->w_flag & ~(WFMOVE | WFMODE)) && !left_column && !oldbound) {
-		/*
-		 * The dot moved and the frame did not have to follow it -
-		 * reframe() sets WFHARD when it does - so no text changed
-		 * and every row still says what it already said.  Only the
-		 * mode line can differ, and the cursor has to move.
-		 */
-		modeline(wp);
-	} else if (wp->w_flag || left_column != oldbound)
-		paint_window(wp, check);
+		for (wp = window_head; wp != NULL; wp = wp->w_wndp)
+			if (wp == curwp || wp->w_flag)
+				update_window(wp, oldbound);
+	}
 
-	wp->w_flag = 0;
-	wp->w_force = 0;
+	for (wp = window_head; wp != NULL; wp = wp->w_wndp) {
+		wp->w_flag = 0;
+		wp->w_force = 0;
+	}
 
 	/* update the cursor and flush the buffers */
 	movecursor(cursor_row, cursor_col - left_column);
@@ -688,15 +733,17 @@ static void modeline(struct window *wp)
 			modeline_putc(mline, &n, c);
 	}
 
+	i = wp->w_toprow + wp->w_ntrows;
+
 	/* Already up there, and 145 bytes not to say it again. */
-	if (shown_modeline_len == term.t_ncol &&
+	if (shown_modeline_row == i &&
 	    memcmp(shown_modeline, mline, term.t_ncol) == 0)
 		return;
 	memcpy(shown_modeline, mline, term.t_ncol);
-	shown_modeline_len = term.t_ncol;
+	shown_modeline_row = i;
 
 	/* and paint it, in reverse video across the full width */
-	movecursor(wp->w_toprow + wp->w_ntrows, 0);
+	movecursor(i, 0);
 	tcaprev(TRUE);
 	for (i = 0; i < term.t_ncol; i++)
 		ttputc(mline[i]);
