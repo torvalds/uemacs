@@ -193,7 +193,7 @@ int main(int argc, char **argv)
 			case 's':		/* -s for initial search string */
 			case 'S':
 				searchflag = TRUE;
-				strncpy(pat, &argv[carg][2], NPAT);
+				strncpy(search_pattern, &argv[carg][2], NPAT);
 				break;
 			case 'v':		/* -v for View File */
 			case 'V':

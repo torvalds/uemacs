@@ -78,9 +78,9 @@ struct buffer *curbp;				/* Current buffer               */
 struct buffer *bheadp;				/* Head of list of buffers      */
 struct buffer *blistp;				/* Buffer for C-X C-B           */
 
-char pat[NPAT];					/* Search pattern               */
-char tap[NPAT];					/* Reversed pattern array.      */
-char rpat[NPAT];				/* replacement pattern          */
+char search_pattern[NPAT];			/* what to search for */
+char reversed_pattern[NPAT];			/* the same thing backwards, for reverse search */
+char replace_pattern[NPAT];			/* what to replace it with */
 
 /* The variable matchlen holds the length of the matched
  * string - used by the replace functions.

@@ -73,9 +73,9 @@
  */
 static short int magical;
 static short int rmagical;
-static struct magic mcpat[NPAT];		/* The magic pattern. */
-static struct magic tapcm[NPAT];		/* The reversed magic patterni. */
-static struct magic_replacement rmcpat[NPAT];	/* The replacement magic array. */
+static struct magic magic_pattern[NPAT];			/* the pattern, compiled for MAGIC mode */
+static struct magic reversed_magic_pattern[NPAT];		/* the same thing backwards, for reverse search */
+static struct magic_replacement magic_replace_pattern[NPAT];	/* the replacement, compiled the same way */
 
 static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *pcwoff);
 static int readpattern(char *prompt, char *apat, int srch);
@@ -112,12 +112,12 @@ int cmd_search_forward(int f, int n)
 	 * n is positive (n == 0 will go through once, which
 	 * is just fine).
 	 */
-	if ((status = readpattern("Search", &pat[0], TRUE)) == TRUE) {
+	if ((status = readpattern("Search", &search_pattern[0], TRUE)) == TRUE) {
 		do {
 			if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
-				status = mcscanner(&mcpat[0], FORWARD, PTEND);
+				status = mcscanner(&magic_pattern[0], FORWARD, PTEND);
 			else
-				status = scanner(&pat[0], FORWARD, PTEND);
+				status = scanner(&search_pattern[0], FORWARD, PTEND);
 		} while ((--n > 0) && status);
 
 		/* Save away the match, or complain
@@ -148,11 +148,11 @@ int cmd_hunt_forward(int f, int n)
 	/* Make sure a pattern exists, or that we didn't switch
 	 * into MAGIC mode until after we entered the pattern.
 	 */
-	if (pat[0] == '\0') {
+	if (search_pattern[0] == '\0') {
 		msg_printf("No pattern set");
 		return FALSE;
 	}
-	if ((curwp->w_bufp->b_mode & MDMAGIC) != 0 && mcpat[0].mc_type == MCNIL) {
+	if ((curwp->w_bufp->b_mode & MDMAGIC) != 0 && magic_pattern[0].mc_type == MCNIL) {
 		if (!mcstr())
 			return FALSE;
 	}
@@ -163,9 +163,9 @@ int cmd_hunt_forward(int f, int n)
 	 */
 	do {
 		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
-			status = mcscanner(&mcpat[0], FORWARD, PTEND);
+			status = mcscanner(&magic_pattern[0], FORWARD, PTEND);
 		else
-			status = scanner(&pat[0], FORWARD, PTEND);
+			status = scanner(&search_pattern[0], FORWARD, PTEND);
 	} while ((--n > 0) && status);
 
 	/* Save away the match, or complain
@@ -203,12 +203,12 @@ int cmd_search_reverse(int f, int n)
 	 * n is positive (n == 0 will go through once, which
 	 * is just fine).
 	 */
-	if ((status = readpattern("Reverse search", &pat[0], TRUE)) == TRUE) {
+	if ((status = readpattern("Reverse search", &search_pattern[0], TRUE)) == TRUE) {
 		do {
 			if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
-				status = mcscanner(&tapcm[0], REVERSE, PTBEG);
+				status = mcscanner(&reversed_magic_pattern[0], REVERSE, PTBEG);
 			else
-				status = scanner(&tap[0], REVERSE, PTBEG);
+				status = scanner(&reversed_pattern[0], REVERSE, PTBEG);
 		} while ((--n > 0) && status);
 
 		/* Save away the match, or complain
@@ -240,12 +240,12 @@ int cmd_hunt_backward(int f, int n)
 	/* Make sure a pattern exists, or that we didn't switch
 	 * into MAGIC mode until after we entered the pattern.
 	 */
-	if (tap[0] == '\0') {
+	if (reversed_pattern[0] == '\0') {
 		msg_printf("No pattern set");
 		return FALSE;
 	}
 
-	if ((curwp->w_bufp->b_mode & MDMAGIC) != 0 && tapcm[0].mc_type == MCNIL) {
+	if ((curwp->w_bufp->b_mode & MDMAGIC) != 0 && reversed_magic_pattern[0].mc_type == MCNIL) {
 		if (!mcstr())
 			return FALSE;
 	}
@@ -256,9 +256,9 @@ int cmd_hunt_backward(int f, int n)
 	 */
 	do {
 		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0)
-			status = mcscanner(&tapcm[0], REVERSE, PTBEG);
+			status = mcscanner(&reversed_magic_pattern[0], REVERSE, PTBEG);
 		else
-			status = scanner(&tap[0], REVERSE, PTBEG);
+			status = scanner(&reversed_pattern[0], REVERSE, PTBEG);
 	} while ((--n > 0) && status);
 
 	/* Save away the match, or complain
@@ -605,7 +605,7 @@ static int readpattern(char *prompt, char *apat, int srch)
 			/* Reverse string copy, and remember
 			 * the length for substitution purposes.
 			 */
-			rvstrcpy(tap, apat);
+			rvstrcpy(reversed_pattern, apat);
 			mlenold = matchlen = strlen(apat);
 		}
 		/* Only make the meta-pattern if in magic mode,
@@ -722,32 +722,32 @@ static int replaces(int kind, int f, int n)
 
 	/* Ask the user for the text of a pattern.
 	 */
-	if ((status = readpattern((kind == FALSE ? "Replace" : "Query replace"), &pat[0], TRUE))
+	if ((status = readpattern((kind == FALSE ? "Replace" : "Query replace"), &search_pattern[0], TRUE))
 	    != TRUE)
 		return status;
 
 	/* Ask for the replacement string.
 	 */
-	if ((status = readpattern("with", &rpat[0], FALSE)) == ABORT)
+	if ((status = readpattern("with", &replace_pattern[0], FALSE)) == ABORT)
 		return status;
 
 	/* Find the length of the replacement string.
 	 */
-	rlength = strlen(&rpat[0]);
+	rlength = strlen(&replace_pattern[0]);
 
 	/* Set up flags so we can make sure not to do a recursive
 	 * replace on the last line.
 	 */
-	nlflag = (pat[matchlen - 1] == '\n');
+	nlflag = (search_pattern[matchlen - 1] == '\n');
 	nlrepl = FALSE;
 
 	if (kind) {
 		/* Build query replace question string.
 		 */
 		mystrscpy(tpat, "Replace '", sizeof(tpat));
-		expandp(&pat[0], tpat + strlen(tpat), NPAT / 3);
+		expandp(&search_pattern[0], tpat + strlen(tpat), NPAT / 3);
 		mystrscat(tpat, "' with '", sizeof(tpat));
-		expandp(&rpat[0], tpat + strlen(tpat), NPAT / 3);
+		expandp(&replace_pattern[0], tpat + strlen(tpat), NPAT / 3);
 		mystrscat(tpat, "'? ", sizeof(tpat));
 
 		/* Initialize last replaced pointers.
@@ -771,9 +771,9 @@ static int replaces(int kind, int f, int n)
 		 * the matched string.
 		 */
 		if ((magical && curwp->w_bufp->b_mode & MDMAGIC) != 0) {
-			if (!mcscanner(&mcpat[0], FORWARD, PTBEG))
+			if (!mcscanner(&magic_pattern[0], FORWARD, PTBEG))
 				break;
-		} else if (!scanner(&pat[0], FORWARD, PTBEG))
+		} else if (!scanner(&search_pattern[0], FORWARD, PTBEG))
 			break;			/* all done */
 
 		++nummatch;			/* Increment # of matches */
@@ -872,7 +872,7 @@ static int replaces(int kind, int f, int n)
 		 * Delete the sucker, and insert its
 		 * replacement.
 		 */
-		status = delins(matchlen, &rpat[0], TRUE);
+		status = delins(matchlen, &replace_pattern[0], TRUE);
 		if (status != TRUE)
 			return status;
 
@@ -909,7 +909,7 @@ int delins(int dlength, char *instr, int use_meta)
 	if ((status = delete_bytes((long)dlength, FALSE)) != TRUE)
 		msg_printf("%%ERROR while deleting");
 	else if ((rmagical && use_meta) && (curwp->w_bufp->b_mode & MDMAGIC) != 0) {
-		rmcptr = &rmcpat[0];
+		rmcptr = &magic_replace_pattern[0];
 		while (rmcptr->mc_type != MCNIL && status == TRUE) {
 			if (rmcptr->mc_type == LITCHAR)
 				status = insert_string(rmcptr->rstr);
@@ -1068,8 +1068,8 @@ static int mcstr(void)
 
 	magical = FALSE;
 	mj = 0;
-	mcptr = &mcpat[0];
-	patptr = &pat[0];
+	mcptr = &magic_pattern[0];
+	patptr = &search_pattern[0];
 
 	while ((pchr = *patptr) && status) {
 		switch (pchr) {
@@ -1144,7 +1144,7 @@ static int mcstr(void)
 	 * to free any other bitmaps.
 	 */
 	if (status) {
-		rtpcm = &tapcm[0];
+		rtpcm = &reversed_magic_pattern[0];
 		while (--mj >= 0) {
 			*rtpcm++ = *--mcptr;
 		}
@@ -1170,8 +1170,8 @@ static int rmcstr(void)
 	int status = TRUE;
 	int mj;
 
-	patptr = &rpat[0];
-	rmcptr = &rmcpat[0];
+	patptr = &replace_pattern[0];
+	rmcptr = &magic_replace_pattern[0];
 	mj = 0;
 	rmagical = FALSE;
 
@@ -1256,14 +1256,14 @@ void mcclear(void)
 {
 	struct magic *mcptr;
 
-	mcptr = &mcpat[0];
+	mcptr = &magic_pattern[0];
 
 	while (mcptr->mc_type != MCNIL) {
 		if ((mcptr->mc_type & MASKCL) == CCL || (mcptr->mc_type & MASKCL) == NCCL)
 			free(mcptr->u.cclmap);
 		mcptr++;
 	}
-	mcpat[0].mc_type = tapcm[0].mc_type = MCNIL;
+	magic_pattern[0].mc_type = reversed_magic_pattern[0].mc_type = MCNIL;
 }
 
 /*
@@ -1273,7 +1273,7 @@ void rmcclear(void)
 {
 	struct magic_replacement *rmcptr;
 
-	rmcptr = &rmcpat[0];
+	rmcptr = &magic_replace_pattern[0];
 
 	while (rmcptr->mc_type != MCNIL) {
 		if (rmcptr->mc_type == LITCHAR)
@@ -1281,7 +1281,7 @@ void rmcclear(void)
 		rmcptr++;
 	}
 
-	rmcpat[0].mc_type = MCNIL;
+	magic_replace_pattern[0].mc_type = MCNIL;
 }
 
 /*

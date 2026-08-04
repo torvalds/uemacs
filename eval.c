@@ -263,9 +263,9 @@ char *gtenv(char *vname)
 		saveflag = lastflag;
 		return itoa(curgoal);
 	case EVSEARCH:
-		return pat;
+		return search_pattern;
 	case EVREPLACE:
-		return rpat;
+		return replace_pattern;
 	case EVMATCH:
 		return (patmatch == NULL) ? "" : patmatch;
 	case EVKILL:
@@ -535,12 +535,12 @@ int svar(struct variable_description *var, char *value)
 			thisflag = saveflag;
 			break;
 		case EVSEARCH:
-			strcpy(pat, value);
-			rvstrcpy(tap, pat);
+			strcpy(search_pattern, value);
+			rvstrcpy(reversed_pattern, search_pattern);
 			mcclear();
 			break;
 		case EVREPLACE:
-			strcpy(rpat, value);
+			strcpy(replace_pattern, value);
 			break;
 		case EVMATCH:
 			break;

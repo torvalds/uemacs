@@ -93,9 +93,9 @@ extern struct buffer *curbp;			/* Current buffer               */
 extern struct buffer *bheadp;			/* Head of list of buffers      */
 extern struct buffer *blistp;			/* Buffer for C-X C-B           */
 
-extern char pat[];				/* Search pattern.              */
-extern char tap[];				/* Reversed pattern array.      */
-extern char rpat[];				/* Replacement pattern.         */
+extern char search_pattern[];			/* what to search for */
+extern char reversed_pattern[];			/* the same thing backwards, for reverse search */
+extern char replace_pattern[];			/* what to replace it with */
 
 extern unsigned int matchlen;
 extern unsigned int mlenold;
