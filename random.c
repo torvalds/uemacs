@@ -828,7 +828,7 @@ int adjustmode(int kind, int global)
 	int i;					/* loop index */
 	int status;				/* error return on input */
 	char prompt[50];			/* string to prompt user with */
-	char execute_numbered_macro[NPAT];			/* buffer to recieve mode name into */
+	char mode_name[NPAT];			/* the mode name they typed */
 
 	/* build the proper prompt string */
 	if (global)
@@ -843,13 +843,13 @@ int adjustmode(int kind, int global)
 
 	/* prompt the user and get an answer */
 
-	status = ask_string(prompt, execute_numbered_macro, NPAT - 1);
+	status = ask_string(prompt, mode_name, NPAT - 1);
 	if (status != TRUE)
 		return status;
 
 	/* make it uppercase */
 
-	scan = execute_numbered_macro;
+	scan = mode_name;
 	while (*scan != 0) {
 		if (*scan >= 'a' && *scan <= 'z')
 			*scan = *scan - 32;
@@ -859,7 +859,7 @@ int adjustmode(int kind, int global)
 	/* test it against the modes we know */
 
 	for (i = 0; i < NUMMODES; i++) {
-		if (strcmp(execute_numbered_macro, modename[i]) == 0) {
+		if (strcmp(mode_name, modename[i]) == 0) {
 			/* finding a match, we process it */
 			if (kind == TRUE)
 				if (global)
