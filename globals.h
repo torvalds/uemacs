@@ -68,9 +68,9 @@ extern int restflag;				/* restricted use?              */
 extern int last_key;				/* last keystroke, the $lastkey setting */
 extern int random_seed;				/* random number seed, the $seed setting */
 extern int macro_debug;				/* trace macros, the $debug setting */
-extern char errorm[];				/* error literal                */
-extern char truem[];				/* true literal                 */
-extern char falsem[];				/* false litereal               */
+extern char error_text[];			/* what a macro expression evaluates to on an error */
+extern char true_text[];			/* and what TRUE and FALSE come back as */
+extern char false_text[];
 extern int command_status;			/* last command status, the $status setting */
 extern int saveflag;				/* Flags, saved with the $target var */
 extern char *file_line;				/* buffer file_get_line() reads a line into */
@@ -103,7 +103,7 @@ extern char *matched_text;			/* the text that matched, for $match */
 extern struct line *match_line;			/* the line the match started on */
 extern int match_offset;			/* and the byte offset within it */
 
-extern char *dname[];				/* Directive name table.        */
+extern char *directive_names[];			/* the !if, !goto and friends that exec.c looks for */
 
 /* Terminal table defined only in term.c */
 extern struct terminal term;

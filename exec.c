@@ -544,7 +544,7 @@ int dobuf(struct buffer *bp)
 			/* Find out which directive this is */
 			++eline;
 			for (dirnum = 0; dirnum < NUMDIRS; dirnum++)
-				if (strncmp(eline, dname[dirnum], strlen(dname[dirnum])) == 0)
+				if (strncmp(eline, directive_names[dirnum], strlen(directive_names[dirnum])) == 0)
 					break;
 
 			/* and bitch if it's illegal */

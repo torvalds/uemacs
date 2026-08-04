@@ -53,22 +53,22 @@ char *gtfun(char *fname)
 
 	/* return errorm on a bad reference */
 	if (fnum == ARRAY_SIZE(funcs))
-		return errorm;
+		return error_text;
 
 	/* if needed, retrieve the first argument */
 	if (funcs[fnum].f_type >= MONAMIC) {
 		if ((status = macarg(arg1)) != TRUE)
-			return errorm;
+			return error_text;
 
 		/* if needed, retrieve the second argument */
 		if (funcs[fnum].f_type >= DYNAMIC) {
 			if ((status = macarg(arg2)) != TRUE)
-				return errorm;
+				return error_text;
 
 			/* if needed, retrieve the third argument */
 			if (funcs[fnum].f_type >= TRINAMIC)
 				if ((status = macarg(arg3)) != TRUE)
-					return errorm;
+					return error_text;
 		}
 	}
 
@@ -177,13 +177,13 @@ char *gtusr(char *vname)
 	/* scan the list looking for the user var name */
 	for (vnum = 0; vnum < MAXVARS; vnum++) {
 		if (uv[vnum].u_name[0] == 0)
-			return errorm;
+			return error_text;
 		if (strcmp(vname, uv[vnum].u_name) == 0)
 			return uv[vnum].u_value;
 	}
 
 	/* return errorm if we run off the end */
-	return errorm;
+	return error_text;
 }
 
 static char *getkill(void);
@@ -209,7 +209,7 @@ char *gtenv(char *vname)
 		if (ename != NULL)
 			return ename;
 		else
-			return errorm;
+			return error_text;
 	}
 
 	/* otherwise, fetch the appropriate value */
@@ -693,7 +693,7 @@ static char *internal_getval(char *token)
 		status = getstring(token, buf, NSTRING, ctoec('\n'));
 		display_commands = distmp;
 		if (status == ABORT)
-			return errorm;
+			return error_text;
 		return buf;
 
 	case TKBUF:				/* buffer contents fetch */
@@ -702,7 +702,7 @@ static char *internal_getval(char *token)
 		getval(token + 1, token, -1);
 		bp = bfind(token, FALSE, 0);
 		if (bp == NULL)
-			return errorm;
+			return error_text;
 
 		/* if the buffer is displayed, get the window
 		   vars instead of the buffer vars */
@@ -713,7 +713,7 @@ static char *internal_getval(char *token)
 
 		/* make sure we are not at the end */
 		if (bp->b_linep == bp->b_dotp)
-			return errorm;
+			return error_text;
 
 		/* grab the line as an argument */
 		blen = bp->b_dotp->l_used - bp->b_doto;
@@ -743,9 +743,9 @@ static char *internal_getval(char *token)
 	case TKFUN:
 		return gtfun(token + 1);
 	case TKDIR:
-		return errorm;
+		return error_text;
 	case TKLBL:
-		return errorm;
+		return error_text;
 	case TKLIT:
 		return token;
 	case TKSTR:
@@ -753,7 +753,7 @@ static char *internal_getval(char *token)
 	case TKCMD:
 		return token;
 	}
-	return errorm;
+	return error_text;
 }
 
 char *getval(char *token, char *dst, int size)
@@ -788,9 +788,9 @@ int stol(char *val)
 char *ltos(int val)
 {
 	if (val)
-		return truem;
+		return true_text;
 	else
-		return falsem;
+		return false_text;
 }
 
 /*

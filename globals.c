@@ -53,9 +53,9 @@ int restflag = FALSE;				/* restricted use?              */
 int last_key = 0;				/* last keystroke, the $lastkey setting */
 int random_seed = 0;				/* random number seed, the $seed setting */
 int macro_debug = FALSE;			/* trace macros, the $debug setting */
-char errorm[] = "ERROR";			/* error literal                */
-char truem[] = "TRUE";				/* true literal                 */
-char falsem[] = "FALSE";			/* false litereal               */
+char error_text[] = "ERROR";			/* what a macro expression evaluates to on an error */
+char true_text[] = "TRUE";			/* and what TRUE and FALSE come back as */
+char false_text[] = "FALSE";
 int command_status = TRUE;			/* last command status, the $status setting */
 int saveflag = 0;				/* Flags, saved with the $target var */
 char *file_line = NULL;				/* buffer file_get_line() reads a line into */
@@ -97,7 +97,7 @@ int match_offset = 0;				/* and the byte offset within it */
 /* directive name table:
 	This holds the names of all the directives....	*/
 
-char *dname[] = {
+char *directive_names[] = {
 	"if", "else", "endif",
 	"goto", "return", "endm",
 	"while", "endwhile", "break",
