@@ -57,6 +57,94 @@ int cmd_help(int f, int n)
 	return TRUE;
 }
 
+/*
+ * Fill the *Binding list* buffer with every command name, each followed by
+ * the keys bound to it, and switch to it.  With a match string only the
+ * names containing it are listed, which is what apropos is.
+ *
+ * Like list-buffers, this builds a buffer and goes there rather than
+ * popping up a window for it - see commit cfad0e9 ("Restore list-buffers,
+ * without needing a window to put it in").  C-x b gets you back.
+ */
+static int build_binding_list(char *match)
+{
+	struct name_bind *nptr;
+	struct key_tab *ktp;
+	struct buffer *bp;
+	char outseq[NSTRING];
+	int cpos;
+
+	bp = bfind("*Binding list*", TRUE, BFINVS);
+	if (bp == NULL || bclear(bp) == FALSE) {
+		msg_printf("Can not display binding list");
+		return FALSE;
+	}
+
+	for (nptr = &names[0]; nptr->n_func != NULL; ++nptr) {
+		if (match && strinc(nptr->n_name, match) == FALSE)
+			continue;
+
+		strcpy(outseq, nptr->n_name);
+		cpos = strlen(outseq);
+
+		/* every key bound to it, one line each */
+		for (ktp = &keytab[0]; ktp->k_fp != NULL; ++ktp) {
+			if (ktp->k_fp != nptr->n_func)
+				continue;
+			while (cpos < 28)
+				outseq[cpos++] = ' ';
+			cmdstr(ktp->k_code, &outseq[cpos]);
+			if (addline(bp, outseq) == FALSE)
+				return FALSE;
+			cpos = 0;		/* the name is said already */
+		}
+
+		/* and the ones with no key at all still get a line */
+		if (cpos > 0) {
+			outseq[cpos] = 0;
+			if (addline(bp, outseq) == FALSE)
+				return FALSE;
+		}
+	}
+
+	bp->b_mode |= MDVIEW;
+	bp->b_flag &= ~BFCHG;
+
+	if (curwp->w_bufp != bp && swbuffer(bp) != TRUE)
+		return FALSE;
+	curwp->w_linep = line_next(bp->b_linep);
+	curwp->w_dotp = line_next(bp->b_linep);
+	curwp->w_doto = 0;
+	curwp->w_markp = NULL;
+	curwp->w_marko = 0;
+	curwp->w_flag |= WFMODE | WFHARD;
+	return TRUE;
+}
+
+/*
+ * Every key binding there is.  Bound to nothing by default; upstream
+ * bound it to nothing either, and M-x is how you get at it.
+ */
+int cmd_describe_bindings(int f, int n)
+{
+	return build_binding_list(NULL);
+}
+
+/*
+ * The same list, narrowed to the command names containing a string.
+ * Bound to "M-A".
+ */
+int cmd_apropos(int f, int n)
+{
+	char match[NSTRING];
+	int status;
+
+	status = ask_string("Apropos string: ", match, NSTRING - 1);
+	if (status != TRUE)
+		return status;
+	return build_binding_list(match);
+}
+
 int cmd_describe_key(int f, int n)
 {						/* describe the command for a certain key */
 	int c;					/* key to describe */

@@ -244,7 +244,7 @@ void ltoa(char *buf, int width, long num)
  * on the end. Return TRUE if it worked and
  * FALSE if you ran out of room.
  */
-int addline(char *text)
+int addline(struct buffer *bp, char *text)
 {
 	struct line *lp;
 	int i;
@@ -255,12 +255,12 @@ int addline(char *text)
 		return FALSE;
 	for (i = 0; i < ntext; ++i)
 		lputc(lp, i, text[i]);
-	list_buffer->b_linep->l_bp->l_fp = lp;	/* Hook onto the end    */
-	lp->l_bp = list_buffer->b_linep->l_bp;
-	list_buffer->b_linep->l_bp = lp;
-	lp->l_fp = list_buffer->b_linep;
-	if (list_buffer->b_dotp == list_buffer->b_linep)	/* If "." is at the end */
-		list_buffer->b_dotp = lp;		/* move it to new line  */
+	bp->b_linep->l_bp->l_fp = lp;		/* Hook onto the end    */
+	lp->l_bp = bp->b_linep->l_bp;
+	bp->b_linep->l_bp = lp;
+	lp->l_fp = bp->b_linep;
+	if (bp->b_dotp == bp->b_linep)		/* If "." is at the end */
+		bp->b_dotp = lp;		/* move it to new line  */
 	return TRUE;
 }
 
@@ -288,8 +288,8 @@ int makelist(int iflag)
 	if ((s = bclear(list_buffer)) != TRUE)	/* Blow old text away   */
 		return s;
 	strcpy(list_buffer->b_fname, "");
-	if (addline("ACT MODES        Size Buffer        File") == FALSE
-	    || addline("--- -----        ---- ------        ----") == FALSE)
+	if (addline(list_buffer, "ACT MODES        Size Buffer        File") == FALSE
+	    || addline(list_buffer, "--- -----        ---- ------        ----") == FALSE)
 		return FALSE;
 	bp = buffer_head;			/* For all buffers      */
 
@@ -307,7 +307,7 @@ int makelist(int iflag)
 		else
 			*cp1++ = '.';
 	strcpy(cp1, "         Global Modes");
-	if (addline(line) == FALSE)
+	if (addline(list_buffer, line) == FALSE)
 		return FALSE;
 
 	/* output the list of buffers */
@@ -371,7 +371,7 @@ int makelist(int iflag)
 			}
 		}
 		*cp1 = 0;			/* Add to the buffer.   */
-		if (addline(line) == FALSE)
+		if (addline(list_buffer, line) == FALSE)
 			return FALSE;
 		bp = bp->b_bufp;
 	}

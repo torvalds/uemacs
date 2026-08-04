@@ -176,6 +176,8 @@ extern void ostring(char *s);
 
 /* bind.c */
 extern int cmd_help(int f, int n);
+extern int cmd_describe_bindings(int f, int n);
+extern int cmd_apropos(int f, int n);
 extern int cmd_describe_key(int f, int n);
 extern int cmd_bind_to_key(int f, int n);
 extern int cmd_unbind_key(int f, int n);
@@ -202,7 +204,7 @@ extern int cmd_name_buffer(int f, int n);
 extern int makelist(int iflag);
 extern int cmd_list_buffers(int f, int n);
 extern void ltoa(char *buf, int width, long num);
-extern int addline(char *text);
+extern int addline(struct buffer *bp, char *text);
 extern int anycb(void);
 extern int bclear(struct buffer *bp);
 extern int cmd_unmark_buffer(int f, int n);
