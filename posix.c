@@ -19,7 +19,7 @@
 #include <sys/ioctl.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 #include "utf8.h"
 
@@ -74,8 +74,8 @@ void ttopen(void)
 
 	/* on all screens we are not sure of the initial position
 	   of the cursor                                        */
-	ttrow = 999;
-	ttcol = 999;
+	shown_row = 999;
+	shown_col = 999;
 }
 
 /*
@@ -167,6 +167,21 @@ void ttpause(void)
 }
 
 /*
+ * One character of pushback.  The incremental search reads the
+ * character that ended it, decides it was a command rather than part of
+ * the pattern, and hands it back for the command loop to find.  A
+ * second pushback with one still pending is dropped, which is what the
+ * caller has always relied on.
+ */
+static int pushback = -1;
+
+void ttungetc(int c)
+{
+	if (pushback < 0)
+		pushback = c;
+}
+
+/*
  * Read a character from the terminal, performing no editing and doing no echo
  * at all. More complex in VMS that almost anyplace else, which figures. Very
  * simple on CPM, because the system can do exactly what you want.
@@ -176,12 +191,26 @@ int ttgetc(void)
 	unicode_t c;
 	int count, bytes = 1, expected;
 
+	if (pushback >= 0) {
+		c = pushback;
+		pushback = -1;
+		return c;
+	}
+
 	count = TT.nr;
-	if (!count) {
+	while (!count) {
 		count = read(0, TT.buf, sizeof(TT.buf));
-		if (count <= 0)
-			return 0;
-		TT.nr = count;
+		if (count > 0) {
+			TT.nr = count;
+			break;
+		}
+		/* a signal, most likely the window changing size */
+		if (count < 0 && errno == EINTR) {
+			checkwinsize();
+			count = 0;
+			continue;
+		}
+		return 0;
 	}
 
 	c = (unsigned char)TT.buf[0];

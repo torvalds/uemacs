@@ -12,7 +12,7 @@
 #include        <stdio.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 #include "line.h"
 
@@ -22,13 +22,13 @@
  * if the use count is 0. Otherwise, they come
  * from some other window.
  */
-int usebuffer(int f, int n)
+int cmd_select_buffer(int f, int n)
 {
 	struct buffer *bp;
 	int s;
 	char bufn[NBUFN];
 
-	if ((s = mlreply("Use buffer: ", bufn, NBUFN)) != TRUE)
+	if ((s = ask_string("Use buffer: ", bufn, NBUFN)) != TRUE)
 		return s;
 	if ((bp = bfind(bufn, TRUE, 0)) == NULL)
 		return FALSE;
@@ -40,7 +40,7 @@ int usebuffer(int f, int n)
  *
  * int f, n;		default flag, numeric argument
  */
-int nextbuffer(int f, int n)
+int cmd_next_buffer(int f, int n)
 {
 	struct buffer *bp = NULL;		/* eligable buffer to switch to */
 	struct buffer *bbp;			/* eligable buffer to switch to */
@@ -59,7 +59,7 @@ int nextbuffer(int f, int n)
 		/* cycle through the buffers to find an eligable one */
 		while (bp == NULL || bp->b_flag & BFINVS) {
 			if (bp == NULL)
-				bp = bheadp;
+				bp = buffer_head;
 			else
 				bp = bp->b_bufp;
 
@@ -90,10 +90,10 @@ int swbuffer(struct buffer *bp)
 	if (curbp->b_active != TRUE) {		/* buffer not active yet */
 		/* read it in and activate it */
 		readin(curbp->b_fname, TRUE);
-		curbp->b_dotp = lforw(curbp->b_linep);
+		curbp->b_dotp = line_next(curbp->b_linep);
 		curbp->b_doto = 0;
 		curbp->b_active = TRUE;
-		curbp->b_mode |= gmode;		/* P.K. */
+		curbp->b_mode |= global_mode;		/* P.K. */
 	}
 	curwp->w_bufp = bp;
 	curwp->w_linep = bp->b_linep;		/* For macros, ignored. */
@@ -103,9 +103,22 @@ int swbuffer(struct buffer *bp)
 		curwp->w_doto = bp->b_doto;
 		curwp->w_markp = bp->b_markp;
 		curwp->w_marko = bp->b_marko;
-		return TRUE;
 	}
+	shown_buffer_changed();
 	return TRUE;
+}
+
+/*
+ * Tell a macro that the buffer on the screen is not the one that was
+ * there before.  Anything bound to META-SPEC-X gets run; nothing is by
+ * default.
+ *
+ * Not to be confused with buffer_changed(), which is about a buffer's
+ * contents rather than about which one you are looking at.
+ */
+void shown_buffer_changed(void)
+{
+	execute(META | SPEC | 'X', FALSE, 1);
 }
 
 /*
@@ -116,13 +129,13 @@ int swbuffer(struct buffer *bp)
  * if the buffer has been changed). Then free the header
  * line and the buffer header. Bound to "C-X K".
  */
-int killbuffer(int f, int n)
+int cmd_delete_buffer(int f, int n)
 {
 	struct buffer *bp;
 	int s;
 	char bufn[NBUFN];
 
-	if ((s = mlreply("Kill buffer: ", bufn, NBUFN)) != TRUE)
+	if ((s = ask_string("Kill buffer: ", bufn, NBUFN)) != TRUE)
 		return s;
 	if ((bp = bfind(bufn, FALSE, 0)) == NULL)	/* Easy if unknown.     */
 		return TRUE;
@@ -141,21 +154,21 @@ int zotbuf(struct buffer *bp)
 	int s;
 
 	if (bp->b_nwnd != 0) {			/* Error if on screen.  */
-		mlwrite("Buffer is being displayed");
+		msg_printf("Buffer is being displayed");
 		return FALSE;
 	}
 	if ((s = bclear(bp)) != TRUE)		/* Blow text away.      */
 		return s;
 	free((char *)bp->b_linep);		/* Release header line. */
 	bp1 = NULL;				/* Find the header.     */
-	bp2 = bheadp;
+	bp2 = buffer_head;
 	while (bp2 != bp) {
 		bp1 = bp2;
 		bp2 = bp2->b_bufp;
 	}
 	bp2 = bp2->b_bufp;			/* Next one in chain.   */
 	if (bp1 == NULL)			/* Unlink it.           */
-		bheadp = bp2;
+		buffer_head = bp2;
 	else
 		bp1->b_bufp = bp2;
 	free((char *)bp);			/* Release buffer block */
@@ -167,17 +180,17 @@ int zotbuf(struct buffer *bp)
  *
  * int f, n;		default Flag & Numeric arg
  */
-int namebuffer(int f, int n)
+int cmd_name_buffer(int f, int n)
 {
 	struct buffer *bp;			/* pointer to scan through all buffers */
 	char bufn[NBUFN];			/* buffer to hold buffer name */
 
 	/* prompt for and get the new buffer name */
- ask:	if (mlreply("Change buffer name to: ", bufn, NBUFN) != TRUE)
+ ask:	if (ask_string("Change buffer name to: ", bufn, NBUFN) != TRUE)
 		return FALSE;
 
 	/* and check for duplicates */
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if (bp != curbp) {
 			/* if the names the same */
@@ -189,7 +202,7 @@ int namebuffer(int f, int n)
 
 	strcpy(curbp->b_bname, bufn);		/* copy buffer name to structure */
 	curwp->w_flag |= WFMODE;		/* make mode line replot */
-	mlerase();
+	msg_erase();
 	return TRUE;
 }
 
@@ -219,16 +232,162 @@ int addline(char *text)
 	int ntext;
 
 	ntext = strlen(text);
-	if ((lp = lalloc(ntext)) == NULL)
+	if ((lp = line_alloc(ntext)) == NULL)
 		return FALSE;
 	for (i = 0; i < ntext; ++i)
 		lputc(lp, i, text[i]);
-	blistp->b_linep->l_bp->l_fp = lp;	/* Hook onto the end    */
-	lp->l_bp = blistp->b_linep->l_bp;
-	blistp->b_linep->l_bp = lp;
-	lp->l_fp = blistp->b_linep;
-	if (blistp->b_dotp == blistp->b_linep)	/* If "." is at the end */
-		blistp->b_dotp = lp;		/* move it to new line  */
+	list_buffer->b_linep->l_bp->l_fp = lp;	/* Hook onto the end    */
+	lp->l_bp = list_buffer->b_linep->l_bp;
+	list_buffer->b_linep->l_bp = lp;
+	lp->l_fp = list_buffer->b_linep;
+	if (list_buffer->b_dotp == list_buffer->b_linep)	/* If "." is at the end */
+		list_buffer->b_dotp = lp;		/* move it to new line  */
+	return TRUE;
+}
+
+/*
+ * Rebuild the text in the *List* buffer: a line per buffer, saying
+ * whether it has been read in, whether it has changed, what modes it
+ * is in, how big it is, and what file it came from.
+ *
+ * int iflag;		list the invisible buffers too
+ */
+int makelist(int iflag)
+{
+	char *cp1;
+	char *cp2;
+	int c;
+	struct buffer *bp;
+	struct line *lp;
+	int s;
+	int i;
+	long nbytes;				/* # of bytes in current buffer */
+	char b[7 + 1];
+	char line[MAXCOL];
+
+	list_buffer->b_flag &= ~BFCHG;		/* Don't complain!      */
+	if ((s = bclear(list_buffer)) != TRUE)	/* Blow old text away   */
+		return s;
+	strcpy(list_buffer->b_fname, "");
+	if (addline("ACT MODES        Size Buffer        File") == FALSE
+	    || addline("--- -----        ---- ------        ----") == FALSE)
+		return FALSE;
+	bp = buffer_head;			/* For all buffers      */
+
+	/* build line to report global mode settings */
+	cp1 = &line[0];
+	*cp1++ = ' ';
+	*cp1++ = ' ';
+	*cp1++ = ' ';
+	*cp1++ = ' ';
+
+	/* output the mode codes */
+	for (i = 0; i < NUMMODES; i++)
+		if (global_mode & (1 << i))
+			*cp1++ = modecode[i];
+		else
+			*cp1++ = '.';
+	strcpy(cp1, "         Global Modes");
+	if (addline(line) == FALSE)
+		return FALSE;
+
+	/* output the list of buffers */
+	while (bp != NULL) {
+		/* skip invisable buffers if iflag is false */
+		if (((bp->b_flag & BFINVS) != 0) && (iflag != TRUE)) {
+			bp = bp->b_bufp;
+			continue;
+		}
+		cp1 = &line[0];			/* Start at left edge   */
+
+		/* output status of ACTIVE flag (has the file been read in? */
+		if (bp->b_active == TRUE)	/* "@" if activated       */
+			*cp1++ = '@';
+		else
+			*cp1++ = ' ';
+
+		/* output status of changed flag */
+		if ((bp->b_flag & BFCHG) != 0)	/* "*" if changed       */
+			*cp1++ = '*';
+		else
+			*cp1++ = ' ';
+
+		/* report if the file is truncated */
+		if ((bp->b_flag & BFTRUNC) != 0)
+			*cp1++ = '#';
+		else
+			*cp1++ = ' ';
+
+		*cp1++ = ' ';			/* space */
+
+		/* output the mode codes */
+		for (i = 0; i < NUMMODES; i++) {
+			if (bp->b_mode & (1 << i))
+				*cp1++ = modecode[i];
+			else
+				*cp1++ = '.';
+		}
+		*cp1++ = ' ';			/* Gap.                 */
+		nbytes = 0L;			/* Count bytes in buf.  */
+		lp = line_next(bp->b_linep);
+		while (lp != bp->b_linep) {
+			nbytes += (long)line_length(lp) + 1L;
+			lp = line_next(lp);
+		}
+		ltoa(b, 7, nbytes);		/* 6 digit buffer size. */
+		cp2 = &b[0];
+		while ((c = *cp2++) != 0)
+			*cp1++ = c;
+		*cp1++ = ' ';			/* Gap.                 */
+		cp2 = &bp->b_bname[0];		/* Buffer name          */
+		while ((c = *cp2++) != 0)
+			*cp1++ = c;
+		cp2 = &bp->b_fname[0];		/* File name            */
+		if (*cp2 != 0) {
+			while (cp1 < &line[3 + 1 + 5 + 1 + 6 + 4 + NBUFN])
+				*cp1++ = ' ';
+			while ((c = *cp2++) != 0) {
+				if (cp1 < &line[MAXCOL - 1])
+					*cp1++ = c;
+			}
+		}
+		*cp1 = 0;			/* Add to the buffer.   */
+		if (addline(line) == FALSE)
+			return FALSE;
+		bp = bp->b_bufp;
+	}
+	return TRUE;				/* All done             */
+}
+
+/*
+ * The list-buffers command: rebuild the listing and go and look at it.
+ * With an argument, the invisible buffers are listed too.
+ *
+ * This used to put the listing in a second window and leave you in the
+ * first.  With one window we simply switch to it, and you come back
+ * with C-x b the way you would from any other buffer.
+ *
+ * The dot has to be put back by hand rather than left to swbuffer():
+ * makelist() has just thrown away every line the window was pointing
+ * at, so if we were already looking at *List* the window's idea of
+ * where it was is a pointer to freed memory.
+ */
+int cmd_list_buffers(int f, int n)
+{
+	int s;
+
+	if ((s = makelist(f)) != TRUE)
+		return s;
+
+	if (curwp->w_bufp != list_buffer && (s = swbuffer(list_buffer)) != TRUE)
+		return s;
+
+	curwp->w_linep = line_next(list_buffer->b_linep);
+	curwp->w_dotp = line_next(list_buffer->b_linep);
+	curwp->w_doto = 0;
+	curwp->w_markp = NULL;
+	curwp->w_marko = 0;
+	curwp->w_flag |= WFMODE | WFHARD;
 	return TRUE;
 }
 
@@ -246,7 +405,7 @@ int anycb(void)
 {
 	struct buffer *bp;
 
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if ((bp->b_flag & BFINVS) == 0 && (bp->b_flag & BFCHG) != 0)
 			return TRUE;
@@ -268,7 +427,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 	struct buffer *sb;			/* buffer to insert after */
 	struct line *lp;
 
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if (strcmp(bname, bp->b_bname) == 0)
 			return bp;
@@ -277,17 +436,17 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 	if (cflag != FALSE) {
 		if ((bp = (struct buffer *)malloc(sizeof(struct buffer))) == NULL)
 			return NULL;
-		if ((lp = lalloc(0)) == NULL) {
+		if ((lp = line_alloc(0)) == NULL) {
 			free((char *)bp);
 			return NULL;
 		}
 		/* find the place in the list to insert this buffer */
-		if (bheadp == NULL || strcmp(bheadp->b_bname, bname) > 0) {
+		if (buffer_head == NULL || strcmp(buffer_head->b_bname, bname) > 0) {
 			/* insert at the beginning */
-			bp->b_bufp = bheadp;
-			bheadp = bp;
+			bp->b_bufp = buffer_head;
+			buffer_head = bp;
 		} else {
-			sb = bheadp;
+			sb = buffer_head;
 			while (sb->b_bufp != NULL) {
 				if (strcmp(sb->b_bufp->b_bname, bname) > 0)
 					break;
@@ -306,9 +465,10 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 		bp->b_markp = NULL;
 		bp->b_marko = 0;
 		bp->b_flag = bflag;
-		bp->b_mode = gmode;
+		bp->b_mode = global_mode;
 		bp->b_nwnd = 0;
 		bp->b_linep = lp;
+		bp->b_fstate.fs_what = FSTATE_UNKNOWN;
 		strcpy(bp->b_fname, "");
 		strcpy(bp->b_bname, bname);
 		lp->l_fp = lp;
@@ -334,11 +494,11 @@ int bclear(struct buffer *bp)
 
 	if ((bp->b_flag & BFINVS) == 0		/* Not scratch buffer.  */
 	    && (bp->b_flag & BFCHG) != 0	/* Something changed    */
-	    && (s = mlyesno("Discard changes")) != TRUE)
+	    && (s = ask_yesno("Discard changes")) != TRUE)
 		return s;
 	bp->b_flag &= ~BFCHG;			/* Not changed          */
-	while ((lp = lforw(bp->b_linep)) != bp->b_linep)
-		lfree(lp);
+	while ((lp = line_next(bp->b_linep)) != bp->b_linep)
+		line_free(lp);
 	bp->b_dotp = bp->b_linep;		/* Fix "."              */
 	bp->b_doto = 0;
 	bp->b_markp = NULL;			/* Invalidate "mark"    */
@@ -351,7 +511,7 @@ int bclear(struct buffer *bp)
  *
  * int f, n;		unused command arguments
  */
-int unmark(int f, int n)
+int cmd_unmark_buffer(int f, int n)
 {
 	curbp->b_flag &= ~BFCHG;
 	curwp->w_flag |= WFMODE;

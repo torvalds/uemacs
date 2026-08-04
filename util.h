@@ -17,6 +17,15 @@ static inline void mystrscpy(char *dst, const char *src, int size)
 	*dst = 0;
 }
 
+/* Append to it, with 'size' being the whole of dst rather than what is left */
+static inline void mystrscat(char *dst, const char *src, int size)
+{
+	int len = strlen(dst);
+
+	if (len < size)
+		mystrscpy(dst + len, src, size - len);
+}
+
 // Overly simplistic "how does the column number change
 // based on character 'c'" function
 static inline int next_column(int old, unicode_t c)

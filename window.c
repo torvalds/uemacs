@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 #include "line.h"
 #include "wrapper.h"
@@ -19,7 +19,7 @@
  * bottom. If it is 0 the window is centered (this is what the standard
  * redisplay code does). With no argument it defaults to 0. Bound to M-!.
  */
-int reposition(int f, int n)
+int cmd_redraw_display(int f, int n)
 {
 	if (f == FALSE)				/* default to 0 to center screen */
 		n = 0;
@@ -32,10 +32,10 @@ int reposition(int f, int n)
  * Refresh the screen. With no argument, it just does the refresh. With an
  * argument it recenters "." in the current window. Bound to "C-L".
  */
-int redraw(int f, int n)
+int cmd_clear_and_redraw(int f, int n)
 {
 	if (f == FALSE)
-		sgarbf = TRUE;
+		screen_garbage = TRUE;
 	else {
 		curwp->w_force = 0;		/* Center dot. */
 		curwp->w_flag |= WFFORCE;
@@ -50,7 +50,7 @@ int redraw(int f, int n)
  * int f;	default flag
  * int n;	numeric argument
  */
-int newsize(int f, int n)
+int cmd_change_screen_size(int f, int n)
 {
 	struct window *wp;			/* current window being examined */
 
@@ -60,7 +60,7 @@ int newsize(int f, int n)
 
 	/* make sure it's in range */
 	if (n < 3 || n > term.t_mrow + 1) {
-		mlwrite("%%Screen size out of range");
+		msg_printf("%%Screen size out of range");
 		return FALSE;
 	}
 
@@ -73,7 +73,7 @@ int newsize(int f, int n)
 
 	/* screen is garbage */
 	term.t_nrow = n - 1;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 	return TRUE;
 }
 
@@ -83,7 +83,7 @@ int newsize(int f, int n)
  * int f;		default flag
  * int n;		numeric argument
  */
-int newwidth(int f, int n)
+int cmd_change_screen_width(int f, int n)
 {
 	/* if the command defaults, assume the largest */
 	if (f == FALSE)
@@ -91,7 +91,7 @@ int newwidth(int f, int n)
 
 	/* make sure it's in range */
 	if (n < 10 || n > term.t_mcol) {
-		mlwrite("%%Screen width out of range");
+		msg_printf("%%Screen width out of range");
 		return FALSE;
 	}
 
@@ -102,7 +102,7 @@ int newwidth(int f, int n)
 
 	/* force window to redraw */
 	curwp->w_flag |= WFHARD | WFMOVE | WFMODE;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 
 	return TRUE;
 }

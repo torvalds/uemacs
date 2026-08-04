@@ -10,20 +10,20 @@
 #include <stdio.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 #include "epath.h"
 #include "line.h"
 #include "util.h"
 
-int deskey(int f, int n)
+int cmd_describe_key(int f, int n)
 {						/* describe the command for a certain key */
 	int c;					/* key to describe */
 	char *ptr;				/* string pointer to scan output strings */
 	char outseq[NSTRING];			/* output buffer for command sequence */
 
 	/* prompt the user to type us a key to describe */
-	mlwrite(": describe-key ");
+	msg_printf(": describe-key ");
 
 	/* get the command sequence to describe
 	   change it to something we can print as well */
@@ -48,7 +48,7 @@ int deskey(int f, int n)
  *
  * int f, n;		command arguments [IGNORED]
  */
-int bindtokey(int f, int n)
+int cmd_bind_to_key(int f, int n)
 {
 	unsigned int c;				/* command key to bind */
 	fn_t kfunc;				/* ptr to the requested function to bind to */
@@ -57,18 +57,18 @@ int bindtokey(int f, int n)
 	char outseq[80];			/* output buffer for keystroke sequence */
 
 	/* prompt the user to type in a key to bind */
-	mlwrite(": bind-to-key ");
+	msg_printf(": bind-to-key ");
 
 	/* get the function name to bind it to */
 	kfunc = getname();
 	if (kfunc == NULL) {
-		mlwrite("(No such function)");
+		msg_printf("(No such function)");
 		return FALSE;
 	}
 	ostring(" ");
 
 	/* get the command sequence to bind */
-	c = getckey((kfunc == metafn) || (kfunc == cex) || (kfunc == unarg) || (kfunc == ctrlg));
+	c = getckey((kfunc == cmd_meta_prefix) || (kfunc == cmd_ctlx_prefix) || (kfunc == cmd_universal_argument) || (kfunc == cmd_abort_command));
 
 	/* change it to something we can print as well */
 	cmdstr(c, &outseq[0]);
@@ -77,7 +77,7 @@ int bindtokey(int f, int n)
 	ostring(outseq);
 
 	/* if the function is a prefix key */
-	if (kfunc == metafn || kfunc == cex || kfunc == unarg || kfunc == ctrlg) {
+	if (kfunc == cmd_meta_prefix || kfunc == cmd_ctlx_prefix || kfunc == cmd_universal_argument || kfunc == cmd_abort_command) {
 
 		/* search for an existing binding for the prefix key */
 		ktp = &keytab[0];
@@ -89,14 +89,14 @@ int bindtokey(int f, int n)
 		}
 
 		/* reset the appropriate global prefix variable */
-		if (kfunc == metafn)
-			metac = c;
-		if (kfunc == cex)
-			ctlxc = c;
-		if (kfunc == unarg)
-			reptc = c;
-		if (kfunc == ctrlg)
-			abortc = c;
+		if (kfunc == cmd_meta_prefix)
+			meta_char = c;
+		if (kfunc == cmd_ctlx_prefix)
+			ctlx_char = c;
+		if (kfunc == cmd_universal_argument)
+			repeat_key = c;
+		if (kfunc == cmd_abort_command)
+			abort_char = c;
 	}
 
 	/* search the table to see if it exists */
@@ -115,7 +115,7 @@ int bindtokey(int f, int n)
 	} else {				/* otherwise we need to add it to the end */
 		/* if we run out of binding room, bitch */
 		if (ktp >= &keytab[NBINDS]) {
-			mlwrite("Binding table FULL!");
+			msg_printf("Binding table FULL!");
 			return FALSE;
 		}
 
@@ -134,13 +134,13 @@ int bindtokey(int f, int n)
  *
  * int f, n;		command arguments [IGNORED]
  */
-int unbindkey(int f, int n)
+int cmd_unbind_key(int f, int n)
 {
 	int c;					/* command key to unbind */
 	char outseq[80];			/* output buffer for keystroke sequence */
 
 	/* prompt the user to type in a key to unbind */
-	mlwrite(": unbind-key ");
+	msg_printf(": unbind-key ");
 
 	/* get the command sequence to unbind */
 	c = getckey(FALSE);			/* get a command sequence */
@@ -153,7 +153,7 @@ int unbindkey(int f, int n)
 
 	/* if it isn't bound, bitch */
 	if (unbindchar(c) == FALSE) {
-		mlwrite("(Key not bound)");
+		msg_printf("(Key not bound)");
 		return FALSE;
 	}
 	return TRUE;
@@ -248,7 +248,7 @@ unsigned int getckey(int mflag)
 	char tok[NSTRING];			/* command incoming */
 
 	/* check to see if we are executing a command line */
-	if (clexec) {
+	if (executing_command_line) {
 		macarg(tok);			/* get the next token */
 		return stock(tok);
 	}
@@ -306,22 +306,22 @@ char *flook(char *fname, int hflag)
 			snprintf(fspec, sizeof(fspec), "%s/%s", home, fname);
 
 			/* and try it out */
-			if (ffropen(fspec) == FIOSUC) {
-				ffclose();
+			if (file_open_read(fspec) == FIOSUC) {
+				file_close();
 				return fspec;
 			}
 
 			snprintf(fspec, sizeof(fspec), "%s/lib/%s", home, fname);
-			if (ffropen(fspec) == FIOSUC) {
-				ffclose();
+			if (file_open_read(fspec) == FIOSUC) {
+				file_close();
 				return fspec;
 			}
 		}
 	}
 
 	/* always try the current directory first */
-	if (ffropen(fname) == FIOSUC) {
-		ffclose();
+	if (file_open_read(fname) == FIOSUC) {
+		file_close();
 		return fname;
 	}
 
@@ -342,8 +342,8 @@ char *flook(char *fname, int hflag)
 			strcat(fspec, fname);
 
 			/* and try it out */
-			if (ffropen(fspec) == FIOSUC) {
-				ffclose();
+			if (file_open_read(fspec) == FIOSUC) {
+				file_close();
 				return fspec;
 			}
 
@@ -357,8 +357,8 @@ char *flook(char *fname, int hflag)
 		strcat(fspec, fname);
 
 		/* and try it out */
-		if (ffropen(fspec) == FIOSUC) {
-			ffclose();
+		if (file_open_read(fspec) == FIOSUC) {
+			file_close();
 			return fspec;
 		}
 	}

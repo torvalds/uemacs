@@ -7,14 +7,29 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 
 #include        <signal.h>
-extern int chg_width, chg_height;
-extern void sizesignal(int);
+
+/*
+ * Remember what a subprocess exited with, for $rval.  system() hands
+ * back a wait status rather than an exit code, so report it the way a
+ * shell reports $? - the exit status, or 128 plus the signal that
+ * killed it.
+ */
+static void record_status(int status)
+{
+	if (status < 0)				/* system() itself failed */
+		subprocess_status = -1;
+	else if (WIFEXITED(status))
+		subprocess_status = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status))
+		subprocess_status = 128 + WTERMSIG(status);
+}
 
 /*
  * Create a subjob with a copy of the command intrepreter in it. When the
@@ -22,7 +37,7 @@ extern void sizesignal(int);
  * repaint. Bound to "^X C". The message at the start in VMS puts out a newline.
  * Under some (unknown) condition, you don't get one free when DCL starts up.
  */
-int spawncli(int f, int n)
+int cmd_interactive_shell(int f, int n)
 {
 	char *cp;
 
@@ -31,32 +46,23 @@ int spawncli(int f, int n)
 		return resterr();
 
 	movecursor(term.t_nrow, 0);		/* Seek to last line.   */
-	TTflush();
-	TTclose();				/* stty to old settings */
-	TTkclose();				/* Close "keyboard" */
+	ttflush();
+	tcapclose();				/* stty to old settings */
+	tcapkclose();				/* Close "keyboard" */
 	if ((cp = getenv("SHELL")) != NULL && *cp != '\0')
-		system(cp);
+		record_status(system(cp));
 	else
-		system("exec /bin/sh");
-	sgarbf = TRUE;
+		record_status(system("exec /bin/sh"));
+	screen_garbage = TRUE;
 	sleep(2);
-	TTopen();
-	TTkopen();
-
-/*
- * This fools the update routines to force a full
- * redraw with complete window size checking.
- *		-lbt
- */
-	chg_width = term.t_ncol;
-	chg_height = term.t_nrow + 1;
-	term.t_nrow = term.t_ncol = 0;
+	tcapopen();
+	tcapkopen();
 	return TRUE;
 }
 
-int bktoshell(int f, int n)
+int cmd_suspend_emacs(int f, int n)
 {						/* suspend MicroEMACS and wait to wake up */
-	vttidy();
+	display_close();
 /******************************
 	int pid;
 
@@ -69,9 +75,9 @@ int bktoshell(int f, int n)
 
 void rtfrmshell(void)
 {
-	TTopen();
+	tcapopen();
 	curwp->w_flag = WFHARD;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 }
 
 /*
@@ -79,7 +85,7 @@ void rtfrmshell(void)
  * character to be typed, then mark the screen as garbage so a full repaint is
  * done. Bound to "C-X !".
  */
-int spawn(int f, int n)
+int cmd_shell_command(int f, int n)
 {
 	int s;
 	char line[NLINE];
@@ -88,23 +94,23 @@ int spawn(int f, int n)
 	if (restflag)
 		return resterr();
 
-	if ((s = mlreply("!", line, NLINE)) != TRUE)
+	if ((s = ask_string("!", line, NLINE)) != TRUE)
 		return s;
-	TTflush();
-	TTclose();				/* stty to old modes    */
-	TTkclose();
-	system(line);
+	ttflush();
+	tcapclose();				/* stty to old modes    */
+	tcapkclose();
+	record_status(system(line));
 	fflush(stdout);				/* to be sure P.K.      */
-	TTopen();
+	tcapopen();
 
-	if (clexec == FALSE) {
-		mlputs("(End)");		/* Pause.               */
-		TTflush();
+	if (executing_command_line == FALSE) {
+		msg_append("(End)");		/* Pause.               */
+		ttflush();
 		while ((s = tgetc()) != '\r' && s != ' ') ;
-		mlputs("\r\n");
+		msg_append("\r\n");
 	}
-	TTkopen();
-	sgarbf = TRUE;
+	tcapkopen();
+	screen_garbage = TRUE;
 	return TRUE;
 }
 
@@ -114,7 +120,7 @@ int spawn(int f, int n)
  * done. Bound to "C-X $".
  */
 
-int execprg(int f, int n)
+int cmd_execute_program(int f, int n)
 {
 	int s;
 	char line[NLINE];
@@ -123,19 +129,19 @@ int execprg(int f, int n)
 	if (restflag)
 		return resterr();
 
-	if ((s = mlreply("!", line, NLINE)) != TRUE)
+	if ((s = ask_string("!", line, NLINE)) != TRUE)
 		return s;
-	TTputc('\n');				/* Already have '\r'    */
-	TTflush();
-	TTclose();				/* stty to old modes    */
-	TTkclose();
-	system(line);
+	ttputc('\n');				/* Already have '\r'    */
+	ttflush();
+	tcapclose();				/* stty to old modes    */
+	tcapkclose();
+	record_status(system(line));
 	fflush(stdout);				/* to be sure P.K.      */
-	TTopen();
-	mlputs("(End)");			/* Pause.               */
-	TTflush();
+	tcapopen();
+	msg_append("(End)");			/* Pause.               */
+	ttflush();
 	while ((s = tgetc()) != '\r' && s != ' ') ;
-	sgarbf = TRUE;
+	screen_garbage = TRUE;
 	return TRUE;
 }
 
@@ -143,12 +149,13 @@ int execprg(int f, int n)
  * filter a buffer through an external DOS program
  * Bound to ^X #
  */
-int filter_buffer(int f, int n)
+int cmd_filter_buffer(int f, int n)
 {
 	int s;					/* return status from CLI */
 	struct buffer *bp;			/* pointer to buffer to zot */
 	char line[NLINE];			/* command line send to shell */
 	char tmpnam[NFILEN];			/* place to store real file name */
+	struct filestate tmpstate;		/* and the state that goes with it */
 	static char bname1[] = "fltinp";
 
 	static char filnam1[] = "fltinp";
@@ -162,43 +169,52 @@ int filter_buffer(int f, int n)
 		return rdonly();		/* we are in read only mode     */
 
 	/* get the filter name and its args */
-	if ((s = mlreply("#", line, NLINE)) != TRUE)
+	if ((s = ask_string("#", line, NLINE)) != TRUE)
 		return s;
 
 	/* setup the proper file names */
 	bp = curbp;
 	strcpy(tmpnam, bp->b_fname);		/* save the original name */
+	tmpstate = bp->b_fstate;		/* and what we know about it */
 	strcpy(bp->b_fname, bname1);		/* set it to our new one */
 
 	/* write it out, checking for errors */
 	if (writeout(filnam1) != TRUE) {
-		mlwrite("(Cannot write filter file)");
+		msg_printf("(Cannot write filter file)");
 		strcpy(bp->b_fname, tmpnam);
+		bp->b_fstate = tmpstate;
 		return FALSE;
 	}
-	TTputc('\n');				/* Already have '\r'    */
-	TTflush();
-	TTclose();				/* stty to old modes    */
-	TTkclose();
+	ttputc('\n');				/* Already have '\r'    */
+	ttflush();
+	tcapclose();				/* stty to old modes    */
+	tcapkclose();
 	strcat(line, " <fltinp >fltout");
-	system(line);
-	TTopen();
-	TTkopen();
-	TTflush();
-	sgarbf = TRUE;
+	record_status(system(line));
+	tcapopen();
+	tcapkopen();
+	ttflush();
+	screen_garbage = TRUE;
 	s = TRUE;
 
 	/* on failure, escape gracefully */
 	if (s != TRUE || (readin(filnam2, FALSE) == FALSE)) {
-		mlwrite("(Execution failed)");
+		msg_printf("(Execution failed)");
 		strcpy(bp->b_fname, tmpnam);
+		bp->b_fstate = tmpstate;
 		unlink(filnam1);
 		unlink(filnam2);
 		return s;
 	}
 
-	/* reset file name */
+	/*
+	 * Reset file name.  The state goes back with it: readin() has just
+	 * recorded what the filter's output file looked like, which says
+	 * nothing at all about the file the buffer is really for - and we
+	 * have not touched that one, so what we knew about it still holds.
+	 */
 	strcpy(bp->b_fname, tmpnam);		/* restore name */
+	bp->b_fstate = tmpstate;
 	bp->b_flag |= BFCHG;			/* flag it as changed */
 
 	/* and get rid of the temporary file */

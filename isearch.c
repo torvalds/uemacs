@@ -25,16 +25,15 @@
 #include <stdio.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 #include "line.h"
+#include "util.h"
 
 static int echo_char(int c, int col);
 
 /* A couple of "own" variables for re-eat */
 
-static int (*saved_get_char)(void);		/* Get character routine */
-static int eaten_char = -1;			/* Re-eaten char */
 
 /* A couple more "own" variables for the command string */
 
@@ -46,7 +45,7 @@ static int cmd_reexecute = -1;			/* > 0 if re-executing command */
  * Subroutine to do incremental reverse search.  It actually uses the
  * same code as the normal incremental search, as both can go both ways.
  */
-int risearch(int f, int n)
+int cmd_reverse_incremental_search(int f, int n)
 {
 	struct line *curline;			/* Current line on entry              */
 	int curoff;				/* Current offset on entry            */
@@ -58,25 +57,25 @@ int risearch(int f, int n)
 
 	/* Make sure the search doesn't match where we already are:               */
 
-	backchar(TRUE, 1);			/* Back up a character                */
+	cmd_backward_character(TRUE, 1);			/* Back up a character                */
 
 	if (!(isearch(f, -n))) {		/* Call ISearch backwards       *//* If error in search:                */
 		curwp->w_dotp = curline;	/* Reset the line pointer             */
 		curwp->w_doto = curoff;		/*  and the offset to original value  */
 		curwp->w_flag |= WFMOVE;	/* Say we've moved                    */
-		update(FALSE);			/* And force an update                */
-		mlwrite("(search failed)");	/* Say we died                        */
-		matchlen = strlen(pat);
+		update();
+		msg_printf("(search failed)");	/* Say we died                        */
+		match_bytes = strlen(search_pattern);
 	} else
-		mlerase();			/* If happy, just erase the cmd line  */
-	matchlen = strlen(pat);
+		msg_erase();			/* If happy, just erase the cmd line  */
+	match_bytes = strlen(search_pattern);
 	return TRUE;
 }
 
 /*
  * Again, but for the forward direction
  */
-int fisearch(int f, int n)
+int cmd_incremental_search(int f, int n)
 {
 	struct line *curline;			/* Current line on entry              */
 	int curoff;				/* Current offset on entry            */
@@ -92,12 +91,12 @@ int fisearch(int f, int n)
 		curwp->w_dotp = curline;	/* Reset the line pointer             */
 		curwp->w_doto = curoff;		/*  and the offset to original value  */
 		curwp->w_flag |= WFMOVE;	/* Say we've moved                    */
-		update(FALSE);			/* And force an update                */
-		mlwrite("(search failed)");	/* Say we died                        */
-		matchlen = strlen(pat);
+		update();
+		msg_printf("(search failed)");	/* Say we died                        */
+		match_bytes = strlen(search_pattern);
 	} else
-		mlerase();			/* If happy, just erase the cmd line  */
-	matchlen = strlen(pat);
+		msg_erase();			/* If happy, just erase the cmd line  */
+	match_bytes = strlen(search_pattern);
 	return TRUE;
 }
 
@@ -144,7 +143,7 @@ int isearch(int f, int n)
 	cmd_reexecute = -1;			/* We're not re-executing (yet?)      */
 	cmd_offset = 0;				/* Start at the beginning of the buff */
 	cmd_buff[0] = '\0';			/* Init the command buffer            */
-	strncpy(pat_save, pat, NPAT);		/* Save the old pattern string        */
+	mystrscpy(pat_save, search_pattern, NPAT);		/* Save the old pattern string        */
 	curline = curwp->w_dotp;		/* Save the current line pointer      */
 	curoff = curwp->w_doto;			/* Save the current offset            */
 	init_direction = n;			/* Save the initial search direction  */
@@ -166,14 +165,14 @@ int isearch(int f, int n)
 
 	c = ectoc(expc = get_char());		/* Get the first character    */
 	if ((c == IS_FORWARD) || (c == IS_REVERSE)) {	/* Reuse old search string?   */
-		for (cpos = 0; pat[cpos] != 0; cpos++)	/* Yup, find the length           */
-			col = echo_char(pat[cpos], col);	/*  and re-echo the string    */
+		for (cpos = 0; search_pattern[cpos] != 0; cpos++)	/* Yup, find the length           */
+			col = echo_char(search_pattern[cpos], col);	/*  and re-echo the string    */
 		if (c == IS_REVERSE) {		/* forward search?            */
 			n = -1;			/* No, search in reverse      */
-			backchar(TRUE, 1);	/* Be defensive about EOB     */
+			cmd_backward_character(TRUE, 1);	/* Be defensive about EOB     */
 		} else
 			n = 1;			/* Yes, search forward        */
-		status = scanmore(pat, n);	/* Do the search              */
+		status = scanmore(search_pattern, n);	/* Do the search              */
 		c = ectoc(expc = get_char());	/* Get another character      */
 	}
 
@@ -183,7 +182,7 @@ int isearch(int f, int n)
 		/* Check for special characters first: */
 		/* Most cases here change the search */
 
-		if (expc == metac)		/* Want to quit searching?    */
+		if (expc == meta_char)		/* Want to quit searching?    */
 			return TRUE;		/* Quit searching now         */
 
 		switch (c) {			/* dispatch on the input char */
@@ -196,7 +195,7 @@ int isearch(int f, int n)
 				n = -1;		/* Set the reverse direction  */
 			else			/* Otherwise,                     */
 				n = 1;		/*  go forward                */
-			status = scanmore(pat, n);	/* Start the search again     */
+			status = scanmore(search_pattern, n);	/* Start the search again     */
 			c = ectoc(expc = get_char());	/* Get the next char          */
 			continue;		/* Go continue with the search */
 
@@ -220,7 +219,7 @@ int isearch(int f, int n)
 			curwp->w_dotp = curline;	/* Reset the line pointer     */
 			curwp->w_doto = curoff;	/*  and the offset            */
 			n = init_direction;	/* Reset the search direction */
-			strncpy(pat, pat_save, NPAT);	/* Restore the old search str */
+			mystrscpy(search_pattern, pat_save, NPAT);	/* Restore the old search str */
 			cmd_reexecute = 0;	/* Start the whole mess over  */
 			goto start_over;	/* Let it take care of itself */
 
@@ -228,25 +227,25 @@ int isearch(int f, int n)
 
 		default:			/* All other chars            */
 			if (c < ' ') {		/* Is it printable?             *//* Nope.                      */
-				reeat(c);	/* Re-eat the char            */
+				ttungetc(c);	/* Hand the char back         */
 				return TRUE;	/* And return the last status */
 			}
 		}				/* Switch */
 
 		/* I guess we got something to search for, so search for it           */
 
-		pat[cpos++] = c;		/* put the char in the buffer */
+		search_pattern[cpos++] = c;		/* put the char in the buffer */
 		if (cpos >= NPAT) {		/* too many chars in string?  *//* Yup.  Complain about it    */
-			mlwrite("? Search string too long");
+			msg_printf("? Search string too long");
 			return TRUE;		/* Return an error            */
 		}
-		pat[cpos] = 0;			/* null terminate the buffer  */
+		search_pattern[cpos] = 0;			/* null terminate the buffer  */
 		col = echo_char(c, col);	/* Echo the character         */
 		if (!status) {			/* If we lost last time       */
-			TTputc(BELL);		/* Feep again                 */
-			TTflush();		/* see that the feep feeps    */
-		} else /* Otherwise, we must have won */ if (!(status = checknext(c, pat, n)))	/* See if match         */
-			status = scanmore(pat, n);	/*  or find the next match    */
+			ttputc(BELL);		/* Feep again                 */
+			ttflush();		/* see that the feep feeps    */
+		} else /* Otherwise, we must have won */ if (!(status = checknext(c, search_pattern, n)))	/* See if match         */
+			status = scanmore(search_pattern, n);	/*  or find the next match    */
 		c = ectoc(expc = get_char());	/* Get the next char          */
 	}					/* for {;;} */
 }
@@ -278,8 +277,8 @@ int checknext(char chr, char *patrn, int dir)
 	curoff = curwp->w_doto;			/* Get the offset within that line    */
 
 	if (dir > 0) {				/* If searching forward                 */
-		if (curoff == llength(curline)) {	/* If at end of line                    */
-			curline = lforw(curline);	/* Skip to the next line              */
+		if (curoff == line_length(curline)) {	/* If at end of line                    */
+			curline = line_next(curline);	/* Skip to the next line              */
 			if (curline == curbp->b_linep)
 				return FALSE;	/* Abort if at end of buffer          */
 			curoff = 0;		/* Start at the beginning of the line */
@@ -313,14 +312,14 @@ int scanmore(char *patrn, int dir)
 	int sts;				/* search status                      */
 
 	if (dir < 0) {				/* reverse search?              */
-		rvstrcpy(tap, patrn);		/* Put reversed string in tap */
-		sts = scanner(tap, REVERSE, PTBEG);
+		rvstrcpy(reversed_pattern, patrn);		/* Put reversed string in tap */
+		sts = scanner(reversed_pattern, REVERSE, PTBEG);
 	} else
 		sts = scanner(patrn, FORWARD, PTEND);	/* Nope. Go forward   */
 
 	if (!sts) {
-		TTputc(BELL);			/* Feep if search fails       */
-		TTflush();			/* see that the feep feeps    */
+		ttputc(BELL);			/* Feep if search fails       */
+		ttflush();			/* see that the feep feeps    */
 	}
 
 	return sts;				/* else, don't even try       */
@@ -352,8 +351,8 @@ int match_pat(char *patrn)
 	/* top of per character compare loop: */
 
 	for (i = 0; i < strlen(patrn); i++) {	/* Loop for all characters in patrn   */
-		if (curoff == llength(curline)) {	/* If at end of line                    */
-			curline = lforw(curline);	/* Skip to the next line              */
+		if (curoff == line_length(curline)) {	/* If at end of line                    */
+			curline = line_next(curline);	/* Skip to the next line              */
 			curoff = 0;		/* Start at the beginning of the line */
 			if (curline == curbp->b_linep)
 				return FALSE;	/* Abort if at end of buffer          */
@@ -373,14 +372,14 @@ int promptpattern(char *prompt)
 {
 	char tpat[NPAT + 20];
 
-	strcpy(tpat, prompt);			/* copy prompt to output string */
-	strcat(tpat, " (");			/* build new prompt string */
-	expandp(pat, &tpat[strlen(tpat)], NPAT / 2);	/* add old pattern */
-	strcat(tpat, ")<Meta>: ");
+	mystrscpy(tpat, prompt, sizeof(tpat));	/* copy prompt to output string */
+	mystrscat(tpat, " (", sizeof(tpat));	/* build new prompt string */
+	expandp(search_pattern, tpat + strlen(tpat), NPAT / 2);	/* add old pattern */
+	mystrscat(tpat, ")<Meta>: ", sizeof(tpat));
 
 	/* check to see if we are executing a command line */
-	if (!clexec) {
-		mlwrite(tpat);
+	if (!executing_command_line) {
+		msg_puts(tpat);
 	}
 	return strlen(tpat);
 }
@@ -397,36 +396,36 @@ static int echo_char(int c, int col)
 	if ((c < ' ') || (c == 0x7F)) {		/* Control character?           */
 		switch (c) {			/* Yes, dispatch special cases */
 		case '\n':			/* Newline                    */
-			TTputc('<');
-			TTputc('N');
-			TTputc('L');
-			TTputc('>');
+			ttputc('<');
+			ttputc('N');
+			ttputc('L');
+			ttputc('>');
 			col += 3;
 			break;
 
 		case '\t':			/* Tab                        */
-			TTputc('<');
-			TTputc('T');
-			TTputc('A');
-			TTputc('B');
-			TTputc('>');
+			ttputc('<');
+			ttputc('T');
+			ttputc('A');
+			ttputc('B');
+			ttputc('>');
 			col += 4;
 			break;
 
 		case 0x7F:			/* Rubout:                    */
-			TTputc('^');		/* Output a funny looking     */
-			TTputc('?');		/*  indication of Rubout      */
+			ttputc('^');		/* Output a funny looking     */
+			ttputc('?');		/*  indication of Rubout      */
 			col++;			/* Count the extra char       */
 			break;
 
 		default:			/* Vanilla control char       */
-			TTputc('^');		/* Yes, output prefix         */
-			TTputc(c + 0x40);	/* Make it "^X"               */
+			ttputc('^');		/* Yes, output prefix         */
+			ttputc(c + 0x40);	/* Make it "^X"               */
 			col++;			/* Count this char            */
 		}
 	} else
-		TTputc(c);			/* Otherwise, output raw char */
-	TTflush();				/* Flush the output           */
+		ttputc(c);			/* Otherwise, output raw char */
+	ttflush();				/* Flush the output           */
 	return ++col;				/* return the new column no   */
 }
 
@@ -449,10 +448,10 @@ int get_char(void)
 	/* We're not re-executing (or aren't any more).  Try for a real char      */
 
 	cmd_reexecute = -1;			/* Say we're in real mode again       */
-	update(FALSE);				/* Pretty up the screen               */
+	update();				/* Pretty up the screen               */
 	if (cmd_offset >= CMDBUFLEN - 1) {	/* If we're getting too big ...         */
-		mlwrite("? command too long");	/* Complain loudly and bitterly       */
-		return metac;			/* And force a quit                   */
+		msg_printf("? command too long");	/* Complain loudly and bitterly       */
+		return meta_char;			/* And force a quit                   */
 	}
 	c = get1key();				/* Get the next character             */
 	cmd_buff[cmd_offset++] = c;		/* Save the char for next time        */
@@ -467,21 +466,3 @@ int get_char(void)
 
 /* Come here on the next term.t_getchar call: */
 
-int uneat(void)
-{
-	int c;
-
-	term.t_getchar = saved_get_char;	/* restore the routine address        */
-	c = eaten_char;				/* Get the re-eaten char              */
-	eaten_char = -1;			/* Clear the old char                 */
-	return c;				/* and return the last char           */
-}
-
-void reeat(int c)
-{
-	if (eaten_char != -1)			/* If we've already been here             */
-		return /*(NULL) */ ;		/* Don't do it again                  */
-	eaten_char = c;				/* Else, save the char for later      */
-	saved_get_char = term.t_getchar;	/* Save the char get routine          */
-	term.t_getchar = uneat;			/* Replace it with ours               */
-}

@@ -8,7 +8,7 @@
 
 #include        <stdio.h>
 #include	"estruct.h"
-#include        "edef.h"
+#include        "globals.h"
 #include	"efunc.h"
 
 static FILE *ffp;				/* File pointer, all functions. */
@@ -17,7 +17,7 @@ static int eofflag;				/* end-of-file flag */
 /*
  * Open a file for reading.
  */
-int ffropen(char *fn)
+int file_open_read(char *fn)
 {
 	if ((ffp = fopen(fn, "r")) == NULL)
 		return FIOFNF;
@@ -29,10 +29,10 @@ int ffropen(char *fn)
  * Open a file for writing. Return TRUE if all is well, and FALSE on error
  * (cannot create).
  */
-int ffwopen(char *fn)
+int file_open_write(char *fn)
 {
 	if ((ffp = fopen(fn, "w")) == NULL) {
-		mlwrite("Cannot open file for writing");
+		msg_printf("Cannot open file for writing");
 		return FIOERR;
 	}
 	return FIOSUC;
@@ -41,17 +41,17 @@ int ffwopen(char *fn)
 /*
  * Close a file. Should look at the status in all systems.
  */
-int ffclose(void)
+int file_close(void)
 {
 	/* free this since we do not need it anymore */
-	if (fline) {
-		free(fline);
-		fline = NULL;
+	if (file_line) {
+		free(file_line);
+		file_line = NULL;
 	}
 	eofflag = FALSE;
 
 	if (fclose(ffp) != FALSE) {
-		mlwrite("Error closing file");
+		msg_printf("Error closing file");
 		return FIOERR;
 	}
 	return FIOSUC;
@@ -62,7 +62,7 @@ int ffclose(void)
  * and the "nbuf" is its length, less the free newline. Return the status.
  * Check only at the newline.
  */
-int ffputline(char *buf, int nbuf)
+int file_put_line(char *buf, int nbuf)
 {
 	int i;
 
@@ -72,7 +72,7 @@ int ffputline(char *buf, int nbuf)
 	fputc('\n', ffp);
 
 	if (ferror(ffp)) {
-		mlwrite("Write I/O error");
+		msg_printf("Write I/O error");
 		return FIOERR;
 	}
 
@@ -85,7 +85,7 @@ int ffputline(char *buf, int nbuf)
  * at the end of the file that don't have a newline present. Check for I/O
  * errors too. Return status.
  */
-int ffgetline(void)
+int file_get_line(void)
 {
 	int c;					/* current character read */
 	int i;					/* current index into fline */
@@ -96,26 +96,26 @@ int ffgetline(void)
 		return FIOEOF;
 
 	/* dump fline if it ended up too big */
-	if (flen > NSTRING) {
-		free(fline);
-		fline = NULL;
+	if (file_line_size > NSTRING) {
+		free(file_line);
+		file_line = NULL;
 	}
 
 	/* if we don't have an fline, allocate one */
-	if (fline == NULL)
-		if ((fline = malloc(flen = NSTRING)) == NULL)
+	if (file_line == NULL)
+		if ((file_line = malloc(file_line_size = NSTRING)) == NULL)
 			return FIOMEM;
 
 	/* read the line in */
-	if (!nullflag) {
-		if (fgets(fline, NSTRING, ffp) == (char *)NULL) {	/* EOF ? */
+	if (!accept_nulls) {
+		if (fgets(file_line, NSTRING, ffp) == (char *)NULL) {	/* EOF ? */
 			i = 0;
 			c = EOF;
 		} else {
-			i = strlen(fline);
+			i = strlen(file_line);
 			c = 0;
 			if (i > 0) {
-				c = fline[i - 1];
+				c = file_line[i - 1];
 				i--;
 			}
 		}
@@ -125,15 +125,15 @@ int ffgetline(void)
 	}
 	while (c != EOF && c != '\n') {
 		if (c) {
-			fline[i++] = c;
+			file_line[i++] = c;
 			/* if it's longer, get more room */
-			if (i >= flen) {
-				if ((tmpline = malloc(flen + NSTRING)) == NULL)
+			if (i >= file_line_size) {
+				if ((tmpline = malloc(file_line_size + NSTRING)) == NULL)
 					return FIOMEM;
-				strncpy(tmpline, fline, flen);
-				flen += NSTRING;
-				free(fline);
-				fline = tmpline;
+				strncpy(tmpline, file_line, file_line_size);
+				file_line_size += NSTRING;
+				free(file_line);
+				file_line = tmpline;
 			}
 		}
 		c = fgetc(ffp);
@@ -142,7 +142,7 @@ int ffgetline(void)
 	/* test for any errors that may have occured */
 	if (c == EOF) {
 		if (ferror(ffp)) {
-			mlwrite("File read error");
+			msg_printf("File read error");
 			return FIOERR;
 		}
 
@@ -153,7 +153,7 @@ int ffgetline(void)
 	}
 
 	/* terminate and decrypt the string */
-	fline[i] = 0;
+	file_line[i] = 0;
 	return FIOSUC;
 }
 
@@ -162,7 +162,7 @@ int ffgetline(void)
  *
  * char *fname;		file to check for existance
  */
-int fexist(char *fname)
+int file_exists(char *fname)
 {
 	FILE *fp;
 

@@ -17,7 +17,7 @@
 #include <term.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 
 #include <signal.h>
@@ -28,17 +28,17 @@
 #define BEL     0x07
 #define ESC     0x1B
 
-static void tcapkopen(void);
-static void tcapkclose(void);
-static void tcapmove(int, int);
-static void tcapeeol(void);
-static void tcapeeop(void);
-static void tcapbeep(void);
-static void tcaprev(int);
+void tcapkopen(void);
+void tcapkclose(void);
+void tcapmove(int, int);
+void tcapeeol(void);
+void tcapeeop(void);
+void tcapbeep(void);
+void tcaprev(int);
 static void putpad(char *str);
 
-static void tcapopen(void);
-static void tcapclose(void);
+void tcapopen(void);
+void tcapclose(void);
 
 #define TCAPSLEN 315
 static char tcapbuf[TCAPSLEN];
@@ -54,21 +54,9 @@ struct terminal term = {
 	MARGIN,
 	SCRSIZ,
 	NPAUSE,
-	tcapopen,
-	tcapclose,
-	tcapkopen,
-	tcapkclose,
-	ttgetc,
-	ttputc,
-	ttflush,
-	tcapmove,
-	tcapeeol,
-	tcapeeop,
-	tcapbeep,
-	tcaprev,
 };
 
-static void tcapopen(void)
+void tcapopen(void)
 {
 	char *t, *p;
 	char tcbuf[1024];
@@ -119,10 +107,10 @@ static void tcapopen(void)
 	SE = tgetstr("se", &p);
 	SO = tgetstr("so", &p);
 	if (SO != NULL)
-		revexist = TRUE;
+		can_reverse_video = TRUE;
 
 	if (tgetnum("sg") > 0) {		/* can reverse be used? P.K. */
-		revexist = FALSE;
+		can_reverse_video = FALSE;
 		SE = NULL;
 		SO = NULL;
 	}
@@ -135,7 +123,7 @@ static void tcapopen(void)
 	}
 
 	if (CE == NULL)				/* will we be able to use clear to EOL? */
-		eolexist = FALSE;
+		can_erase_to_eol = FALSE;
 
 	if (p >= &tcapbuf[TCAPSLEN]) {
 		puts("Terminal description too big!\n");
@@ -144,7 +132,7 @@ static void tcapopen(void)
 	ttopen();
 }
 
-static void tcapclose(void)
+void tcapclose(void)
 {
 	putpad(tgoto(CM, 0, term.t_nrow));
 	putpad(TE);
@@ -152,32 +140,32 @@ static void tcapclose(void)
 	ttclose();
 }
 
-static void tcapkopen(void)
+void tcapkopen(void)
 {
 	putpad(TI);
 	ttflush();
-	ttrow = 999;
-	ttcol = 999;
-	sgarbf = TRUE;
+	shown_row = 999;
+	shown_col = 999;
+	screen_garbage = TRUE;
 }
 
-static void tcapkclose(void)
+void tcapkclose(void)
 {
 	putpad(TE);
 	ttflush();
 }
 
-static void tcapmove(int row, int col)
+void tcapmove(int row, int col)
 {
 	putpad(tgoto(CM, col, row));
 }
 
-static void tcapeeol(void)
+void tcapeeol(void)
 {
 	putpad(CE);
 }
 
-static void tcapeeop(void)
+void tcapeeop(void)
 {
 	putpad(CL);
 }
@@ -187,7 +175,7 @@ static void tcapeeop(void)
  *
  * @state: FALSE = normal video, TRUE = reverse video.
  */
-static void tcaprev(int state)
+void tcaprev(int state)
 {
 	if (state) {
 		if (SO != NULL)
@@ -196,7 +184,7 @@ static void tcaprev(int state)
 		putpad(SE);
 }
 
-static void tcapbeep(void)
+void tcapbeep(void)
 {
 	ttputc(BEL);
 }

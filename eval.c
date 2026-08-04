@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 #include "evar.h"
 #include "line.h"
@@ -53,22 +53,22 @@ char *gtfun(char *fname)
 
 	/* return errorm on a bad reference */
 	if (fnum == ARRAY_SIZE(funcs))
-		return errorm;
+		return error_text;
 
 	/* if needed, retrieve the first argument */
 	if (funcs[fnum].f_type >= MONAMIC) {
 		if ((status = macarg(arg1)) != TRUE)
-			return errorm;
+			return error_text;
 
 		/* if needed, retrieve the second argument */
 		if (funcs[fnum].f_type >= DYNAMIC) {
 			if ((status = macarg(arg2)) != TRUE)
-				return errorm;
+				return error_text;
 
 			/* if needed, retrieve the third argument */
 			if (funcs[fnum].f_type >= TRINAMIC)
 				if ((status = macarg(arg3)) != TRUE)
-					return errorm;
+					return error_text;
 		}
 	}
 
@@ -145,7 +145,7 @@ char *gtfun(char *fname)
 	case UFBIND:
 		return transbind(arg1);
 	case UFEXIST:
-		return ltos(fexist(arg1));
+		return ltos(file_exists(arg1));
 	case UFFIND:
 		tsp = flook(arg1, TRUE);
 		return tsp == NULL ? "" : tsp;
@@ -177,13 +177,13 @@ char *gtusr(char *vname)
 	/* scan the list looking for the user var name */
 	for (vnum = 0; vnum < MAXVARS; vnum++) {
 		if (uv[vnum].u_name[0] == 0)
-			return errorm;
+			return error_text;
 		if (strcmp(vname, uv[vnum].u_name) == 0)
 			return uv[vnum].u_value;
 	}
 
 	/* return errorm if we run off the end */
-	return errorm;
+	return error_text;
 }
 
 static char *getkill(void);
@@ -209,13 +209,13 @@ char *gtenv(char *vname)
 		if (ename != NULL)
 			return ename;
 		else
-			return errorm;
+			return error_text;
 	}
 
 	/* otherwise, fetch the appropriate value */
 	switch (vnum) {
 	case EVFILLCOL:
-		return itoa(fillcol);
+		return itoa(fill_column);
 	case EVPAGELEN:
 		return itoa(term.t_nrow + 1);
 	case EVCURCOL:
@@ -235,63 +235,63 @@ char *gtenv(char *vname)
 	case EVSRES:
 		return "NORMAL";
 	case EVDEBUG:
-		return ltos(macbug);
+		return ltos(macro_debug);
 	case EVSTATUS:
-		return ltos(cmdstatus);
+		return ltos(command_status);
 	case EVPALETTE:
 		return "";
 	case EVASAVE:
-		return itoa(gasave);
+		return itoa(autosave_interval);
 	case EVACOUNT:
-		return itoa(gacount);
+		return itoa(autosave_countdown);
 	case EVLASTKEY:
-		return itoa(lastkey);
+		return itoa(last_key);
 	case EVCURCHAR:
 		return (curwp->w_dotp->l_used ==
 			curwp->w_doto ? itoa('\n') : itoa(lgetc(curwp->w_dotp, curwp->w_doto)));
 	case EVDISCMD:
-		return ltos(discmd);
+		return ltos(display_commands);
 	case EVVERSION:
 		return VERSION;
 	case EVPROGNAME:
 		return PROGRAM_NAME_LONG;
 	case EVSEED:
-		return itoa(seed);
+		return itoa(random_seed);
 	case EVDISINP:
-		return ltos(disinp);
+		return ltos(display_input);
 	case EVTARGET:
 		saveflag = lastflag;
-		return itoa(curgoal);
+		return itoa(goal_column);
 	case EVSEARCH:
-		return pat;
+		return search_pattern;
 	case EVREPLACE:
-		return rpat;
+		return replace_pattern;
 	case EVMATCH:
-		return (patmatch == NULL) ? "" : patmatch;
+		return (matched_text == NULL) ? "" : matched_text;
 	case EVKILL:
 		return getkill();
 	case EVCMODE:
 		return itoa(curbp->b_mode);
 	case EVGMODE:
-		return itoa(gmode);
+		return itoa(global_mode);
 	case EVTPAUSE:
 		return itoa(term.t_pause);
 	case EVPENDING:
 		return ltos(typahead());
 	case EVLWIDTH:
-		return itoa(llength(curwp->w_dotp));
+		return itoa(line_length(curwp->w_dotp));
 	case EVLINE:
 		return getctext();
 	case EVGFLAGS:
-		return itoa(gflags);
+		return itoa(global_flags);
 	case EVRVAL:
-		return itoa(rval);
+		return itoa(subprocess_status);
 	case EVTAB:
 		return itoa(tabmask + 1);
 	case EVOVERLAP:
 		return itoa(overlap);
 	case EVSCROLLCOUNT:
-		return itoa(scrollcount);
+		return itoa(scroll_lines);
 	case EVSCROLL:
 		return ltos(0);
 	}
@@ -306,16 +306,16 @@ static char *getkill(void)
 	int size;				/* max number of chars to return */
 	static char value[NSTRING];		/* temp buffer for value */
 
-	if (kbufh == NULL)
+	if (kill_head == NULL)
 		/* no kill buffer....just a null string */
 		value[0] = 0;
 	else {
 		/* copy in the contents... */
-		if (kused < NSTRING)
-			size = kused;
+		if (kill_used < NSTRING)
+			size = kill_used;
 		else
 			size = NSTRING - 1;
-		memcpy(value, kbufh->d_chunk, size);
+		memcpy(value, kill_head->d_chunk, size);
 		value[size] = 0;
 	}
 
@@ -329,7 +329,7 @@ static char *getkill(void)
  * int f;		default flag
  * int n;		numeric arg (can overide prompted value)
  */
-int setvar(int f, int n)
+int cmd_set(int f, int n)
 {
 	int status;				/* status return */
 	struct variable_description vd;		/* variable num/type */
@@ -337,13 +337,13 @@ int setvar(int f, int n)
 	char value[NSTRING];			/* value to set variable to */
 
 	/* first get the variable to set.. */
-	if (clexec == FALSE) {
-		status = mlreply("Variable to set: ", &var[0], NVSIZE);
+	if (executing_command_line == FALSE) {
+		status = ask_string("Variable to set: ", &var[0], NVSIZE);
 		if (status != TRUE)
 			return status;
 	} else {				/* macro line argument */
 		/* grab token and skip it */
-		execstr = token(execstr, var, NVSIZE + 1);
+		command_string = token(command_string, var, NVSIZE + 1);
 	}
 
 	/* check the legality and find the var */
@@ -351,7 +351,7 @@ int setvar(int f, int n)
 
 	/* if its not legal....bitch */
 	if (vd.v_type == -1) {
-		mlwrite("%%No such variable as '%s'", var);
+		msg_printf("%%No such variable as '%s'", var);
 		return FALSE;
 	}
 
@@ -359,7 +359,7 @@ int setvar(int f, int n)
 	if (f == TRUE)
 		strcpy(value, itoa(n));
 	else {
-		status = mlreply("Value: ", &value[0], NSTRING);
+		status = ask_string("Value: ", &value[0], NSTRING);
 		if (status != TRUE)
 			return status;
 	}
@@ -418,7 +418,7 @@ void findvar(char *var, struct variable_description *vd, int size)
 		var[4] = 0;
 		if (strcmp(&var[1], "ind") == 0) {
 			/* grab token, and eval it */
-			execstr = token(execstr, var, size);
+			command_string = token(command_string, var, size);
 			getval(var, var, size);
 			goto fvar;
 		}
@@ -465,23 +465,23 @@ int svar(struct variable_description *var, char *value)
 		status = TRUE;			/* by default */
 		switch (vnum) {
 		case EVFILLCOL:
-			fillcol = atoi(value);
+			fill_column = atoi(value);
 			break;
 		case EVPAGELEN:
-			status = newsize(TRUE, atoi(value));
+			status = cmd_change_screen_size(TRUE, atoi(value));
 			break;
 		case EVCURCOL:
 			status = setccol(atoi(value));
 			break;
 		case EVCURLINE:
-			status = gotoline(TRUE, atoi(value));
+			status = cmd_goto_line(TRUE, atoi(value));
 			break;
 		case EVRAM:
 			break;
 		case EVFLICKER:
 			break;
 		case EVCURWIDTH:
-			status = newwidth(TRUE, atoi(value));
+			status = cmd_change_screen_width(TRUE, atoi(value));
 			break;
 		case EVCBUFNAME:
 			strcpy(curbp->b_bname, value);
@@ -494,53 +494,53 @@ int svar(struct variable_description *var, char *value)
 		case EVSRES:
 			break;
 		case EVDEBUG:
-			macbug = stol(value);
+			macro_debug = stol(value);
 			break;
 		case EVSTATUS:
-			cmdstatus = stol(value);
+			command_status = stol(value);
 			break;
 		case EVASAVE:
-			gasave = atoi(value);
+			autosave_interval = atoi(value);
 			break;
 		case EVACOUNT:
-			gacount = atoi(value);
+			autosave_countdown = atoi(value);
 			break;
 		case EVLASTKEY:
-			lastkey = atoi(value);
+			last_key = atoi(value);
 			break;
 		case EVCURCHAR:
-			ldelchar(1, FALSE);	/* delete 1 char */
+			delete_characters(1, FALSE);	/* delete 1 char */
 			c = atoi(value);
 			if (c == '\n')
-				lnewline();
+				insert_newline();
 			else
-				linsert(1, c);
-			backchar(FALSE, 1);
+				insert_char(1, c);
+			cmd_backward_character(FALSE, 1);
 			break;
 		case EVDISCMD:
-			discmd = stol(value);
+			display_commands = stol(value);
 			break;
 		case EVVERSION:
 			break;
 		case EVPROGNAME:
 			break;
 		case EVSEED:
-			seed = atoi(value);
+			random_seed = atoi(value);
 			break;
 		case EVDISINP:
-			disinp = stol(value);
+			display_input = stol(value);
 			break;
 		case EVTARGET:
-			curgoal = atoi(value);
+			goal_column = atoi(value);
 			thisflag = saveflag;
 			break;
 		case EVSEARCH:
-			strcpy(pat, value);
-			rvstrcpy(tap, pat);
+			strcpy(search_pattern, value);
+			rvstrcpy(reversed_pattern, search_pattern);
 			mcclear();
 			break;
 		case EVREPLACE:
-			strcpy(rpat, value);
+			strcpy(replace_pattern, value);
 			break;
 		case EVMATCH:
 			break;
@@ -551,7 +551,7 @@ int svar(struct variable_description *var, char *value)
 			curwp->w_flag |= WFMODE;
 			break;
 		case EVGMODE:
-			gmode = atoi(value);
+			global_mode = atoi(value);
 			break;
 		case EVTPAUSE:
 			term.t_pause = atoi(value);
@@ -563,7 +563,7 @@ int svar(struct variable_description *var, char *value)
 		case EVLINE:
 			putctext(value);
 		case EVGFLAGS:
-			gflags = atoi(value);
+			global_flags = atoi(value);
 			break;
 		case EVRVAL:
 			break;
@@ -577,7 +577,7 @@ int svar(struct variable_description *var, char *value)
 			overlap = atoi(value);
 			break;
 		case EVSCROLLCOUNT:
-			scrollcount = atoi(value);
+			scroll_lines = atoi(value);
 			break;
 		case EVSCROLL:
 			break;
@@ -688,12 +688,12 @@ static char *internal_getval(char *token)
 
 	case TKARG:				/* interactive argument */
 		getval(token + 1, token, -1);
-		distmp = discmd;		/* echo it always! */
-		discmd = TRUE;
+		distmp = display_commands;		/* echo it always! */
+		display_commands = TRUE;
 		status = getstring(token, buf, NSTRING, ctoec('\n'));
-		discmd = distmp;
+		display_commands = distmp;
 		if (status == ABORT)
-			return errorm;
+			return error_text;
 		return buf;
 
 	case TKBUF:				/* buffer contents fetch */
@@ -702,7 +702,7 @@ static char *internal_getval(char *token)
 		getval(token + 1, token, -1);
 		bp = bfind(token, FALSE, 0);
 		if (bp == NULL)
-			return errorm;
+			return error_text;
 
 		/* if the buffer is displayed, get the window
 		   vars instead of the buffer vars */
@@ -713,7 +713,7 @@ static char *internal_getval(char *token)
 
 		/* make sure we are not at the end */
 		if (bp->b_linep == bp->b_dotp)
-			return errorm;
+			return error_text;
 
 		/* grab the line as an argument */
 		blen = bp->b_dotp->l_used - bp->b_doto;
@@ -743,9 +743,9 @@ static char *internal_getval(char *token)
 	case TKFUN:
 		return gtfun(token + 1);
 	case TKDIR:
-		return errorm;
+		return error_text;
 	case TKLBL:
-		return errorm;
+		return error_text;
 	case TKLIT:
 		return token;
 	case TKSTR:
@@ -753,7 +753,7 @@ static char *internal_getval(char *token)
 	case TKCMD:
 		return token;
 	}
-	return errorm;
+	return error_text;
 }
 
 char *getval(char *token, char *dst, int size)
@@ -788,9 +788,9 @@ int stol(char *val)
 char *ltos(int val)
 {
 	if (val)
-		return truem;
+		return true_text;
 	else
-		return falsem;
+		return false_text;
 }
 
 /*
@@ -843,8 +843,8 @@ int abs(int x)
  */
 int ernd(void)
 {
-	seed = abs(seed * 1721 + 10007);
-	return seed;
+	random_seed = abs(random_seed * 1721 + 10007);
+	return random_seed;
 }
 
 /*

@@ -59,7 +59,7 @@
 #define	maindef
 
 #include "estruct.h"				/* Global structures and defines. */
-#include "edef.h"				/* Global definitions. */
+#include "globals.h"				/* Global definitions. */
 #include "efunc.h"				/* Function declarations and name table. */
 #include "ebind.h"				/* Default key bindings. */
 #include "version.h"
@@ -90,11 +90,11 @@ int spellcheck(const char *word)
 	return Hunspell_spell(hunhandle, word);
 }
 
-static void local_dictionary(Hunhandle *handle, const char *filename)
+static void local_dictionary(Hunhandle *handle, const char *cmd_change_file_name)
 {
 	struct stat st;
-	if (!stat(filename, &st) && S_ISREG(st.st_mode))
-		Hunspell_add_dic(handle, filename);
+	if (!stat(cmd_change_file_name, &st) && S_ISREG(st.st_mode))
+		Hunspell_add_dic(handle, cmd_change_file_name);
 }
 
 int main(int argc, char **argv)
@@ -130,7 +130,14 @@ int main(int argc, char **argv)
 		}
 	}
 
-	signal(SIGWINCH, sizesignal);
+	/*
+	 * Deliberately not SA_RESTART: a resize has to interrupt the
+	 * read() the editor spends its life in, or nothing acts on it
+	 * until the next keystroke.
+	 */
+	struct sigaction winch = { .sa_handler = sizesignal };
+	sigemptyset(&winch.sa_mask);
+	sigaction(SIGWINCH, &winch, NULL);
 	if (argc == 2) {
 		if (strcmp(argv[1], "--help") == 0) {
 			usage(EXIT_FAILURE);
@@ -142,7 +149,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Initialize the editor. */
-	vtinit();				/* Display */
+	display_open();				/* Display */
 	edinit("main");				/* Buffers, windows */
 	varinit();				/* user variables */
 
@@ -177,7 +184,7 @@ int main(int argc, char **argv)
 				break;
 			case 'n':		/* -n accept null chars */
 			case 'N':
-				nullflag = TRUE;
+				accept_nulls = TRUE;
 				break;
 			case 'r':		/* -r restrictive use */
 			case 'R':
@@ -186,7 +193,7 @@ int main(int argc, char **argv)
 			case 's':		/* -s for initial search string */
 			case 'S':
 				searchflag = TRUE;
-				strncpy(pat, &argv[carg][2], NPAT);
+				strncpy(search_pattern, &argv[carg][2], NPAT);
 				break;
 			case 'v':		/* -v for View File */
 			case 'V':
@@ -242,28 +249,28 @@ int main(int argc, char **argv)
 		startup("");
 		startflag = TRUE;
 	}
-	discmd = TRUE;				/* P.K. */
+	display_commands = TRUE;				/* P.K. */
 
 	/* if there are any files to read, read the first one! */
 	bp = bfind("main", FALSE, 0);
-	if (firstfile == FALSE && (gflags & GFREAD)) {
+	if (firstfile == FALSE && (global_flags & GFREAD)) {
 		swbuffer(firstbp);
 		zotbuf(bp);
 	} else
-		bp->b_mode |= gmode;
+		bp->b_mode |= global_mode;
 
 	/* Deal with startup gotos and searches */
 	if (gotoflag && searchflag) {
-		update(FALSE);
-		mlwrite("(Can not search and goto at the same time!)");
+		update();
+		msg_printf("(Can not search and goto at the same time!)");
 	} else if (gotoflag) {
-		if (gotoline(TRUE, gline) == FALSE) {
-			update(FALSE);
-			mlwrite("(Bogus goto argument)");
+		if (cmd_goto_line(TRUE, gline) == FALSE) {
+			update();
+			msg_printf("(Bogus goto argument)");
 		}
 	} else if (searchflag) {
-		if (forwhunt(FALSE, 0) == FALSE)
-			update(FALSE);
+		if (cmd_hunt_forward(FALSE, 0) == FALSE)
+			update();
 	}
 
 	/* Setup to process commands. */
@@ -276,13 +283,13 @@ int main(int argc, char **argv)
 	lastflag = saveflag;
 
 	if (curwp->w_flag || !typahead())
-		update(FALSE);
+		update();
 	c = getcmd();
 
 	/* if there is something on the command line, clear it */
-	if (mpresf != FALSE) {
-		mlerase();
-		update(FALSE);
+	if (message_present != FALSE) {
+		msg_erase();
+		update();
 	}
 	f = FALSE;
 	n = 1;
@@ -305,9 +312,9 @@ int main(int argc, char **argv)
 				n = n * 10 + (c - '0');
 			}
 			if ((n == 0) && (mflag == -1))	/* lonely - */
-				mlwrite("Arg:");
+				msg_printf("Arg:");
 			else
-				mlwrite("Arg: %d", n * mflag);
+				msg_printf("Arg: %d", n * mflag);
 
 			c = getcmd();		/* get the next key */
 		}
@@ -316,13 +323,13 @@ int main(int argc, char **argv)
 
 	/* do ^U repeat argument processing */
 
-	if (c == reptc) {			/* ^U, start argument   */
+	if (c == repeat_key) {			/* ^U, start argument   */
 		f = TRUE;
 		n = 4;				/* with argument of 4 */
 		mflag = 0;			/* that can be discarded. */
-		mlwrite("Arg: 4");
-		while (((c = getcmd()) >= '0' && c <= '9') || c == reptc || c == '-') {
-			if (c == reptc)
+		msg_printf("Arg: 4");
+		while (((c = getcmd()) >= '0' && c <= '9') || c == repeat_key || c == '-') {
+			if (c == repeat_key)
 				if ((n > 0) == ((n * 4) > 0))
 					n = n * 4;
 				else
@@ -348,7 +355,7 @@ int main(int argc, char **argv)
 				}
 				n = 10 * n + c - '0';
 			}
-			mlwrite("Arg: %d", (mflag >= 0) ? n : (n ? -n : -1));
+			msg_printf("Arg: %d", (mflag >= 0) ? n : (n ? -n : -1));
 		}
 		/*
 		 * Make arguments preceded by a minus sign negative and change
@@ -377,9 +384,9 @@ void edinit(char *bname)
 	struct window *wp;
 
 	bp = bfind(bname, TRUE, 0);		/* First buffer         */
-	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
+	list_buffer = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
 	wp = (struct window *)malloc(sizeof(struct window));	/* First window         */
-	if (bp == NULL || wp == NULL || blistp == NULL)
+	if (bp == NULL || wp == NULL || list_buffer == NULL)
 		exit(1);
 	curbp = bp;				/* Make this current    */
 	curwp = wp;
@@ -419,8 +426,8 @@ int execute(int c, int f, int n)
 	 * negative, wrap mode is enabled, and we are now past fill column,
 	 * and we are not read-only, perform word wrap.
 	 */
-	if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fillcol > 0 &&
-	    n >= 0 && getccol(FALSE) > fillcol && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
+	if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fill_column > 0 &&
+	    n >= 0 && getccol(FALSE) > fill_column && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
 		execute(META | SPEC | 'W', FALSE, 1);
 
 	if ((c >= 0x20 && c <= 0x7E)		/* Self inserting.      */
@@ -437,7 +444,7 @@ int execute(int c, int f, int n)
 		if (curwp->w_bufp->b_mode & MDOVER &&
 		    curwp->w_doto < curwp->w_dotp->l_used &&
 		    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' || (curwp->w_doto) % 8 == 7))
-			ldelchar(1, FALSE);
+			delete_characters(1, FALSE);
 
 		/* do the appropriate insertion */
 		if (c == '}' && (curbp->b_mode & MDCMOD) != 0)
@@ -445,7 +452,7 @@ int execute(int c, int f, int n)
 		else if (c == '#' && (curbp->b_mode & MDCMOD) != 0)
 			status = inspound();
 		else
-			status = linsert(n, c);
+			status = insert_char(n, c);
 
 		/* check for CMODE fence matching */
 		if ((c == '}' || c == ')' || c == ']') && (curbp->b_mode & MDCMOD) != 0)
@@ -453,18 +460,18 @@ int execute(int c, int f, int n)
 
 		/* check auto-save mode */
 		if (curbp->b_mode & MDASAVE)
-			if (--gacount == 0) {
+			if (--autosave_countdown == 0) {
 				/* and save the file if needed */
-				upscreen(FALSE, 0);
-				filesave(FALSE, 0);
-				gacount = gasave;
+				cmd_update_screen(FALSE, 0);
+				cmd_save_file(FALSE, 0);
+				autosave_countdown = autosave_interval;
 			}
 
 		lastflag = thisflag;
 		return status;
 	}
-	TTbeep();
-	mlwrite("(Key not bound)");		/* complain             */
+	tcapbeep();
+	msg_printf("(Key not bound)");		/* complain             */
 	lastflag = 0;				/* Fake last flags.     */
 	return FALSE;
 }
@@ -473,7 +480,7 @@ int execute(int c, int f, int n)
  * Fancy quit command, as implemented by Norm. If the any buffer has
  * changed do a write on that buffer and exit emacs, otherwise simply exit.
  */
-int quickexit(int f, int n)
+int cmd_quick_exit(int f, int n)
 {
 	struct buffer *bp;			/* scanning pointer to buffers */
 	struct buffer *oldcb;			/* original current buffer */
@@ -481,56 +488,49 @@ int quickexit(int f, int n)
 
 	oldcb = curbp;				/* save in case we fail */
 
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if ((bp->b_flag & BFCHG) != 0	/* Changed.             */
 		    && (bp->b_flag & BFTRUNC) == 0	/* Not truncated P.K.   */
 		    && (bp->b_flag & BFINVS) == 0) {	/* Real.                */
 			curbp = bp;		/* make that buffer cur */
-			mlwrite("(Saving %s)", bp->b_fname);
-			if ((status = filesave(f, n)) != TRUE) {
+			msg_printf("(Saving %s)", bp->b_fname);
+			if ((status = cmd_save_file(f, n)) != TRUE) {
 				curbp = oldcb;	/* restore curbp */
 				return status;
 			}
 		}
 		bp = bp->b_bufp;		/* on to the next buffer */
 	}
-	quit(f, n);				/* conditionally quit   */
+	cmd_exit_emacs(f, n);				/* conditionally quit   */
 	return TRUE;
 }
 
 static void emergencyexit(int signr)
 {
-	quickexit(FALSE, 0);
-	quit(TRUE, 0);
+	cmd_quick_exit(FALSE, 0);
+	cmd_exit_emacs(TRUE, 0);
 }
 
 /*
  * Quit command. If an argument, always quit. Otherwise confirm if a buffer
  * has been changed and not written out. Normally bound to "C-X C-C".
  */
-int quit(int f, int n)
+int cmd_exit_emacs(int f, int n)
 {
 	int s;
 
 	if (f != FALSE				/* Argument forces it.  */
 	    || anycb() == FALSE			/* All buffers clean.   */
 	    /* User says it's OK.   */
-	    || (s = mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
-		if (lockrel() != TRUE) {
-			TTputc('\n');
-			TTputc('\r');
-			TTclose();
-			TTkclose();
-			exit(1);
-		}
-		vttidy();
+	    || (s = ask_yesno("Modified buffers exist. Leave anyway")) == TRUE) {
+		display_close();
 		if (f)
 			exit(n);
 		else
 			exit(0);
 	}
-	mlwrite("");
+	msg_printf("");
 	return s;
 }
 
@@ -539,16 +539,16 @@ int quit(int f, int n)
  * Error if not at the top level in keyboard processing. Set up variables and
  * return.
  */
-int ctlxlp(int f, int n)
+int cmd_begin_macro(int f, int n)
 {
-	if (kbdmode != STOP) {
-		mlwrite("%%Macro already active");
+	if (keyboard_macro_mode != STOP) {
+		msg_printf("%%Macro already active");
 		return FALSE;
 	}
-	mlwrite("(Start macro)");
-	kbdptr = &kbdm[0];
-	kbdend = kbdptr;
-	kbdmode = RECORD;
+	msg_printf("(Start macro)");
+	keyboard_macro_pos = &keyboard_macro[0];
+	keyboard_macro_end = keyboard_macro_pos;
+	keyboard_macro_mode = RECORD;
 	return TRUE;
 }
 
@@ -556,15 +556,15 @@ int ctlxlp(int f, int n)
  * End keyboard macro. Check for the same limit conditions as the above
  * routine. Set up the variables and return to the caller.
  */
-int ctlxrp(int f, int n)
+int cmd_end_macro(int f, int n)
 {
-	if (kbdmode == STOP) {
-		mlwrite("%%Macro not active");
+	if (keyboard_macro_mode == STOP) {
+		msg_printf("%%Macro not active");
 		return FALSE;
 	}
-	if (kbdmode == RECORD) {
-		mlwrite("(End macro)");
-		kbdmode = STOP;
+	if (keyboard_macro_mode == RECORD) {
+		msg_printf("(End macro)");
+		keyboard_macro_mode = STOP;
 	}
 	return TRUE;
 }
@@ -574,17 +574,17 @@ int ctlxrp(int f, int n)
  * The command argument is the number of times to loop. Quit as soon as a
  * command gets an error. Return TRUE if all ok, else FALSE.
  */
-int ctlxe(int f, int n)
+int cmd_execute_macro(int f, int n)
 {
-	if (kbdmode != STOP) {
-		mlwrite("%%Macro already active");
+	if (keyboard_macro_mode != STOP) {
+		msg_printf("%%Macro already active");
 		return FALSE;
 	}
 	if (n <= 0)
 		return TRUE;
-	kbdrep = n;				/* remember how many times to execute */
-	kbdmode = PLAY;				/* start us in play mode */
-	kbdptr = &kbdm[0];			/*    at the beginning */
+	keyboard_macro_repeat = n;				/* remember how many times to execute */
+	keyboard_macro_mode = PLAY;				/* start us in play mode */
+	keyboard_macro_pos = &keyboard_macro[0];			/*    at the beginning */
 	return TRUE;
 }
 
@@ -593,11 +593,11 @@ int ctlxe(int f, int n)
  * Beep the beeper. Kill off any keyboard macro, etc., that is in progress.
  * Sometimes called as a routine, to do general aborting of stuff.
  */
-int ctrlg(int f, int n)
+int cmd_abort_command(int f, int n)
 {
-	TTbeep();
-	kbdmode = STOP;
-	mlwrite("(Aborted)");
+	tcapbeep();
+	keyboard_macro_mode = STOP;
+	msg_printf("(Aborted)");
 	return ABORT;
 }
 
@@ -607,38 +607,38 @@ int ctrlg(int f, int n)
  */
 int rdonly(void)
 {
-	TTbeep();
-	mlwrite("(Key illegal in VIEW mode)");
+	tcapbeep();
+	msg_printf("(Key illegal in VIEW mode)");
 	return FALSE;
 }
 
 int resterr(void)
 {
-	TTbeep();
-	mlwrite("(That command is RESTRICTED)");
+	tcapbeep();
+	msg_printf("(That command is RESTRICTED)");
 	return FALSE;
 }
 
 /* user function that does NOTHING */
-int nullproc(int f, int n)
+int cmd_nop(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to meta prefix */
-int metafn(int f, int n)
+int cmd_meta_prefix(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to control-x prefix */
-int cex(int f, int n)
+int cmd_ctlx_prefix(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to universal-argument */
-int unarg(int f, int n)
+int cmd_universal_argument(int f, int n)
 {
 	return TRUE;
 }

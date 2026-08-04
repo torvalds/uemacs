@@ -6,149 +6,103 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/file.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 
-#include <sys/errno.h>
-
-static char *lname[NLOCKS];			/* names of all locked files */
+/*
+ * A lock is an exclusive flock() on an open file descriptor, so the
+ * descriptor has to stay open for as long as we hold the file.  Nothing
+ * ever reads 'fd' again - it is here so that the descriptor is not lost,
+ * and it is closed by exit() along with everything else.
+ *
+ * The table is keyed on device and inode rather than on the file name,
+ * because the same file reached by two different names is the same file.
+ * With name keying flock() would refuse our own second descriptor and
+ * leave us reporting that somebody else had it, which is a silly way to
+ * be told you can spell.
+ */
+static struct filelock {
+	dev_t dev;
+	ino_t ino;
+	int fd;
+} locks[NLOCKS];
 static int numlocks;				/* # of current locks active */
 
 /*
  * lockchk:
  *	check a file for locking and add it to the list
  *
+ *	returns	TRUE = we hold it now, or nobody meaningfully does
+ *		ABORT = somebody else holds it, don't read the file
+ *
  * char *fname;			file to check for a lock
  */
 int lockchk(char *fname)
 {
-	int i;					/* loop indexes */
-	int status;				/* return status */
+	struct stat st;
+	int fd, i;
 
-	/* check to see if that file is already locked here */
-	if (numlocks > 0)
-		for (i = 0; i < numlocks; ++i)
-			if (strcmp(fname, lname[i]) == 0)
-				return TRUE;
+	/*
+	 * Nothing to lock: a new file, or one we have no business
+	 * reading.  Either way readin() is about to report it properly,
+	 * so don't report it first and worse.
+	 *
+	 * O_CLOEXEC matters here - spawn.c forks shells, and a
+	 * descriptor inherited by one of them would hold the lock open
+	 * long after we exited.
+	 */
+	fd = open(fname, O_RDONLY | O_CLOEXEC);
+	if (fd < 0)
+		return TRUE;
+
+	if (fstat(fd, &st) < 0) {
+		close(fd);
+		return TRUE;
+	}
+
+	/* already ours? */
+	for (i = 0; i < numlocks; i++) {
+		if (locks[i].dev == st.st_dev && locks[i].ino == st.st_ino) {
+			close(fd);
+			return TRUE;
+		}
+	}
 
 	/* if we have a full locking table, bitch and leave */
 	if (numlocks == NLOCKS) {
-		mlwrite("LOCK ERROR: Lock table full");
+		msg_printf("LOCK ERROR: Lock table full");
+		close(fd);
 		return ABORT;
 	}
 
-	/* next, try to lock it */
-	status = lock(fname);
-	if (status == ABORT)			/* file is locked, no override */
-		return ABORT;
-	if (status == FALSE)			/* locked, overriden, dont add to table */
-		return TRUE;
+	if (flock(fd, LOCK_EX | LOCK_NB) < 0) {
+		close(fd);
 
-	/* we have now locked it, add it to our table */
-	lname[++numlocks - 1] = (char *)malloc(strlen(fname) + 1);
-	if (lname[numlocks - 1] == NULL) {	/* malloc failure */
-		undolock(fname);		/* free the lock */
-		mlwrite("Cannot lock, out of memory");
-		--numlocks;
+		/*
+		 * Only EWOULDBLOCK means somebody else has it.  Any
+		 * other error means this filesystem does not do locking,
+		 * and refusing to edit over that would be worse than not
+		 * locking at all.
+		 */
+		if (errno != EWOULDBLOCK)
+			return TRUE;
+
+		/* someone else has it....override? */
+		if (ask_yesno("File in use, override") == TRUE)
+			return TRUE;
 		return ABORT;
 	}
 
-	/* everthing is cool, add it to the table */
-	strcpy(lname[numlocks - 1], fname);
+	locks[numlocks].dev = st.st_dev;
+	locks[numlocks].ino = st.st_ino;
+	locks[numlocks].fd = fd;
+	numlocks++;
 	return TRUE;
-}
-
-/*
- * lockrel:
- *	release all the file locks so others may edit
- */
-int lockrel(void)
-{
-	int i;					/* loop index */
-	int status;				/* status of locks */
-	int s;					/* status of one unlock */
-
-	status = TRUE;
-	if (numlocks > 0)
-		for (i = 0; i < numlocks; ++i) {
-			if ((s = unlock(lname[i])) != TRUE)
-				status = s;
-			free(lname[i]);
-		}
-	numlocks = 0;
-	return status;
-}
-
-/*
- * lock:
- *	Check and lock a file from access by others
- *	returns	TRUE = files was not locked and now is
- *		FALSE = file was locked and overridden
- *		ABORT = file was locked, abort command
- *
- * char *fname;		file name to lock
- */
-int lock(char *fname)
-{
-	char *locker;				/* lock error message */
-	int status;				/* return status */
-	char msg[NSTRING];			/* message string */
-
-	/* attempt to lock the file */
-	locker = dolock(fname);
-	if (locker == NULL)			/* we win */
-		return TRUE;
-
-	/* file failed...abort */
-	if (strncmp(locker, "LOCK", 4) == 0) {
-		lckerror(locker);
-		return ABORT;
-	}
-
-	/* someone else has it....override? */
-	strcpy(msg, "File in use by ");
-	strcat(msg, locker);
-	strcat(msg, ", override?");
-	status = mlyesno(msg);			/* ask them */
-	if (status == TRUE)
-		return FALSE;
-	else
-		return ABORT;
-}
-
-/*
- * unlock:
- *	Unlock a file
- *	this only warns the user if it fails
- *
- * char *fname;		file to unlock
- */
-int unlock(char *fname)
-{
-	char *locker;				/* undolock return string */
-
-	/* unclock and return */
-	locker = undolock(fname);
-	if (locker == NULL)
-		return TRUE;
-
-	/* report the error and come back */
-	lckerror(locker);
-	return FALSE;
-}
-
-/*
- * report a lock error
- *
- * char *errstr;	lock error string to print out
- */
-void lckerror(char *errstr)
-{
-	char obuf[NSTRING];			/* output buffer for error message */
-
-	strcpy(obuf, errstr);
-	strcat(obuf, " - ");
-	strcat(obuf, strerror(errno));
-	mlwrite(obuf);
 }
