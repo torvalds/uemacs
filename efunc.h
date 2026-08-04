@@ -182,6 +182,7 @@ extern char *transbind(char *skey);
 extern int cmd_select_buffer(int f, int n);
 extern int cmd_next_buffer(int f, int n);
 extern int swbuffer(struct buffer *bp);
+extern void shown_buffer_changed(void);
 extern int cmd_delete_buffer(int f, int n);
 extern int zotbuf(struct buffer *bp);
 extern int cmd_name_buffer(int f, int n);

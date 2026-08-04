@@ -142,7 +142,7 @@ struct key_tab keytab[NBINDS] = {
 	{ SPEC | META | 'W', cmd_wrap_word },	/* called on word wrap */
 	{ SPEC | META | 'C', cmd_nop },	/*  every command input */
 	{ SPEC | META | 'R', cmd_nop },	/*  on file read */
-	{ SPEC | META | 'X', cmd_nop },	/*  on window change P.K. */
+	{ SPEC | META | 'X', cmd_nop },	/*  on buffer change */
 
 	{ 0, NULL }
 };

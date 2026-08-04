@@ -174,6 +174,7 @@ int getfile(char *fname, int lockfl)
 				lp = line_prev(lp);
 			curwp->w_linep = lp;
 			curwp->w_flag |= WFMODE | WFHARD;
+			shown_buffer_changed();
 			msg_printf("(Old buffer)");
 			return TRUE;
 		}
@@ -203,6 +204,7 @@ int getfile(char *fname, int lockfl)
 	curwp->w_bufp = bp;
 	curbp->b_nwnd++;
 	s = readin(fname, lockfl);		/* Read it in.          */
+	shown_buffer_changed();
 	return s;
 }
 

@@ -103,9 +103,22 @@ int swbuffer(struct buffer *bp)
 		curwp->w_doto = bp->b_doto;
 		curwp->w_markp = bp->b_markp;
 		curwp->w_marko = bp->b_marko;
-		return TRUE;
 	}
+	shown_buffer_changed();
 	return TRUE;
+}
+
+/*
+ * Tell a macro that the buffer on the screen is not the one that was
+ * there before.  Anything bound to META-SPEC-X gets run; nothing is by
+ * default.
+ *
+ * Not to be confused with buffer_changed(), which is about a buffer's
+ * contents rather than about which one you are looking at.
+ */
+void shown_buffer_changed(void)
+{
+	execute(META | SPEC | 'X', FALSE, 1);
 }
 
 /*
