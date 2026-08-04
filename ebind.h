@@ -112,6 +112,7 @@ struct key_tab keytab[NBINDS] = {
 	{ META | '.', cmd_set_mark },
 	{ META | '>', cmd_end_of_file },
 	{ META | '<', cmd_beginning_of_file },
+	{ META | '?', cmd_help },
 	{ META | '~', cmd_unmark_buffer },
 	{ META | 'B', cmd_previous_word },
 	{ META | 'C', cmd_case_word_capitalize },

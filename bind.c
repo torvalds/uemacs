@@ -16,6 +16,47 @@
 #include "line.h"
 #include "util.h"
 
+/*
+ * Show the help file, in a window of its own and in view mode.  Bound to
+ * "M-?".
+ *
+ * The lookup asks flook() to try $HOME and $HOME/lib, which is the whole
+ * reason this works at all: the Makefile installs emacs.hlp into
+ * $(HOME)/lib, and that is the one place the old FALSE here told flook
+ * not to look.  Unless you happened to be sitting in a directory with a
+ * copy of the file in it, help had nothing to show.
+ */
+int cmd_help(int f, int n)
+{
+	struct buffer *bp;
+	char *fname = NULL;
+
+	/* already read in once? */
+	bp = bfind("emacs.hlp", FALSE, BFINVS);
+	if (bp == NULL) {
+		fname = flook(pathname[1], TRUE);
+		if (fname == NULL) {
+			msg_printf("(Help file is not online)");
+			return FALSE;
+		}
+	}
+
+	/* a window to put it in */
+	if (cmd_split_current_window(FALSE, 1) == FALSE)
+		return FALSE;
+
+	if (bp == NULL) {
+		if (getfile(fname, FALSE) == FALSE)
+			return FALSE;
+	} else
+		swbuffer(bp);
+
+	curwp->w_bufp->b_mode |= MDVIEW;
+	curwp->w_bufp->b_flag |= BFINVS;
+	update_modeline();
+	return TRUE;
+}
+
 int cmd_describe_key(int f, int n)
 {						/* describe the command for a certain key */
 	int c;					/* key to describe */

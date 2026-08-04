@@ -175,6 +175,7 @@ extern void outstring(char *s);
 extern void ostring(char *s);
 
 /* bind.c */
+extern int cmd_help(int f, int n);
 extern int cmd_describe_key(int f, int n);
 extern int cmd_bind_to_key(int f, int n);
 extern int cmd_unbind_key(int f, int n);

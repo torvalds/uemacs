@@ -104,6 +104,7 @@ struct name_bind names[] = {
 	{ "forward-character", cmd_forward_character },
 	{ "goto-line", cmd_goto_line },
 	{ "grow-window", cmd_grow_window },
+	{ "help", cmd_help },
 	{ "goto-matching-fence", cmd_goto_matching_fence },
 	{ "handle-tab", cmd_handle_tab },
 	{ "hunt-forward", cmd_hunt_forward },
