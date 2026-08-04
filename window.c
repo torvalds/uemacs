@@ -364,6 +364,117 @@ int cmd_shrink_window(int f, int n)
 }
 
 /*
+ * Move the frame of the current window up by "n" lines, leaving the dot
+ * where it is if it is still on the screen afterwards and centring it if
+ * it is not.  This moves the window over the text, not the text through
+ * the window.  Bound to "C-x C-P".
+ */
+int cmd_move_window_up(int f, int n)
+{
+	struct line *lp = curwp->w_linep;
+	int i;
+
+	if (n < 0) {
+		while (n++ && lp != curbp->b_linep)
+			lp = line_next(lp);
+	} else {
+		while (n-- && line_prev(lp) != curbp->b_linep)
+			lp = line_prev(lp);
+	}
+	/*
+	 * The mode line has to be redrawn too, whatever upstream's "Mode
+	 * line is OK" said: the Top/Bot/percentage it ends with is worked
+	 * out from w_linep, which is exactly what just moved.
+	 */
+	curwp->w_linep = lp;
+	curwp->w_flag |= WFHARD | WFMODE;
+
+	/* if the dot is still showing, leave it alone */
+	for (i = 0; i < curwp->w_ntrows; ++i) {
+		if (lp == curwp->w_dotp)
+			return TRUE;
+		if (lp == curbp->b_linep)
+			break;
+		lp = line_next(lp);
+	}
+
+	/* it is not, so put it in the middle of where we are looking */
+	lp = curwp->w_linep;
+	i = curwp->w_ntrows / 2;
+	while (i-- && lp != curbp->b_linep)
+		lp = line_next(lp);
+	curwp->w_dotp = lp;
+	curwp->w_doto = 0;
+	return TRUE;
+}
+
+/*
+ * The same thing the other way up.  Bound to "C-x C-N".
+ */
+int cmd_move_window_down(int f, int n)
+{
+	return cmd_move_window_up(f, -n);
+}
+
+/*
+ * Make the current window "n" rows tall.  Without an argument there is no
+ * size to change to, so nothing happens.  Bound to "C-x W".
+ */
+int cmd_resize_window(int f, int n)
+{
+	if (f == FALSE)
+		return TRUE;
+	if (curwp->w_ntrows == n)
+		return TRUE;
+	return cmd_grow_window(TRUE, n - curwp->w_ntrows);
+}
+
+/*
+ * Page the *other* window, without leaving this one - which is the point
+ * of having two windows open on different things.  Bound to "M-C-Z" and
+ * "M-C-V".
+ */
+int cmd_scroll_next_up(int f, int n)
+{
+	cmd_next_window(FALSE, 1);
+	cmd_previous_page(f, n);
+	cmd_previous_window(FALSE, 1);
+	return TRUE;
+}
+
+int cmd_scroll_next_down(int f, int n)
+{
+	cmd_next_window(FALSE, 1);
+	cmd_next_page(f, n);
+	cmd_previous_window(FALSE, 1);
+	return TRUE;
+}
+
+/*
+ * Remember the current window, and come back to it later.  Not bound to
+ * anything: these are for macros, which is why the saved window is checked
+ * against the list rather than trusted - the window it names may have been
+ * closed in between.
+ */
+int cmd_save_window(int f, int n)
+{
+	saved_window = curwp;
+	return TRUE;
+}
+
+int cmd_restore_window(int f, int n)
+{
+	struct window *wp;
+
+	for (wp = window_head; wp != NULL; wp = wp->w_wndp) {
+		if (wp == saved_window)
+			return enter_window(wp);
+	}
+	msg_printf("(No such window exists)");
+	return FALSE;
+}
+
+/*
  * Reposition dot in the current window to line "n". If the argument is
  * positive, it is that line. If it is negative it is that line from the
  * bottom. If it is 0 the window is centered (this is what the standard

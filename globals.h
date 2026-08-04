@@ -92,6 +92,7 @@ extern struct window *curwp;			/* Current window               */
 extern struct buffer *curbp;			/* Current buffer               */
 extern struct buffer *buffer_head;		/* first of the chain of all buffers */
 extern struct window *window_head;		/* first of the chain of all windows */
+extern struct window *saved_window;		/* the one save-window remembered */
 extern struct buffer *list_buffer;		/* the *List* buffer, which shows the others */
 
 extern char search_pattern[];			/* what to search for */

@@ -77,6 +77,7 @@ struct window *curwp;				/* Current window               */
 struct buffer *curbp;				/* Current buffer               */
 struct buffer *buffer_head;			/* first of the chain of all buffers */
 struct window *window_head;			/* first of the chain of all windows */
+struct window *saved_window;			/* the one save-window remembered */
 struct buffer *list_buffer;			/* the *List* buffer, which shows the others */
 
 char search_pattern[NPAT];			/* what to search for */
