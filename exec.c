@@ -213,7 +213,7 @@ int macarg(char *tok)
 
 	savcle = executing_command_line;			/* save execution mode */
 	executing_command_line = TRUE;				/* get the argument */
-	status = nextarg("", tok, NSTRING, ctoec('\n'));
+	status = nextarg("", tok, NSTRING, char_to_keycode('\n'));
 	executing_command_line = savcle;			/* restore execution mode */
 	return status;
 }

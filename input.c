@@ -33,7 +33,7 @@ int ask_yesno(char *prompt)
 		/* get the responce */
 		c = tgetc();
 
-		if (c == ectoc(abort_char))		/* Bail out! */
+		if (c == keycode_to_char(abort_char))		/* Bail out! */
 			return ABORT;
 
 		if (c == 'y' || c == 'Y')
@@ -54,7 +54,7 @@ int ask_yesno(char *prompt)
 
 int ask_string(char *prompt, char *buf, int nbuf)
 {
-	return nextarg(prompt, buf, nbuf, ctoec('\n'));
+	return nextarg(prompt, buf, nbuf, char_to_keycode('\n'));
 }
 
 int ask_string_until(char *prompt, char *buf, int nbuf, int eolchar)
@@ -63,11 +63,11 @@ int ask_string_until(char *prompt, char *buf, int nbuf, int eolchar)
 }
 
 /*
- * ectoc:
+ * keycode_to_char:
  *	expanded character to character
  *	collapse the CONTROL and SPEC flags back into an ascii code
  */
-int ectoc(int c)
+int keycode_to_char(int c)
 {
 	if (c & CONTROL)
 		c = c & ~(CONTROL | 0x40);
@@ -77,11 +77,11 @@ int ectoc(int c)
 }
 
 /*
- * ctoec:
+ * char_to_keycode:
  *	character to extended character
  *	pull out the CONTROL and SPEC prefixes (if possible)
  */
-int ctoec(int c)
+int char_to_keycode(int c)
 {
 	if (c >= 0x00 && c <= 0x1F)
 		c = CONTROL | (c + '@');
@@ -124,7 +124,7 @@ fn_t getname(void)
 			/* and match it off */
 			return fncmatch(&buf[0]);
 
-		} else if (c == ectoc(abort_char)) {	/* Bell, abort */
+		} else if (c == keycode_to_char(abort_char)) {	/* Bell, abort */
 			cmd_abort_command(FALSE, 0);
 			ttflush();
 			return NULL;
@@ -431,9 +431,9 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 		}
 
 		/* change from command form back to character form */
-		c = ectoc(c);
+		c = keycode_to_char(c);
 
-		if (c == ectoc(abort_char) && quotef == FALSE) {
+		if (c == keycode_to_char(abort_char) && quotef == FALSE) {
 			/* Abort the input? */
 			cmd_abort_command(FALSE, 0);
 			ttflush();

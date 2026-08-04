@@ -690,7 +690,7 @@ static char *internal_getval(char *token)
 		getval(token + 1, token, -1);
 		distmp = display_commands;		/* echo it always! */
 		display_commands = TRUE;
-		status = getstring(token, buf, NSTRING, ctoec('\n'));
+		status = getstring(token, buf, NSTRING, char_to_keycode('\n'));
 		display_commands = distmp;
 		if (status == ABORT)
 			return error_text;

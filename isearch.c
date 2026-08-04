@@ -163,7 +163,7 @@ int isearch(int f, int n)
 	   or Control-R, re-use the old search string and find the first occurrence
 	 */
 
-	c = ectoc(expc = get_char());		/* Get the first character    */
+	c = keycode_to_char(expc = get_char());		/* Get the first character    */
 	if ((c == IS_FORWARD) || (c == IS_REVERSE)) {	/* Reuse old search string?   */
 		for (cpos = 0; search_pattern[cpos] != 0; cpos++)	/* Yup, find the length           */
 			col = echo_char(search_pattern[cpos], col);	/*  and re-echo the string    */
@@ -173,7 +173,7 @@ int isearch(int f, int n)
 		} else
 			n = 1;			/* Yes, search forward        */
 		status = scanmore(search_pattern, n);	/* Do the search              */
-		c = ectoc(expc = get_char());	/* Get another character      */
+		c = keycode_to_char(expc = get_char());	/* Get another character      */
 	}
 
 	/* Top of the per character loop */
@@ -196,7 +196,7 @@ int isearch(int f, int n)
 			else			/* Otherwise,                     */
 				n = 1;		/*  go forward                */
 			status = scanmore(search_pattern, n);	/* Start the search again     */
-			c = ectoc(expc = get_char());	/* Get the next char          */
+			c = keycode_to_char(expc = get_char());	/* Get the next char          */
 			continue;		/* Go continue with the search */
 
 		case IS_NEWLINE:		/* Carriage return            */
@@ -204,7 +204,7 @@ int isearch(int f, int n)
 			break;			/* Make sure we use it        */
 
 		case IS_QUOTE:			/* Quote character            */
-			c = ectoc(expc = get_char());	/* Get the next char          */
+			c = keycode_to_char(expc = get_char());	/* Get the next char          */
 
 		case IS_TAB:			/* Generically allowed        */
 		case '\n':			/*  controlled characters     */
@@ -246,7 +246,7 @@ int isearch(int f, int n)
 			ttflush();		/* see that the feep feeps    */
 		} else /* Otherwise, we must have won */ if (!(status = checknext(c, search_pattern, n)))	/* See if match         */
 			status = scanmore(search_pattern, n);	/*  or find the next match    */
-		c = ectoc(expc = get_char());	/* Get the next char          */
+		c = keycode_to_char(expc = get_char());	/* Get the next char          */
 	}					/* for {;;} */
 }
 
