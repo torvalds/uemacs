@@ -384,9 +384,9 @@ void edinit(char *bname)
 	struct window *wp;
 
 	bp = bfind(bname, TRUE, 0);		/* First buffer         */
-	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
+	list_buffer = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
 	wp = (struct window *)malloc(sizeof(struct window));	/* First window         */
-	if (bp == NULL || wp == NULL || blistp == NULL)
+	if (bp == NULL || wp == NULL || list_buffer == NULL)
 		exit(1);
 	curbp = bp;				/* Make this current    */
 	curwp = wp;
@@ -488,7 +488,7 @@ int cmd_quick_exit(int f, int n)
 
 	oldcb = curbp;				/* save in case we fail */
 
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if ((bp->b_flag & BFCHG) != 0	/* Changed.             */
 		    && (bp->b_flag & BFTRUNC) == 0	/* Not truncated P.K.   */

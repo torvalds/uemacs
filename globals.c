@@ -72,11 +72,11 @@ int cursor_row;					/* where the cursor belongs, worked out from dot */
 int cursor_col;					/* and its column, counting from the line start */
 int thisflag;					/* Flags, this command          */
 int lastflag;					/* Flags, last command          */
-int curgoal;					/* Goal for C-P, C-N            */
+int goal_column;				/* column C-p and C-n try to stay in */
 struct window *curwp;				/* Current window               */
 struct buffer *curbp;				/* Current buffer               */
-struct buffer *bheadp;				/* Head of list of buffers      */
-struct buffer *blistp;				/* Buffer for C-X C-B           */
+struct buffer *buffer_head;			/* first of the chain of all buffers */
+struct buffer *list_buffer;			/* the *List* buffer, which shows the others */
 
 char search_pattern[NPAT];			/* what to search for */
 char reversed_pattern[NPAT];			/* the same thing backwards, for reverse search */

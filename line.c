@@ -70,7 +70,7 @@ void line_free(struct line *lp)
 		wp->w_marko = 0;
 	}
 
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if (bp->b_nwnd == 0) {
 			if (bp->b_dotp == lp) {

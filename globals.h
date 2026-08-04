@@ -87,11 +87,11 @@ extern int cursor_row;				/* where the cursor belongs, worked out from dot */
 extern int cursor_col;				/* and its column, counting from the line start */
 extern int thisflag;				/* Flags, this command          */
 extern int lastflag;				/* Flags, last command          */
-extern int curgoal;				/* Goal for C-P, C-N            */
+extern int goal_column;				/* column C-p and C-n try to stay in */
 extern struct window *curwp;			/* Current window               */
 extern struct buffer *curbp;			/* Current buffer               */
-extern struct buffer *bheadp;			/* Head of list of buffers      */
-extern struct buffer *blistp;			/* Buffer for C-X C-B           */
+extern struct buffer *buffer_head;		/* first of the chain of all buffers */
+extern struct buffer *list_buffer;		/* the *List* buffer, which shows the others */
 
 extern char search_pattern[];			/* what to search for */
 extern char reversed_pattern[];			/* the same thing backwards, for reverse search */

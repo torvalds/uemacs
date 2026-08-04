@@ -261,7 +261,7 @@ char *gtenv(char *vname)
 		return ltos(display_input);
 	case EVTARGET:
 		saveflag = lastflag;
-		return itoa(curgoal);
+		return itoa(goal_column);
 	case EVSEARCH:
 		return search_pattern;
 	case EVREPLACE:
@@ -531,7 +531,7 @@ int svar(struct variable_description *var, char *value)
 			display_input = stol(value);
 			break;
 		case EVTARGET:
-			curgoal = atoi(value);
+			goal_column = atoi(value);
 			thisflag = saveflag;
 			break;
 		case EVSEARCH:

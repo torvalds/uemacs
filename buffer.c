@@ -59,7 +59,7 @@ int cmd_next_buffer(int f, int n)
 		/* cycle through the buffers to find an eligable one */
 		while (bp == NULL || bp->b_flag & BFINVS) {
 			if (bp == NULL)
-				bp = bheadp;
+				bp = buffer_head;
 			else
 				bp = bp->b_bufp;
 
@@ -148,14 +148,14 @@ int zotbuf(struct buffer *bp)
 		return s;
 	free((char *)bp->b_linep);		/* Release header line. */
 	bp1 = NULL;				/* Find the header.     */
-	bp2 = bheadp;
+	bp2 = buffer_head;
 	while (bp2 != bp) {
 		bp1 = bp2;
 		bp2 = bp2->b_bufp;
 	}
 	bp2 = bp2->b_bufp;			/* Next one in chain.   */
 	if (bp1 == NULL)			/* Unlink it.           */
-		bheadp = bp2;
+		buffer_head = bp2;
 	else
 		bp1->b_bufp = bp2;
 	free((char *)bp);			/* Release buffer block */
@@ -177,7 +177,7 @@ int cmd_name_buffer(int f, int n)
 		return FALSE;
 
 	/* and check for duplicates */
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if (bp != curbp) {
 			/* if the names the same */
@@ -223,12 +223,12 @@ int addline(char *text)
 		return FALSE;
 	for (i = 0; i < ntext; ++i)
 		lputc(lp, i, text[i]);
-	blistp->b_linep->l_bp->l_fp = lp;	/* Hook onto the end    */
-	lp->l_bp = blistp->b_linep->l_bp;
-	blistp->b_linep->l_bp = lp;
-	lp->l_fp = blistp->b_linep;
-	if (blistp->b_dotp == blistp->b_linep)	/* If "." is at the end */
-		blistp->b_dotp = lp;		/* move it to new line  */
+	list_buffer->b_linep->l_bp->l_fp = lp;	/* Hook onto the end    */
+	lp->l_bp = list_buffer->b_linep->l_bp;
+	list_buffer->b_linep->l_bp = lp;
+	lp->l_fp = list_buffer->b_linep;
+	if (list_buffer->b_dotp == list_buffer->b_linep)	/* If "." is at the end */
+		list_buffer->b_dotp = lp;		/* move it to new line  */
 	return TRUE;
 }
 
@@ -246,7 +246,7 @@ int anycb(void)
 {
 	struct buffer *bp;
 
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if ((bp->b_flag & BFINVS) == 0 && (bp->b_flag & BFCHG) != 0)
 			return TRUE;
@@ -268,7 +268,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 	struct buffer *sb;			/* buffer to insert after */
 	struct line *lp;
 
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if (strcmp(bname, bp->b_bname) == 0)
 			return bp;
@@ -282,12 +282,12 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
 			return NULL;
 		}
 		/* find the place in the list to insert this buffer */
-		if (bheadp == NULL || strcmp(bheadp->b_bname, bname) > 0) {
+		if (buffer_head == NULL || strcmp(buffer_head->b_bname, bname) > 0) {
 			/* insert at the beginning */
-			bp->b_bufp = bheadp;
-			bheadp = bp;
+			bp->b_bufp = buffer_head;
+			buffer_head = bp;
 		} else {
-			sb = bheadp;
+			sb = buffer_head;
 			while (sb->b_bufp != NULL) {
 				if (strcmp(sb->b_bufp->b_bname, bname) > 0)
 					break;

@@ -165,7 +165,7 @@ int getfile(char *fname, int lockfl)
 	int s;
 	char bname[NBUFN];			/* buffer name to put file */
 
-	for (bp = bheadp; bp != NULL; bp = bp->b_bufp) {
+	for (bp = buffer_head; bp != NULL; bp = bp->b_bufp) {
 		if ((bp->b_flag & BFINVS) == 0 && strcmp(bp->b_fname, fname) == 0) {
 			swbuffer(bp);
 			lp = curwp->w_dotp;

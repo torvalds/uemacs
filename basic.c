@@ -36,7 +36,7 @@ static int getgoal(struct line *dlp)
 		int width = utf8_to_unicode(dlp->l_text, dbo, len, &c);
 
 		col = next_column(col, c);
-		if (col > curgoal)
+		if (col > goal_column)
 			break;
 		dbo += width;
 	}
@@ -204,7 +204,7 @@ int cmd_next_line(int f, int n)
 	/* if the last command was not note a line move,
 	   reset the goal column */
 	if ((lastflag & CFCPCN) == 0)
-		curgoal = getccol(FALSE);
+		goal_column = getccol(FALSE);
 
 	/* flag this command as a line move */
 	thisflag |= CFCPCN;
@@ -241,7 +241,7 @@ int cmd_previous_line(int f, int n)
 	/* if the last command was not note a line move,
 	   reset the goal column */
 	if ((lastflag & CFCPCN) == 0)
-		curgoal = getccol(FALSE);
+		goal_column = getccol(FALSE);
 
 	/* flag this command as a line move */
 	thisflag |= CFCPCN;
