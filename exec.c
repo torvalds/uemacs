@@ -836,21 +836,21 @@ int dofile(char *fname)
 }
 
 /*
- * cbuf:
+ * execute_numbered_macro:
  *	Execute the contents of a numbered buffer
  *
  * int f, n;		default flag and numeric arg
- * int bufnum;		number of buffer to execute
+ * int number;		number of buffer to execute
  */
-int cbuf(int f, int n, int bufnum)
+int execute_numbered_macro(int f, int n, int number)
 {
 	struct buffer *bp;			/* ptr to buffer to execute */
 	int status;				/* status return */
 	static char bufname[] = "*Macro xx*";
 
 	/* make the buffer name */
-	bufname[7] = '0' + (bufnum / 10);
-	bufname[8] = '0' + (bufnum % 10);
+	bufname[7] = '0' + (number / 10);
+	bufname[8] = '0' + (number % 10);
 
 	/* find the pointer to that buffer */
 	if ((bp = find_buffer(bufname, FALSE, 0)) == NULL) {
@@ -867,200 +867,200 @@ int cbuf(int f, int n, int bufnum)
 
 int cmd_execute_macro_1(int f, int n)
 {
-	return cbuf(f, n, 1);
+	return execute_numbered_macro(f, n, 1);
 }
 
 int cmd_execute_macro_2(int f, int n)
 {
-	return cbuf(f, n, 2);
+	return execute_numbered_macro(f, n, 2);
 }
 
 int cmd_execute_macro_3(int f, int n)
 {
-	return cbuf(f, n, 3);
+	return execute_numbered_macro(f, n, 3);
 }
 
 int cmd_execute_macro_4(int f, int n)
 {
-	return cbuf(f, n, 4);
+	return execute_numbered_macro(f, n, 4);
 }
 
 int cmd_execute_macro_5(int f, int n)
 {
-	return cbuf(f, n, 5);
+	return execute_numbered_macro(f, n, 5);
 }
 
 int cmd_execute_macro_6(int f, int n)
 {
-	return cbuf(f, n, 6);
+	return execute_numbered_macro(f, n, 6);
 }
 
 int cmd_execute_macro_7(int f, int n)
 {
-	return cbuf(f, n, 7);
+	return execute_numbered_macro(f, n, 7);
 }
 
 int cmd_execute_macro_8(int f, int n)
 {
-	return cbuf(f, n, 8);
+	return execute_numbered_macro(f, n, 8);
 }
 
 int cmd_execute_macro_9(int f, int n)
 {
-	return cbuf(f, n, 9);
+	return execute_numbered_macro(f, n, 9);
 }
 
 int cmd_execute_macro_10(int f, int n)
 {
-	return cbuf(f, n, 10);
+	return execute_numbered_macro(f, n, 10);
 }
 
 int cmd_execute_macro_11(int f, int n)
 {
-	return cbuf(f, n, 11);
+	return execute_numbered_macro(f, n, 11);
 }
 
 int cmd_execute_macro_12(int f, int n)
 {
-	return cbuf(f, n, 12);
+	return execute_numbered_macro(f, n, 12);
 }
 
 int cmd_execute_macro_13(int f, int n)
 {
-	return cbuf(f, n, 13);
+	return execute_numbered_macro(f, n, 13);
 }
 
 int cmd_execute_macro_14(int f, int n)
 {
-	return cbuf(f, n, 14);
+	return execute_numbered_macro(f, n, 14);
 }
 
 int cmd_execute_macro_15(int f, int n)
 {
-	return cbuf(f, n, 15);
+	return execute_numbered_macro(f, n, 15);
 }
 
 int cmd_execute_macro_16(int f, int n)
 {
-	return cbuf(f, n, 16);
+	return execute_numbered_macro(f, n, 16);
 }
 
 int cmd_execute_macro_17(int f, int n)
 {
-	return cbuf(f, n, 17);
+	return execute_numbered_macro(f, n, 17);
 }
 
 int cmd_execute_macro_18(int f, int n)
 {
-	return cbuf(f, n, 18);
+	return execute_numbered_macro(f, n, 18);
 }
 
 int cmd_execute_macro_19(int f, int n)
 {
-	return cbuf(f, n, 19);
+	return execute_numbered_macro(f, n, 19);
 }
 
 int cmd_execute_macro_20(int f, int n)
 {
-	return cbuf(f, n, 20);
+	return execute_numbered_macro(f, n, 20);
 }
 
 int cmd_execute_macro_21(int f, int n)
 {
-	return cbuf(f, n, 21);
+	return execute_numbered_macro(f, n, 21);
 }
 
 int cmd_execute_macro_22(int f, int n)
 {
-	return cbuf(f, n, 22);
+	return execute_numbered_macro(f, n, 22);
 }
 
 int cmd_execute_macro_23(int f, int n)
 {
-	return cbuf(f, n, 23);
+	return execute_numbered_macro(f, n, 23);
 }
 
 int cmd_execute_macro_24(int f, int n)
 {
-	return cbuf(f, n, 24);
+	return execute_numbered_macro(f, n, 24);
 }
 
 int cmd_execute_macro_25(int f, int n)
 {
-	return cbuf(f, n, 25);
+	return execute_numbered_macro(f, n, 25);
 }
 
 int cmd_execute_macro_26(int f, int n)
 {
-	return cbuf(f, n, 26);
+	return execute_numbered_macro(f, n, 26);
 }
 
 int cmd_execute_macro_27(int f, int n)
 {
-	return cbuf(f, n, 27);
+	return execute_numbered_macro(f, n, 27);
 }
 
 int cmd_execute_macro_28(int f, int n)
 {
-	return cbuf(f, n, 28);
+	return execute_numbered_macro(f, n, 28);
 }
 
 int cmd_execute_macro_29(int f, int n)
 {
-	return cbuf(f, n, 29);
+	return execute_numbered_macro(f, n, 29);
 }
 
 int cmd_execute_macro_30(int f, int n)
 {
-	return cbuf(f, n, 30);
+	return execute_numbered_macro(f, n, 30);
 }
 
 int cmd_execute_macro_31(int f, int n)
 {
-	return cbuf(f, n, 31);
+	return execute_numbered_macro(f, n, 31);
 }
 
 int cmd_execute_macro_32(int f, int n)
 {
-	return cbuf(f, n, 32);
+	return execute_numbered_macro(f, n, 32);
 }
 
 int cmd_execute_macro_33(int f, int n)
 {
-	return cbuf(f, n, 33);
+	return execute_numbered_macro(f, n, 33);
 }
 
 int cmd_execute_macro_34(int f, int n)
 {
-	return cbuf(f, n, 34);
+	return execute_numbered_macro(f, n, 34);
 }
 
 int cmd_execute_macro_35(int f, int n)
 {
-	return cbuf(f, n, 35);
+	return execute_numbered_macro(f, n, 35);
 }
 
 int cmd_execute_macro_36(int f, int n)
 {
-	return cbuf(f, n, 36);
+	return execute_numbered_macro(f, n, 36);
 }
 
 int cmd_execute_macro_37(int f, int n)
 {
-	return cbuf(f, n, 37);
+	return execute_numbered_macro(f, n, 37);
 }
 
 int cmd_execute_macro_38(int f, int n)
 {
-	return cbuf(f, n, 38);
+	return execute_numbered_macro(f, n, 38);
 }
 
 int cmd_execute_macro_39(int f, int n)
 {
-	return cbuf(f, n, 39);
+	return execute_numbered_macro(f, n, 39);
 }
 
 int cmd_execute_macro_40(int f, int n)
 {
-	return cbuf(f, n, 40);
+	return execute_numbered_macro(f, n, 40);
 }

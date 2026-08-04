@@ -34,7 +34,7 @@
 volatile sig_atomic_t chg_width, chg_height;
 
 static int reframe(struct window *wp);
-static void updpos(void);
+static void update_cursor_position(void);
 static void paint_window(struct window *wp, bool check);
 static void modeline(struct window *wp);
 
@@ -300,7 +300,7 @@ static void paint_window(struct window *wp, bool check)
 
 		/*
 		 * Only the window the cursor is in can be scrolled
-		 * sideways: updpos() works left_column out from the
+		 * sideways: update_cursor_position() works left_column out from the
 		 * current dot, and cursor_row is a screen row that means
 		 * nothing anywhere else.
 		 */
@@ -350,7 +350,7 @@ static void update_window(struct window *wp, int oldbound)
 	bool check = (wp->w_bufp->b_mode & MDSPELL) != 0;
 	/*
 	 * Sideways scrolling is the current window's business and nobody
-	 * else's: updpos() works left_column out from the current dot.
+	 * else's: update_cursor_position() works left_column out from the current dot.
 	 */
 	int bound = wp == curwp ? left_column : 0;
 	int oldb = wp == curwp ? oldbound : 0;
@@ -392,7 +392,7 @@ void update_now(void)
 		if (wp->w_flag)
 			reframe(wp);		/* check the framing */
 
-	updpos();				/* currow, curcol and lbound */
+	update_cursor_position();				/* currow, curcol and lbound */
 
 	if (screen_garbage != FALSE) {
 		/* the screen is not what we think it is; start over */
@@ -503,11 +503,11 @@ static int reframe(struct window *wp)
 }
 
 /*
- * updpos:
+ * update_cursor_position:
  *	update the position of the hardware cursor and handle extended
  *	lines. This is the only update for simple moves.
  */
-static void updpos(void)
+static void update_cursor_position(void)
 {
 	struct line *lp;
 	int i;

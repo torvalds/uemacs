@@ -249,7 +249,7 @@ extern int dobuf(struct buffer *bp);
 extern void freewhile(struct while_block *wp);
 extern int cmd_execute_file(int f, int n);
 extern int dofile(char *fname);
-extern int cbuf(int f, int n, int bufnum);
+extern int execute_numbered_macro(int f, int n, int number);
 extern int cmd_execute_macro_1(int f, int n);
 extern int cmd_execute_macro_2(int f, int n);
 extern int cmd_execute_macro_3(int f, int n);
