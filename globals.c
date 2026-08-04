@@ -82,18 +82,17 @@ char search_pattern[NPAT];			/* what to search for */
 char reversed_pattern[NPAT];			/* the same thing backwards, for reverse search */
 char replace_pattern[NPAT];			/* what to replace it with */
 
-/* The variable matchlen holds the length of the matched
- * string - used by the replace functions.
- * The variable patmatch holds the string that satisfies
- * the search command.
- * The variables matchline and matchoff hold the line and
- * offset position of the *start* of match.
+/*
+ * Where the last search matched, for the replace functions and for
+ * $match.  match_line and match_offset are the start of it, and
+ * match_bytes is how long it is - in bytes, from strlen(), which is
+ * not the same as how many characters it is.
  */
-unsigned int matchlen = 0;
-unsigned int mlenold = 0;
-char *patmatch = NULL;
-struct line *matchline = NULL;
-int matchoff = 0;
+unsigned int match_bytes = 0;			/* length of the last match, in bytes */
+unsigned int previous_match_bytes = 0;		/* and of the one before, for undoing a replace */
+char *matched_text = NULL;			/* the text that matched, for $match */
+struct line *match_line = NULL;			/* the line the match started on */
+int match_offset = 0;				/* and the byte offset within it */
 
 /* directive name table:
 	This holds the names of all the directives....	*/

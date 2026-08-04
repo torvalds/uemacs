@@ -65,10 +65,10 @@ int cmd_reverse_incremental_search(int f, int n)
 		curwp->w_flag |= WFMOVE;	/* Say we've moved                    */
 		update();
 		msg_printf("(search failed)");	/* Say we died                        */
-		matchlen = strlen(search_pattern);
+		match_bytes = strlen(search_pattern);
 	} else
 		msg_erase();			/* If happy, just erase the cmd line  */
-	matchlen = strlen(search_pattern);
+	match_bytes = strlen(search_pattern);
 	return TRUE;
 }
 
@@ -93,10 +93,10 @@ int cmd_incremental_search(int f, int n)
 		curwp->w_flag |= WFMOVE;	/* Say we've moved                    */
 		update();
 		msg_printf("(search failed)");	/* Say we died                        */
-		matchlen = strlen(search_pattern);
+		match_bytes = strlen(search_pattern);
 	} else
 		msg_erase();			/* If happy, just erase the cmd line  */
-	matchlen = strlen(search_pattern);
+	match_bytes = strlen(search_pattern);
 	return TRUE;
 }
 

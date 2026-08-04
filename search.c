@@ -297,7 +297,7 @@ int mcscanner(struct magic *mcpatrn, int direct, int beg_or_end)
 	 * This is important for query-replace undo
 	 * command.
 	 */
-	mlenold = matchlen;
+	previous_match_bytes = match_bytes;
 
 	/* Setup local scan pointers to global ".".
 	 */
@@ -311,9 +311,9 @@ int mcscanner(struct magic *mcpatrn, int direct, int beg_or_end)
 		 * restore it on a match, and initialize matchlen to
 		 * zero in case we are doing a search for replacement.
 		 */
-		matchline = curline;
-		matchoff = curoff;
-		matchlen = 0;
+		match_line = curline;
+		match_offset = curoff;
+		match_bytes = 0;
 
 		if (amatch(mcpatrn, direct, &curline, &curoff)) {
 			/* A SUCCESSFULL MATCH!!!
@@ -324,8 +324,8 @@ int mcscanner(struct magic *mcpatrn, int direct, int beg_or_end)
 				curwp->w_doto = curoff;
 			} else {		/* at beginning of string */
 
-				curwp->w_dotp = matchline;
-				curwp->w_doto = matchoff;
+				curwp->w_dotp = match_line;
+				curwp->w_doto = match_offset;
 			}
 
 			curwp->w_flag |= WFMOVE;	/* flag that we have moved */
@@ -411,7 +411,7 @@ static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *p
 				c = nextch(&curline, &curoff, direct ^ REVERSE);
 
 				if (amatch(mcptr, direct, &curline, &curoff)) {
-					matchlen += nchars;
+					match_bytes += nchars;
 					goto success;
 				}
 
@@ -462,7 +462,7 @@ static int amatch(struct magic *mcptr, int direct, struct line **pcwline, int *p
 		/* Increment the length counter and
 		 * advance the pattern pointer.
 		 */
-		matchlen++;
+		match_bytes++;
 		mcptr++;
 	}					/* End of mcptr loop. */
 
@@ -510,8 +510,8 @@ int scanner(const char *patrn, int direct, int beg_or_end)
 		/* Save the current position in case we match
 		 * the search string at this point.
 		 */
-		matchline = curline;
-		matchoff = curoff;
+		match_line = curline;
+		match_offset = curoff;
 
 		/* Get the character resolving newlines, and
 		 * test it against first char in pattern.
@@ -542,8 +542,8 @@ int scanner(const char *patrn, int direct, int beg_or_end)
 				curwp->w_doto = scanoff;
 			} else {		/* at beginning of string */
 
-				curwp->w_dotp = matchline;
-				curwp->w_doto = matchoff;
+				curwp->w_dotp = match_line;
+				curwp->w_doto = match_offset;
 			}
 
 			curwp->w_flag |= WFMOVE;	/* Flag that we have moved. */
@@ -606,7 +606,7 @@ static int readpattern(char *prompt, char *apat, int srch)
 			 * the length for substitution purposes.
 			 */
 			rvstrcpy(reversed_pattern, apat);
-			mlenold = matchlen = strlen(apat);
+			previous_match_bytes = match_bytes = strlen(apat);
 		}
 		/* Only make the meta-pattern if in magic mode,
 		 * since the pattern in question might have an
@@ -636,16 +636,16 @@ void savematch(void)
 	/* Free any existing match string, then
 	 * attempt to allocate a new one.
 	 */
-	if (patmatch != NULL)
-		free(patmatch);
+	if (matched_text != NULL)
+		free(matched_text);
 
-	ptr = patmatch = malloc(matchlen + 1);
+	ptr = matched_text = malloc(match_bytes + 1);
 
 	if (ptr != NULL) {
-		curoff = matchoff;
-		curline = matchline;
+		curoff = match_offset;
+		curline = match_line;
 
-		for (j = 0; j < matchlen; j++)
+		for (j = 0; j < match_bytes; j++)
 			*ptr++ = nextch(&curline, &curoff, FORWARD);
 
 		*ptr = '\0';
@@ -738,7 +738,7 @@ static int replaces(int kind, int f, int n)
 	/* Set up flags so we can make sure not to do a recursive
 	 * replace on the last line.
 	 */
-	nlflag = (search_pattern[matchlen - 1] == '\n');
+	nlflag = (search_pattern[match_bytes - 1] == '\n');
 	nlrepl = FALSE;
 
 	if (kind) {
@@ -830,9 +830,9 @@ static int replaces(int kind, int f, int n)
 				/* Delete the new string.
 				 */
 				cmd_backward_character(FALSE, rlength);
-				matchline = curwp->w_dotp;
-				matchoff = curwp->w_doto;
-				status = delins(rlength, patmatch, FALSE);
+				match_line = curwp->w_dotp;
+				match_offset = curwp->w_doto;
+				status = delins(rlength, matched_text, FALSE);
 				if (status != TRUE)
 					return status;
 
@@ -841,9 +841,9 @@ static int replaces(int kind, int f, int n)
 				 * reprompt.
 				 */
 				--numsub;
-				cmd_backward_character(FALSE, mlenold);
-				matchline = curwp->w_dotp;
-				matchoff = curwp->w_doto;
+				cmd_backward_character(FALSE, previous_match_bytes);
+				match_line = curwp->w_dotp;
+				match_offset = curwp->w_doto;
 				goto pprompt;
 
 			case '.':		/* abort! and return */
@@ -872,7 +872,7 @@ static int replaces(int kind, int f, int n)
 		 * Delete the sucker, and insert its
 		 * replacement.
 		 */
-		status = delins(matchlen, &replace_pattern[0], TRUE);
+		status = delins(match_bytes, &replace_pattern[0], TRUE);
 		if (status != TRUE)
 			return status;
 
@@ -914,7 +914,7 @@ int delins(int dlength, char *instr, int use_meta)
 			if (rmcptr->mc_type == LITCHAR)
 				status = insert_string(rmcptr->rstr);
 			else
-				status = insert_string(patmatch);
+				status = insert_string(matched_text);
 			rmcptr++;
 		}
 	} else

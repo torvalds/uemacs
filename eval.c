@@ -267,7 +267,7 @@ char *gtenv(char *vname)
 	case EVREPLACE:
 		return replace_pattern;
 	case EVMATCH:
-		return (patmatch == NULL) ? "" : patmatch;
+		return (matched_text == NULL) ? "" : matched_text;
 	case EVKILL:
 		return getkill();
 	case EVCMODE:

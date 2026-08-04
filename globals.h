@@ -97,11 +97,11 @@ extern char search_pattern[];			/* what to search for */
 extern char reversed_pattern[];			/* the same thing backwards, for reverse search */
 extern char replace_pattern[];			/* what to replace it with */
 
-extern unsigned int matchlen;
-extern unsigned int mlenold;
-extern char *patmatch;
-extern struct line *matchline;
-extern int matchoff;
+extern unsigned int match_bytes;		/* length of the last match, in bytes */
+extern unsigned int previous_match_bytes;	/* and of the one before, for undoing a replace */
+extern char *matched_text;			/* the text that matched, for $match */
+extern struct line *match_line;			/* the line the match started on */
+extern int match_offset;			/* and the byte offset within it */
 
 extern char *dname[];				/* Directive name table.        */
 
