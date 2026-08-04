@@ -753,7 +753,10 @@ static void modeline(struct window *wp)
 
 void update_modeline(void)
 {						/* update all the mode lines */
-	curwp->w_flag |= WFMODE;
+	struct window *wp;
+
+	for (wp = window_head; wp != NULL; wp = wp->w_wndp)
+		wp->w_flag |= WFMODE;
 }
 
 /*

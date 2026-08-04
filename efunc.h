@@ -27,6 +27,13 @@ extern int cmd_kill_paragraph(int f, int n);
 extern int cmd_count_words(int f, int n);
 
 /* window.c */
+extern int cmd_split_current_window(int f, int n);
+extern int cmd_next_window(int f, int n);
+extern int cmd_previous_window(int f, int n);
+extern int cmd_delete_other_windows(int f, int n);
+extern int cmd_delete_window(int f, int n);
+extern int cmd_grow_window(int f, int n);
+extern int cmd_shrink_window(int f, int n);
 extern int cmd_redraw_display(int f, int n);
 extern int cmd_clear_and_redraw(int f, int n);
 extern int cmd_change_screen_size(int f, int n);
