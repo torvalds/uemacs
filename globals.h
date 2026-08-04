@@ -24,8 +24,6 @@ typedef int (*fn_t)(int, int);
 
 extern int fill_column;				/* fill column, the $fillcol setting */
 extern int keyboard_macro[];			/* the recorded keystrokes */
-extern char pat[];				/* Search pattern               */
-extern char rpat[];				/* Replacement pattern          */
 extern char *command_string;			/* the command line being executed, or NULL */
 extern char goto_label[];			/* the label a !goto is looking for */
 extern int if_level;				/* !if levels being skipped; 0 means executing */
