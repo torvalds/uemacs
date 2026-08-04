@@ -298,6 +298,7 @@ extern int cmd_suspend_emacs(int f, int n);
 extern void rtfrmshell(void);
 extern int cmd_shell_command(int f, int n);
 extern int cmd_execute_program(int f, int n);
+extern int cmd_pipe_command(int f, int n);
 extern int cmd_filter_buffer(int f, int n);
 
 /* search.c */

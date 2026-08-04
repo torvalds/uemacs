@@ -136,6 +136,7 @@ struct name_bind names[] = {
 	{ "nop", cmd_nop },
 	{ "open-line", cmd_open_line },
 	{ "overwrite-string", cmd_overwrite_string },
+	{ "pipe-command", cmd_pipe_command },
 	{ "previous-line", cmd_previous_line },
 	{ "previous-page", cmd_previous_page },
 	{ "previous-paragraph", cmd_previous_paragraph },

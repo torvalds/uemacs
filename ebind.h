@@ -72,6 +72,7 @@ struct key_tab keytab[NBINDS] = {
 	{ CTLX | '#', cmd_filter_buffer },
 	{ CTLX | '$', cmd_execute_program },
 	{ CTLX | '=', cmd_buffer_position },
+	{ CTLX | '@', cmd_pipe_command },
 	{ CTLX | '(', cmd_begin_macro },
 	{ CTLX | ')', cmd_end_macro },
 	{ CTLX | 'A', cmd_set },
