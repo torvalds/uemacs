@@ -149,6 +149,7 @@ struct key_tab keytab[NBINDS] = {
 	{ SPEC | 'd', cmd_backward_character },
 	{ SPEC | 'e', cmd_next_line },
 	{ SPEC | 'f', cmd_beginning_of_file },
+	{ SPEC | 'h', cmd_help },
 	{ SPEC | 'i', cmd_ctlx_prefix },
 
 	{ 0x7F, cmd_delete_previous_character },
