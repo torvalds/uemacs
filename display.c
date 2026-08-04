@@ -39,6 +39,16 @@ static void paint_window(struct window *wp, bool check);
 static void modeline(struct window *wp);
 
 /*
+ * What the mode line says at the moment.  The dot moving is the commonest
+ * thing that happens and almost never changes it, so this is worth knowing:
+ * it is the whole of the screen image the display keeps, one row of it.
+ * A length of -1 means the screen was cleared under us and nothing is known
+ * about that row any more.
+ */
+static unsigned char shown_modeline[MAXCOL];
+static int shown_modeline_len = -1;
+
+/*
  * Take the terminal over for editing.  There is nothing to allocate:
  * the screen is painted from the buffers, and there is no image of it.
  */
@@ -338,6 +348,7 @@ void update_now(void)
 		tcapeeop();
 		screen_garbage = FALSE;
 		message_present = FALSE;
+		shown_modeline_len = -1;	/* the mode line went with it */
 		paint_window(wp, check);
 	} else if ((wp->w_flag & ~WFMODE) == WFEDIT && !left_column && !oldbound) {
 		/*
@@ -675,6 +686,13 @@ static void modeline(struct window *wp)
 		while ((c = *cp++) != 0)
 			modeline_putc(mline, &n, c);
 	}
+
+	/* Already up there, and 145 bytes not to say it again. */
+	if (shown_modeline_len == term.t_ncol &&
+	    memcmp(shown_modeline, mline, term.t_ncol) == 0)
+		return;
+	memcpy(shown_modeline, mline, term.t_ncol);
+	shown_modeline_len = term.t_ncol;
 
 	/* and paint it, in reverse video across the full width */
 	movecursor(term.t_nrow - 1, 0);
