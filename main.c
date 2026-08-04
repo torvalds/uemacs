@@ -53,6 +53,7 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <hunspell.h>
 
 /* Make global definitions not external. */
@@ -63,6 +64,7 @@
 #include "efunc.h"				/* Function declarations and name table. */
 #include "ebind.h"				/* Default key bindings. */
 #include "version.h"
+#include "util.h"
 
 #include <signal.h>
 static void emergencyexit(int);
@@ -81,13 +83,42 @@ void usage(int status)
 	exit(status);
 }
 
-static Hunhandle *hunhandle;
+/*
+ * The languages to check against.  A word is spelled correctly if any one
+ * of these says so, which is how "colour" and "color" both come out right
+ * without having to pick a side.  Another language is a line here.
+ *
+ * They cannot share one hunspell handle.  Hunspell_add_dic() bolts an
+ * extra word list onto an existing one and the two share the first one's
+ * affix rules, which is right for a personal word list and wrong for a
+ * second language: en_GB.dic's entries carry flags that mean what
+ * en_GB.aff says they mean, and en_GB.aff defines sixty-four of them
+ * against en_US.aff's twenty-three.  Loaded that way the stems arrive and
+ * the inflections quietly do not - "anarchical" and "almsman" are the two
+ * that turned up while checking this.
+ */
+static const char *languages[] = { "en_US", "en_GB" };
+
+/*
+ * Where to look for them.  $DICPATH is hunspell's own variable and is a
+ * colon-separated search path, so it is split like $PATH; the rest is
+ * where the distributions that were to hand keep theirs.
+ */
+static const char *dictionary_path[] = {
+	"/usr/share/hunspell", "/usr/share/myspell",
+	"/usr/local/share/hunspell", "/usr/local/share/myspell",
+};
+
+static Hunhandle *spellers[ARRAY_SIZE(languages)];
+static int nspellers;
 
 int spellcheck(const char *word)
 {
-	if (!hunhandle)
-		return 1;
-	return Hunspell_spell(hunhandle, word);
+	for (int i = 0; i < nspellers; i++)
+		if (Hunspell_spell(spellers[i], word))
+			return 1;
+	/* with nothing to check against, nothing is misspelled */
+	return nspellers == 0;
 }
 
 static void local_dictionary(Hunhandle *handle, const char *filename)
@@ -95,6 +126,70 @@ static void local_dictionary(Hunhandle *handle, const char *filename)
 	struct stat st;
 	if (!stat(filename, &st) && S_ISREG(st.st_mode))
 		Hunspell_add_dic(handle, filename);
+}
+
+/*
+ * One language out of one directory, or NULL if it is not there.  Both
+ * halves have to exist: hunspell will hand back a handle for a missing
+ * dictionary and then say every word is wrong.
+ */
+static Hunhandle *open_dictionary(const char *dir, int dirlen, const char *lang)
+{
+	char aff[NFILEN], dic[NFILEN];
+
+	if (dirlen <= 0)
+		return NULL;
+	snprintf(aff, sizeof(aff), "%.*s/%s.aff", dirlen, dir, lang);
+	snprintf(dic, sizeof(dic), "%.*s/%s.dic", dirlen, dir, lang);
+	if (access(aff, R_OK) || access(dic, R_OK))
+		return NULL;
+	return Hunspell_create(aff, dic);
+}
+
+static Hunhandle *find_dictionary(const char *lang)
+{
+	const char *dicpath = getenv("DICPATH");
+
+	while (dicpath && *dicpath) {
+		const char *end = strchr(dicpath, ':');
+		int len = end ? end - dicpath : (int)strlen(dicpath);
+		Hunhandle *h = open_dictionary(dicpath, len, lang);
+
+		if (h)
+			return h;
+		dicpath = end ? end + 1 : NULL;
+	}
+	for (int i = 0; i < ARRAY_SIZE(dictionary_path); i++) {
+		Hunhandle *h = open_dictionary(dictionary_path[i],
+					       strlen(dictionary_path[i]), lang);
+		if (h)
+			return h;
+	}
+	return NULL;
+}
+
+static void spell_init(void)
+{
+	const char *home;
+
+	for (int i = 0; i < ARRAY_SIZE(languages); i++) {
+		Hunhandle *h = find_dictionary(languages[i]);
+
+		if (h)
+			spellers[nspellers++] = h;
+	}
+	if (nspellers == 0)
+		return;
+
+	/* the personal word list goes on the first, and shares its rules */
+	local_dictionary(spellers[0], ".dictionary");
+	home = getenv("HOME");
+	if (home) {
+		char buf[NFILEN];
+
+		snprintf(buf, sizeof(buf), "%s/.dictionary", home);
+		local_dictionary(spellers[0], buf);
+	}
 }
 
 int main(int argc, char **argv)
@@ -117,18 +212,7 @@ int main(int argc, char **argv)
 	int errflag;				/* C error processing? */
 	char bname[NBUFN];			/* buffer name of file to read */
 
-	const char *aff_path = "/usr/share/hunspell/en_US.aff";
-	const char *dic_path = "/usr/share/hunspell/en_US.dic";
-	hunhandle = Hunspell_create(aff_path, dic_path);
-	if (hunhandle) {
-		local_dictionary(hunhandle, ".dictionary");
-		const char *home = getenv("HOME");
-		if (home) {
-			char buf[1024];
-			snprintf(buf, sizeof(buf), "%s/.dictionary", home);
-			local_dictionary(hunhandle, buf);
-		}
-	}
+	spell_init();
 
 	/*
 	 * Deliberately not SA_RESTART: a resize has to interrupt the
