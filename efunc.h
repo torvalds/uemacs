@@ -182,7 +182,6 @@ extern int cmd_describe_key(int f, int n);
 extern int cmd_bind_to_key(int f, int n);
 extern int cmd_unbind_key(int f, int n);
 extern int unbindchar(int c);
-extern int strinc(char *source, char *sub);
 extern unsigned int getckey(int mflag);
 extern int startup(char *sfname);
 extern char *lookup_file(char *fname, int try_home);

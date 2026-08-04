@@ -81,7 +81,7 @@ static int build_binding_list(char *match)
 	}
 
 	for (nptr = &names[0]; nptr->n_func != NULL; ++nptr) {
-		if (match && strinc(nptr->n_name, match) == FALSE)
+		if (match && strstr(nptr->n_name, match) == NULL)
 			continue;
 
 		strcpy(outseq, nptr->n_name);
@@ -328,42 +328,6 @@ int unbindchar(int c)
 	ktp->k_code = 0;
 	ktp->k_fp = NULL;
 	return TRUE;
-}
-
-/*
- * does source include sub?
- *
- * char *source;	string to search in
- * char *sub;		substring to look for
- */
-int strinc(char *source, char *sub)
-{
-	char *sp;				/* ptr into source */
-	char *nxtsp;				/* next ptr into source */
-	char *tp;				/* ptr into substring */
-
-	/* for each character in the source string */
-	sp = source;
-	while (*sp) {
-		tp = sub;
-		nxtsp = sp;
-
-		/* is the substring here? */
-		while (*tp) {
-			if (*nxtsp++ != *tp)
-				break;
-			else
-				tp++;
-		}
-
-		/* yes, return a success */
-		if (*tp == 0)
-			return TRUE;
-
-		/* no, onward */
-		sp++;
-	}
-	return FALSE;
 }
 
 /*
