@@ -100,7 +100,6 @@ extern int cmd_nop(int f, int n);
 extern int cmd_meta_prefix(int f, int n);
 extern int cmd_ctlx_prefix(int f, int n);
 extern int cmd_universal_argument(int f, int n);
-extern int cexit(int status);
 
 /* display.c */
 extern void display_open(void);
@@ -166,7 +165,6 @@ extern int cmd_describe_key(int f, int n);
 extern int cmd_bind_to_key(int f, int n);
 extern int cmd_unbind_key(int f, int n);
 extern int unbindchar(int c);
-extern int buildlist(int type, char *mstring);
 extern int strinc(char *source, char *sub);
 extern unsigned int getckey(int mflag);
 extern int startup(char *sfname);
@@ -284,9 +282,6 @@ extern void rtfrmshell(void);
 extern int cmd_shell_command(int f, int n);
 extern int cmd_execute_program(int f, int n);
 extern int cmd_filter_buffer(int f, int n);
-extern int sys(char *cmd);
-extern int shellprog(char *cmd);
-extern int execprog(char *cmd);
 
 /* search.c */
 extern int cmd_search_forward(int f, int n);
