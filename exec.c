@@ -97,7 +97,7 @@ int docmd(char *cline)
 	}
 
 	/* process leadin argument */
-	if (gettyp(tkn) != TKCMD) {
+	if (token_type(tkn) != TKCMD) {
 		f = TRUE;
 		getval(tkn, tkn, sizeof(tkn));
 		n = atoi(tkn);

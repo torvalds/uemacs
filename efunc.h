@@ -331,21 +331,21 @@ extern int get_char(void);
 
 /* eval.c */
 extern void varinit(void);
-extern char *gtfun(char *fname);
-extern char *gtusr(char *vname);
-extern char *gtenv(char *vname);
+extern char *eval_function(char *fname);
+extern char *user_variable(char *vname);
+extern char *environment_variable(char *vname);
 extern int cmd_set(int f, int n);
 extern void findvar(char *var, struct variable_description *vd, int size);
 extern int svar(struct variable_description *var, char *value);
 extern char *itoa(int i);
-extern int gettyp(char *token);
+extern int token_type(char *token);
 extern char *getval(char *token, char *result, int size);
 extern int stol(char *val);
 extern char *ltos(int val);
 extern char *mkupper(const char *str, char *result);
 extern char *mklower(const char *str, char *result);
 extern int abs(int x);
-extern int ernd(void);
+extern int next_random(void);
 extern int sindex(char *source, char *pattern);
 extern char *xlat(char *source, char *lookup, char *trans);
 

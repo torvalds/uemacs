@@ -34,7 +34,7 @@ void varinit(void)
  *
  * @fname: name of function to evaluate.
  */
-char *gtfun(char *fname)
+char *eval_function(char *fname)
 {
 	int fnum;				/* index to function to eval */
 	int status;				/* return status */
@@ -134,7 +134,7 @@ char *gtfun(char *fname)
 		result[1] = 0;
 		return result;
 	case UFRND:
-		return itoa((ernd() % abs(atoi(arg1))) + 1);
+		return itoa((next_random() % abs(atoi(arg1))) + 1);
 	case UFABS:
 		return itoa(abs(atoi(arg1)));
 	case UFSINDEX:
@@ -169,7 +169,7 @@ char *gtfun(char *fname)
  *
  * char *vname;			name of user variable to fetch
  */
-char *gtusr(char *vname)
+char *user_variable(char *vname)
 {
 
 	int vnum;				/* ordinal number of user var */
@@ -189,11 +189,11 @@ char *gtusr(char *vname)
 static char *getkill(void);
 
 /*
- * gtenv()
+ * environment_variable()
  *
  * char *vname;			name of environment variable to retrieve
  */
-char *gtenv(char *vname)
+char *environment_variable(char *vname)
 {
 	int vnum;				/* ordinal number of var refrenced */
 
@@ -630,7 +630,7 @@ char *itoa(int i)
  *
  * char *token;		token to analyze
  */
-int gettyp(char *token)
+int token_type(char *token)
 {
 	char c;					/* first char in token */
 
@@ -682,7 +682,7 @@ static char *internal_getval(char *token)
 	int distmp;				/* temporary discmd flag */
 	static char buf[NSTRING];		/* string buffer for some returns */
 
-	switch (gettyp(token)) {
+	switch (token_type(token)) {
 	case TKNUL:
 		return "";
 
@@ -737,11 +737,11 @@ static char *internal_getval(char *token)
 		return buf;
 
 	case TKVAR:
-		return gtusr(token + 1);
+		return user_variable(token + 1);
 	case TKENV:
-		return gtenv(token + 1);
+		return environment_variable(token + 1);
 	case TKFUN:
-		return gtfun(token + 1);
+		return eval_function(token + 1);
 	case TKDIR:
 		return error_text;
 	case TKLBL:
@@ -841,7 +841,7 @@ int abs(int x)
 /*
  * returns a random integer
  */
-int ernd(void)
+int next_random(void)
 {
 	random_seed = abs(random_seed * 1721 + 10007);
 	return random_seed;
