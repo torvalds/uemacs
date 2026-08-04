@@ -41,7 +41,7 @@ int repeat_key = CONTROL | 'U';		/* current universal repeat key */
 int abort_char = CONTROL | 'G';			/* current abort character */
 
 int quote_char = 0x11;				/* quote the next character, during ask_string() */
-int tabmask = 0x07;				/* tabulator mask */
+int tabmask = 0x07;				/* tab stops are every tabmask + 1 columns */
 struct kill *kill_last = NULL;			/* the chunk being filled, at the end of the list */
 struct kill *kill_head = NULL;			/* first chunk of the kill buffer, or NULL */
 int kill_used = KBLOCK;				/* bytes used in that last chunk */
@@ -61,7 +61,7 @@ int saveflag = 0;				/* Flags, saved with the $target var */
 char *file_line = NULL;				/* buffer file_get_line() reads a line into */
 int file_line_size = 0;				/* how big that allocation is, not the length in it */
 int subprocess_status = 0;			/* what the last shell command exited with, the $rval setting */
-int nullflag = FALSE;				/* accept null characters */
+int accept_nulls = FALSE;			/* read NUL bytes as text, the -n option */
 int justflag = FALSE;				/* justify, don't fill */
 int overlap = 0;				/* line overlap in forw/back page */
 int scroll_lines = 1;				/* lines a scroll moves, the $jump setting */

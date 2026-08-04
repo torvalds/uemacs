@@ -107,7 +107,7 @@ int file_get_line(void)
 			return FIOMEM;
 
 	/* read the line in */
-	if (!nullflag) {
+	if (!accept_nulls) {
 		if (fgets(file_line, NSTRING, ffp) == (char *)NULL) {	/* EOF ? */
 			i = 0;
 			c = EOF;

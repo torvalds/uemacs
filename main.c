@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 				break;
 			case 'n':		/* -n accept null chars */
 			case 'N':
-				nullflag = TRUE;
+				accept_nulls = TRUE;
 				break;
 			case 'r':		/* -r restrictive use */
 			case 'R':

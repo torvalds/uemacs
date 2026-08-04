@@ -56,7 +56,7 @@ extern int repeat_key;				/* current universal repeat key */
 extern int abort_char;				/* current abort character */
 
 extern int quote_char;				/* quote the next character, during ask_string() */
-extern int tabmask;
+extern int tabmask;				/* tab stops are every tabmask + 1 columns */
 extern struct kill *kill_last;			/* the chunk being filled, at the end of the list */
 extern struct kill *kill_head;			/* first chunk of the kill buffer, or NULL */
 extern int kill_used;				/* bytes used in that last chunk */
@@ -76,7 +76,7 @@ extern int saveflag;				/* Flags, saved with the $target var */
 extern char *file_line;				/* buffer file_get_line() reads a line into */
 extern int file_line_size;			/* how big that allocation is, not the length in it */
 extern int subprocess_status;			/* what the last shell command exited with, the $rval setting */
-extern int nullflag;
+extern int accept_nulls;			/* read NUL bytes as text, the -n option */
 extern int justflag;				/* justify, don't fill */
 extern int overlap;				/* line overlap in forw/back page */
 extern int scroll_lines;			/* lines a scroll moves, the $jump setting */
