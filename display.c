@@ -34,9 +34,25 @@
 volatile sig_atomic_t chg_width, chg_height;
 
 static int reframe(struct window *wp);
-static void updpos(void);
+static void update_cursor_position(void);
 static void paint_window(struct window *wp, bool check);
 static void modeline(struct window *wp);
+
+/*
+ * What the mode line says at the moment, and which row it is on.  The dot
+ * moving is the commonest thing that happens and almost never changes it,
+ * so this is worth knowing: it is the whole of the screen image the display
+ * keeps, one row of it.  A row of -1 means the screen was cleared under us
+ * and nothing is known about any of it any more.
+ *
+ * With several windows there are several mode lines and this only holds the
+ * one painted last, so the saving goes to whichever window is being worked
+ * in and the others simply repaint.  Remembering all of them would be a
+ * screen image again, for a case that does not repeat the way a single
+ * window's mode line does.
+ */
+static unsigned char shown_modeline[MAXCOL];
+static int shown_modeline_row = -1;
 
 /*
  * Take the terminal over for editing.  There is nothing to allocate:
@@ -278,11 +294,19 @@ static void paint_window(struct window *wp, bool check)
 	struct line *end = wp->w_bufp->b_linep;
 	struct line *lp = wp->w_linep;
 
-	for (int row = 0; row < term.t_nrow - 1; row++) {
+	for (int i = 0; i < wp->w_ntrows; i++) {
+		int row = wp->w_toprow + i;
 		bool eob = lp == end;
 
+		/*
+		 * Only the window the cursor is in can be scrolled
+		 * sideways: update_cursor_position() works left_column out from the
+		 * current dot, and cursor_row is a screen row that means
+		 * nothing anywhere else.
+		 */
 		paint_line(row, eob ? NULL : lp,
-			   row == cursor_row ? left_column : 0, check);
+			   wp == curwp && row == cursor_row ? left_column : 0,
+			   check);
 		if (!eob)
 			lp = line_next(lp);
 	}
@@ -321,35 +345,33 @@ void update(void)
  * window flags say the change cannot have reached further than the line
  * the cursor is on.
  */
-void update_now(void)
+static void update_window(struct window *wp, int oldbound)
 {
-	struct window *wp = curwp;
 	bool check = (wp->w_bufp->b_mode & MDSPELL) != 0;
-	int oldbound = left_column;
+	/*
+	 * Sideways scrolling is the current window's business and nobody
+	 * else's: update_cursor_position() works left_column out from the current dot.
+	 */
+	int bound = wp == curwp ? left_column : 0;
+	int oldb = wp == curwp ? oldbound : 0;
 
-	if (wp->w_flag)
-		reframe(wp);			/* check the framing */
-
-	updpos();				/* currow, curcol and lbound */
-
-	if (screen_garbage != FALSE) {
-		/* the screen is not what we think it is; start over */
-		movecursor(0, 0);
-		tcapeeop();
-		screen_garbage = FALSE;
-		message_present = FALSE;
-		paint_window(wp, check);
-	} else if ((wp->w_flag & ~WFMODE) == WFEDIT && !left_column && !oldbound) {
+	if (wp == curwp && (wp->w_flag & ~WFMODE) == WFEDIT
+	    && !bound && !oldb) {
 		/*
 		 * The case that happens on every keystroke: a character
 		 * went into the line the cursor is on, the line count did
 		 * not change, and nothing is scrolled sideways.  No other
 		 * row can have moved, so no other row is worth painting.
+		 *
+		 * Only ever the current window: buffer_changed() promotes
+		 * the flag to WFHARD as soon as a second window is showing
+		 * the buffer, exactly so that nobody has to paint one
+		 * window's edit at another window's dot.
 		 */
 		paint_line(cursor_row, wp->w_dotp, 0, check);
 		if (wp->w_flag & WFMODE)
 			modeline(wp);
-	} else if (!(wp->w_flag & ~(WFMOVE | WFMODE)) && !left_column && !oldbound) {
+	} else if (!(wp->w_flag & ~(WFMOVE | WFMODE)) && !bound && !oldb) {
 		/*
 		 * The dot moved and the frame did not have to follow it -
 		 * reframe() sets WFHARD when it does - so no text changed
@@ -357,11 +379,46 @@ void update_now(void)
 		 * mode line can differ, and the cursor has to move.
 		 */
 		modeline(wp);
-	} else if (wp->w_flag || left_column != oldbound)
+	} else if (wp->w_flag || bound != oldb)
 		paint_window(wp, check);
+}
 
-	wp->w_flag = 0;
-	wp->w_force = 0;
+void update_now(void)
+{
+	struct window *wp;
+	int oldbound = left_column;
+
+	for (wp = window_head; wp != NULL; wp = wp->w_wndp)
+		if (wp->w_flag)
+			reframe(wp);		/* check the framing */
+
+	update_cursor_position();				/* currow, curcol and lbound */
+
+	if (screen_garbage != FALSE) {
+		/* the screen is not what we think it is; start over */
+		movecursor(0, 0);
+		tcapeeop();
+		screen_garbage = FALSE;
+		message_present = FALSE;
+		shown_modeline_row = -1;	/* the mode line went with it */
+		for (wp = window_head; wp != NULL; wp = wp->w_wndp)
+			paint_window(wp, (wp->w_bufp->b_mode & MDSPELL) != 0);
+	} else {
+		/*
+		 * The current window is looked at whether it says anything
+		 * changed or not, because its mode line carries where the
+		 * dot is; the others are only worth the visit when they
+		 * have asked for one.
+		 */
+		for (wp = window_head; wp != NULL; wp = wp->w_wndp)
+			if (wp == curwp || wp->w_flag)
+				update_window(wp, oldbound);
+	}
+
+	for (wp = window_head; wp != NULL; wp = wp->w_wndp) {
+		wp->w_flag = 0;
+		wp->w_force = 0;
+	}
 
 	/* update the cursor and flush the buffers */
 	movecursor(cursor_row, cursor_col - left_column);
@@ -393,11 +450,11 @@ static int reframe(struct window *wp)
 			i = -1;
 			lp = lp0;
 		}
-		for (; i < term.t_nrow; i++) {
+		for (; i <= wp->w_ntrows; i++) {
 			/* if the line is in the window, no reframe */
 			if (lp == wp->w_dotp) {
 				/* if not _quite_ in, we'll reframe gently */
-				if (i < 0 || i == term.t_nrow - 1) {
+				if (i < 0 || i == wp->w_ntrows) {
 					break;
 				}
 				return TRUE;
@@ -413,7 +470,7 @@ static int reframe(struct window *wp)
 	}
 	if (i == -1) {				/* we're just above the window */
 		i = scroll_lines;		/* put dot at first line */
-	} else if (i == term.t_nrow - 1) {	/* we're just below the window */
+	} else if (i == wp->w_ntrows) {		/* we're just below the window */
 		i = -scroll_lines;		/* put dot at last line */
 	} else					/* put dot where requested */
 		i = wp->w_force;		/* (is 0, unless reposition() was called) */
@@ -422,14 +479,14 @@ static int reframe(struct window *wp)
 
 	/* how far back to reframe? */
 	if (i > 0) {				/* only one screen worth of lines max */
-		if (--i >= term.t_nrow - 1)
-			i = term.t_nrow - 2;
+		if (--i >= wp->w_ntrows)
+			i = wp->w_ntrows - 1;
 	} else if (i < 0) {			/* negative update???? */
-		i += term.t_nrow - 1;
+		i += wp->w_ntrows;
 		if (i < 0)
 			i = 0;
 	} else
-		i = (term.t_nrow - 1) / 2;
+		i = wp->w_ntrows / 2;
 
 	/* backup to new line at top of window */
 	lp = wp->w_dotp;
@@ -446,18 +503,18 @@ static int reframe(struct window *wp)
 }
 
 /*
- * updpos:
+ * update_cursor_position:
  *	update the position of the hardware cursor and handle extended
  *	lines. This is the only update for simple moves.
  */
-static void updpos(void)
+static void update_cursor_position(void)
 {
 	struct line *lp;
 	int i;
 
-	/* find the current row */
+	/* find the current row, counting from the top of the screen */
 	lp = curwp->w_linep;
-	cursor_row = 0;
+	cursor_row = curwp->w_toprow;
 	while (lp != curwp->w_dotp) {
 		++cursor_row;
 		lp = line_next(lp);
@@ -623,7 +680,7 @@ static void modeline(struct window *wp)
 
 	{					/* determine if top line, bottom line, or both are visible */
 		struct line *lp = wp->w_linep;
-		int rows = term.t_nrow - 1;
+		int rows = wp->w_ntrows;
 		char *msg = NULL;
 
 		n -= 7;				/* strlen(" top ") plus a couple */
@@ -676,8 +733,17 @@ static void modeline(struct window *wp)
 			modeline_putc(mline, &n, c);
 	}
 
+	i = wp->w_toprow + wp->w_ntrows;
+
+	/* Already up there, and 145 bytes not to say it again. */
+	if (shown_modeline_row == i &&
+	    memcmp(shown_modeline, mline, term.t_ncol) == 0)
+		return;
+	memcpy(shown_modeline, mline, term.t_ncol);
+	shown_modeline_row = i;
+
 	/* and paint it, in reverse video across the full width */
-	movecursor(term.t_nrow - 1, 0);
+	movecursor(i, 0);
 	tcaprev(TRUE);
 	for (i = 0; i < term.t_ncol; i++)
 		ttputc(mline[i]);
@@ -687,7 +753,10 @@ static void modeline(struct window *wp)
 
 void update_modeline(void)
 {						/* update all the mode lines */
-	curwp->w_flag |= WFMODE;
+	struct window *wp;
+
+	for (wp = window_head; wp != NULL; wp = wp->w_wndp)
+		wp->w_flag |= WFMODE;
 }
 
 /*

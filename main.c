@@ -53,6 +53,7 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <hunspell.h>
 
 /* Make global definitions not external. */
@@ -63,6 +64,7 @@
 #include "efunc.h"				/* Function declarations and name table. */
 #include "ebind.h"				/* Default key bindings. */
 #include "version.h"
+#include "util.h"
 
 #include <signal.h>
 static void emergencyexit(int);
@@ -81,20 +83,113 @@ void usage(int status)
 	exit(status);
 }
 
-static Hunhandle *hunhandle;
+/*
+ * The languages to check against.  A word is spelled correctly if any one
+ * of these says so, which is how "colour" and "color" both come out right
+ * without having to pick a side.  Another language is a line here.
+ *
+ * They cannot share one hunspell handle.  Hunspell_add_dic() bolts an
+ * extra word list onto an existing one and the two share the first one's
+ * affix rules, which is right for a personal word list and wrong for a
+ * second language: en_GB.dic's entries carry flags that mean what
+ * en_GB.aff says they mean, and en_GB.aff defines sixty-four of them
+ * against en_US.aff's twenty-three.  Loaded that way the stems arrive and
+ * the inflections quietly do not - "anarchical" and "almsman" are the two
+ * that turned up while checking this.
+ */
+static const char *languages[] = { "en_US", "en_GB" };
+
+/*
+ * Where to look for them.  $DICPATH is hunspell's own variable and is a
+ * colon-separated search path, so it is split like $PATH; the rest is
+ * where the distributions that were to hand keep theirs.
+ */
+static const char *dictionary_path[] = {
+	"/usr/share/hunspell", "/usr/share/myspell",
+	"/usr/local/share/hunspell", "/usr/local/share/myspell",
+};
+
+static Hunhandle *spellers[ARRAY_SIZE(languages)];
+static int nspellers;
 
 int spellcheck(const char *word)
 {
-	if (!hunhandle)
-		return 1;
-	return Hunspell_spell(hunhandle, word);
+	for (int i = 0; i < nspellers; i++)
+		if (Hunspell_spell(spellers[i], word))
+			return 1;
+	/* with nothing to check against, nothing is misspelled */
+	return nspellers == 0;
 }
 
-static void local_dictionary(Hunhandle *handle, const char *cmd_change_file_name)
+static void local_dictionary(Hunhandle *handle, const char *filename)
 {
 	struct stat st;
-	if (!stat(cmd_change_file_name, &st) && S_ISREG(st.st_mode))
-		Hunspell_add_dic(handle, cmd_change_file_name);
+	if (!stat(filename, &st) && S_ISREG(st.st_mode))
+		Hunspell_add_dic(handle, filename);
+}
+
+/*
+ * One language out of one directory, or NULL if it is not there.  Both
+ * halves have to exist: hunspell will hand back a handle for a missing
+ * dictionary and then say every word is wrong.
+ */
+static Hunhandle *open_dictionary(const char *dir, int dirlen, const char *lang)
+{
+	char aff[NFILEN], dic[NFILEN];
+
+	if (dirlen <= 0)
+		return NULL;
+	snprintf(aff, sizeof(aff), "%.*s/%s.aff", dirlen, dir, lang);
+	snprintf(dic, sizeof(dic), "%.*s/%s.dic", dirlen, dir, lang);
+	if (access(aff, R_OK) || access(dic, R_OK))
+		return NULL;
+	return Hunspell_create(aff, dic);
+}
+
+static Hunhandle *find_dictionary(const char *lang)
+{
+	const char *dicpath = getenv("DICPATH");
+
+	while (dicpath && *dicpath) {
+		const char *end = strchr(dicpath, ':');
+		int len = end ? end - dicpath : (int)strlen(dicpath);
+		Hunhandle *h = open_dictionary(dicpath, len, lang);
+
+		if (h)
+			return h;
+		dicpath = end ? end + 1 : NULL;
+	}
+	for (int i = 0; i < ARRAY_SIZE(dictionary_path); i++) {
+		Hunhandle *h = open_dictionary(dictionary_path[i],
+					       strlen(dictionary_path[i]), lang);
+		if (h)
+			return h;
+	}
+	return NULL;
+}
+
+static void spell_init(void)
+{
+	const char *home;
+
+	for (int i = 0; i < ARRAY_SIZE(languages); i++) {
+		Hunhandle *h = find_dictionary(languages[i]);
+
+		if (h)
+			spellers[nspellers++] = h;
+	}
+	if (nspellers == 0)
+		return;
+
+	/* the personal word list goes on the first, and shares its rules */
+	local_dictionary(spellers[0], ".dictionary");
+	home = getenv("HOME");
+	if (home) {
+		char buf[NFILEN];
+
+		snprintf(buf, sizeof(buf), "%s/.dictionary", home);
+		local_dictionary(spellers[0], buf);
+	}
 }
 
 int main(int argc, char **argv)
@@ -117,18 +212,7 @@ int main(int argc, char **argv)
 	int errflag;				/* C error processing? */
 	char bname[NBUFN];			/* buffer name of file to read */
 
-	const char *aff_path = "/usr/share/hunspell/en_US.aff";
-	const char *dic_path = "/usr/share/hunspell/en_US.dic";
-	hunhandle = Hunspell_create(aff_path, dic_path);
-	if (hunhandle) {
-		local_dictionary(hunhandle, ".dictionary");
-		const char *home = getenv("HOME");
-		if (home) {
-			char buf[1024];
-			snprintf(buf, sizeof(buf), "%s/.dictionary", home);
-			local_dictionary(hunhandle, buf);
-		}
-	}
+	spell_init();
 
 	/*
 	 * Deliberately not SA_RESTART: a resize has to interrupt the
@@ -217,10 +301,10 @@ int main(int argc, char **argv)
 
 			/* set up a buffer for this file */
 			makename(bname, argv[carg]);
-			unqname(bname);
+			unique_buffer_name(bname);
 
 			/* set this to inactive */
-			bp = bfind(bname, TRUE, 0);
+			bp = find_buffer(bname, TRUE, 0);
 			strcpy(bp->b_fname, argv[carg]);
 			bp->b_active = FALSE;
 			if (firstfile) {
@@ -252,10 +336,10 @@ int main(int argc, char **argv)
 	display_commands = TRUE;				/* P.K. */
 
 	/* if there are any files to read, read the first one! */
-	bp = bfind("main", FALSE, 0);
+	bp = find_buffer("main", FALSE, 0);
 	if (firstfile == FALSE && (global_flags & GFREAD)) {
 		swbuffer(firstbp);
-		zotbuf(bp);
+		destroy_buffer(bp);
 	} else
 		bp->b_mode |= global_mode;
 
@@ -383,22 +467,54 @@ void edinit(char *bname)
 	struct buffer *bp;
 	struct window *wp;
 
-	bp = bfind(bname, TRUE, 0);		/* First buffer         */
-	list_buffer = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
+	bp = find_buffer(bname, TRUE, 0);		/* First buffer         */
+	list_buffer = find_buffer("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
 	wp = (struct window *)malloc(sizeof(struct window));	/* First window         */
 	if (bp == NULL || wp == NULL || list_buffer == NULL)
 		exit(1);
 	curbp = bp;				/* Make this current    */
+	window_head = wp;
 	curwp = wp;
-	wp->w_bufp = bp;			/* Initialize window    */
+	wp->w_wndp = NULL;			/* Initialize window    */
+	wp->w_bufp = bp;
 	bp->b_nwnd = 1;				/* Displayed.           */
 	wp->w_linep = bp->b_linep;
 	wp->w_dotp = bp->b_linep;
 	wp->w_doto = 0;
 	wp->w_markp = NULL;
 	wp->w_marko = 0;
+	wp->w_toprow = 0;
+	wp->w_ntrows = term.t_nrow - 1;		/* "-1" for the mode line */
 	wp->w_force = 0;
 	wp->w_flag = WFMODE | WFHARD;		/* Full.                */
+}
+
+/*
+ * Save the buffer because it is time to, rather than because anybody
+ * asked.  cmd_save_file() asks before overwriting a file that changed
+ * under us and before writing one that was truncated on the way in, and
+ * a question here would arrive in the middle of somebody typing and eat
+ * the keystroke that answered it.  So the cases it would ask about are
+ * the cases this declines to write, and says why on the message line.
+ */
+static void autosave(void)
+{
+	if (curbp->b_mode & MDVIEW)		/* nothing to save */
+		return;
+	if (curbp->b_fname[0] == 0) {
+		msg_printf("(No file name, not autosaving)");
+		return;
+	}
+	if (curbp->b_flag & BFTRUNC) {
+		msg_printf("(%s was truncated, not autosaving)", curbp->b_fname);
+		return;
+	}
+	if (file_changed(curbp, curbp->b_fname)) {
+		msg_printf("(%s changed on disk, not autosaving)", curbp->b_fname);
+		return;
+	}
+	cmd_update_screen(FALSE, 0);
+	cmd_save_file(FALSE, 0);
 }
 
 /*
@@ -461,9 +577,7 @@ int execute(int c, int f, int n)
 		/* check auto-save mode */
 		if (curbp->b_mode & MDASAVE)
 			if (--autosave_countdown == 0) {
-				/* and save the file if needed */
-				cmd_update_screen(FALSE, 0);
-				cmd_save_file(FALSE, 0);
+				autosave();
 				autosave_countdown = autosave_interval;
 			}
 
@@ -521,7 +635,7 @@ int cmd_exit_emacs(int f, int n)
 	int s;
 
 	if (f != FALSE				/* Argument forces it.  */
-	    || anycb() == FALSE			/* All buffers clean.   */
+	    || any_changed_buffers() == FALSE			/* All buffers clean.   */
 	    /* User says it's OK.   */
 	    || (s = ask_yesno("Modified buffers exist. Leave anyway")) == TRUE) {
 		display_close();
@@ -605,14 +719,14 @@ int cmd_abort_command(int f, int n)
  * tell the user that this command is illegal while we are in
  * VIEW (read-only) mode
  */
-int rdonly(void)
+int readonly_error(void)
 {
 	tcapbeep();
 	msg_printf("(Key illegal in VIEW mode)");
 	return FALSE;
 }
 
-int resterr(void)
+int restricted_error(void)
 {
 	tcapbeep();
 	msg_printf("(That command is RESTRICTED)");

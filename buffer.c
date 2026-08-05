@@ -30,7 +30,7 @@ int cmd_select_buffer(int f, int n)
 
 	if ((s = ask_string("Use buffer: ", bufn, NBUFN)) != TRUE)
 		return s;
-	if ((bp = bfind(bufn, TRUE, 0)) == NULL)
+	if ((bp = find_buffer(bufn, TRUE, 0)) == NULL)
 		return FALSE;
 	return swbuffer(bp);
 }
@@ -103,6 +103,25 @@ int swbuffer(struct buffer *bp)
 		curwp->w_doto = bp->b_doto;
 		curwp->w_markp = bp->b_markp;
 		curwp->w_marko = bp->b_marko;
+	} else {
+		struct window *wp;
+
+		/*
+		 * Somebody else is already showing this buffer, so start
+		 * where they are looking rather than where the buffer was
+		 * left the last time nobody had it on the screen.
+		 */
+		wp = window_head;
+		while (wp != NULL) {
+			if (wp != curwp && wp->w_bufp == bp) {
+				curwp->w_dotp = wp->w_dotp;
+				curwp->w_doto = wp->w_doto;
+				curwp->w_markp = wp->w_markp;
+				curwp->w_marko = wp->w_marko;
+				break;
+			}
+			wp = wp->w_wndp;
+		}
 	}
 	shown_buffer_changed();
 	return TRUE;
@@ -137,17 +156,17 @@ int cmd_delete_buffer(int f, int n)
 
 	if ((s = ask_string("Kill buffer: ", bufn, NBUFN)) != TRUE)
 		return s;
-	if ((bp = bfind(bufn, FALSE, 0)) == NULL)	/* Easy if unknown.     */
+	if ((bp = find_buffer(bufn, FALSE, 0)) == NULL)	/* Easy if unknown.     */
 		return TRUE;
 	if (bp->b_flag & BFINVS)		/* Deal with special buffers        */
 		return TRUE;			/* by doing nothing.    */
-	return zotbuf(bp);
+	return destroy_buffer(bp);
 }
 
 /*
  * kill the buffer pointed to by bp
  */
-int zotbuf(struct buffer *bp)
+int destroy_buffer(struct buffer *bp)
 {
 	struct buffer *bp1;
 	struct buffer *bp2;
@@ -157,7 +176,7 @@ int zotbuf(struct buffer *bp)
 		msg_printf("Buffer is being displayed");
 		return FALSE;
 	}
-	if ((s = bclear(bp)) != TRUE)		/* Blow text away.      */
+	if ((s = clear_buffer(bp)) != TRUE)		/* Blow text away.      */
 		return s;
 	free((char *)bp->b_linep);		/* Release header line. */
 	bp1 = NULL;				/* Find the header.     */
@@ -225,7 +244,7 @@ void ltoa(char *buf, int width, long num)
  * on the end. Return TRUE if it worked and
  * FALSE if you ran out of room.
  */
-int addline(char *text)
+int addline(struct buffer *bp, char *text)
 {
 	struct line *lp;
 	int i;
@@ -236,12 +255,12 @@ int addline(char *text)
 		return FALSE;
 	for (i = 0; i < ntext; ++i)
 		lputc(lp, i, text[i]);
-	list_buffer->b_linep->l_bp->l_fp = lp;	/* Hook onto the end    */
-	lp->l_bp = list_buffer->b_linep->l_bp;
-	list_buffer->b_linep->l_bp = lp;
-	lp->l_fp = list_buffer->b_linep;
-	if (list_buffer->b_dotp == list_buffer->b_linep)	/* If "." is at the end */
-		list_buffer->b_dotp = lp;		/* move it to new line  */
+	bp->b_linep->l_bp->l_fp = lp;		/* Hook onto the end    */
+	lp->l_bp = bp->b_linep->l_bp;
+	bp->b_linep->l_bp = lp;
+	lp->l_fp = bp->b_linep;
+	if (bp->b_dotp == bp->b_linep)		/* If "." is at the end */
+		bp->b_dotp = lp;		/* move it to new line  */
 	return TRUE;
 }
 
@@ -266,11 +285,11 @@ int makelist(int iflag)
 	char line[MAXCOL];
 
 	list_buffer->b_flag &= ~BFCHG;		/* Don't complain!      */
-	if ((s = bclear(list_buffer)) != TRUE)	/* Blow old text away   */
+	if ((s = clear_buffer(list_buffer)) != TRUE)	/* Blow old text away   */
 		return s;
 	strcpy(list_buffer->b_fname, "");
-	if (addline("ACT MODES        Size Buffer        File") == FALSE
-	    || addline("--- -----        ---- ------        ----") == FALSE)
+	if (addline(list_buffer, "ACT MODES        Size Buffer        File") == FALSE
+	    || addline(list_buffer, "--- -----        ---- ------        ----") == FALSE)
 		return FALSE;
 	bp = buffer_head;			/* For all buffers      */
 
@@ -288,7 +307,7 @@ int makelist(int iflag)
 		else
 			*cp1++ = '.';
 	strcpy(cp1, "         Global Modes");
-	if (addline(line) == FALSE)
+	if (addline(list_buffer, line) == FALSE)
 		return FALSE;
 
 	/* output the list of buffers */
@@ -352,7 +371,7 @@ int makelist(int iflag)
 			}
 		}
 		*cp1 = 0;			/* Add to the buffer.   */
-		if (addline(line) == FALSE)
+		if (addline(list_buffer, line) == FALSE)
 			return FALSE;
 		bp = bp->b_bufp;
 	}
@@ -401,7 +420,7 @@ int cmd_list_buffers(int f, int n)
  * Return FALSE if no buffers
  * have been changed.
  */
-int anycb(void)
+int any_changed_buffers(void)
 {
 	struct buffer *bp;
 
@@ -421,7 +440,7 @@ int anycb(void)
  * and the "cflag" is TRUE, create it. The "bflag" is
  * the settings for the flags in in buffer.
  */
-struct buffer *bfind(char *bname, int cflag, int bflag)
+struct buffer *find_buffer(char *bname, int cflag, int bflag)
 {
 	struct buffer *bp;
 	struct buffer *sb;			/* buffer to insert after */
@@ -487,7 +506,7 @@ struct buffer *bfind(char *bname, int cflag, int bflag)
  * that are required. Return TRUE if everything
  * looks good.
  */
-int bclear(struct buffer *bp)
+int clear_buffer(struct buffer *bp)
 {
 	struct line *lp;
 	int s;

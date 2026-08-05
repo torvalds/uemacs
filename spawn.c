@@ -43,7 +43,7 @@ int cmd_interactive_shell(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	movecursor(term.t_nrow, 0);		/* Seek to last line.   */
 	ttflush();
@@ -92,7 +92,7 @@ int cmd_shell_command(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	if ((s = ask_string("!", line, NLINE)) != TRUE)
 		return s;
@@ -127,7 +127,7 @@ int cmd_execute_program(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	if ((s = ask_string("!", line, NLINE)) != TRUE)
 		return s;
@@ -149,6 +149,75 @@ int cmd_execute_program(int f, int n)
  * filter a buffer through an external DOS program
  * Bound to ^X #
  */
+/*
+ * Run a command and read what it printed into a window of its own, in
+ * view mode.  Bound to "C-x @".
+ *
+ * The output goes through a file called "command" in the current
+ * directory, which is how filter-buffer's fltinp and fltout work two
+ * functions down; all three share the same weakness about where they put
+ * it and what happens if something is there already.
+ */
+int cmd_pipe_command(int f, int n)
+{
+	struct window *wp;
+	struct buffer *bp;
+	char line[NLINE];
+	int s;
+	static char bname[] = "command";
+	static char filnam[] = "command";
+
+	/* don't allow this command if restricted */
+	if (restflag)
+		return restricted_error();
+
+	if ((s = ask_string("@", line, NLINE)) != TRUE)
+		return s;
+
+	/* if the last one is still around, get it off the screen and go */
+	bp = find_buffer(bname, FALSE, 0);
+	if (bp != NULL) {
+		for (wp = window_head; wp != NULL; wp = wp->w_wndp) {
+			if (wp->w_bufp != bp)
+				continue;
+			if (wp == curwp)
+				cmd_delete_window(FALSE, 1);
+			else
+				cmd_delete_other_windows(FALSE, 1);
+			break;
+		}
+		if (destroy_buffer(bp) != TRUE)
+			return FALSE;
+	}
+
+	ttflush();
+	tcapclose();				/* stty to old modes    */
+	tcapkclose();
+	/*
+	 * The space before the '>' matters: without it a command ending in
+	 * a digit has that digit read as a file descriptor number, so "seq
+	 * 4" becomes "seq" with fd 4 redirected and nothing comes back.
+	 * filter-buffer below has always had the space.
+	 */
+	strcat(line, " >");
+	strcat(line, filnam);
+	record_status(system(line));
+	tcapopen();
+	tcapkopen();
+	ttflush();
+	screen_garbage = TRUE;
+
+	if (cmd_split_current_window(FALSE, 1) == FALSE)
+		return FALSE;
+	if (getfile(filnam, FALSE) == FALSE)
+		return FALSE;
+
+	curwp->w_bufp->b_mode |= MDVIEW;
+	update_modeline();
+	unlink(filnam);
+	return TRUE;
+}
+
 int cmd_filter_buffer(int f, int n)
 {
 	int s;					/* return status from CLI */
@@ -163,10 +232,10 @@ int cmd_filter_buffer(int f, int n)
 
 	/* don't allow this command if restricted */
 	if (restflag)
-		return resterr();
+		return restricted_error();
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 
 	/* get the filter name and its args */
 	if ((s = ask_string("#", line, NLINE)) != TRUE)

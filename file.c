@@ -84,7 +84,7 @@ int cmd_read_file(int f, int n)
 	char fname[NFILEN];
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("Read file: ", fname, NFILEN)) != TRUE)
 		return s;
 	return readin(fname, TRUE);
@@ -103,12 +103,12 @@ int cmd_insert_file(int f, int n)
 	char fname[NFILEN];
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if ((s = ask_string("Insert file: ", fname, NFILEN)) != TRUE)
 		return s;
-	if ((s = ifile(fname)) != TRUE)
+	if ((s = insert_file(fname)) != TRUE)
 		return s;
 	return cmd_redraw_display(TRUE, -1);
 }
@@ -128,7 +128,7 @@ int cmd_find_file(int f, int n)
 	int s;					/* status return */
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("Find file: ", fname, NFILEN)) != TRUE)
 		return s;
 	return getfile(fname, TRUE);
@@ -140,13 +140,21 @@ int cmd_view_file(int f, int n)
 	int s;					/* status return */
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("View file: ", fname, NFILEN)) != TRUE)
 		return s;
 	s = getfile(fname, FALSE);
 	if (s) {				/* if we succeed, put it in view mode */
+		struct window *wp;
+
 		curwp->w_bufp->b_mode |= MDVIEW;
-		curwp->w_flag = WFMODE;
+
+		/* scan through and update mode lines of all windows */
+		wp = window_head;
+		while (wp != NULL) {
+			wp->w_flag |= WFMODE;
+			wp = wp->w_wndp;
+		}
 	}
 	return s;
 }
@@ -169,7 +177,7 @@ int getfile(char *fname, int lockfl)
 		if ((bp->b_flag & BFINVS) == 0 && strcmp(bp->b_fname, fname) == 0) {
 			swbuffer(bp);
 			lp = curwp->w_dotp;
-			i = (term.t_nrow - 1) / 2;
+			i = curwp->w_ntrows / 2;
 			while (i-- && line_prev(lp) != curbp->b_linep)
 				lp = line_prev(lp);
 			curwp->w_linep = lp;
@@ -180,7 +188,7 @@ int getfile(char *fname, int lockfl)
 		}
 	}
 	makename(bname, fname);			/* New buffer name.     */
-	while ((bp = bfind(bname, FALSE, 0)) != NULL) {
+	while ((bp = find_buffer(bname, FALSE, 0)) != NULL) {
 		/* old buffer name conflict code */
 		s = ask_string("Buffer name: ", bname, NBUFN);
 		if (s == ABORT)			/* ^G to just quit      */
@@ -190,7 +198,7 @@ int getfile(char *fname, int lockfl)
 			break;
 		}
 	}
-	if (bp == NULL && (bp = bfind(bname, TRUE, 0)) == NULL) {
+	if (bp == NULL && (bp = find_buffer(bname, TRUE, 0)) == NULL) {
 		msg_printf("Cannot create buffer");
 		return FALSE;
 	}
@@ -238,7 +246,7 @@ int readin(char *fname, int lockfl)
 		goto out;
 	}
 	bp = curbp;				/* Cheap.               */
-	if ((s = bclear(bp)) != TRUE)		/* Might be old.        */
+	if ((s = clear_buffer(bp)) != TRUE)		/* Might be old.        */
 		return s;
 	bp->b_flag &= ~(BFINVS | BFCHG);
 	mystrscpy(bp->b_fname, fname, NFILEN);
@@ -299,14 +307,17 @@ int readin(char *fname, int lockfl)
 	if (bp->b_fname[0])
 		record_fstate(bp, bp->b_fname);
 
-	wp = curwp;
-	if (wp->w_bufp == curbp) {
-		wp->w_linep = line_next(curbp->b_linep);
-		wp->w_dotp = line_next(curbp->b_linep);
-		wp->w_doto = 0;
-		wp->w_markp = NULL;
-		wp->w_marko = 0;
-		wp->w_flag |= WFMODE | WFHARD;
+	wp = window_head;
+	while (wp != NULL) {
+		if (wp->w_bufp == curbp) {
+			wp->w_linep = line_next(curbp->b_linep);
+			wp->w_dotp = line_next(curbp->b_linep);
+			wp->w_doto = 0;
+			wp->w_markp = NULL;
+			wp->w_marko = 0;
+			wp->w_flag |= WFMODE | WFHARD;
+		}
+		wp = wp->w_wndp;
 	}
 	if (s == FIOERR || s == FIOFNF)		/* False if error.      */
 		return FALSE;
@@ -342,12 +353,12 @@ void makename(char *bname, char *fname)
  *
  * char *name;		name to check on
  */
-void unqname(char *name)
+void unique_buffer_name(char *name)
 {
 	char *sp;
 
 	/* check to see if it is in the buffer list */
-	while (bfind(name, 0, FALSE) != NULL) {
+	while (find_buffer(name, 0, FALSE) != NULL) {
 
 		/* go to the end of the name */
 		sp = name;
@@ -377,16 +388,19 @@ int cmd_write_file(int f, int n)
 	char fname[NFILEN];
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("Write file: ", fname, NFILEN)) != TRUE)
 		return s;
 	if ((s = writeout(fname)) == TRUE) {
 		strcpy(curbp->b_fname, fname);
 		record_fstate(curbp, fname);	/* This is our file now */
 		curbp->b_flag &= ~BFCHG;
-		wp = curwp;			/* Update mode line.    */
-		if (wp->w_bufp == curbp)
-			wp->w_flag |= WFMODE;
+		wp = window_head;		/* Update mode lines.   */
+		while (wp != NULL) {
+			if (wp->w_bufp == curbp)
+				wp->w_flag |= WFMODE;
+			wp = wp->w_wndp;
+		}
 	}
 	return s;
 }
@@ -404,7 +418,7 @@ int cmd_save_file(int f, int n)
 	int s;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if ((curbp->b_flag & BFCHG) == 0)	/* Return, no changes.  */
 		return TRUE;
 	if (curbp->b_fname[0] == 0) {		/* Must have a name.    */
@@ -492,7 +506,7 @@ int cmd_change_file_name(int f, int n)
 	char fname[NFILEN];
 
 	if (restflag)				/* don't allow this command if restricted */
-		return resterr();
+		return restricted_error();
 	if ((s = ask_string("Name: ", fname, NFILEN)) == ABORT)
 		return s;
 	if (s == FALSE)
@@ -509,7 +523,7 @@ int cmd_change_file_name(int f, int n)
  * buffer, Called by insert file command. Return the final
  * status of the read.
  */
-int ifile(char *fname)
+int insert_file(char *fname)
 {
 	struct line *lp0;
 	struct line *lp1;

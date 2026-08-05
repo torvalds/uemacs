@@ -58,16 +58,19 @@ void line_free(struct line *lp)
 	struct buffer *bp;
 	struct window *wp;
 
-	wp = curwp;
-	if (wp->w_linep == lp)
-		wp->w_linep = lp->l_fp;
-	if (wp->w_dotp == lp) {
-		wp->w_dotp = lp->l_fp;
-		wp->w_doto = 0;
-	}
-	if (wp->w_markp == lp) {
-		wp->w_markp = lp->l_fp;
-		wp->w_marko = 0;
+	wp = window_head;
+	while (wp != NULL) {
+		if (wp->w_linep == lp)
+			wp->w_linep = lp->l_fp;
+		if (wp->w_dotp == lp) {
+			wp->w_dotp = lp->l_fp;
+			wp->w_doto = 0;
+		}
+		if (wp->w_markp == lp) {
+			wp->w_markp = lp->l_fp;
+			wp->w_marko = 0;
+		}
+		wp = wp->w_wndp;
 	}
 
 	bp = buffer_head;
@@ -106,9 +109,12 @@ void buffer_changed(int flag)
 		flag |= WFMODE;			/* update mode lines.   */
 		curbp->b_flag |= BFCHG;
 	}
-	wp = curwp;
-	if (wp->w_bufp == curbp)
-		wp->w_flag |= flag;
+	wp = window_head;
+	while (wp != NULL) {
+		if (wp->w_bufp == curbp)
+			wp->w_flag |= flag;
+		wp = wp->w_wndp;
+	}
 }
 
 /*
@@ -165,7 +171,7 @@ static int insert_byte(int n, int c)
 	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	buffer_changed(WFEDIT);
 	lp1 = curwp->w_dotp;			/* Current line         */
 	if (lp1 == curbp->b_linep) {		/* At the end: special  */
@@ -204,17 +210,20 @@ static int insert_byte(int n, int c)
 			lp1->l_used - doto - n);
 	}
 	memset(lp2->l_text + doto, c, n);	/* Add the characters       */
-	wp = curwp;				/* Update window        */
-	if (wp->w_linep == lp1)
-		wp->w_linep = lp2;
-	if (wp->w_dotp == lp1) {
-		wp->w_dotp = lp2;
-		wp->w_doto += n;
-	}
-	if (wp->w_markp == lp1) {
-		wp->w_markp = lp2;
-		if (wp->w_marko > doto)
-			wp->w_marko += n;
+	wp = window_head;			/* Update windows       */
+	while (wp != NULL) {
+		if (wp->w_linep == lp1)
+			wp->w_linep = lp2;
+		if (wp->w_dotp == lp1) {
+			wp->w_dotp = lp2;
+			wp->w_doto += n;
+		}
+		if (wp->w_markp == lp1) {
+			wp->w_markp = lp2;
+			if (wp->w_marko > doto)
+				wp->w_marko += n;
+		}
+		wp = wp->w_wndp;
 	}
 	return TRUE;
 }
@@ -290,7 +299,7 @@ int insert_newline(void)
 	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	buffer_changed(WFHARD);
 	lp1 = curwp->w_dotp;			/* Get the address and  */
 	doto = curwp->w_doto;			/* offset of "."        */
@@ -308,20 +317,23 @@ int insert_newline(void)
 	lp1->l_bp = lp2;
 	lp2->l_bp->l_fp = lp2;
 	lp2->l_fp = lp1;
-	wp = curwp;				/* Window               */
-	if (wp->w_linep == lp1)
-		wp->w_linep = lp2;
-	if (wp->w_dotp == lp1) {
-		if (wp->w_doto < doto)
-			wp->w_dotp = lp2;
-		else
-			wp->w_doto -= doto;
-	}
-	if (wp->w_markp == lp1) {
-		if (wp->w_marko < doto)
-			wp->w_markp = lp2;
-		else
-			wp->w_marko -= doto;
+	wp = window_head;			/* Windows              */
+	while (wp != NULL) {
+		if (wp->w_linep == lp1)
+			wp->w_linep = lp2;
+		if (wp->w_dotp == lp1) {
+			if (wp->w_doto < doto)
+				wp->w_dotp = lp2;
+			else
+				wp->w_doto -= doto;
+		}
+		if (wp->w_markp == lp1) {
+			if (wp->w_marko < doto)
+				wp->w_markp = lp2;
+			else
+				wp->w_marko -= doto;
+		}
+		wp = wp->w_wndp;
 	}
 	return TRUE;
 }
@@ -368,7 +380,7 @@ int delete_bytes(long n, int kflag)
 	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	while (n != 0) {
 		dotp = curwp->w_dotp;
 		doto = curwp->w_doto;
@@ -398,16 +410,19 @@ int delete_bytes(long n, int kflag)
 		while (cp2 != &dotp->l_text[dotp->l_used])
 			*cp1++ = *cp2++;
 		dotp->l_used -= chunk;
-		wp = curwp;			/* Fix window           */
-		if (wp->w_dotp == dotp && wp->w_doto >= doto) {
-			wp->w_doto -= chunk;
-			if (wp->w_doto < doto)
-				wp->w_doto = doto;
-		}
-		if (wp->w_markp == dotp && wp->w_marko >= doto) {
-			wp->w_marko -= chunk;
-			if (wp->w_marko < doto)
-				wp->w_marko = doto;
+		wp = window_head;		/* Fix windows          */
+		while (wp != NULL) {
+			if (wp->w_dotp == dotp && wp->w_doto >= doto) {
+				wp->w_doto -= chunk;
+				if (wp->w_doto < doto)
+					wp->w_doto = doto;
+			}
+			if (wp->w_markp == dotp && wp->w_marko >= doto) {
+				wp->w_marko -= chunk;
+				if (wp->w_marko < doto)
+					wp->w_marko = doto;
+			}
+			wp = wp->w_wndp;
 		}
 		n -= chunk;
 	}
@@ -483,7 +498,7 @@ int delete_newline(void)
 	struct window *wp;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	lp1 = curwp->w_dotp;
 	lp2 = lp1->l_fp;
 	if (lp2 == curbp->b_linep) {		/* At the buffer end.   */
@@ -496,16 +511,19 @@ int delete_newline(void)
 		cp2 = &lp2->l_text[0];
 		while (cp2 != &lp2->l_text[lp2->l_used])
 			*cp1++ = *cp2++;
-		wp = curwp;
-		if (wp->w_linep == lp2)
-			wp->w_linep = lp1;
-		if (wp->w_dotp == lp2) {
-			wp->w_dotp = lp1;
-			wp->w_doto += lp1->l_used;
-		}
-		if (wp->w_markp == lp2) {
-			wp->w_markp = lp1;
-			wp->w_marko += lp1->l_used;
+		wp = window_head;
+		while (wp != NULL) {
+			if (wp->w_linep == lp2)
+				wp->w_linep = lp1;
+			if (wp->w_dotp == lp2) {
+				wp->w_dotp = lp1;
+				wp->w_doto += lp1->l_used;
+			}
+			if (wp->w_markp == lp2) {
+				wp->w_markp = lp1;
+				wp->w_marko += lp1->l_used;
+			}
+			wp = wp->w_wndp;
 		}
 		lp1->l_used += lp2->l_used;
 		lp1->l_fp = lp2->l_fp;
@@ -526,20 +544,23 @@ int delete_newline(void)
 	lp3->l_fp = lp2->l_fp;
 	lp2->l_fp->l_bp = lp3;
 	lp3->l_bp = lp1->l_bp;
-	wp = curwp;
-	if (wp->w_linep == lp1 || wp->w_linep == lp2)
-		wp->w_linep = lp3;
-	if (wp->w_dotp == lp1)
-		wp->w_dotp = lp3;
-	else if (wp->w_dotp == lp2) {
-		wp->w_dotp = lp3;
-		wp->w_doto += lp1->l_used;
-	}
-	if (wp->w_markp == lp1)
-		wp->w_markp = lp3;
-	else if (wp->w_markp == lp2) {
-		wp->w_markp = lp3;
-		wp->w_marko += lp1->l_used;
+	wp = window_head;
+	while (wp != NULL) {
+		if (wp->w_linep == lp1 || wp->w_linep == lp2)
+			wp->w_linep = lp3;
+		if (wp->w_dotp == lp1)
+			wp->w_dotp = lp3;
+		else if (wp->w_dotp == lp2) {
+			wp->w_dotp = lp3;
+			wp->w_doto += lp1->l_used;
+		}
+		if (wp->w_markp == lp1)
+			wp->w_markp = lp3;
+		else if (wp->w_markp == lp2) {
+			wp->w_markp = lp3;
+			wp->w_marko += lp1->l_used;
+		}
+		wp = wp->w_wndp;
 	}
 	free((char *)lp1);
 	free((char *)lp2);
@@ -612,7 +633,7 @@ int cmd_yank(int f, int n)
 	struct kill *kp;			/* pointer into kill buffer */
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if (n < 0)
 		return FALSE;
 	/* make sure there is something to yank */

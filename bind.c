@@ -16,6 +16,135 @@
 #include "line.h"
 #include "util.h"
 
+/*
+ * Show the help file, in a window of its own and in view mode.  Bound to
+ * "M-?".
+ *
+ * The lookup asks lookup_file() to try $HOME and $HOME/lib, which is the whole
+ * reason this works at all: the Makefile installs emacs.hlp into
+ * $(HOME)/lib, and that is the one place the old FALSE here told lookup_file
+ * not to look.  Unless you happened to be sitting in a directory with a
+ * copy of the file in it, help had nothing to show.
+ */
+int cmd_help(int f, int n)
+{
+	struct buffer *bp;
+	char *fname = NULL;
+
+	/* already read in once? */
+	bp = find_buffer("emacs.hlp", FALSE, BFINVS);
+	if (bp == NULL) {
+		fname = lookup_file(pathname[1], TRUE);
+		if (fname == NULL) {
+			msg_printf("(Help file is not online)");
+			return FALSE;
+		}
+	}
+
+	/* a window to put it in */
+	if (cmd_split_current_window(FALSE, 1) == FALSE)
+		return FALSE;
+
+	if (bp == NULL) {
+		if (getfile(fname, FALSE) == FALSE)
+			return FALSE;
+	} else
+		swbuffer(bp);
+
+	curwp->w_bufp->b_mode |= MDVIEW;
+	curwp->w_bufp->b_flag |= BFINVS;
+	update_modeline();
+	return TRUE;
+}
+
+/*
+ * Fill the *Binding list* buffer with every command name, each followed by
+ * the keys bound to it, and switch to it.  With a match string only the
+ * names containing it are listed, which is what apropos is.
+ *
+ * Like list-buffers, this builds a buffer and goes there rather than
+ * popping up a window for it - see commit cfad0e9 ("Restore list-buffers,
+ * without needing a window to put it in").  C-x b gets you back.
+ */
+static int build_binding_list(char *match)
+{
+	struct name_bind *nptr;
+	struct key_tab *ktp;
+	struct buffer *bp;
+	char outseq[NSTRING];
+	int cpos;
+
+	bp = find_buffer("*Binding list*", TRUE, BFINVS);
+	if (bp == NULL || clear_buffer(bp) == FALSE) {
+		msg_printf("Can not display binding list");
+		return FALSE;
+	}
+
+	for (nptr = &names[0]; nptr->n_func != NULL; ++nptr) {
+		if (match && strstr(nptr->n_name, match) == NULL)
+			continue;
+
+		strcpy(outseq, nptr->n_name);
+		cpos = strlen(outseq);
+
+		/* every key bound to it, one line each */
+		for (ktp = &keytab[0]; ktp->k_fp != NULL; ++ktp) {
+			if (ktp->k_fp != nptr->n_func)
+				continue;
+			while (cpos < 28)
+				outseq[cpos++] = ' ';
+			cmdstr(ktp->k_code, &outseq[cpos]);
+			if (addline(bp, outseq) == FALSE)
+				return FALSE;
+			cpos = 0;		/* the name is said already */
+		}
+
+		/* and the ones with no key at all still get a line */
+		if (cpos > 0) {
+			outseq[cpos] = 0;
+			if (addline(bp, outseq) == FALSE)
+				return FALSE;
+		}
+	}
+
+	bp->b_mode |= MDVIEW;
+	bp->b_flag &= ~BFCHG;
+
+	if (curwp->w_bufp != bp && swbuffer(bp) != TRUE)
+		return FALSE;
+	curwp->w_linep = line_next(bp->b_linep);
+	curwp->w_dotp = line_next(bp->b_linep);
+	curwp->w_doto = 0;
+	curwp->w_markp = NULL;
+	curwp->w_marko = 0;
+	curwp->w_flag |= WFMODE | WFHARD;
+	return TRUE;
+}
+
+/*
+ * Every key binding there is.  Bound to nothing by default; upstream
+ * bound it to nothing either, and M-x is how you get at it.
+ */
+int cmd_describe_bindings(int f, int n)
+{
+	return build_binding_list(NULL);
+}
+
+/*
+ * The same list, narrowed to the command names containing a string.
+ * Bound to "M-A".
+ */
+int cmd_apropos(int f, int n)
+{
+	char match[NSTRING];
+	int status;
+
+	status = ask_string("Apropos string: ", match, NSTRING - 1);
+	if (status != TRUE)
+		return status;
+	return build_binding_list(match);
+}
+
 int cmd_describe_key(int f, int n)
 {						/* describe the command for a certain key */
 	int c;					/* key to describe */
@@ -202,42 +331,6 @@ int unbindchar(int c)
 }
 
 /*
- * does source include sub?
- *
- * char *source;	string to search in
- * char *sub;		substring to look for
- */
-int strinc(char *source, char *sub)
-{
-	char *sp;				/* ptr into source */
-	char *nxtsp;				/* next ptr into source */
-	char *tp;				/* ptr into substring */
-
-	/* for each character in the source string */
-	sp = source;
-	while (*sp) {
-		tp = sub;
-		nxtsp = sp;
-
-		/* is the substring here? */
-		while (*tp) {
-			if (*nxtsp++ != *tp)
-				break;
-			else
-				tp++;
-		}
-
-		/* yes, return a success */
-		if (*tp == 0)
-			return TRUE;
-
-		/* no, onward */
-		sp++;
-	}
-	return FALSE;
-}
-
-/*
  * get a command key sequence from the keyboard
  *
  * int mflag;		going for a meta sequence?
@@ -272,9 +365,9 @@ int startup(char *sfname)
 
 	/* look up the startup file */
 	if (*sfname != 0)
-		fname = flook(sfname, TRUE);
+		fname = lookup_file(sfname, TRUE);
 	else
-		fname = flook(pathname[0], TRUE);
+		fname = lookup_file(pathname[0], TRUE);
 
 	/* if it isn't around, don't sweat it */
 	if (fname == NULL)
@@ -290,9 +383,9 @@ int startup(char *sfname)
  * asked and possible
  *
  * char *fname;		base file name to search for
- * int hflag;		Look in the HOME environment variable first?
+ * int try_home;		Look in the HOME environment variable first?
  */
-char *flook(char *fname, int hflag)
+char *lookup_file(char *fname, int try_home)
 {
 	char *home;				/* path to home directory */
 	char *path;				/* environmental PATH variable */
@@ -300,7 +393,7 @@ char *flook(char *fname, int hflag)
 	int i;					/* index */
 	static char fspec[NSTRING];		/* full path spec to search */
 
-	if (hflag) {
+	if (try_home) {
 		home = getenv("HOME");
 		if (home != NULL) {
 			snprintf(fspec, sizeof(fspec), "%s/%s", home, fname);

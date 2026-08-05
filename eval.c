@@ -34,7 +34,7 @@ void varinit(void)
  *
  * @fname: name of function to evaluate.
  */
-char *gtfun(char *fname)
+char *eval_function(char *fname)
 {
 	int fnum;				/* index to function to eval */
 	int status;				/* return status */
@@ -96,25 +96,25 @@ char *gtfun(char *fname)
 	case UFMID:
 		return (strncpy(result, &arg1[atoi(arg2) - 1], atoi(arg3)));
 	case UFNOT:
-		return ltos(stol(arg1) == FALSE);
+		return truth_text(truth_value(arg1) == FALSE);
 	case UFEQUAL:
-		return ltos(atoi(arg1) == atoi(arg2));
+		return truth_text(atoi(arg1) == atoi(arg2));
 	case UFLESS:
-		return ltos(atoi(arg1) < atoi(arg2));
+		return truth_text(atoi(arg1) < atoi(arg2));
 	case UFGREATER:
-		return ltos(atoi(arg1) > atoi(arg2));
+		return truth_text(atoi(arg1) > atoi(arg2));
 	case UFSEQUAL:
-		return ltos(strcmp(arg1, arg2) == 0);
+		return truth_text(strcmp(arg1, arg2) == 0);
 	case UFSLESS:
-		return ltos(strcmp(arg1, arg2) < 0);
+		return truth_text(strcmp(arg1, arg2) < 0);
 	case UFSGREAT:
-		return ltos(strcmp(arg1, arg2) > 0);
+		return truth_text(strcmp(arg1, arg2) > 0);
 	case UFIND:
 		return getval(arg1, result, sizeof(result));
 	case UFAND:
-		return ltos(stol(arg1) && stol(arg2));
+		return truth_text(truth_value(arg1) && truth_value(arg2));
 	case UFOR:
-		return ltos(stol(arg1) || stol(arg2));
+		return truth_text(truth_value(arg1) || truth_value(arg2));
 	case UFLENGTH:
 		return itoa(strlen(arg1));
 	case UFUPPER:
@@ -122,7 +122,7 @@ char *gtfun(char *fname)
 	case UFLOWER:
 		return mklower(arg1, result);
 	case UFTRUTH:
-		return ltos(atoi(arg1) == 42);
+		return truth_text(atoi(arg1) == 42);
 	case UFASCII:
 		return itoa((int)arg1[0]);
 	case UFCHR:
@@ -134,7 +134,7 @@ char *gtfun(char *fname)
 		result[1] = 0;
 		return result;
 	case UFRND:
-		return itoa((ernd() % abs(atoi(arg1))) + 1);
+		return itoa((next_random() % abs(atoi(arg1))) + 1);
 	case UFABS:
 		return itoa(abs(atoi(arg1)));
 	case UFSINDEX:
@@ -145,9 +145,9 @@ char *gtfun(char *fname)
 	case UFBIND:
 		return transbind(arg1);
 	case UFEXIST:
-		return ltos(file_exists(arg1));
+		return truth_text(file_exists(arg1));
 	case UFFIND:
-		tsp = flook(arg1, TRUE);
+		tsp = lookup_file(arg1, TRUE);
 		return tsp == NULL ? "" : tsp;
 	case UFBAND:
 		return itoa(atoi(arg1) & atoi(arg2));
@@ -169,7 +169,7 @@ char *gtfun(char *fname)
  *
  * char *vname;			name of user variable to fetch
  */
-char *gtusr(char *vname)
+char *user_variable(char *vname)
 {
 
 	int vnum;				/* ordinal number of user var */
@@ -189,11 +189,11 @@ char *gtusr(char *vname)
 static char *getkill(void);
 
 /*
- * gtenv()
+ * environment_variable()
  *
  * char *vname;			name of environment variable to retrieve
  */
-char *gtenv(char *vname)
+char *environment_variable(char *vname)
 {
 	int vnum;				/* ordinal number of var refrenced */
 
@@ -225,7 +225,7 @@ char *gtenv(char *vname)
 	case EVRAM:
 		return itoa(0);
 	case EVFLICKER:
-		return ltos(FALSE);
+		return truth_text(FALSE);
 	case EVCURWIDTH:
 		return itoa(term.t_ncol);
 	case EVCBUFNAME:
@@ -235,9 +235,9 @@ char *gtenv(char *vname)
 	case EVSRES:
 		return "NORMAL";
 	case EVDEBUG:
-		return ltos(macro_debug);
+		return truth_text(macro_debug);
 	case EVSTATUS:
-		return ltos(command_status);
+		return truth_text(command_status);
 	case EVPALETTE:
 		return "";
 	case EVASAVE:
@@ -250,7 +250,7 @@ char *gtenv(char *vname)
 		return (curwp->w_dotp->l_used ==
 			curwp->w_doto ? itoa('\n') : itoa(lgetc(curwp->w_dotp, curwp->w_doto)));
 	case EVDISCMD:
-		return ltos(display_commands);
+		return truth_text(display_commands);
 	case EVVERSION:
 		return VERSION;
 	case EVPROGNAME:
@@ -258,7 +258,7 @@ char *gtenv(char *vname)
 	case EVSEED:
 		return itoa(random_seed);
 	case EVDISINP:
-		return ltos(display_input);
+		return truth_text(display_input);
 	case EVTARGET:
 		saveflag = lastflag;
 		return itoa(goal_column);
@@ -277,7 +277,7 @@ char *gtenv(char *vname)
 	case EVTPAUSE:
 		return itoa(term.t_pause);
 	case EVPENDING:
-		return ltos(typahead());
+		return truth_text(typahead());
 	case EVLWIDTH:
 		return itoa(line_length(curwp->w_dotp));
 	case EVLINE:
@@ -293,7 +293,7 @@ char *gtenv(char *vname)
 	case EVSCROLLCOUNT:
 		return itoa(scroll_lines);
 	case EVSCROLL:
-		return ltos(0);
+		return truth_text(0);
 	}
 	exit(-12);				/* again, we should never get here */
 }
@@ -494,10 +494,10 @@ int svar(struct variable_description *var, char *value)
 		case EVSRES:
 			break;
 		case EVDEBUG:
-			macro_debug = stol(value);
+			macro_debug = truth_value(value);
 			break;
 		case EVSTATUS:
-			command_status = stol(value);
+			command_status = truth_value(value);
 			break;
 		case EVASAVE:
 			autosave_interval = atoi(value);
@@ -518,7 +518,7 @@ int svar(struct variable_description *var, char *value)
 			cmd_backward_character(FALSE, 1);
 			break;
 		case EVDISCMD:
-			display_commands = stol(value);
+			display_commands = truth_value(value);
 			break;
 		case EVVERSION:
 			break;
@@ -528,7 +528,7 @@ int svar(struct variable_description *var, char *value)
 			random_seed = atoi(value);
 			break;
 		case EVDISINP:
-			display_input = stol(value);
+			display_input = truth_value(value);
 			break;
 		case EVTARGET:
 			goal_column = atoi(value);
@@ -630,7 +630,7 @@ char *itoa(int i)
  *
  * char *token;		token to analyze
  */
-int gettyp(char *token)
+int token_type(char *token)
 {
 	char c;					/* first char in token */
 
@@ -682,7 +682,7 @@ static char *internal_getval(char *token)
 	int distmp;				/* temporary discmd flag */
 	static char buf[NSTRING];		/* string buffer for some returns */
 
-	switch (gettyp(token)) {
+	switch (token_type(token)) {
 	case TKNUL:
 		return "";
 
@@ -690,7 +690,7 @@ static char *internal_getval(char *token)
 		getval(token + 1, token, -1);
 		distmp = display_commands;		/* echo it always! */
 		display_commands = TRUE;
-		status = getstring(token, buf, NSTRING, ctoec('\n'));
+		status = getstring(token, buf, NSTRING, char_to_keycode('\n'));
 		display_commands = distmp;
 		if (status == ABORT)
 			return error_text;
@@ -700,7 +700,7 @@ static char *internal_getval(char *token)
 
 		/* grab the right buffer */
 		getval(token + 1, token, -1);
-		bp = bfind(token, FALSE, 0);
+		bp = find_buffer(token, FALSE, 0);
 		if (bp == NULL)
 			return error_text;
 
@@ -737,11 +737,11 @@ static char *internal_getval(char *token)
 		return buf;
 
 	case TKVAR:
-		return gtusr(token + 1);
+		return user_variable(token + 1);
 	case TKENV:
-		return gtenv(token + 1);
+		return environment_variable(token + 1);
 	case TKFUN:
-		return gtfun(token + 1);
+		return eval_function(token + 1);
 	case TKDIR:
 		return error_text;
 	case TKLBL:
@@ -766,9 +766,9 @@ char *getval(char *token, char *dst, int size)
 /*
  * convert a string to a numeric logical
  *
- * char *val;		value to check for stol
+ * char *val;		value to check for truth_value
  */
-int stol(char *val)
+int truth_value(char *val)
 {
 	/* check for logical values */
 	if (val[0] == 'F')
@@ -785,7 +785,7 @@ int stol(char *val)
  *
  * int val;		value to translate
  */
-char *ltos(int val)
+char *truth_text(int val)
 {
 	if (val)
 		return true_text;
@@ -841,7 +841,7 @@ int abs(int x)
 /*
  * returns a random integer
  */
-int ernd(void)
+int next_random(void)
 {
 	random_seed = abs(random_seed * 1721 + 10007);
 	return random_seed;

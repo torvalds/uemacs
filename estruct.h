@@ -151,12 +151,15 @@
  * character.
  */
 struct window {
+	struct window *w_wndp;			/* Next window                  */
 	struct buffer *w_bufp;			/* Buffer displayed in window   */
 	struct line *w_linep;			/* Top line in the window       */
 	struct line *w_dotp;			/* Line containing "."          */
 	struct line *w_markp;			/* Line containing "mark"       */
 	int w_doto;				/* Byte offset for "."          */
 	int w_marko;				/* Byte offset for "mark"       */
+	int w_toprow;				/* Origin 0 top row of window   */
+	int w_ntrows;				/* # of rows of text in window  */
 	char w_force;				/* If NZ, forcing row.          */
 	char w_flag;				/* Flags.                       */
 };
@@ -228,7 +231,7 @@ struct buffer {
 #define	BFTRUNC	0x04				/* buffer was truncated when read */
 
 /*	mode flags	*/
-#define	NUMMODES	10			/* # of defined modes           */
+#define	NUMMODES	9			/* # of defined modes           */
 
 #define	MDWRAP	0x0001				/* word wrap                    */
 #define	MDCMOD	0x0002				/* C indentation and fence match */
@@ -237,7 +240,13 @@ struct buffer {
 #define	MDVIEW	0x0010				/* read-only buffer             */
 #define MDOVER	0x0020				/* overwrite mode               */
 #define MDMAGIC	0x0040				/* regular expressions in search */
-#define	MDASAVE	0x0800				/* auto-save mode               */
+#define	MDASAVE	0x0080				/* auto-save mode               */
+/*
+ * 0x0100 is the "utf-8" mode's, and has no name here because nothing
+ * reads it - commit 12e4647 ("Remove the old utf8_mode thing.") took
+ * MDUTF8 away and left the mode in modename[], where emacs.rc still
+ * turns it on from $LANG.  A new mode starts at 0x0200.
+ */
 
 /*
  * The starting position of a region, and the size of the region in

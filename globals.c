@@ -20,7 +20,7 @@ char *mode2name[] = {				/* name of modes                */
 	"Magic", "Asave", "utf-8"
 };
 
-char modecode[] = "WCSEVOMYAU";			/* letters to represent modes   */
+char modecode[] = "WCSEVOMAU";			/* letters to represent modes   */
 int global_mode = 0;				/* default modes for new buffers, the $gmode setting */
 int global_flags = GFREAD;			/* global control flags, the $gflags setting */
 int autosave_interval = 256;			/* changes between autosaves, the $asave setting */
@@ -76,6 +76,8 @@ int goal_column;				/* column C-p and C-n try to stay in */
 struct window *curwp;				/* Current window               */
 struct buffer *curbp;				/* Current buffer               */
 struct buffer *buffer_head;			/* first of the chain of all buffers */
+struct window *window_head;			/* first of the chain of all windows */
+struct window *saved_window;			/* the one save-window remembered */
 struct buffer *list_buffer;			/* the *List* buffer, which shows the others */
 
 char search_pattern[NPAT];			/* what to search for */

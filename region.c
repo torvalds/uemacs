@@ -26,7 +26,7 @@ int cmd_kill_region(int f, int n)
 	struct region region;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if ((s = getregion(&region)) != TRUE)
 		return s;
 	if ((lastflag & CFKILL) == 0)		/* This is a kill type  */
@@ -90,7 +90,7 @@ int cmd_case_region_lower(int f, int n)
 	struct region region;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if ((s = getregion(&region)) != TRUE)
 		return s;
 	buffer_changed(WFHARD);
@@ -127,7 +127,7 @@ int cmd_case_region_upper(int f, int n)
 	struct region region;
 
 	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
-		return rdonly();		/* we are in read only mode     */
+		return readonly_error();		/* we are in read only mode     */
 	if ((s = getregion(&region)) != TRUE)
 		return s;
 	buffer_changed(WFHARD);

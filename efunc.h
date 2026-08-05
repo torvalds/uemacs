@@ -27,6 +27,20 @@ extern int cmd_kill_paragraph(int f, int n);
 extern int cmd_count_words(int f, int n);
 
 /* window.c */
+extern int cmd_split_current_window(int f, int n);
+extern int cmd_next_window(int f, int n);
+extern int cmd_previous_window(int f, int n);
+extern int cmd_delete_other_windows(int f, int n);
+extern int cmd_delete_window(int f, int n);
+extern int cmd_grow_window(int f, int n);
+extern int cmd_shrink_window(int f, int n);
+extern int cmd_move_window_up(int f, int n);
+extern int cmd_move_window_down(int f, int n);
+extern int cmd_resize_window(int f, int n);
+extern int cmd_scroll_next_up(int f, int n);
+extern int cmd_scroll_next_down(int f, int n);
+extern int cmd_save_window(int f, int n);
+extern int cmd_restore_window(int f, int n);
 extern int cmd_redraw_display(int f, int n);
 extern int cmd_clear_and_redraw(int f, int n);
 extern int cmd_change_screen_size(int f, int n);
@@ -94,8 +108,8 @@ extern int cmd_begin_macro(int f, int n);
 extern int cmd_end_macro(int f, int n);
 extern int cmd_execute_macro(int f, int n);
 extern int cmd_abort_command(int f, int n);
-extern int rdonly(void);
-extern int resterr(void);
+extern int readonly_error(void);
+extern int restricted_error(void);
 extern int cmd_nop(int f, int n);
 extern int cmd_meta_prefix(int f, int n);
 extern int cmd_ctlx_prefix(int f, int n);
@@ -150,8 +164,8 @@ extern int typahead(void);
 extern int ask_yesno(char *prompt);
 extern int ask_string(char *prompt, char *buf, int nbuf);
 extern int ask_string_until(char *prompt, char *buf, int nbuf, int eolchar);
-extern int ectoc(int c);
-extern int ctoec(int c);
+extern int keycode_to_char(int c);
+extern int char_to_keycode(int c);
 extern fn_t getname(void);
 extern int tgetc(void);
 extern int get1key(void);
@@ -161,14 +175,16 @@ extern void outstring(char *s);
 extern void ostring(char *s);
 
 /* bind.c */
+extern int cmd_help(int f, int n);
+extern int cmd_describe_bindings(int f, int n);
+extern int cmd_apropos(int f, int n);
 extern int cmd_describe_key(int f, int n);
 extern int cmd_bind_to_key(int f, int n);
 extern int cmd_unbind_key(int f, int n);
 extern int unbindchar(int c);
-extern int strinc(char *source, char *sub);
 extern unsigned int getckey(int mflag);
 extern int startup(char *sfname);
-extern char *flook(char *fname, int hflag);
+extern char *lookup_file(char *fname, int try_home);
 extern void cmdstr(int c, char *seq);
 extern fn_t getbind(int c);
 extern char *getfname(fn_t);
@@ -182,17 +198,17 @@ extern int cmd_next_buffer(int f, int n);
 extern int swbuffer(struct buffer *bp);
 extern void shown_buffer_changed(void);
 extern int cmd_delete_buffer(int f, int n);
-extern int zotbuf(struct buffer *bp);
+extern int destroy_buffer(struct buffer *bp);
 extern int cmd_name_buffer(int f, int n);
 extern int makelist(int iflag);
 extern int cmd_list_buffers(int f, int n);
 extern void ltoa(char *buf, int width, long num);
-extern int addline(char *text);
-extern int anycb(void);
-extern int bclear(struct buffer *bp);
+extern int addline(struct buffer *bp, char *text);
+extern int any_changed_buffers(void);
+extern int clear_buffer(struct buffer *bp);
 extern int cmd_unmark_buffer(int f, int n);
 /* Lookup a buffer by name. */
-extern struct buffer *bfind(char *bname, int cflag, int bflag);
+extern struct buffer *find_buffer(char *bname, int cflag, int bflag);
 
 /* file.c */
 extern int cmd_read_file(int f, int n);
@@ -202,12 +218,12 @@ extern int cmd_view_file(int f, int n);
 extern int getfile(char *fname, int lockfl);
 extern int readin(char *fname, int lockfl);
 extern void makename(char *bname, char *fname);
-extern void unqname(char *name);
+extern void unique_buffer_name(char *name);
 extern int cmd_write_file(int f, int n);
 extern int cmd_save_file(int f, int n);
 extern int writeout(char *fn);
 extern int cmd_change_file_name(int f, int n);
-extern int ifile(char *fname);
+extern int insert_file(char *fname);
 extern int file_changed(struct buffer *bp, char *fn);
 
 /* fileio.c */
@@ -233,7 +249,7 @@ extern int dobuf(struct buffer *bp);
 extern void freewhile(struct while_block *wp);
 extern int cmd_execute_file(int f, int n);
 extern int dofile(char *fname);
-extern int cbuf(int f, int n, int bufnum);
+extern int execute_numbered_macro(int f, int n, int number);
 extern int cmd_execute_macro_1(int f, int n);
 extern int cmd_execute_macro_2(int f, int n);
 extern int cmd_execute_macro_3(int f, int n);
@@ -281,6 +297,7 @@ extern int cmd_suspend_emacs(int f, int n);
 extern void rtfrmshell(void);
 extern int cmd_shell_command(int f, int n);
 extern int cmd_execute_program(int f, int n);
+extern int cmd_pipe_command(int f, int n);
 extern int cmd_filter_buffer(int f, int n);
 
 /* search.c */
@@ -297,7 +314,7 @@ extern int cmd_replace_string(int f, int n);
 extern int cmd_query_replace_string(int f, int n);
 extern int delins(int dlength, char *instr, int use_meta);
 extern int expandp(char *srcstr, char *deststr, int maxlength);
-extern int boundry(struct line *curline, int curoff, int dir);
+extern int at_buffer_end(struct line *curline, int curoff, int dir);
 extern void mcclear(void);
 extern void rmcclear(void);
 
@@ -313,21 +330,21 @@ extern int get_char(void);
 
 /* eval.c */
 extern void varinit(void);
-extern char *gtfun(char *fname);
-extern char *gtusr(char *vname);
-extern char *gtenv(char *vname);
+extern char *eval_function(char *fname);
+extern char *user_variable(char *vname);
+extern char *environment_variable(char *vname);
 extern int cmd_set(int f, int n);
 extern void findvar(char *var, struct variable_description *vd, int size);
 extern int svar(struct variable_description *var, char *value);
 extern char *itoa(int i);
-extern int gettyp(char *token);
+extern int token_type(char *token);
 extern char *getval(char *token, char *result, int size);
-extern int stol(char *val);
-extern char *ltos(int val);
+extern int truth_value(char *val);
+extern char *truth_text(int val);
 extern char *mkupper(const char *str, char *result);
 extern char *mklower(const char *str, char *result);
 extern int abs(int x);
-extern int ernd(void);
+extern int next_random(void);
 extern int sindex(char *source, char *pattern);
 extern char *xlat(char *source, char *lookup, char *trans);
 
