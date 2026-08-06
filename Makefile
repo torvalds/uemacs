@@ -30,9 +30,25 @@ DEFINES=-DPOSIX -D_GNU_SOURCE
 
 CFLAGS=-O2 $(WARNINGS)
 
-LIBS=ncurses hunspell
+LIBS=ncurses
 BINDIR=$(HOME)/bin
 LIBDIR=$(HOME)/lib
+
+# The spell checking is hunspell, and it is the only optional part of
+# this.  HUNSPELL=0 - or anything that is not 1 - builds an editor that
+# has spell mode and never finds a misspelling.  Asking for it without
+# the library installed says so and builds that editor too, rather than
+# failing halfway through with a missing header.
+HUNSPELL=1
+HAVE_HUNSPELL := $(shell pkg-config --exists hunspell && echo 1)
+ifeq ($(HUNSPELL),1)
+ifeq ($(HAVE_HUNSPELL),1)
+LIBS += hunspell
+DEFINES += -DHUNSPELL
+else
+$(warning hunspell not installed, not building with spell checking)
+endif
+endif
 
 PKG_CONFIG_CFLAGS=$(shell pkg-config --cflags $(LIBS))
 ALL_CFLAGS=$(CFLAGS) $(DEFINES) $(PKG_CONFIG_CFLAGS)

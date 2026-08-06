@@ -9,13 +9,16 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <hunspell.h>
 
 #include "estruct.h"
 #include "globals.h"
 #include "efunc.h"
 #include "utf8.h"
 #include "util.h"
+
+#ifdef HUNSPELL
+
+#include <hunspell.h>
 
 /*
  * The languages to check against.  A word is spelled correctly if any one
@@ -125,3 +128,22 @@ void spell_init(void)
 		local_dictionary(spellers[0], buf);
 	}
 }
+
+#else
+
+/*
+ * Built without hunspell.  This is the same answer the real thing gives
+ * when it finds no dictionaries to open: with nothing to check against,
+ * nothing is misspelled.  Spell mode still exists and still toggles, it
+ * just never has anything to say.
+ */
+void spell_init(void)
+{
+}
+
+int spellcheck(const char *word)
+{
+	return 1;
+}
+
+#endif
