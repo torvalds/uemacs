@@ -45,7 +45,7 @@
  * A modified 3.9e/PK was heavily used at the University of Helsinki
  * for several years on different UNIX, VMS, and MSDOS platforms.
  *
- * This modified version is now called eEmacs/PK.
+ * This modified version is now called uEmacs/PK.
  *
  * 4.0	Petri Kutvonen, 1-Sep-91
  *
