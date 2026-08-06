@@ -212,3 +212,11 @@ Box drawing alignment tests:                                          █
                                                ▝▀▘▙▄▟
 
 😇
+
+Corner cases:
+U+0800: ࠀ
+U+010000: 𐀀
+
+Combining cases:
+Invisible plus and zero: ⁤0
+Red Heart Emoji: U+2764 U+FE0F ❤️

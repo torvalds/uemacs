@@ -17,409 +17,151 @@
  * control-X commands.
  */
 struct key_tab keytab[NBINDS] = {
-	{CONTROL | 'A', gotobol}
-	,
-	{CONTROL | 'B', backchar}
-	,
-	{CONTROL | 'C', insspace}
-	,
-	{CONTROL | 'D', forwdel}
-	,
-	{CONTROL | 'E', gotoeol}
-	,
-	{CONTROL | 'F', forwchar}
-	,
-	{CONTROL | 'G', ctrlg}
-	,
-	{CONTROL | 'H', backdel}
-	,
-	{CONTROL | 'I', insert_tab}
-	,
-	{CONTROL | 'J', indent}
-	,
-	{CONTROL | 'K', killtext}
-	,
-	{CONTROL | 'L', redraw}
-	,
-	{CONTROL | 'M', insert_newline}
-	,
-	{CONTROL | 'N', forwline}
-	,
-	{CONTROL | 'O', openline}
-	,
-	{CONTROL | 'P', backline}
-	,
-	{CONTROL | 'Q', quote}
-	,
-	{CONTROL | 'R', backsearch}
-	,
-	{CONTROL | 'S', forwsearch}
-	,
-	{CONTROL | 'T', twiddle}
-	,
-	{CONTROL | 'U', unarg}
-	,
-	{CONTROL | 'V', forwpage}
-	,
-	{CONTROL | 'W', killregion}
-	,
-	{CONTROL | 'X', cex}
-	,
-	{CONTROL | 'Y', yank}
-	,
-	{CONTROL | 'Z', backpage}
-	,
-	{CONTROL | ']', metafn}
-	,
-	{CTLX | CONTROL | 'B', listbuffers}
-	,
-	{CTLX | CONTROL | 'C', quit}
-	,			/* Hard quit.           */
-#if	PKCODE & AEDIT
-	{CTLX | CONTROL | 'A', detab}
-	,
-#endif
-#if	PKCODE
-	{CTLX | CONTROL | 'D', filesave}
-	,			/* alternative          */
-#else
-#if	AEDIT
-	{CTLX | CONTROL | 'D', detab}
-	,
-#endif
-#endif
-#if	AEDIT
-	{CTLX | CONTROL | 'E', entab}
-	,
-#endif
-	{CTLX | CONTROL | 'F', filefind}
-	,
-	{CTLX | CONTROL | 'I', insfile}
-	,
-	{CTLX | CONTROL | 'L', lowerregion}
-	,
-	{CTLX | CONTROL | 'M', delmode}
-	,
-	{CTLX | CONTROL | 'N', mvdnwind}
-	,
-	{CTLX | CONTROL | 'O', deblank}
-	,
-	{CTLX | CONTROL | 'P', mvupwind}
-	,
-	{CTLX | CONTROL | 'R', fileread}
-	,
-	{CTLX | CONTROL | 'S', filesave}
-	,
-#if	AEDIT
-	{CTLX | CONTROL | 'T', trim}
-	,
-#endif
-	{CTLX | CONTROL | 'U', upperregion}
-	,
-	{CTLX | CONTROL | 'V', viewfile}
-	,
-	{CTLX | CONTROL | 'W', filewrite}
-	,
-	{CTLX | CONTROL | 'X', swapmark}
-	,
-	{CTLX | CONTROL | 'Z', shrinkwind}
-	,
-	{CTLX | '?', deskey}
-	,
-	{CTLX | '!', spawn}
-	,
-	{CTLX | '@', pipecmd}
-	,
-	{CTLX | '#', filter_buffer}
-	,
-	{CTLX | '$', execprg}
-	,
-	{CTLX | '=', showcpos}
-	,
-	{CTLX | '(', ctlxlp}
-	,
-	{CTLX | ')', ctlxrp}
-	,
-	{CTLX | '^', enlargewind}
-	,
-	{CTLX | '0', delwind}
-	,
-	{CTLX | '1', onlywind}
-	,
-	{CTLX | '2', splitwind}
-	,
-	{CTLX | 'A', setvar}
-	,
-	{CTLX | 'B', usebuffer}
-	,
-	{CTLX | 'C', spawncli}
-	,
-#if	BSD | __hpux | SVR4
-	{CTLX | 'D', bktoshell}
-	,
-#endif
-	{CTLX | 'E', ctlxe}
-	,
-	{CTLX | 'F', setfillcol}
-	,
-	{CTLX | 'K', killbuffer}
-	,
-	{CTLX | 'M', setemode}
-	,
-	{CTLX | 'N', filename}
-	,
-	{CTLX | 'O', nextwind}
-	,
-	{CTLX | 'P', prevwind}
-	,
-#if	PKCODE
-	{CTLX | 'Q', quote}
-	,			/* alternative  */
-#endif
-#if	ISRCH
-	{CTLX | 'R', risearch}
-	,
-	{CTLX | 'S', fisearch}
-	,
-#endif
-	{CTLX | 'W', resize}
-	,
-	{CTLX | 'X', nextbuffer}
-	,
-	{CTLX | 'Z', enlargewind}
-	,
-#if	WORDPRO
-	{META | CONTROL | 'C', wordcount}
-	,
-#endif
-#if	PKCODE
-	{META | CONTROL | 'D', newsize}
-	,
-#endif
-#if	PROC
-	{META | CONTROL | 'E', execproc}
-	,
-#endif
-#if	CFENCE
-	{META | CONTROL | 'F', getfence}
-	,
-#endif
-	{META | CONTROL | 'H', delbword}
-	,
-	{META | CONTROL | 'K', unbindkey}
-	,
-	{META | CONTROL | 'L', reposition}
-	,
-	{META | CONTROL | 'M', delgmode}
-	,
-	{META | CONTROL | 'N', namebuffer}
-	,
-	{META | CONTROL | 'R', qreplace}
-	,
-	{META | CONTROL | 'S', newsize}
-	,
-	{META | CONTROL | 'T', newwidth}
-	,
-	{META | CONTROL | 'V', scrnextdw}
-	,
-#if	WORDPRO
-	{META | CONTROL | 'W', killpara}
-	,
-#endif
-	{META | CONTROL | 'Z', scrnextup}
-	,
-	{META | ' ', setmark}
-	,
-	{META | '?', help}
-	,
-	{META | '!', reposition}
-	,
-	{META | '.', setmark}
-	,
-	{META | '>', gotoeob}
-	,
-	{META | '<', gotobob}
-	,
-	{META | '~', unmark}
-	,
-#if	APROP
-	{META | 'A', apro}
-	,
-#endif
-	{META | 'B', backword}
-	,
-	{META | 'C', capword}
-	,
-	{META | 'D', delfword}
-	,
-#if	CRYPT
-	{META | 'E', set_encryption_key}
-	,
-#endif
-	{META | 'F', forwword}
-	,
-	{META | 'G', gotoline}
-	,
-#if	PKCODE
-#if	WORDPRO
-	{META | 'J', justpara}
-	,
-#endif
-#endif
-	{META | 'K', bindtokey}
-	,
-	{META | 'L', lowerword}
-	,
-	{META | 'M', setgmode}
-	,
-#if	WORDPRO
-	{META | 'N', gotoeop}
-	,
-	{META | 'P', gotobop}
-	,
-	{META | 'Q', fillpara}
-	,
-#endif
-	{META | 'R', sreplace}
-	,
-#if	PKCODE
-	{META | 'S', forwsearch}
-	,			/* alternative P.K.     */
-#else
-#if	BSD
-	{META | 'S', bktoshell}
-	,
-#endif
-#endif
-	{META | 'U', upperword}
-	,
-	{META | 'V', backpage}
-	,
-	{META | 'W', copyregion}
-	,
-	{META | 'X', namedcmd}
-	,
-	{META | 'Z', quickexit}
-	,
-	{META | 0x7F, delbword}
-	,
+	{ CONTROL | 'A', cmd_beginning_of_line },
+	{ CONTROL | 'B', cmd_backward_character },
+	{ CONTROL | 'C', cmd_insert_space },
+	{ CONTROL | 'D', cmd_delete_next_character },
+	{ CONTROL | 'E', cmd_end_of_line },
+	{ CONTROL | 'F', cmd_forward_character },
+	{ CONTROL | 'G', cmd_abort_command },
+	{ CONTROL | 'H', cmd_delete_previous_character },
+	{ CONTROL | 'I', cmd_handle_tab },
+	{ CONTROL | 'J', cmd_newline_and_indent },
+	{ CONTROL | 'K', cmd_kill_to_end_of_line },
+	{ CONTROL | 'L', cmd_clear_and_redraw },
+	{ CONTROL | 'M', cmd_newline },
+	{ CONTROL | 'N', cmd_next_line },
+	{ CONTROL | 'O', cmd_open_line },
+	{ CONTROL | 'P', cmd_previous_line },
+	{ CONTROL | 'Q', cmd_quote_character },
+	{ CONTROL | 'R', cmd_search_reverse },
+	{ CONTROL | 'S', cmd_search_forward },
+	{ CONTROL | 'T', cmd_transpose_characters },
+	{ CONTROL | 'U', cmd_universal_argument },
+	{ CONTROL | 'V', cmd_next_page },
+	{ CONTROL | 'W', cmd_kill_region },
+	{ CONTROL | 'X', cmd_ctlx_prefix },
+	{ CONTROL | 'Y', cmd_yank },
+	{ CONTROL | 'Z', cmd_previous_page },
+	{ CONTROL | ']', cmd_meta_prefix },
+	{ CTLX | CONTROL | 'B', cmd_list_buffers },
+	{ CTLX | CONTROL | 'C', cmd_exit_emacs },		/* Hard quit.           */
+	{ CTLX | CONTROL | 'A', cmd_detab_line },
+	{ CTLX | CONTROL | 'D', cmd_save_file },	/* alternative          */
+	{ CTLX | CONTROL | 'E', cmd_entab_line },
+	{ CTLX | CONTROL | 'F', cmd_find_file },
+	{ CTLX | CONTROL | 'I', cmd_insert_file },
+	{ CTLX | CONTROL | 'L', cmd_case_region_lower },
+	{ CTLX | CONTROL | 'M', cmd_delete_mode },
+	{ CTLX | CONTROL | 'N', cmd_move_window_down },
+	{ CTLX | CONTROL | 'O', cmd_delete_blank_lines },
+	{ CTLX | CONTROL | 'P', cmd_move_window_up },
+	{ CTLX | CONTROL | 'R', cmd_read_file },
+	{ CTLX | CONTROL | 'S', cmd_save_file },
+	{ CTLX | CONTROL | 'T', cmd_trim_line },
+	{ CTLX | CONTROL | 'U', cmd_case_region_upper },
+	{ CTLX | CONTROL | 'V', cmd_view_file },
+	{ CTLX | CONTROL | 'W', cmd_write_file },
+	{ CTLX | CONTROL | 'X', cmd_exchange_point_and_mark },
+	{ CTLX | CONTROL | 'Z', cmd_shrink_window },
+	{ CTLX | '0', cmd_delete_window },
+	{ CTLX | '1', cmd_delete_other_windows },
+	{ CTLX | '2', cmd_split_current_window },
+	{ CTLX | '?', cmd_describe_key },
+	{ CTLX | '!', cmd_shell_command },
+	{ CTLX | '#', cmd_filter_buffer },
+	{ CTLX | '$', cmd_execute_program },
+	{ CTLX | '=', cmd_buffer_position },
+	{ CTLX | '@', cmd_pipe_command },
+	{ CTLX | '(', cmd_begin_macro },
+	{ CTLX | ')', cmd_end_macro },
+	{ CTLX | 'A', cmd_set },
+	{ CTLX | 'B', cmd_select_buffer },
+	{ CTLX | 'C', cmd_interactive_shell },
+	{ CTLX | 'D', cmd_suspend_emacs },
+	{ CTLX | 'E', cmd_execute_macro },
+	{ CTLX | 'F', cmd_set_fill_column },
+	{ CTLX | 'K', cmd_delete_buffer },
+	{ CTLX | 'M', cmd_add_mode },
+	{ CTLX | 'N', cmd_change_file_name },
+	{ CTLX | 'O', cmd_next_window },
+	{ CTLX | 'P', cmd_previous_window },
+	{ CTLX | 'Q', cmd_quote_character },			/* alternative  */
+	{ CTLX | 'R', cmd_reverse_incremental_search },
+	{ CTLX | 'S', cmd_incremental_search },
+	{ CTLX | 'W', cmd_resize_window },
+	{ CTLX | 'X', cmd_next_buffer },
+	{ CTLX | 'Z', cmd_grow_window },
+	{ CTLX | '^', cmd_grow_window },
+	{ META | CONTROL | 'C', cmd_count_words },
+	{ META | CONTROL | 'D', cmd_change_screen_size },
+	{ META | CONTROL | 'E', cmd_execute_procedure },
+	{ META | CONTROL | 'F', cmd_goto_matching_fence },
+	{ META | CONTROL | 'H', cmd_delete_previous_word },
+	{ META | CONTROL | 'K', cmd_unbind_key },
+	{ META | CONTROL | 'L', cmd_redraw_display },
+	{ META | CONTROL | 'M', cmd_delete_global_mode },
+	{ META | CONTROL | 'N', cmd_name_buffer },
+	{ META | CONTROL | 'R', cmd_query_replace_string },
+	{ META | CONTROL | 'S', cmd_change_screen_size },
+	{ META | CONTROL | 'T', cmd_change_screen_width },
+	{ META | CONTROL | 'V', cmd_scroll_next_down },
+	{ META | CONTROL | 'W', cmd_kill_paragraph },
+	{ META | CONTROL | 'Z', cmd_scroll_next_up },
+	{ META | ' ', cmd_set_mark },
+	{ META | '!', cmd_redraw_display },
+	{ META | '.', cmd_set_mark },
+	{ META | '>', cmd_end_of_file },
+	{ META | '<', cmd_beginning_of_file },
+	{ META | '?', cmd_help },
+	{ META | '~', cmd_unmark_buffer },
+	{ META | 'A', cmd_apropos },
+	{ META | 'B', cmd_previous_word },
+	{ META | 'C', cmd_case_word_capitalize },
+	{ META | 'D', cmd_delete_next_word },
+	{ META | 'F', cmd_next_word },
+	{ META | 'G', cmd_goto_line },
+	{ META | 'J', cmd_justify_paragraph },
+	{ META | 'K', cmd_bind_to_key },
+	{ META | 'L', cmd_case_word_lower },
+	{ META | 'M', cmd_add_global_mode },
+	{ META | 'N', cmd_next_paragraph },
+	{ META | 'P', cmd_previous_paragraph },
+	{ META | 'Q', cmd_fill_paragraph },
+	{ META | 'R', cmd_replace_string },
+	{ META | 'S', cmd_search_forward },		/* alternative P.K.     */
+	{ META | 'U', cmd_case_word_upper },
+	{ META | 'V', cmd_previous_page },
+	{ META | 'W', cmd_copy_region },
+	{ META | 'X', cmd_execute_named_command },
+	{ META | 'Z', cmd_quick_exit },
+	{ META | 0x7F, cmd_delete_previous_word },
+	{ SPEC | '1', cmd_incremental_search },		/* VT220 keys   */
+	{ SPEC | '2', cmd_yank },
+	{ SPEC | '3', cmd_kill_region },
+	{ SPEC | '4', cmd_set_mark },
+	{ SPEC | '5', cmd_previous_page },
+	{ SPEC | '6', cmd_next_page },
+	{ SPEC | 'A', cmd_previous_line },
+	{ SPEC | 'B', cmd_next_line },
+	{ SPEC | 'C', cmd_forward_character },
+	{ SPEC | 'D', cmd_backward_character },
+	{ SPEC | 'c', cmd_meta_prefix },
+	{ SPEC | 'd', cmd_backward_character },
+	{ SPEC | 'e', cmd_next_line },
+	{ SPEC | 'f', cmd_beginning_of_file },
+	{ SPEC | 'h', cmd_help },
+	{ SPEC | 'i', cmd_ctlx_prefix },
 
-#if	MSDOS
-	{SPEC | CONTROL | '_', forwhunt}
-	,
-	{SPEC | CONTROL | 'S', backhunt}
-	,
-	{SPEC | 71, gotobol}
-	,
-	{SPEC | 72, backline}
-	,
-	{SPEC | 73, backpage}
-	,
-	{SPEC | 75, backchar}
-	,
-	{SPEC | 77, forwchar}
-	,
-	{SPEC | 79, gotoeol}
-	,
-	{SPEC | 80, forwline}
-	,
-	{SPEC | 81, forwpage}
-	,
-	{SPEC | 82, insspace}
-	,
-	{SPEC | 83, forwdel}
-	,
-	{SPEC | 115, backword}
-	,
-	{SPEC | 116, forwword}
-	,
-#if	WORDPRO
-	{SPEC | 132, gotobop}
-	,
-	{SPEC | 118, gotoeop}
-	,
-#endif
-	{SPEC | 84, cbuf1}
-	,
-	{SPEC | 85, cbuf2}
-	,
-	{SPEC | 86, cbuf3}
-	,
-	{SPEC | 87, cbuf4}
-	,
-	{SPEC | 88, cbuf5}
-	,
-	{SPEC | 89, cbuf6}
-	,
-	{SPEC | 90, cbuf7}
-	,
-	{SPEC | 91, cbuf8}
-	,
-	{SPEC | 92, cbuf9}
-	,
-	{SPEC | 93, cbuf10}
-	,
-#if PKCODE
-	{SPEC | 117, gotoeob}
-	,
-	{SPEC | 119, gotobob}
-	,
-	{SPEC | 141, gotobop}
-	,
-	{SPEC | 145, gotoeop}
-	,
-	{SPEC | 146, yank}
-	,
-	{SPEC | 147, killregion}
-	,
-#endif
-#endif
-
-#if	VT220
-	{SPEC | '1', fisearch}
-	,			/* VT220 keys   */
-	{SPEC | '2', yank}
-	,
-	{SPEC | '3', killregion}
-	,
-	{SPEC | '4', setmark}
-	,
-	{SPEC | '5', backpage}
-	,
-	{SPEC | '6', forwpage}
-	,
-	{SPEC | 'A', backline}
-	,
-	{SPEC | 'B', forwline}
-	,
-	{SPEC | 'C', forwchar}
-	,
-	{SPEC | 'D', backchar}
-	,
-	{SPEC | 'c', metafn}
-	,
-	{SPEC | 'd', backchar}
-	,
-	{SPEC | 'e', forwline}
-	,
-	{SPEC | 'f', gotobob}
-	,
-	{SPEC | 'h', help}
-	,
-	{SPEC | 'i', cex}
-	,
-#endif
-
-	{0x7F, backdel}
-	,
+	{ 0x7F, cmd_delete_previous_character },
 
 	/* special internal bindings */
-	{ SPEC | META | 'W', wrapword },	/* called on word wrap */
-	{ SPEC | META | 'C', nullproc },	/*  every command input */
-	{ SPEC | META | 'R', nullproc },	/*  on file read */
-	{ SPEC | META | 'X', nullproc },	/*  on window change P.K. */
+	{ SPEC | META | 'W', cmd_wrap_word },	/* called on word wrap */
+	{ SPEC | META | 'C', cmd_nop },	/*  every command input */
+	{ SPEC | META | 'R', cmd_nop },	/*  on file read */
+	{ SPEC | META | 'X', cmd_nop },	/*  on buffer change */
 
-	{0, NULL}
+	{ 0, NULL }
 };
 
-#endif  /* EBIND_H_ */
+#endif				/* EBIND_H_ */

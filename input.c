@@ -10,42 +10,30 @@
 #include <unistd.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 #include "wrapper.h"
-
-#if	PKCODE
-#if     MSDOS && TURBO
-#include	<dir.h>
-#endif
-#endif
-
-#if	PKCODE && (UNIX || (MSDOS && TURBO))
-#define	COMPLC	1
-#else
-#define COMPLC	0
-#endif
 
 /*
  * Ask a yes or no question in the message line. Return either TRUE, FALSE, or
  * ABORT. The ABORT status is returned if the user bumps out of the question
  * with a ^G. Used any time a confirmation is required.
  */
-int mlyesno(char *prompt)
+int ask_yesno(char *prompt)
 {
-	char c;			/* input character */
-	char buf[NPAT];		/* prompt to user */
+	char c;					/* input character */
+	char buf[NPAT];				/* prompt to user */
 
 	for (;;) {
 		/* build and prompt the user */
 		strcpy(buf, prompt);
 		strcat(buf, " (y/n)? ");
-		mlwrite(buf);
+		msg_puts(buf);
 
 		/* get the responce */
 		c = tgetc();
 
-		if (c == ectoc(abortc))	/* Bail out! */
+		if (c == keycode_to_char(abort_char))		/* Bail out! */
 			return ABORT;
 
 		if (c == 'y' || c == 'Y')
@@ -64,22 +52,22 @@ int mlyesno(char *prompt)
  * return. Handle erase, kill, and abort keys.
  */
 
-int mlreply(char *prompt, char *buf, int nbuf)
+int ask_string(char *prompt, char *buf, int nbuf)
 {
-	return nextarg(prompt, buf, nbuf, ctoec('\n'));
+	return nextarg(prompt, buf, nbuf, char_to_keycode('\n'));
 }
 
-int mlreplyt(char *prompt, char *buf, int nbuf, int eolchar)
+int ask_string_until(char *prompt, char *buf, int nbuf, int eolchar)
 {
 	return nextarg(prompt, buf, nbuf, eolchar);
 }
 
 /*
- * ectoc:
+ * keycode_to_char:
  *	expanded character to character
  *	collapse the CONTROL and SPEC flags back into an ascii code
  */
-int ectoc(int c)
+int keycode_to_char(int c)
 {
 	if (c & CONTROL)
 		c = c & ~(CONTROL | 0x40);
@@ -89,11 +77,11 @@ int ectoc(int c)
 }
 
 /*
- * ctoec:
+ * char_to_keycode:
  *	character to extended character
  *	pull out the CONTROL and SPEC prefixes (if possible)
  */
-int ctoec(int c)
+int char_to_keycode(int c)
 {
 	if (c >= 0x00 && c <= 0x1F)
 		c = CONTROL | (c + '@');
@@ -107,19 +95,19 @@ int ctoec(int c)
  */
 fn_t getname(void)
 {
-	int cpos;	/* current column on screen output */
+	int cpos;				/* current column on screen output */
 	int c;
-	char *sp;	/* pointer to string for output */
-	struct name_bind *ffp;	/* first ptr to entry in name binding table */
-	struct name_bind *cffp;	/* current ptr to entry in name binding table */
-	struct name_bind *lffp;	/* last ptr to entry in name binding table */
-	char buf[NSTRING];	/* buffer to hold tentative command name */
+	char *sp;				/* pointer to string for output */
+	struct name_bind *ffp;			/* first ptr to entry in name binding table */
+	struct name_bind *cffp;			/* current ptr to entry in name binding table */
+	struct name_bind *lffp;			/* last ptr to entry in name binding table */
+	char buf[NSTRING];			/* buffer to hold tentative command name */
 
 	/* starting at the beginning of the string buffer */
 	cpos = 0;
 
 	/* if we are executing a command line get the next arg and match it */
-	if (clexec) {
+	if (executing_command_line) {
 		if (macarg(buf) != TRUE)
 			return NULL;
 		return fncmatch(&buf[0]);
@@ -136,50 +124,48 @@ fn_t getname(void)
 			/* and match it off */
 			return fncmatch(&buf[0]);
 
-		} else if (c == ectoc(abortc)) {	/* Bell, abort */
-			ctrlg(FALSE, 0);
-			TTflush();
+		} else if (c == keycode_to_char(abort_char)) {	/* Bell, abort */
+			cmd_abort_command(FALSE, 0);
+			ttflush();
 			return NULL;
 
 		} else if (c == 0x7F || c == 0x08) {	/* rubout/erase */
 			if (cpos != 0) {
-				TTputc('\b');
-				TTputc(' ');
-				TTputc('\b');
-				--ttcol;
+				ttputc('\b');
+				ttputc(' ');
+				ttputc('\b');
+				--shown_col;
 				--cpos;
-				TTflush();
+				ttflush();
 			}
 
-		} else if (c == 0x15) {	/* C-U, kill */
+		} else if (c == 0x15) {		/* C-U, kill */
 			while (cpos != 0) {
-				TTputc('\b');
-				TTputc(' ');
-				TTputc('\b');
+				ttputc('\b');
+				ttputc(' ');
+				ttputc('\b');
 				--cpos;
-				--ttcol;
+				--shown_col;
 			}
 
-			TTflush();
+			ttflush();
 
 		} else if (c == ' ' || c == 0x1b || c == 0x09) {
 /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 			/* attempt a completion */
-			buf[cpos] = 0;	/* terminate it for us */
+			buf[cpos] = 0;		/* terminate it for us */
 			ffp = &names[0];	/* scan for matches */
 			while (ffp->n_func != NULL) {
 				if (strncmp(buf, ffp->n_name, strlen(buf))
 				    == 0) {
 					/* a possible match! More than one? */
 					if ((ffp + 1)->n_func == NULL ||
-					    (strncmp
-					     (buf, (ffp + 1)->n_name,
-					      strlen(buf)) != 0)) {
+					    (strncmp(buf, (ffp + 1)->n_name, strlen(buf)) != 0)) {
 						/* no...we match, print it */
 						sp = ffp->n_name + cpos;
 						while (*sp)
-							TTputc(*sp++);
-						TTflush();
+							ttputc(*sp++);
+						ttflush();
 						return ffp->n_func;
 					} else {
 /* << << << << << << << << << << << << << << << << << */
@@ -187,14 +173,9 @@ fn_t getname(void)
 
 						/* first scan down until we no longer match the current input */
 						lffp = (ffp + 1);
-						while ((lffp +
-							1)->n_func !=
-						       NULL) {
+						while ((lffp + 1)->n_func != NULL) {
 							if (strncmp
-							    (buf,
-							     (lffp +
-							      1)->n_name,
-							     strlen(buf))
+							    (buf, (lffp + 1)->n_name, strlen(buf))
 							    != 0)
 								break;
 							++lffp;
@@ -203,27 +184,19 @@ fn_t getname(void)
 						/* and now, attempt to partial complete the string, char at a time */
 						while (TRUE) {
 							/* add the next char in */
-							buf[cpos] =
-							    ffp->
-							    n_name[cpos];
+							buf[cpos] = ffp->n_name[cpos];
 
 							/* scan through the candidates */
 							cffp = ffp + 1;
-							while (cffp <=
-							       lffp) {
-								if (cffp->
-								    n_name
-								    [cpos]
-								    !=
-								    buf
-								    [cpos])
+							while (cffp <= lffp) {
+								if (cffp->n_name[cpos]
+								    != buf[cpos])
 									goto onward;
 								++cffp;
 							}
 
 							/* add the character */
-							TTputc(buf
-							       [cpos++]);
+							ttputc(buf[cpos++]);
 						}
 /* << << << << << << << << << << << << << << << << << */
 					}
@@ -232,18 +205,18 @@ fn_t getname(void)
 			}
 
 			/* no match.....beep and onward */
-			TTbeep();
-		      onward:;
-			TTflush();
+			tcapbeep();
+ onward:		;
+			ttflush();
 /* <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 		} else {
 			if (cpos < NSTRING - 1 && c > ' ') {
 				buf[cpos++] = c;
-				TTputc(c);
+				ttputc(c);
 			}
 
-			++ttcol;
-			TTflush();
+			++shown_col;
+			ttflush();
 		}
 	}
 }
@@ -253,45 +226,43 @@ fn_t getname(void)
 
 int tgetc(void)
 {
-	int c;			/* fetched character */
+	int c;					/* fetched character */
 
 	/* if we are playing a keyboard macro back, */
-	if (kbdmode == PLAY) {
+	if (keyboard_macro_mode == PLAY) {
 
 		/* if there is some left... */
-		if (kbdptr < kbdend)
-			return (int) *kbdptr++;
+		if (keyboard_macro_pos < keyboard_macro_end)
+			return (int)*keyboard_macro_pos++;
 
 		/* at the end of last repitition? */
-		if (--kbdrep < 1) {
-			kbdmode = STOP;
-#if	VISMAC == 0
+		if (--keyboard_macro_repeat < 1) {
+			keyboard_macro_mode = STOP;
 			/* force a screen update after all is done */
-			update(FALSE);
-#endif
+			update();
 		} else {
 
 			/* reset the macro to the begining for the next rep */
-			kbdptr = &kbdm[0];
-			return (int) *kbdptr++;
+			keyboard_macro_pos = &keyboard_macro[0];
+			return (int)*keyboard_macro_pos++;
 		}
 	}
 
 	/* fetch a character from the terminal driver */
-	c = TTgetc();
+	c = ttgetc();
 
 	/* record it for $lastkey */
-	lastkey = c;
+	last_key = c;
 
 	/* save it if we need to */
-	if (kbdmode == RECORD) {
-		*kbdptr++ = c;
-		kbdend = kbdptr;
+	if (keyboard_macro_mode == RECORD) {
+		*keyboard_macro_pos++ = c;
+		keyboard_macro_end = keyboard_macro_pos;
 
 		/* don't overrun the buffer */
-		if (kbdptr == &kbdm[NKBDM - 1]) {
-			kbdmode = STOP;
-			TTbeep();
+		if (keyboard_macro_pos == &keyboard_macro[NKBDM - 1]) {
+			keyboard_macro_mode = STOP;
+			tcapbeep();
 		}
 	}
 
@@ -310,16 +281,7 @@ int get1key(void)
 	/* get a keystroke */
 	c = tgetc();
 
-#if	MSDOS
-	if (c == 0) {		/* Apply SPEC prefix    */
-		c = tgetc();
-		if (c >= 0x00 && c <= 0x1F)	/* control key? */
-			c = CONTROL | (c + '@');
-		return SPEC | c;
-	}
-#endif
-
-	if (c >= 0x00 && c <= 0x1F)	/* C0 control -> C-     */
+	if (c >= 0x00 && c <= 0x1F)		/* C0 control -> C-     */
 		c = CONTROL | (c + '@');
 	return c;
 }
@@ -329,34 +291,29 @@ int get1key(void)
 							*/
 int getcmd(void)
 {
-	int c;			/* fetched keystroke */
-#if VT220
-	int d;			/* second character P.K. */
+	int c;					/* fetched keystroke */
+	int d;					/* second character P.K. */
 	int cmask = 0;
-#endif
 	/* get initial character */
 	c = get1key();
 
-#if VT220
-      proc_metac:
-#endif
-	if (c == 128+27)		/* CSI */
+ proc_metac:
+	if (c == 128 + 27)			/* CSI */
 		goto handle_CSI;
 	/* process META prefix */
 	if (c == (CONTROL | '[')) {
 		c = get1key();
-#if VT220
 		if (c == '[' || c == 'O') {	/* CSI P.K. */
-handle_CSI:
+ handle_CSI:
 			c = get1key();
 			if (c >= 'A' && c <= 'D')
 				return SPEC | c | cmask;
 			if (c >= 'E' && c <= 'z' && c != 'i' && c != 'c')
 				return SPEC | c | cmask;
 			d = get1key();
-			if (d == '~')	/* ESC [ n ~   P.K. */
+			if (d == '~')		/* ESC [ n ~   P.K. */
 				return SPEC | c | cmask;
-			switch (c) {	/* ESC [ n n ~ P.K. */
+			switch (c) {		/* ESC [ n n ~ P.K. */
 			case '1':
 				c = d + 32;
 				break;
@@ -370,59 +327,46 @@ handle_CSI:
 				c = '?';
 				break;
 			}
-			if (d != '~')	/* eat tilde P.K. */
+			if (d != '~')		/* eat tilde P.K. */
 				get1key();
-			if (c == 'i') {	/* DO key    P.K. */
-				c = ctlxc;
+			if (c == 'i') {		/* DO key    P.K. */
+				c = ctlx_char;
 				goto proc_ctlxc;
 			} else if (c == 'c')	/* ESC key   P.K. */
 				c = get1key();
 			else
 				return SPEC | c | cmask;
 		}
-#endif
-#if VT220
 		if (c == (CONTROL | '[')) {
 			cmask = META;
 			goto proc_metac;
 		}
-#endif
-		if (islower(c))	/* Force to upper */
+		if (islower(c))			/* Force to upper */
 			c ^= DIFCASE;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
 			c = CONTROL | (c + '@');
 		return META | c;
-	}
-#if	PKCODE
-	else if (c == metac) {
+	} else if (c == meta_char) {
 		c = get1key();
-#if VT220
 		if (c == (CONTROL | '[')) {
 			cmask = META;
 			goto proc_metac;
 		}
-#endif
-		if (islower(c))	/* Force to upper */
+		if (islower(c))			/* Force to upper */
 			c ^= DIFCASE;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
 			c = CONTROL | (c + '@');
 		return META | c;
 	}
-#endif
 
-
-#if	VT220
-      proc_ctlxc:
-#endif
+ proc_ctlxc:
 	/* process CTLX prefix */
-	if (c == ctlxc) {
+	if (c == ctlx_char) {
 		c = get1key();
-#if VT220
 		if (c == (CONTROL | '[')) {
 			cmask = CTLX;
 			goto proc_metac;
 		}
-#endif
 		if (c >= 'a' && c <= 'z')	/* Force to upper */
 			c -= 0x20;
 		if (c >= 0x00 && c <= 0x1F)	/* control key */
@@ -440,48 +384,35 @@ handle_CSI:
 							*/
 int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 {
-	int cpos;	/* current character position in string */
+	int cpos;				/* current character position in string */
 	int c;
-	int quotef;	/* are we quoting the next char? */
-#if	COMPLC
+	int quotef;				/* are we quoting the next char? */
 	int ffile, ocpos, nskip = 0, didtry = 0;
-#if     MSDOS
-	struct ffblk ffblk;
-	char *fcp;
-#endif
-#if	UNIX
+
 	static char tmp[] = "/tmp/meXXXXXX";
 	FILE *tmpf = NULL;
-#endif
+
 	ffile = (strcmp(prompt, "Find file: ") == 0
 		 || strcmp(prompt, "View file: ") == 0
 		 || strcmp(prompt, "Insert file: ") == 0
 		 || strcmp(prompt, "Write file: ") == 0
-		 || strcmp(prompt, "Read file: ") == 0
-		 || strcmp(prompt, "File to execute: ") == 0);
-#endif
+		 || strcmp(prompt, "Read file: ") == 0 || strcmp(prompt, "File to execute: ") == 0);
 
 	cpos = 0;
 	quotef = FALSE;
 
 	/* prompt the user for the input string */
-	mlwrite(prompt);
+	msg_puts(prompt);
 
 	for (;;) {
-#if	COMPLC
 		if (!didtry)
 			nskip = -1;
 		didtry = 0;
-#endif
 		/* get a character from the user */
 		c = get1key();
 
 		/* If it is a <ret>, change it to a <NL> */
-#if	PKCODE
 		if (c == (CONTROL | 0x4d) && !quotef)
-#else
-		if (c == (CONTROL | 0x4d))
-#endif
 			c = CONTROL | 0x40 | '\n';
 
 		/* if they hit the line terminate, wrap it up */
@@ -489,8 +420,8 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 			buf[cpos++] = 0;
 
 			/* clear the message line */
-			mlwrite("");
-			TTflush();
+			msg_printf("");
+			ttflush();
 
 			/* if we default the buffer, return FALSE */
 			if (buf[0] == 0)
@@ -500,87 +431,73 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 		}
 
 		/* change from command form back to character form */
-		c = ectoc(c);
+		c = keycode_to_char(c);
 
-		if (c == ectoc(abortc) && quotef == FALSE) {
+		if (c == keycode_to_char(abort_char) && quotef == FALSE) {
 			/* Abort the input? */
-			ctrlg(FALSE, 0);
-			TTflush();
+			cmd_abort_command(FALSE, 0);
+			ttflush();
 			return ABORT;
 		} else if ((c == 0x7F || c == 0x08) && quotef == FALSE) {
 			/* rubout/erase */
 			if (cpos != 0) {
 				outstring("\b \b");
-				--ttcol;
+				--shown_col;
 
 				if (buf[--cpos] < 0x20) {
 					outstring("\b \b");
-					--ttcol;
+					--shown_col;
 				}
 				if (buf[cpos] == '\n') {
 					outstring("\b\b  \b\b");
-					ttcol -= 2;
+					shown_col -= 2;
 				}
 
-				TTflush();
+				ttflush();
 			}
 
 		} else if (c == 0x15 && quotef == FALSE) {
 			/* C-U, kill */
 			while (cpos != 0) {
 				outstring("\b \b");
-				--ttcol;
+				--shown_col;
 
 				if (buf[--cpos] < 0x20) {
 					outstring("\b \b");
-					--ttcol;
+					--shown_col;
 				}
 				if (buf[cpos] == '\n') {
 					outstring("\b\b  \b\b");
-					ttcol -= 2;
+					shown_col -= 2;
 				}
 			}
-			TTflush();
+			ttflush();
 
-#if	COMPLC
-		} else if ((c == 0x09 || c == ' ') && quotef == FALSE
-			   && ffile) {
+		} else if ((c == 0x09 || c == ' ') && quotef == FALSE && ffile) {
 			/* TAB, complete file name */
 			char ffbuf[255];
-#if	MSDOS
-			char sffbuf[128];
-			int lsav = -1;
-#endif
 			int n, iswild = 0;
 
 			didtry = 1;
 			ocpos = cpos;
 			while (cpos != 0) {
 				outstring("\b \b");
-				--ttcol;
+				--shown_col;
 
 				if (buf[--cpos] < 0x20) {
 					outstring("\b \b");
-					--ttcol;
+					--shown_col;
 				}
 				if (buf[cpos] == '\n') {
 					outstring("\b\b  \b\b");
-					ttcol -= 2;
+					shown_col -= 2;
 				}
 				if (buf[cpos] == '*' || buf[cpos] == '?')
 					iswild = 1;
-#if	MSDOS
-				if (lsav < 0 && (buf[cpos] == '\\' ||
-						 buf[cpos] == '/' ||
-						 buf[cpos] == ':'
-						 && cpos == 1))
-					lsav = cpos;
-#endif
 			}
-			TTflush();
+			ttflush();
 			if (nskip < 0) {
 				buf[ocpos] = 0;
-#if	UNIX
 				if (tmpf != NULL)
 					fclose(tmpf);
 				strcpy(tmp, "/tmp/meXXXXXX");
@@ -594,82 +511,48 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 				strcat(ffbuf, " 2>&1");
 				system(ffbuf);
 				tmpf = fopen(tmp, "r");
-#endif
-#if	MSDOS
-				strcpy(sffbuf, buf);
-				if (!iswild)
-					strcat(sffbuf, "*.*");
-#endif
 				nskip = 0;
 			}
-#if	UNIX
 			c = ' ';
 			for (n = nskip; n > 0; n--)
-				while ((c = getc(tmpf)) != EOF
-				       && c != ' ');
-#endif
-#if	MSDOS
-			if (nskip == 0) {
-				strcpy(ffbuf, sffbuf);
-				c = findfirst(ffbuf, &ffblk,
-					      FA_DIREC) ? '*' : ' ';
-			} else if (nskip > 0)
-				c = findnext(&ffblk) ? 0 : ' ';
-#endif
+				while ((c = getc(tmpf)) != EOF && c != ' ') ;
 			nskip++;
 
 			if (c != ' ') {
-				TTbeep();
+				tcapbeep();
 				nskip = 0;
 			}
-#if	UNIX
-			while ((c = getc(tmpf)) != EOF && c != '\n'
-			       && c != ' ' && c != '*')
-#endif
-#if	MSDOS
-				if (c == '*')
-					fcp = sffbuf;
-				else {
-					strncpy(buf, sffbuf, lsav + 1);
-					cpos = lsav + 1;
-					fcp = ffblk.ff_name;
-				}
-			while (c != 0 && (c = *fcp++) != 0 && c != '*')
-#endif
-			{
+
+			while ((c = getc(tmpf)) != EOF && c != '\n' && c != ' ' && c != '*') {
 				if (cpos < nbuf - 1)
 					buf[cpos++] = c;
 			}
-#if	UNIX
+
 			if (c == '*')
-				TTbeep();
-#endif
+				tcapbeep();
 
 			for (n = 0; n < cpos; n++) {
 				c = buf[n];
 				if ((c < ' ') && (c != '\n')) {
 					outstring("^");
-					++ttcol;
+					++shown_col;
 					c ^= 0x40;
 				}
 
 				if (c != '\n') {
-					if (disinp)
-						TTputc(c);
+					if (display_input)
+						ttputc(c);
 				} else {	/* put out <NL> for <ret> */
 					outstring("<NL>");
-					ttcol += 3;
+					shown_col += 3;
 				}
-				++ttcol;
+				++shown_col;
 			}
-			TTflush();
-#if	UNIX
+			ttflush();
 			rewind(tmpf);
 			unlink(tmp);
-#endif
-#endif
 
-		} else if ((c == quotec || c == 0x16) && quotef == FALSE) {
+		} else if ((c == quote_char || c == 0x16) && quotef == FALSE) {
 			quotef = TRUE;
 		} else {
 			quotef = FALSE;
@@ -678,19 +561,19 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
 
 				if ((c < ' ') && (c != '\n')) {
 					outstring("^");
-					++ttcol;
+					++shown_col;
 					c ^= 0x40;
 				}
 
 				if (c != '\n') {
-					if (disinp)
-						TTputc(c);
+					if (display_input)
+						ttputc(c);
 				} else {	/* put out <NL> for <ret> */
 					outstring("<NL>");
-					ttcol += 3;
+					shown_col += 3;
 				}
-				++ttcol;
-				TTflush();
+				++shown_col;
+				ttflush();
 			}
 		}
 	}
@@ -703,9 +586,9 @@ int getstring(char *prompt, char *buf, int nbuf, int eolchar)
  */
 void outstring(char *s)
 {
-	if (disinp)
+	if (display_input)
 		while (*s)
-			TTputc(*s++);
+			ttputc(*s++);
 }
 
 /*
@@ -715,7 +598,7 @@ void outstring(char *s)
  */
 void ostring(char *s)
 {
-	if (discmd)
+	if (display_commands)
 		while (*s)
-			TTputc(*s++);
+			ttputc(*s++);
 }

@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 #include "estruct.h"
-#include "edef.h"
+#include "globals.h"
 #include "efunc.h"
 #include "line.h"
 
@@ -20,21 +20,21 @@
  * Move "." to the start, and kill the characters.
  * Bound to "C-W".
  */
-int killregion(int f, int n)
+int cmd_kill_region(int f, int n)
 {
 	int s;
 	struct region region;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return readonly_error();		/* we are in read only mode     */
 	if ((s = getregion(&region)) != TRUE)
 		return s;
-	if ((lastflag & CFKILL) == 0)	/* This is a kill type  */
-		kdelete();	/* command, so do magic */
-	thisflag |= CFKILL;	/* kill buffer stuff.   */
+	if ((lastflag & CFKILL) == 0)		/* This is a kill type  */
+		kdelete();			/* command, so do magic */
+	thisflag |= CFKILL;			/* kill buffer stuff.   */
 	curwp->w_dotp = region.r_linep;
 	curwp->w_doto = region.r_offset;
-	return ldelete(region.r_size, TRUE);
+	return delete_bytes(region.r_size, TRUE);
 }
 
 /*
@@ -43,7 +43,7 @@ int killregion(int f, int n)
  * at all. This is a bit like a kill region followed
  * by a yank. Bound to "M-W".
  */
-int copyregion(int f, int n)
+int cmd_copy_region(int f, int n)
 {
 	struct line *linep;
 	int loffs;
@@ -52,24 +52,24 @@ int copyregion(int f, int n)
 
 	if ((s = getregion(&region)) != TRUE)
 		return s;
-	if ((lastflag & CFKILL) == 0)	/* Kill type command.   */
+	if ((lastflag & CFKILL) == 0)		/* Kill type command.   */
 		kdelete();
 	thisflag |= CFKILL;
-	linep = region.r_linep;	/* Current line.        */
-	loffs = region.r_offset;	/* Current offset.      */
+	linep = region.r_linep;			/* Current line.        */
+	loffs = region.r_offset;		/* Current offset.      */
 	while (region.r_size--) {
-		if (loffs == llength(linep)) {	/* End of line.         */
+		if (loffs == line_length(linep)) {	/* End of line.         */
 			if ((s = kinsert('\n')) != TRUE)
 				return s;
-			linep = lforw(linep);
+			linep = line_next(linep);
 			loffs = 0;
-		} else {	/* Middle of line.      */
+		} else {			/* Middle of line.      */
 			if ((s = kinsert(lgetc(linep, loffs))) != TRUE)
 				return s;
 			++loffs;
 		}
 	}
-	mlwrite("(region copied)");
+	msg_printf("(region copied)");
 	return TRUE;
 }
 
@@ -77,11 +77,11 @@ int copyregion(int f, int n)
  * Lower case region. Zap all of the upper
  * case characters in the region to lower case. Use
  * the region code to set the limits. Scan the buffer,
- * doing the changes. Call "lchange" to ensure that
+ * doing the changes. Call "buffer_changed" to ensure that
  * redisplay is done in all buffers. Bound to
  * "C-X C-L".
  */
-int lowerregion(int f, int n)
+int cmd_case_region_lower(int f, int n)
 {
 	struct line *linep;
 	int loffs;
@@ -89,16 +89,16 @@ int lowerregion(int f, int n)
 	int s;
 	struct region region;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return readonly_error();		/* we are in read only mode     */
 	if ((s = getregion(&region)) != TRUE)
 		return s;
-	lchange(WFHARD);
+	buffer_changed(WFHARD);
 	linep = region.r_linep;
 	loffs = region.r_offset;
 	while (region.r_size--) {
-		if (loffs == llength(linep)) {
-			linep = lforw(linep);
+		if (loffs == line_length(linep)) {
+			linep = line_next(linep);
 			loffs = 0;
 		} else {
 			c = lgetc(linep, loffs);
@@ -114,11 +114,11 @@ int lowerregion(int f, int n)
  * Upper case region. Zap all of the lower
  * case characters in the region to upper case. Use
  * the region code to set the limits. Scan the buffer,
- * doing the changes. Call "lchange" to ensure that
+ * doing the changes. Call "buffer_changed" to ensure that
  * redisplay is done in all buffers. Bound to
  * "C-X C-L".
  */
-int upperregion(int f, int n)
+int cmd_case_region_upper(int f, int n)
 {
 	struct line *linep;
 	int loffs;
@@ -126,16 +126,16 @@ int upperregion(int f, int n)
 	int s;
 	struct region region;
 
-	if (curbp->b_mode & MDVIEW)	/* don't allow this command if      */
-		return rdonly();	/* we are in read only mode     */
+	if (curbp->b_mode & MDVIEW)		/* don't allow this command if      */
+		return readonly_error();		/* we are in read only mode     */
 	if ((s = getregion(&region)) != TRUE)
 		return s;
-	lchange(WFHARD);
+	buffer_changed(WFHARD);
 	linep = region.r_linep;
 	loffs = region.r_offset;
 	while (region.r_size--) {
-		if (loffs == llength(linep)) {
-			linep = lforw(linep);
+		if (loffs == line_length(linep)) {
+			linep = line_next(linep);
 			loffs = 0;
 		} else {
 			c = lgetc(linep, loffs);
@@ -166,40 +166,38 @@ int getregion(struct region *rp)
 	long bsize;
 
 	if (curwp->w_markp == NULL) {
-		mlwrite("No mark set in this window");
+		msg_printf("No mark set in this window");
 		return FALSE;
 	}
 	if (curwp->w_dotp == curwp->w_markp) {
 		rp->r_linep = curwp->w_dotp;
 		if (curwp->w_doto < curwp->w_marko) {
 			rp->r_offset = curwp->w_doto;
-			rp->r_size =
-			    (long) (curwp->w_marko - curwp->w_doto);
+			rp->r_size = (long)(curwp->w_marko - curwp->w_doto);
 		} else {
 			rp->r_offset = curwp->w_marko;
-			rp->r_size =
-			    (long) (curwp->w_doto - curwp->w_marko);
+			rp->r_size = (long)(curwp->w_doto - curwp->w_marko);
 		}
 		return TRUE;
 	}
 	blp = curwp->w_dotp;
-	bsize = (long) curwp->w_doto;
+	bsize = (long)curwp->w_doto;
 	flp = curwp->w_dotp;
-	fsize = (long) (llength(flp) - curwp->w_doto + 1);
-	while (flp != curbp->b_linep || lback(blp) != curbp->b_linep) {
+	fsize = (long)(line_length(flp) - curwp->w_doto + 1);
+	while (flp != curbp->b_linep || line_prev(blp) != curbp->b_linep) {
 		if (flp != curbp->b_linep) {
-			flp = lforw(flp);
+			flp = line_next(flp);
 			if (flp == curwp->w_markp) {
 				rp->r_linep = curwp->w_dotp;
 				rp->r_offset = curwp->w_doto;
 				rp->r_size = fsize + curwp->w_marko;
 				return TRUE;
 			}
-			fsize += llength(flp) + 1;
+			fsize += line_length(flp) + 1;
 		}
-		if (lback(blp) != curbp->b_linep) {
-			blp = lback(blp);
-			bsize += llength(blp) + 1;
+		if (line_prev(blp) != curbp->b_linep) {
+			blp = line_prev(blp);
+			bsize += line_length(blp) + 1;
 			if (blp == curwp->w_markp) {
 				rp->r_linep = blp;
 				rp->r_offset = curwp->w_marko;
@@ -208,6 +206,6 @@ int getregion(struct region *rp)
 			}
 		}
 	}
-	mlwrite("Bug: lost mark");
+	msg_printf("Bug: lost mark");
 	return FALSE;
 }

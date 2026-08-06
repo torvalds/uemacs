@@ -45,7 +45,7 @@
  * A modified 3.9e/PK was heavily used at the University of Helsinki
  * for several years on different UNIX, VMS, and MSDOS platforms.
  *
- * This modified version is now called eEmacs/PK.
+ * This modified version is now called uEmacs/PK.
  *
  * 4.0	Petri Kutvonen, 1-Sep-91
  *
@@ -56,89 +56,60 @@
 /* Make global definitions not external. */
 #define	maindef
 
-#include "estruct.h" /* Global structures and defines. */
-#include "edef.h"    /* Global definitions. */
-#include "efunc.h"   /* Function declarations and name table. */
-#include "ebind.h"   /* Default key bindings. */
+#include "estruct.h"				/* Global structures and defines. */
+#include "globals.h"				/* Global definitions. */
+#include "efunc.h"				/* Function declarations and name table. */
+#include "ebind.h"				/* Default key bindings. */
 #include "version.h"
+#include "util.h"
 
-/* For MSDOS, increase the default stack space. */
-#if MSDOS & TURBO
-#if PKCODE
-extern unsigned _stklen = 20000;
-#else
-extern unsigned _stklen = 32766;
-#endif
-#endif
-
-#if VMS
-#include <ssdef.h>
-#define GOOD    (SS$_NORMAL)
-#endif
-
-#ifndef GOOD
-#define GOOD    0
-#endif
-
-#if UNIX
 #include <signal.h>
 static void emergencyexit(int);
-#ifdef SIGWINCH
 extern void sizesignal(int);
-#endif
-#endif
 
 void usage(int status)
 {
-  printf("Usage: %s filename\n", PROGRAM_NAME);
-  printf("   or: %s [options]\n\n", PROGRAM_NAME);
-  fputs("      +          start at the end of file\n", stdout);
-  fputs("      +<n>       start at line <n>\n", stdout);
-  fputs("      -g[G]<n>   go to line <n>\n", stdout);
-  fputs("      --help     display this help and exit\n", stdout);
-  fputs("      --version  output version information and exit\n", stdout);
+	printf("Usage: %s filename\n", PROGRAM_NAME);
+	printf("   or: %s [options]\n\n", PROGRAM_NAME);
+	fputs("      +          start at the end of file\n", stdout);
+	fputs("      +<n>       start at line <n>\n", stdout);
+	fputs("      -g[G]<n>   go to line <n>\n", stdout);
+	fputs("      --help     display this help and exit\n", stdout);
+	fputs("      --version  output version information and exit\n", stdout);
 
-  exit(status);
+	exit(status);
 }
 
 int main(int argc, char **argv)
 {
-	int c = -1;	/* command character */
-	int f;		/* default flag */
-	int n;		/* numeric repeat count */
-	int mflag;	/* negative flag on repeat */
-	struct buffer *bp;	/* temp buffer pointer */
-	int firstfile;	/* first file flag */
-	int carg;	/* current arg to scan */
-	int startflag;	/* startup executed flag */
-	struct buffer *firstbp = NULL;	/* ptr to first buffer in cmd line */
-	int basec;		/* c stripped of meta character */
-	int viewflag;		/* are we starting in view mode? */
-	int gotoflag;		/* do we need to goto a line at start? */
-	int gline = 0;		/* if so, what line? */
-	int searchflag;		/* Do we need to search at start? */
-	int saveflag;		/* temp store for lastflag */
-	int errflag;		/* C error processing? */
-	char bname[NBUFN];	/* buffer name of file to read */
-#if	CRYPT
-	int cryptflag;		/* encrypting on the way in? */
-	char ekey[NPAT];	/* startup encryption key */
-#endif
-	int newc;
+	int c = -1;				/* command character */
+	int f;					/* default flag */
+	int n;					/* numeric repeat count */
+	int mflag;				/* negative flag on repeat */
+	struct buffer *bp;			/* temp buffer pointer */
+	int firstfile;				/* first file flag */
+	int carg;				/* current arg to scan */
+	int startflag;				/* startup executed flag */
+	struct buffer *firstbp = NULL;		/* ptr to first buffer in cmd line */
+	int basec;				/* c stripped of meta character */
+	int viewflag;				/* are we starting in view mode? */
+	int gotoflag;				/* do we need to goto a line at start? */
+	int gline = 0;				/* if so, what line? */
+	int searchflag;				/* Do we need to search at start? */
+	int saveflag;				/* temp store for lastflag */
+	int errflag;				/* C error processing? */
+	char bname[NBUFN];			/* buffer name of file to read */
 
-#if	PKCODE & VMS
-	(void) umask(-1); /* Use old protection (this is at wrong place). */
-#endif
+	spell_init();
 
-#if	PKCODE & BSD
-	sleep(1); /* Time for window manager. */
-#endif
-
-#if	UNIX
-#ifdef SIGWINCH
-	signal(SIGWINCH, sizesignal);
-#endif
-#endif
+	/*
+	 * Deliberately not SA_RESTART: a resize has to interrupt the
+	 * read() the editor spends its life in, or nothing acts on it
+	 * until the next keystroke.
+	 */
+	struct sigaction winch = { .sa_handler = sizesignal };
+	sigemptyset(&winch.sa_mask);
+	sigaction(SIGWINCH, &winch, NULL);
 	if (argc == 2) {
 		if (strcmp(argv[1], "--help") == 0) {
 			usage(EXIT_FAILURE);
@@ -150,72 +121,57 @@ int main(int argc, char **argv)
 	}
 
 	/* Initialize the editor. */
-	vtinit();		/* Display */
-	edinit("main");		/* Buffers, windows */
-	varinit();		/* user variables */
+	display_open();				/* Display */
+	edinit("main");				/* Buffers, windows */
+	varinit();				/* user variables */
 
-	viewflag = FALSE;	/* view mode defaults off in command line */
-	gotoflag = FALSE;	/* set to off to begin with */
-	searchflag = FALSE;	/* set to off to begin with */
-	firstfile = TRUE;	/* no file to edit yet */
-	startflag = FALSE;	/* startup file not executed yet */
-	errflag = FALSE;	/* not doing C error parsing */
-#if	CRYPT
-	cryptflag = FALSE;	/* no encryption by default */
-#endif
+	viewflag = FALSE;			/* view mode defaults off in command line */
+	gotoflag = FALSE;			/* set to off to begin with */
+	searchflag = FALSE;			/* set to off to begin with */
+	firstfile = TRUE;			/* no file to edit yet */
+	startflag = FALSE;			/* startup file not executed yet */
+	errflag = FALSE;			/* not doing C error parsing */
 
 	/* Parse the command line */
 	for (carg = 1; carg < argc; ++carg) {
 		/* Process Switches */
-#if	PKCODE
 		if (argv[carg][0] == '+') {
 			gotoflag = TRUE;
 			gline = atoi(&argv[carg][1]);
-		} else
-#endif
-		if (argv[carg][0] == '-') {
+		} else if (argv[carg][0] == '-') {
 			switch (argv[carg][1]) {
 				/* Process Startup macroes */
-			case 'a':	/* process error file */
+			case 'a':		/* process error file */
 			case 'A':
 				errflag = TRUE;
 				break;
-			case 'e':	/* -e for Edit file */
+			case 'e':		/* -e for Edit file */
 			case 'E':
 				viewflag = FALSE;
 				break;
-			case 'g':	/* -g for initial goto */
+			case 'g':		/* -g for initial goto */
 			case 'G':
 				gotoflag = TRUE;
 				gline = atoi(&argv[carg][2]);
 				break;
-#if	CRYPT
-			case 'k':	/* -k<key> for code key */
-			case 'K':
-				cryptflag = TRUE;
-				strcpy(ekey, &argv[carg][2]);
-				break;
-#endif
-#if	PKCODE
-			case 'n':	/* -n accept null chars */
+			case 'n':		/* -n accept null chars */
 			case 'N':
-				nullflag = TRUE;
+				accept_nulls = TRUE;
 				break;
-#endif
-			case 'r':	/* -r restrictive use */
+			case 'r':		/* -r restrictive use */
 			case 'R':
 				restflag = TRUE;
 				break;
-			case 's':	/* -s for initial search string */
+			case 's':		/* -s for initial search string */
 			case 'S':
 				searchflag = TRUE;
-				strncpy(pat, &argv[carg][2], NPAT);
+				strncpy(search_pattern, &argv[carg][2], NPAT);
 				break;
-			case 'v':	/* -v for View File */
+			case 'v':		/* -v for View File */
 			case 'V':
 				viewflag = TRUE;
 				break;
-			default:	/* unknown switch */
+			default:		/* unknown switch */
 				/* ignore this for now */
 				break;
 			}
@@ -233,10 +189,10 @@ int main(int argc, char **argv)
 
 			/* set up a buffer for this file */
 			makename(bname, argv[carg]);
-			unqname(bname);
+			unique_buffer_name(bname);
 
 			/* set this to inactive */
-			bp = bfind(bname, TRUE, 0);
+			bp = find_buffer(bname, TRUE, 0);
 			strcpy(bp->b_fname, argv[carg]);
 			bp->b_active = FALSE;
 			if (firstfile) {
@@ -247,21 +203,11 @@ int main(int argc, char **argv)
 			/* set the modes appropriatly */
 			if (viewflag)
 				bp->b_mode |= MDVIEW;
-#if	CRYPT
-			if (cryptflag) {
-				bp->b_mode |= MDCRYPT;
-				myencrypt((char *) NULL, 0);
-				myencrypt(ekey, strlen(ekey));
-				strncpy(bp->b_key, ekey, NPAT);
-			}
-#endif
 		}
 	}
 
-#if	UNIX
 	signal(SIGHUP, emergencyexit);
 	signal(SIGTERM, emergencyexit);
-#endif
 
 	/* if we are C error parsing... run it! */
 	if (errflag) {
@@ -275,85 +221,59 @@ int main(int argc, char **argv)
 		startup("");
 		startflag = TRUE;
 	}
-	discmd = TRUE;		/* P.K. */
+	display_commands = TRUE;				/* P.K. */
 
 	/* if there are any files to read, read the first one! */
-	bp = bfind("main", FALSE, 0);
-	if (firstfile == FALSE && (gflags & GFREAD)) {
+	bp = find_buffer("main", FALSE, 0);
+	if (firstfile == FALSE && (global_flags & GFREAD)) {
 		swbuffer(firstbp);
-		zotbuf(bp);
+		destroy_buffer(bp);
 	} else
-		bp->b_mode |= gmode;
+		bp->b_mode |= global_mode;
 
 	/* Deal with startup gotos and searches */
 	if (gotoflag && searchflag) {
-		update(FALSE);
-		mlwrite("(Can not search and goto at the same time!)");
+		update();
+		msg_printf("(Can not search and goto at the same time!)");
 	} else if (gotoflag) {
-		if (gotoline(TRUE, gline) == FALSE) {
-			update(FALSE);
-			mlwrite("(Bogus goto argument)");
+		if (cmd_goto_line(TRUE, gline) == FALSE) {
+			update();
+			msg_printf("(Bogus goto argument)");
 		}
 	} else if (searchflag) {
-		if (forwhunt(FALSE, 0) == FALSE)
-			update(FALSE);
+		if (cmd_hunt_forward(FALSE, 0) == FALSE)
+			update();
 	}
 
 	/* Setup to process commands. */
-	lastflag = 0;  /* Fake last flags. */
+	lastflag = 0;				/* Fake last flags. */
 
-      loop:
+ loop:
 	/* Execute the "command" macro...normally null. */
-	saveflag = lastflag;  /* Preserve lastflag through this. */
+	saveflag = lastflag;			/* Preserve lastflag through this. */
 	execute(META | SPEC | 'C', FALSE, 1);
 	lastflag = saveflag;
 
-#if TYPEAH && PKCODE
-	if (typahead()) {
-		newc = getcmd();
-		update(FALSE);
-		do {
-			fn_t execfunc;
-
-			if (c == newc && (execfunc = getbind(c)) != NULL
-			    && execfunc != insert_newline
-			    && execfunc != insert_tab)
-				newc = getcmd();
-			else
-				break;
-		} while (typahead());
-		c = newc;
-	} else {
-		update(FALSE);
-		c = getcmd();
-	}
-#else
-	/* Fix up the screen    */
-	update(FALSE);
-
-	/* get the next command from the keyboard */
+	if (curwp->w_flag || !typahead())
+		update();
 	c = getcmd();
-#endif
+
 	/* if there is something on the command line, clear it */
-	if (mpresf != FALSE) {
-		mlerase();
-		update(FALSE);
-#if	CLRMSG
-		if (c == ' ')	/* ITS EMACS does this  */
-			goto loop;
-#endif
+	if (message_present != FALSE) {
+		msg_erase();
+		update();
 	}
 	f = FALSE;
 	n = 1;
 
 	/* do META-# processing if needed */
 
-	basec = c & ~META;	/* strip meta char off if there */
+	basec = c & ~META;			/* strip meta char off if there */
 	if ((c & META) && ((basec >= '0' && basec <= '9') || basec == '-')) {
-		f = TRUE;	/* there is a # arg */
-		n = 0;		/* start with a zero default */
-		mflag = 1;	/* current minus flag */
-		c = basec;	/* strip the META */
+		f = TRUE;			/* there is a # arg */
+		n = 0;				/* start with a zero default */
+		mflag = 1;			/* current minus flag */
+		c = basec;			/* strip the META */
 		while ((c >= '0' && c <= '9') || (c == '-')) {
 			if (c == '-') {
 				/* already hit a minus or digit? */
@@ -364,25 +284,24 @@ int main(int argc, char **argv)
 				n = n * 10 + (c - '0');
 			}
 			if ((n == 0) && (mflag == -1))	/* lonely - */
-				mlwrite("Arg:");
+				msg_printf("Arg:");
 			else
-				mlwrite("Arg: %d", n * mflag);
+				msg_printf("Arg: %d", n * mflag);
 
-			c = getcmd();	/* get the next key */
+			c = getcmd();		/* get the next key */
 		}
-		n = n * mflag;	/* figure in the sign */
+		n = n * mflag;			/* figure in the sign */
 	}
 
 	/* do ^U repeat argument processing */
 
-	if (c == reptc) {	/* ^U, start argument   */
+	if (c == repeat_key) {			/* ^U, start argument   */
 		f = TRUE;
-		n = 4;		/* with argument of 4 */
-		mflag = 0;	/* that can be discarded. */
-		mlwrite("Arg: 4");
-		while (((c = getcmd()) >= '0' && c <= '9') || c == reptc
-		       || c == '-') {
-			if (c == reptc)
+		n = 4;				/* with argument of 4 */
+		mflag = 0;			/* that can be discarded. */
+		msg_printf("Arg: 4");
+		while (((c = getcmd()) >= '0' && c <= '9') || c == repeat_key || c == '-') {
+			if (c == repeat_key)
 				if ((n > 0) == ((n * 4) > 0))
 					n = n * 4;
 				else
@@ -408,8 +327,7 @@ int main(int argc, char **argv)
 				}
 				n = 10 * n + c - '0';
 			}
-			mlwrite("Arg: %d",
-				(mflag >= 0) ? n : (n ? -n : -1));
+			msg_printf("Arg: %d", (mflag >= 0) ? n : (n ? -n : -1));
 		}
 		/*
 		 * Make arguments preceded by a minus sign negative and change
@@ -437,31 +355,54 @@ void edinit(char *bname)
 	struct buffer *bp;
 	struct window *wp;
 
-	bp = bfind(bname, TRUE, 0);	/* First buffer         */
-	blistp = bfind("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
+	bp = find_buffer(bname, TRUE, 0);		/* First buffer         */
+	list_buffer = find_buffer("*List*", TRUE, BFINVS);	/* Buffer list buffer   */
 	wp = (struct window *)malloc(sizeof(struct window));	/* First window         */
-	if (bp == NULL || wp == NULL || blistp == NULL)
+	if (bp == NULL || wp == NULL || list_buffer == NULL)
 		exit(1);
-	curbp = bp;		/* Make this current    */
-	wheadp = wp;
+	curbp = bp;				/* Make this current    */
+	window_head = wp;
 	curwp = wp;
-	wp->w_wndp = NULL;	/* Initialize window    */
+	wp->w_wndp = NULL;			/* Initialize window    */
 	wp->w_bufp = bp;
-	bp->b_nwnd = 1;		/* Displayed.           */
+	bp->b_nwnd = 1;				/* Displayed.           */
 	wp->w_linep = bp->b_linep;
 	wp->w_dotp = bp->b_linep;
 	wp->w_doto = 0;
 	wp->w_markp = NULL;
 	wp->w_marko = 0;
 	wp->w_toprow = 0;
-#if	COLOR
-	/* initalize colors to global defaults */
-	wp->w_fcolor = gfcolor;
-	wp->w_bcolor = gbcolor;
-#endif
-	wp->w_ntrows = term.t_nrow - 1;	/* "-1" for mode line.  */
+	wp->w_ntrows = term.t_nrow - 1;		/* "-1" for the mode line */
 	wp->w_force = 0;
-	wp->w_flag = WFMODE | WFHARD;	/* Full.                */
+	wp->w_flag = WFMODE | WFHARD;		/* Full.                */
+}
+
+/*
+ * Save the buffer because it is time to, rather than because anybody
+ * asked.  cmd_save_file() asks before overwriting a file that changed
+ * under us and before writing one that was truncated on the way in, and
+ * a question here would arrive in the middle of somebody typing and eat
+ * the keystroke that answered it.  So the cases it would ask about are
+ * the cases this declines to write, and says why on the message line.
+ */
+static void autosave(void)
+{
+	if (curbp->b_mode & MDVIEW)		/* nothing to save */
+		return;
+	if (curbp->b_fname[0] == 0) {
+		msg_printf("(No file name, not autosaving)");
+		return;
+	}
+	if (curbp->b_flag & BFTRUNC) {
+		msg_printf("(%s was truncated, not autosaving)", curbp->b_fname);
+		return;
+	}
+	if (file_changed(curbp, curbp->b_fname)) {
+		msg_printf("(%s changed on disk, not autosaving)", curbp->b_fname);
+		return;
+	}
+	cmd_update_screen(FALSE, 0);
+	cmd_save_file(FALSE, 0);
 }
 
 /*
@@ -489,39 +430,25 @@ int execute(int c, int f, int n)
 	 * negative, wrap mode is enabled, and we are now past fill column,
 	 * and we are not read-only, perform word wrap.
 	 */
-	if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fillcol > 0 &&
-	    n >= 0 && getccol(FALSE) > fillcol &&
-	    (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
+	if (c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) && fill_column > 0 &&
+	    n >= 0 && getccol(FALSE) > fill_column && (curwp->w_bufp->b_mode & MDVIEW) == FALSE)
 		execute(META | SPEC | 'W', FALSE, 1);
 
-#if	PKCODE
-	if ((c >= 0x20 && c <= 0x7E)	/* Self inserting.      */
-#if	IBMPC
-	    || (c >= 0x80 && c <= 0xFE)) {
-#else
-#if	VMS || BSD || USG	/* 8BIT P.K. */
-	    || (c >= 0xA0 && c <= 0x10FFFF)) {
-#else
-	    ) {
-#endif
-#endif
-#else
-	if ((c >= 0x20 && c <= 0xFF)) {	/* Self inserting.      */
-#endif
-		if (n <= 0) {	/* Fenceposts.          */
+	if ((c >= 0x20 && c <= 0x7E)		/* Self inserting.      */
+	    ||(c >= 0xA0 && c <= 0x10FFFF)) {
+		if (n <= 0) {			/* Fenceposts.          */
 			lastflag = 0;
 			return n < 0 ? FALSE : TRUE;
 		}
-		thisflag = 0;	/* For the future.      */
+		thisflag = 0;			/* For the future.      */
 
 		/* if we are in overwrite mode, not at eol,
 		   and next char is not a tab or we are at a tab stop,
 		   delete a char forword                        */
 		if (curwp->w_bufp->b_mode & MDOVER &&
 		    curwp->w_doto < curwp->w_dotp->l_used &&
-		    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' ||
-		     (curwp->w_doto) % 8 == 7))
-			ldelchar(1, FALSE);
+		    (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' || (curwp->w_doto) % 8 == 7))
+			delete_characters(1, FALSE);
 
 		/* do the appropriate insertion */
 		if (c == '}' && (curbp->b_mode & MDCMOD) != 0)
@@ -529,30 +456,25 @@ int execute(int c, int f, int n)
 		else if (c == '#' && (curbp->b_mode & MDCMOD) != 0)
 			status = inspound();
 		else
-			status = linsert(n, c);
+			status = insert_char(n, c);
 
-#if	CFENCE
 		/* check for CMODE fence matching */
-		if ((c == '}' || c == ')' || c == ']') &&
-		    (curbp->b_mode & MDCMOD) != 0)
+		if ((c == '}' || c == ')' || c == ']') && (curbp->b_mode & MDCMOD) != 0)
 			fmatch(c);
-#endif
 
 		/* check auto-save mode */
 		if (curbp->b_mode & MDASAVE)
-			if (--gacount == 0) {
-				/* and save the file if needed */
-				upscreen(FALSE, 0);
-				filesave(FALSE, 0);
-				gacount = gasave;
+			if (--autosave_countdown == 0) {
+				autosave();
+				autosave_countdown = autosave_interval;
 			}
 
 		lastflag = thisflag;
 		return status;
 	}
-	TTbeep();
-	mlwrite("(Key not bound)");	/* complain             */
-	lastflag = 0;		/* Fake last flags.     */
+	tcapbeep();
+	msg_printf("(Key not bound)");		/* complain             */
+	lastflag = 0;				/* Fake last flags.     */
 	return FALSE;
 }
 
@@ -560,71 +482,57 @@ int execute(int c, int f, int n)
  * Fancy quit command, as implemented by Norm. If the any buffer has
  * changed do a write on that buffer and exit emacs, otherwise simply exit.
  */
-int quickexit(int f, int n)
+int cmd_quick_exit(int f, int n)
 {
-	struct buffer *bp;	/* scanning pointer to buffers */
-	struct buffer *oldcb;	/* original current buffer */
+	struct buffer *bp;			/* scanning pointer to buffers */
+	struct buffer *oldcb;			/* original current buffer */
 	int status;
 
-	oldcb = curbp;		/* save in case we fail */
+	oldcb = curbp;				/* save in case we fail */
 
-	bp = bheadp;
+	bp = buffer_head;
 	while (bp != NULL) {
 		if ((bp->b_flag & BFCHG) != 0	/* Changed.             */
 		    && (bp->b_flag & BFTRUNC) == 0	/* Not truncated P.K.   */
 		    && (bp->b_flag & BFINVS) == 0) {	/* Real.                */
-			curbp = bp;	/* make that buffer cur */
-			mlwrite("(Saving %s)", bp->b_fname);
-#if	PKCODE
-#else
-			mlwrite("\n");
-#endif
-			if ((status = filesave(f, n)) != TRUE) {
+			curbp = bp;		/* make that buffer cur */
+			msg_printf("(Saving %s)", bp->b_fname);
+			if ((status = cmd_save_file(f, n)) != TRUE) {
 				curbp = oldcb;	/* restore curbp */
 				return status;
 			}
 		}
-		bp = bp->b_bufp;	/* on to the next buffer */
+		bp = bp->b_bufp;		/* on to the next buffer */
 	}
-	quit(f, n);		/* conditionally quit   */
+	cmd_exit_emacs(f, n);				/* conditionally quit   */
 	return TRUE;
 }
 
 static void emergencyexit(int signr)
 {
-	quickexit(FALSE, 0);
-	quit(TRUE, 0);
+	cmd_quick_exit(FALSE, 0);
+	cmd_exit_emacs(TRUE, 0);
 }
 
 /*
  * Quit command. If an argument, always quit. Otherwise confirm if a buffer
  * has been changed and not written out. Normally bound to "C-X C-C".
  */
-int quit(int f, int n)
+int cmd_exit_emacs(int f, int n)
 {
 	int s;
 
-	if (f != FALSE		/* Argument forces it.  */
-	    || anycb() == FALSE	/* All buffers clean.   */
+	if (f != FALSE				/* Argument forces it.  */
+	    || any_changed_buffers() == FALSE			/* All buffers clean.   */
 	    /* User says it's OK.   */
-	    || (s =
-		mlyesno("Modified buffers exist. Leave anyway")) == TRUE) {
-#if	(FILOCK && BSD) || SVR4
-		if (lockrel() != TRUE) {
-			TTputc('\n');
-			TTputc('\r');
-			TTclose();
-			TTkclose();
-			exit(1);
-		}
-#endif
-		vttidy();
+	    || (s = ask_yesno("Modified buffers exist. Leave anyway")) == TRUE) {
+		display_close();
 		if (f)
 			exit(n);
 		else
-			exit(GOOD);
+			exit(0);
 	}
-	mlwrite("");
+	msg_printf("");
 	return s;
 }
 
@@ -633,16 +541,16 @@ int quit(int f, int n)
  * Error if not at the top level in keyboard processing. Set up variables and
  * return.
  */
-int ctlxlp(int f, int n)
+int cmd_begin_macro(int f, int n)
 {
-	if (kbdmode != STOP) {
-		mlwrite("%%Macro already active");
+	if (keyboard_macro_mode != STOP) {
+		msg_printf("%%Macro already active");
 		return FALSE;
 	}
-	mlwrite("(Start macro)");
-	kbdptr = &kbdm[0];
-	kbdend = kbdptr;
-	kbdmode = RECORD;
+	msg_printf("(Start macro)");
+	keyboard_macro_pos = &keyboard_macro[0];
+	keyboard_macro_end = keyboard_macro_pos;
+	keyboard_macro_mode = RECORD;
 	return TRUE;
 }
 
@@ -650,15 +558,15 @@ int ctlxlp(int f, int n)
  * End keyboard macro. Check for the same limit conditions as the above
  * routine. Set up the variables and return to the caller.
  */
-int ctlxrp(int f, int n)
+int cmd_end_macro(int f, int n)
 {
-	if (kbdmode == STOP) {
-		mlwrite("%%Macro not active");
+	if (keyboard_macro_mode == STOP) {
+		msg_printf("%%Macro not active");
 		return FALSE;
 	}
-	if (kbdmode == RECORD) {
-		mlwrite("(End macro)");
-		kbdmode = STOP;
+	if (keyboard_macro_mode == RECORD) {
+		msg_printf("(End macro)");
+		keyboard_macro_mode = STOP;
 	}
 	return TRUE;
 }
@@ -668,17 +576,17 @@ int ctlxrp(int f, int n)
  * The command argument is the number of times to loop. Quit as soon as a
  * command gets an error. Return TRUE if all ok, else FALSE.
  */
-int ctlxe(int f, int n)
+int cmd_execute_macro(int f, int n)
 {
-	if (kbdmode != STOP) {
-		mlwrite("%%Macro already active");
+	if (keyboard_macro_mode != STOP) {
+		msg_printf("%%Macro already active");
 		return FALSE;
 	}
 	if (n <= 0)
 		return TRUE;
-	kbdrep = n;		/* remember how many times to execute */
-	kbdmode = PLAY;		/* start us in play mode */
-	kbdptr = &kbdm[0];	/*    at the beginning */
+	keyboard_macro_repeat = n;				/* remember how many times to execute */
+	keyboard_macro_mode = PLAY;				/* start us in play mode */
+	keyboard_macro_pos = &keyboard_macro[0];			/*    at the beginning */
 	return TRUE;
 }
 
@@ -687,11 +595,11 @@ int ctlxe(int f, int n)
  * Beep the beeper. Kill off any keyboard macro, etc., that is in progress.
  * Sometimes called as a routine, to do general aborting of stuff.
  */
-int ctrlg(int f, int n)
+int cmd_abort_command(int f, int n)
 {
-	TTbeep();
-	kbdmode = STOP;
-	mlwrite("(Aborted)");
+	tcapbeep();
+	keyboard_macro_mode = STOP;
+	msg_printf("(Aborted)");
 	return ABORT;
 }
 
@@ -699,160 +607,40 @@ int ctrlg(int f, int n)
  * tell the user that this command is illegal while we are in
  * VIEW (read-only) mode
  */
-int rdonly(void)
+int readonly_error(void)
 {
-	TTbeep();
-	mlwrite("(Key illegal in VIEW mode)");
+	tcapbeep();
+	msg_printf("(Key illegal in VIEW mode)");
 	return FALSE;
 }
 
-int resterr(void)
+int restricted_error(void)
 {
-	TTbeep();
-	mlwrite("(That command is RESTRICTED)");
+	tcapbeep();
+	msg_printf("(That command is RESTRICTED)");
 	return FALSE;
 }
 
 /* user function that does NOTHING */
-int nullproc(int f, int n)
+int cmd_nop(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to meta prefix */
-int metafn(int f, int n)
+int cmd_meta_prefix(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to control-x prefix */
-int cex(int f, int n)
+int cmd_ctlx_prefix(int f, int n)
 {
 	return TRUE;
 }
 
 /* dummy function for binding to universal-argument */
-int unarg(int f, int n)
+int cmd_universal_argument(int f, int n)
 {
 	return TRUE;
 }
-
-/*****		Compiler specific Library functions	****/
-
-#if	RAMSIZE
-/*	These routines will allow me to track memory usage by placing
-	a layer on top of the standard system malloc() and free() calls.
-	with this code defined, the environment variable, $RAM, will
-	report on the number of bytes allocated via malloc.
-
-	with SHOWRAM defined, the number is also posted on the
-	end of the bottom mode line and is updated whenever it is changed.
-*/
-
-#undef	malloc
-#undef	free
-
-char *allocate(nbytes)
-			    /* allocate nbytes and track */
-unsigned nbytes;		/* # of bytes to allocate */
-
-{
-	char *mp;		/* ptr returned from malloc */
-	char *malloc();
-
-	mp = malloc(nbytes);
-	if (mp) {
-		envram += nbytes;
-#if	RAMSHOW
-		dspram();
-#endif
-	}
-
-	return mp;
-}
-
-release(mp)
-    /* release malloced memory and track */
-char *mp;			/* chunk of RAM to release */
-
-{
-	unsigned *lp;		/* ptr to the long containing the block size */
-
-	if (mp) {
-		/* update amount of ram currently malloced */
-		lp = ((unsigned *) mp) - 1;
-		envram -= (long) *lp - 2;
-		free(mp);
-#if	RAMSHOW
-		dspram();
-#endif
-	}
-}
-
-#if	RAMSHOW
-dspram()
-{				/* display the amount of RAM currently malloced */
-	char mbuf[20];
-	char *sp;
-
-	TTmove(term.t_nrow - 1, 70);
-#if	COLOR
-	TTforg(7);
-	TTbacg(0);
-#endif
-	sprintf(mbuf, "[%lu]", envram);
-	sp = &mbuf[0];
-	while (*sp)
-		TTputc(*sp++);
-	TTmove(term.t_nrow, 0);
-	movecursor(term.t_nrow, 0);
-}
-#endif
-#endif
-
-/*	On some primitave operation systems, and when emacs is used as
-	a subprogram to a larger project, emacs needs to de-alloc its
-	own used memory
-*/
-
-#if	CLEAN
-
-/*
- * cexit()
- *
- * int status;		return status of emacs
- */
-int cexit(int status)
-{
-	struct buffer *bp;	/* buffer list pointer */
-	struct window *wp;	/* window list pointer */
-	struct window *tp;	/* temporary window pointer */
-
-	/* first clean up the windows */
-	wp = wheadp;
-	while (wp) {
-		tp = wp->w_wndp;
-		free(wp);
-		wp = tp;
-	}
-	wheadp = NULL;
-
-	/* then the buffers */
-	bp = bheadp;
-	while (bp) {
-		bp->b_nwnd = 0;
-		bp->b_flag = 0;	/* don't say anything about a changed buffer! */
-		zotbuf(bp);
-		bp = bheadp;
-	}
-
-	/* and the kill buffer */
-	kdelete();
-
-	/* and the video buffers */
-	vtfree();
-
-#undef	exit
-	exit(status);
-}
-#endif

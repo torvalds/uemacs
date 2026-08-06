@@ -1,4 +1,4 @@
-# makefile for emacs, updated Sun Apr 28 17:59:07 EET DST 1996
+# makefile for emacs
 
 # Make the build silent by default
 V =
@@ -12,150 +12,84 @@ else
 endif
 export E Q
 
-uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
-
 PROGRAM=em
 
-SRC=ansi.c basic.c bind.c buffer.c crypt.c display.c eval.c exec.c \
-	file.c fileio.c ibmpc.c input.c isearch.c line.c lock.c main.c \
-	pklock.c posix.c random.c region.c search.c spawn.c tcap.c \
-	termio.c vmsvt.c vt52.c window.c word.c names.c globals.c version.c \
-	usage.c wrapper.c utf8.c util.c
+SRC=	basic.c bind.c buffer.c display.c eval.c exec.c file.c fileio.c \
+	globals.c input.c isearch.c line.c lock.c main.c names.c \
+	posix.c random.c region.c search.c spawn.c spell.c tcap.c \
+	usage.c utf8.c version.c window.c word.c wrapper.c
 
-OBJ=ansi.o basic.o bind.o buffer.o crypt.o display.o eval.o exec.o \
-	file.o fileio.o ibmpc.o input.o isearch.o line.o lock.o main.o \
-	pklock.o posix.o random.o region.o search.o spawn.o tcap.o \
-	termio.o vmsvt.o vt52.o window.o word.o names.o globals.o version.o \
-	usage.o wrapper.o utf8.o util.o
+OBJ=	$(SRC:.c=.o)
 
-HDR=ebind.h edef.h efunc.h epath.h estruct.h evar.h util.h version.h
-
-# DO NOT ADD OR MODIFY ANY LINES ABOVE THIS -- make source creates them
+HDR=	ebind.h efunc.h epath.h estruct.h evar.h globals.h line.h usage.h \
+	utf8.h util.h version.h wrapper.h
 
 CC=gcc
 WARNINGS=-Wall -Wstrict-prototypes
-CFLAGS=-O2 $(WARNINGS) -g
-#CC=c89 +O3			# HP
-#CFLAGS= -D_HPUX_SOURCE -DSYSV
-#CFLAGS=-O4 -DSVR4		# Sun
-#CFLAGS=-O -qchars=signed	# RS/6000
-ifeq ($(uname_S),Linux)
- DEFINES=-DAUTOCONF -DPOSIX -DUSG -D_XOPEN_SOURCE=600 -D_GNU_SOURCE
+DEFINES=-DPOSIX -D_GNU_SOURCE
+
+CFLAGS=-O2 $(WARNINGS)
+
+LIBS=ncurses
+BINDIR=$(HOME)/bin
+LIBDIR=$(HOME)/lib
+
+# The spell checking is hunspell, and it is the only optional part of
+# this.  HUNSPELL=0 - or anything that is not 1 - builds an editor that
+# has spell mode and never finds a misspelling.  Asking for it without
+# the library installed says so and builds that editor too, rather than
+# failing halfway through with a missing header.
+HUNSPELL=1
+HAVE_HUNSPELL := $(shell pkg-config --exists hunspell && echo 1)
+ifeq ($(HUNSPELL),1)
+ifeq ($(HAVE_HUNSPELL),1)
+LIBS += hunspell
+DEFINES += -DHUNSPELL
+else
+$(warning hunspell not installed, not building with spell checking)
 endif
-ifeq ($(uname_S),FreeBSD)
- DEFINES=-DAUTOCONF -DPOSIX -DSYSV -D_FREEBSD_C_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_XOPEN_SOURCE=600
 endif
-ifeq ($(uname_S),Darwin)
- DEFINES=-DAUTOCONF -DPOSIX -DSYSV -D_DARWIN_C_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_XOPEN_SOURCE=600
-endif
-#DEFINES=-DAUTOCONF
-#LIBS=-ltermcap			# BSD
-LIBS=-lcurses			# SYSV
-#LIBS=-ltermlib
-#LIBS=-L/usr/lib/termcap -ltermcap
-LFLAGS=-hbx
-BINDIR=/usr/bin
-LIBDIR=/usr/lib
+
+PKG_CONFIG_CFLAGS=$(shell pkg-config --cflags $(LIBS))
+ALL_CFLAGS=$(CFLAGS) $(DEFINES) $(PKG_CONFIG_CFLAGS)
+LDLIBS += $(shell pkg-config --libs $(LIBS))
+BUILD_FLAGS=$(ALL_CFLAGS) $(LDLIBS)
 
 $(PROGRAM): $(OBJ)
 	$(E) "  LINK    " $@
-	$(Q) $(CC) $(LDFLAGS) $(DEFINES) -o $@ $(OBJ) $(LIBS)
-
-SPARSE=sparse
-SPARSE_FLAGS=-D__LITTLE_ENDIAN__ -D__x86_64__ -D__linux__ -D__unix__
-
-sparse:
-	$(SPARSE) $(SPARSE_FLAGS) $(DEFINES) $(SRC)
-
-clean:
-	$(E) "  CLEAN"
-	$(Q) rm -f $(PROGRAM) core lintout makeout tags makefile.bak *.o
-
-install: $(PROGRAM)
-	cp em ${BINDIR}
-	cp emacs.hlp ${LIBDIR}
-	cp emacs.rc ${LIBDIR}/.emacsrc
-	chmod 755 ${BINDIR}/em
-	chmod 644 ${LIBDIR}/emacs.hlp ${LIBDIR}/.emacsrc
-
-lint:	${SRC}
-	@rm -f lintout
-	lint ${LFLAGS} ${SRC} >lintout
-	cat lintout
-
-errs:
-	@rm -f makeout
-	make em >makeout
-
-tags:	${SRC}
-	@rm -f tags
-	ctags ${SRC}
-
-source:
-	@mv makefile makefile.bak
-	@echo "# makefile for emacs, updated `date`" >makefile
-	@echo '' >>makefile
-	@echo SRC=`ls *.c` >>makefile
-	@echo OBJ=`ls *.c | sed s/c$$/o/` >>makefile
-	@echo HDR=`ls *.h` >>makefile
-	@echo '' >>makefile
-	@sed -n -e '/^# DO NOT ADD OR MODIFY/,$$p' <makefile.bak >>makefile
-
-depend: ${SRC}
-	@for i in ${SRC}; do\
-	    cc ${DEFINES} -M $$i | sed -e 's, \./, ,' | grep -v '/usr/include' | \
-	    awk '{ if ($$1 != prev) { if (rec != "") print rec; \
-		rec = $$0; prev = $$1; } \
-		else { if (length(rec $$2) > 78) { print rec; rec = $$0; } \
-		else rec = rec " " $$2 } } \
-		END { print rec }'; done >makedep
-	@echo '/^# DO NOT DELETE THIS LINE/+2,$$d' >eddep
-	@echo '$$r ./makedep' >>eddep
-	@echo 'w' >>eddep
-	@cp makefile makefile.bak
-	@ed - makefile <eddep
-	@rm eddep makedep
-	@echo '' >>makefile
-	@echo '# DEPENDENCIES MUST END AT END OF FILE' >>makefile
-	@echo '# IF YOU PUT STUFF HERE IT WILL GO AWAY' >>makefile
-	@echo '# see make depend above' >>makefile
+	$(Q) $(CC) $(LDFLAGS) $(DEFINES) -o $@ $(OBJ) $(LDLIBS)
 
 .c.o:
 	$(E) "  CC      " $@
-	$(Q) ${CC} ${CFLAGS} ${DEFINES} -c $*.c
+	$(Q) ${CC} ${ALL_CFLAGS} -c $<
 
-# DO NOT DELETE THIS LINE -- make depend uses it
+# The whole thing builds in a couple of seconds, so it is not worth
+# knowing which object needs which header - they all depend on all of
+# them.  If that ever stops being true, generate the real dependencies
+# during the build with -MMD and include them, rather than going back
+# to keeping a list by hand.
+$(OBJ): $(HDR)
 
-ansi.o: ansi.c estruct.h edef.h
-basic.o: basic.c estruct.h edef.h
-bind.o: bind.c estruct.h edef.h epath.h
-buffer.o: buffer.c estruct.h edef.h
-crypt.o: crypt.c estruct.h edef.h
-display.o: display.c estruct.h edef.h utf8.h
-eval.o: eval.c estruct.h edef.h evar.h
-exec.o: exec.c estruct.h edef.h
-file.o: file.c estruct.h edef.h
-fileio.o: fileio.c estruct.h edef.h
-ibmpc.o: ibmpc.c estruct.h edef.h
-input.o: input.c estruct.h edef.h
-isearch.o: isearch.c estruct.h edef.h
-line.o: line.c estruct.h edef.h
-lock.o: lock.c estruct.h edef.h
-main.o: main.c estruct.h efunc.h edef.h ebind.h
-pklock.o: pklock.c estruct.h
-posix.o: posix.c estruct.h utf8.h
-random.o: random.c estruct.h edef.h
-region.o: region.c estruct.h edef.h
-search.o: search.c estruct.h edef.h
-spawn.o: spawn.c estruct.h edef.h
-tcap.o: tcap.c estruct.h edef.h
-termio.o: termio.c estruct.h edef.h
-utf8.o: utf8.c utf8.h
-vmsvt.o: vmsvt.c estruct.h edef.h
-vt52.o: vt52.c estruct.h edef.h
-window.o: window.c estruct.h edef.h
-word.o: word.c estruct.h edef.h
+# make watches files and not flags, so installing hunspell or asking
+# for a different -O changes what the next build should contain without
+# touching anything make knows about, and it says "up to date" over the
+# old objects.  Keep the flags in a file, rewritten only when they
+# differ so it does not itself force a build every time.
+.build-flags: FORCE
+	$(Q) echo '$(BUILD_FLAGS)' | cmp -s - $@ || echo '$(BUILD_FLAGS)' > $@
 
-# DEPENDENCIES MUST END AT END OF FILE
-# IF YOU PUT STUFF HERE IT WILL GO AWAY
-# see make depend above
+FORCE:
+.PHONY: FORCE
+
+$(PROGRAM) $(OBJ): .build-flags
+
+clean:
+	$(E) "  CLEAN"
+	$(Q) rm -f $(PROGRAM) core *.o .build-flags
+
+install: $(PROGRAM)
+	install em ${BINDIR}
+	cp emacs.hlp ${LIBDIR}
+	cp emacs.rc ${HOME}/.emacsrc
+	chmod 755 ${BINDIR}/em
+	chmod 644 ${LIBDIR}/emacs.hlp ${HOME}/.emacsrc
