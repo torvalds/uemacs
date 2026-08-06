@@ -99,7 +99,6 @@ extern int cmd_insert_string(int f, int n);
 extern int cmd_overwrite_string(int f, int n);
 
 /* main.c */
-extern int spellcheck(const char *word);
 extern void edinit(char *bname);
 extern int execute(int c, int f, int n);
 extern int cmd_quick_exit(int f, int n);
@@ -347,6 +346,10 @@ extern int abs(int x);
 extern int next_random(void);
 extern int sindex(char *source, char *pattern);
 extern char *xlat(char *source, char *lookup, char *trans);
+
+/* spell.c */
+extern void spell_init(void);
+extern int spellcheck(const char *word);
 
 /* lock.c */
 extern int lockchk(char *fname);

@@ -16,7 +16,7 @@ PROGRAM=em
 
 SRC=	basic.c bind.c buffer.c display.c eval.c exec.c file.c fileio.c \
 	globals.c input.c isearch.c line.c lock.c main.c names.c \
-	posix.c random.c region.c search.c spawn.c tcap.c \
+	posix.c random.c region.c search.c spawn.c spell.c tcap.c \
 	usage.c utf8.c version.c window.c word.c wrapper.c
 
 OBJ=	$(SRC:.c=.o)
