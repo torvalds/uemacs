@@ -28,13 +28,14 @@ CC=gcc
 WARNINGS=-Wall -Wstrict-prototypes
 DEFINES=-DPOSIX -D_GNU_SOURCE
 
-CFLAGS=-O2 $(WARNINGS) $(DEFINES)
+CFLAGS=-O2 $(WARNINGS)
 
 LIBS=ncurses hunspell
 BINDIR=$(HOME)/bin
 LIBDIR=$(HOME)/lib
 
-CFLAGS += $(shell pkg-config --cflags $(LIBS))
+PKG_CONFIG_CFLAGS=$(shell pkg-config --cflags $(LIBS))
+ALL_CFLAGS=$(CFLAGS) $(DEFINES) $(PKG_CONFIG_CFLAGS)
 LDLIBS += $(shell pkg-config --libs $(LIBS))
 
 $(PROGRAM): $(OBJ)
@@ -43,7 +44,7 @@ $(PROGRAM): $(OBJ)
 
 .c.o:
 	$(E) "  CC      " $@
-	$(Q) ${CC} ${CFLAGS} -c $<
+	$(Q) ${CC} ${ALL_CFLAGS} -c $<
 
 # The whole thing builds in a couple of seconds, so it is not worth
 # knowing which object needs which header - they all depend on all of
