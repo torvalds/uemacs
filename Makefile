@@ -53,6 +53,7 @@ endif
 PKG_CONFIG_CFLAGS=$(shell pkg-config --cflags $(LIBS))
 ALL_CFLAGS=$(CFLAGS) $(DEFINES) $(PKG_CONFIG_CFLAGS)
 LDLIBS += $(shell pkg-config --libs $(LIBS))
+BUILD_FLAGS=$(ALL_CFLAGS) $(LDLIBS)
 
 $(PROGRAM): $(OBJ)
 	$(E) "  LINK    " $@
@@ -69,9 +70,22 @@ $(PROGRAM): $(OBJ)
 # to keeping a list by hand.
 $(OBJ): $(HDR)
 
+# make watches files and not flags, so installing hunspell or asking
+# for a different -O changes what the next build should contain without
+# touching anything make knows about, and it says "up to date" over the
+# old objects.  Keep the flags in a file, rewritten only when they
+# differ so it does not itself force a build every time.
+.build-flags: FORCE
+	$(Q) echo '$(BUILD_FLAGS)' | cmp -s - $@ || echo '$(BUILD_FLAGS)' > $@
+
+FORCE:
+.PHONY: FORCE
+
+$(PROGRAM) $(OBJ): .build-flags
+
 clean:
 	$(E) "  CLEAN"
-	$(Q) rm -f $(PROGRAM) core *.o
+	$(Q) rm -f $(PROGRAM) core *.o .build-flags
 
 install: $(PROGRAM)
 	install em ${BINDIR}

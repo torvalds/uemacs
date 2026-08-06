@@ -1,2 +1,3 @@
 em
 *.o
+.build-flags
