@@ -48,7 +48,7 @@ void ttopen(void)
 	ntermios = otermios;
 
 	/* raw CR/NL etc input handling, but keep ISTRIP if we're on a 7-bit line */
-	ntermios.c_iflag &= ~(IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK | INLCR | IGNCR | ICRNL);
+	ntermios.c_iflag &= ~(IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK | INLCR | IGNCR | ICRNL | IXON);
 
 	/* raw CR/NR etc output handling */
 	ntermios.c_oflag &= ~(OPOST | ONLCR | OLCUC | OCRNL | ONOCR | ONLRET);
