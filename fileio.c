@@ -7,6 +7,7 @@
  */
 
 #include        <stdio.h>
+#include        <unistd.h>
 #include	"estruct.h"
 #include        "globals.h"
 #include	"efunc.h"
@@ -47,6 +48,7 @@ int file_close(void)
 	if (file_line) {
 		free(file_line);
 		file_line = NULL;
+		file_line_size = 0;
 	}
 	eofflag = FALSE;
 
@@ -89,7 +91,6 @@ int file_get_line(void)
 {
 	int c;					/* current character read */
 	int i;					/* current index into fline */
-	char *tmpline;				/* temp storage for expanding line */
 
 	/* if we are at the end...return it */
 	if (eofflag)
@@ -99,12 +100,15 @@ int file_get_line(void)
 	if (file_line_size > NSTRING) {
 		free(file_line);
 		file_line = NULL;
+		file_line_size = 0;
 	}
 
 	/* if we don't have an fline, allocate one */
-	if (file_line == NULL)
-		if ((file_line = malloc(file_line_size = NSTRING)) == NULL)
+	if (file_line == NULL) {
+		file_line_size = NSTRING;
+		if ((file_line = malloc(file_line_size)) == NULL)
 			return FIOMEM;
+	}
 
 	/* read the line in */
 	if (!accept_nulls) {
@@ -125,16 +129,16 @@ int file_get_line(void)
 	}
 	while (c != EOF && c != '\n') {
 		if (c) {
-			file_line[i++] = c;
-			/* if it's longer, get more room */
-			if (i >= file_line_size) {
-				if ((tmpline = malloc(file_line_size + NSTRING)) == NULL)
+			if (i + 1 >= file_line_size) {
+				int new_size = file_line_size * 2;
+				char *new_line = realloc(file_line, new_size);
+
+				if (new_line == NULL)
 					return FIOMEM;
-				strncpy(tmpline, file_line, file_line_size);
-				file_line_size += NSTRING;
-				free(file_line);
-				file_line = tmpline;
+				file_line = new_line;
+				file_line_size = new_size;
 			}
+			file_line[i++] = c;
 		}
 		c = fgetc(ffp);
 	}
@@ -152,7 +156,7 @@ int file_get_line(void)
 			return FIOEOF;
 	}
 
-	/* terminate and decrypt the string */
+	/* terminate the string */
 	file_line[i] = 0;
 	return FIOSUC;
 }
@@ -164,16 +168,5 @@ int file_get_line(void)
  */
 int file_exists(char *fname)
 {
-	FILE *fp;
-
-	/* try to open the file for reading */
-	fp = fopen(fname, "r");
-
-	/* if it fails, just return false! */
-	if (fp == NULL)
-		return FALSE;
-
-	/* otherwise, close it and report true */
-	fclose(fp);
-	return TRUE;
+	return access(fname, F_OK) == 0;
 }
