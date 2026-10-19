@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <limits.h>
 
 #include "estruct.h"
 #include "globals.h"
@@ -80,10 +81,22 @@ char *eval_function(char *fname)
 		return itoa(atoi(arg1) - atoi(arg2));
 	case UFTIMES:
 		return itoa(atoi(arg1) * atoi(arg2));
-	case UFDIV:
-		return itoa(atoi(arg1) / atoi(arg2));
-	case UFMOD:
-		return itoa(atoi(arg1) % atoi(arg2));
+	case UFDIV: {
+		int num = atoi(arg1);
+		int denom = atoi(arg2);
+
+		if (denom == 0 || (num == INT_MIN && denom == -1))
+			return error_text;
+		return itoa(num / denom);
+	}
+	case UFMOD: {
+		int num = atoi(arg1);
+		int denom = atoi(arg2);
+
+		if (denom == 0 || (num == INT_MIN && denom == -1))
+			return error_text;
+		return itoa(num % denom);
+	}
 	case UFNEG:
 		return itoa(-atoi(arg1));
 	case UFCAT:
@@ -133,10 +146,20 @@ char *eval_function(char *fname)
 		result[0] = tgetc();
 		result[1] = 0;
 		return result;
-	case UFRND:
-		return itoa((next_random() % abs(atoi(arg1))) + 1);
-	case UFABS:
-		return itoa(abs(atoi(arg1)));
+	case UFRND: {
+		int val = atoi(arg1);
+
+		if (val == 0 || val == INT_MIN)
+			return error_text;
+		return itoa((next_random() % abs(val)) + 1);
+	}
+	case UFABS: {
+		int val = atoi(arg1);
+
+		if (val == INT_MIN)
+			return error_text;
+		return itoa(abs(val));
+	}
 	case UFSINDEX:
 		return itoa(sindex(arg1, arg2));
 	case UFENV:
