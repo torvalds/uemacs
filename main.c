@@ -52,6 +52,7 @@
  */
 
 #include <stdio.h>
+#include <locale.h>
 
 /* Make global definitions not external. */
 #define	maindef
@@ -82,6 +83,7 @@ void usage(int status)
 
 int main(int argc, char **argv)
 {
+	setlocale(LC_CTYPE, "");
 	int c = -1;				/* command character */
 	int f;					/* default flag */
 	int n;					/* numeric repeat count */

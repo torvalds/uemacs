@@ -151,33 +151,29 @@ int getccol(int bflg)
  */
 int setccol(int pos)
 {
-	int c;					/* character being scanned */
 	int i;					/* index into current line */
 	int col;				/* current cursor column   */
-	int llen;				/* length of line in bytes */
+	int llen = line_length(curwp->w_dotp);
 
 	col = 0;
-	llen = line_length(curwp->w_dotp);
-
+	i = 0;
 	/* scan the line until we are at or past the target column */
-	for (i = 0; i < llen; ++i) {
-		/* upon reaching the target, drop out */
+	while (i < llen) {
+		unicode_t c;
+		int bytes;
+
 		if (col >= pos)
 			break;
 
-		/* advance one character */
-		c = lgetc(curwp->w_dotp, i);
-		if (c == '\t')
-			col |= tabmask;
-		else if (c < 0x20 || c == 0x7F)
-			++col;
-		++col;
+		bytes = utf8_to_unicode(curwp->w_dotp->l_text, i, llen, &c);
+		col = next_column(col, c);
+		i += bytes;
 	}
 
 	/* set us at the new position */
 	curwp->w_doto = i;
 
-	/* and tell weather we made it */
+	/* and tell whether we made it */
 	return col >= pos;
 }
 

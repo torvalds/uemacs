@@ -107,18 +107,28 @@ struct paint {
  * here one at a time, so the clipping and the counting are only written
  * once.
  */
-static void paint_raw(struct paint *p, unicode_t c)
+static void paint_raw(struct paint *p, unicode_t c, int width)
 {
-	if (p->col >= p->offset + term.t_ncol) {
+	if (width <= 0) {
+		if (p->col >= p->offset && p->col < p->offset + term.t_ncol)
+			ttputc(c);
+		return;
+	}
+
+	if (p->col + width > p->offset + term.t_ncol) {
 		p->overflow = true;
-		p->col++;
+		p->col += width;
 		return;
 	}
 	if (p->col >= p->offset) {
 		ttputc(c);
+		p->out += width;
+	} else if (p->col + width > p->offset) {
+		/* Straddling the left edge of horizontal scroll */
+		ttputc(' ');
 		p->out++;
 	}
-	p->col++;
+	p->col += width;
 }
 
 /*
@@ -130,32 +140,32 @@ static void paint_char(struct paint *p, unicode_t c)
 {
 	if (c == '\t') {
 		do {
-			paint_raw(p, ' ');
+			paint_raw(p, ' ', 1);
 		} while ((p->col & tabmask) != 0);
 		return;
 	}
 
 	if (c < 0x20) {
-		paint_raw(p, '^');
-		paint_raw(p, c ^ 0x40);
+		paint_raw(p, '^', 1);
+		paint_raw(p, c ^ 0x40, 1);
 		return;
 	}
 
 	if (c == 0x7f) {
-		paint_raw(p, '^');
-		paint_raw(p, '?');
+		paint_raw(p, '^', 1);
+		paint_raw(p, '?', 1);
 		return;
 	}
 
 	if (c >= 0x80 && c <= 0xA0) {
 		static const char hex[] = "0123456789abcdef";
-		paint_raw(p, '\\');
-		paint_raw(p, hex[c >> 4]);
-		paint_raw(p, hex[c & 15]);
+		paint_raw(p, '\\', 1);
+		paint_raw(p, hex[c >> 4], 1);
+		paint_raw(p, hex[c & 15], 1);
 		return;
 	}
 
-	paint_raw(p, c);
+	paint_raw(p, c, utf8_width(c));
 }
 
 static void paint_bytes(struct paint *p, char *text, int from, int to)
@@ -884,17 +894,20 @@ void msg_force(char *s)
 }
 
 /*
- * Write out a string. Update the physical cursor position. This assumes that
- * the characters in the string all have width "1"; if this is not the case
- * things will get screwed up a little.
+ * Write out a string. Update the physical cursor position.
  */
 void msg_append(const char *s)
 {
-	int c;
+	int i = 0;
+	int len = strlen(s);
 
-	while ((c = *s++) != 0) {
+	while (i < len) {
+		unicode_t c;
+		int bytes = utf8_to_unicode((char *)s, i, len, &c);
+
+		i += bytes;
 		ttputc(c);
-		++shown_col;
+		shown_col += utf8_width(c);
 	}
 }
 
